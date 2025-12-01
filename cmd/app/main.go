@@ -2,8 +2,12 @@ package main
 
 import (
 	"care-cordination/api"
+	"care-cordination/features/attachments"
 	"care-cordination/features/auth"
+	"care-cordination/features/employee"
 	"care-cordination/features/middleware"
+	"care-cordination/features/registration"
+	"care-cordination/lib/bucket"
 	"care-cordination/lib/config"
 	db "care-cordination/lib/db/sqlc"
 	"care-cordination/lib/logger"
@@ -52,6 +56,25 @@ func main() {
 		cfg.RefreshTokenTTL,
 	)
 
+	// Initialize Object Storage
+	bucketClient, err := bucket.NewObjectStorageClient(
+		cfg.MinioEndpoint,
+		cfg.MinioAccessKeyID,
+		cfg.MinioSecretAccessKey,
+		cfg.MinioUseSSL,
+		cfg.MinioBucketName,
+	)
+	if err != nil {
+		l.Error(ctx, "main", "cannot create object storage client", zap.Error(err))
+		os.Exit(1)
+	}
+
+	// Create bucket if it doesn't exist
+	if err := bucketClient.GetOrCreateBucket(ctx); err != nil {
+		l.Error(ctx, "main", "cannot create bucket", zap.Error(err))
+		os.Exit(1)
+	}
+
 	// Initialize Rate Limiter
 	var rateLimiter ratelimit.RateLimiter
 	if cfg.RateLimitEnabled {
@@ -82,16 +105,26 @@ func main() {
 
 	// 5. Initialize Features
 	mdw := middleware.NewMiddleware(tokenManager, rateLimiter, l)
+
 	authService := auth.NewAuthService(store, tokenManager, l)
 	authHandler := auth.NewAuthHandler(authService, mdw)
 
+	employeeService := employee.NewEmployeeService(store, l)
+	employeeHandler := employee.NewEmployeeHandler(employeeService, mdw)
+
+	registrationService := registration.NewRegistrationService(store, l)
+	registrationHandler := registration.NewRegistrationHandler(registrationService, mdw)
+
+	attachmentsService := attachments.NewAttachmentsService(store, bucketClient, l)
+	attachmentsHandler := attachments.NewAttachmentsHandler(attachmentsService, mdw)
+
 	// 6. Initialize Server
-	server := api.NewServer(l, cfg.Environment, authHandler, rateLimiter)
+	server := api.NewServer(l, cfg.Environment, authHandler, employeeHandler, registrationHandler, attachmentsHandler, rateLimiter, cfg.ServerAddress)
 
 	// 7. Start Server
 	go func() {
 		l.Info(ctx, "main", "starting server", zap.String("address", cfg.ServerAddress))
-		if err := server.Start(cfg.ServerAddress); err != nil && err != http.ErrServerClosed {
+		if err := server.Start(); err != nil && err != http.ErrServerClosed {
 			l.Error(ctx, "main", "cannot start server", zap.Error(err))
 		}
 	}()

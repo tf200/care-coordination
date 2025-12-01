@@ -17,7 +17,11 @@ package api
 
 // @Security Bearer
 import (
+	"care-cordination/docs"
+	"care-cordination/features/attachments"
 	"care-cordination/features/auth"
+	"care-cordination/features/employee"
+	"care-cordination/features/registration"
 	"care-cordination/lib/logger"
 	"care-cordination/lib/ratelimit"
 	"context"
@@ -33,28 +37,41 @@ import (
 )
 
 type Server struct {
-	httpServer  *http.Server
-	router      *gin.Engine
-	authHandler *auth.AuthHandler
-	environment string
-	rateLimiter ratelimit.RateLimiter
-	logger      *logger.Logger
+	httpServer          *http.Server
+	router              *gin.Engine
+	authHandler         *auth.AuthHandler
+	employeeHandler     *employee.EmployeeHandler
+	registrationHandler registration.RegistrationHandler
+	attachmentsHandler  *attachments.AttachmentsHandler
+	environment         string
+	rateLimiter         ratelimit.RateLimiter
+	logger              *logger.Logger
+	addr                string
 }
 
-func NewServer(logger *logger.Logger, environment string, authHandler *auth.AuthHandler, rateLimiter ratelimit.RateLimiter) *Server {
+func NewServer(logger *logger.Logger,
+	environment string, authHandler *auth.AuthHandler,
+	employeeHandler *employee.EmployeeHandler,
+	registrationHandler registration.RegistrationHandler,
+	attachmentsHandler *attachments.AttachmentsHandler,
+	rateLimiter ratelimit.RateLimiter, addr string) *Server {
 	s := &Server{
-		environment: environment,
-		authHandler: authHandler,
-		rateLimiter: rateLimiter,
-		logger:      logger,
+		environment:         environment,
+		authHandler:         authHandler,
+		employeeHandler:     employeeHandler,
+		registrationHandler: registrationHandler,
+		attachmentsHandler:  attachmentsHandler,
+		rateLimiter:         rateLimiter,
+		logger:              logger,
+		addr:                addr,
 	}
 	s.setupRoutes(logger)
 	return s
 }
 
-func (s *Server) Start(addr string) error {
+func (s *Server) Start() error {
 	s.httpServer = &http.Server{
-		Addr:         addr,
+		Addr:         s.addr,
 		Handler:      s.router,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
@@ -94,5 +111,16 @@ func (s *Server) setupRoutes(logger *logger.Logger) {
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	s.authHandler.SetupAuthRoutes(router, s.rateLimiter, logger)
+	s.employeeHandler.SetupEmployeeRoutes(router)
+	s.registrationHandler.SetupRegistrationRoutes(router)
+	s.attachmentsHandler.SetupAttachmentsRoutes(router)
 	s.router = router
+}
+
+func (s *Server) setupSwagger() {
+	docs.SwaggerInfo.Title = "Care-Cordination API"
+	docs.SwaggerInfo.Description = "This is the Care-Cordination server API documentation."
+	docs.SwaggerInfo.Version = "1.0"
+	docs.SwaggerInfo.BasePath = "/"
+	docs.SwaggerInfo.Host = s.addr
 }

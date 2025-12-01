@@ -47,10 +47,11 @@ func (h *AuthHandler) SetupAuthRoutes(router *gin.Engine, rateLimiter ratelimit.
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
 // @Router /auth/login [post]
+// @Security -
 func (h *AuthHandler) Login(ctx *gin.Context) {
 	var req LoginRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, resp.ErrorResponse(ErrInvalidRequest))
+		ctx.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
 		return
 	}
 
@@ -58,11 +59,11 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 	if err != nil {
 		switch err {
 		case ErrInvalidCredentials:
-			ctx.JSON(http.StatusUnauthorized, resp.ErrorResponse(err))
+			ctx.JSON(http.StatusUnauthorized, resp.Error(err))
 		case ErrInternal:
-			ctx.JSON(http.StatusInternalServerError, resp.ErrorResponse(err))
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
 		default:
-			ctx.JSON(http.StatusInternalServerError, resp.ErrorResponse(err))
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
 		}
 		return
 	}
@@ -83,18 +84,18 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 func (h *AuthHandler) RefreshTokens(ctx *gin.Context) {
 	var req RefreshTokensRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, resp.ErrorResponse(ErrInvalidRequest))
+		ctx.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
 		return
 	}
 	tokens, err := h.authService.RefreshTokens(ctx, &req, ctx.Request.UserAgent(), ctx.ClientIP())
 	if err != nil {
 		switch err {
 		case ErrInvalidToken:
-			ctx.JSON(http.StatusUnauthorized, resp.ErrorResponse(err))
+			ctx.JSON(http.StatusUnauthorized, resp.Error(err))
 		case ErrInternal:
-			ctx.JSON(http.StatusInternalServerError, resp.ErrorResponse(err))
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
 		default:
-			ctx.JSON(http.StatusInternalServerError, resp.ErrorResponse(err))
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
 		}
 		return
 	}
@@ -107,7 +108,7 @@ func (h *AuthHandler) RefreshTokens(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param logoutRequest body LogoutRequest true "Logout Request"
-// @Success 200 {object} resp.MessageResonse
+// @Success 200 {object} resp.MessageResponse
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
@@ -115,18 +116,18 @@ func (h *AuthHandler) RefreshTokens(ctx *gin.Context) {
 func (h *AuthHandler) Logout(ctx *gin.Context) {
 	var req LogoutRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, resp.ErrorResponse(ErrInvalidRequest))
+		ctx.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
 		return
 	}
 	err := h.authService.Logout(ctx, &req)
 	if err != nil {
 		switch err {
 		case ErrInvalidToken:
-			ctx.JSON(http.StatusUnauthorized, resp.ErrorResponse(err))
+			ctx.JSON(http.StatusUnauthorized, resp.Error(err))
 		case ErrInternal:
-			ctx.JSON(http.StatusInternalServerError, resp.ErrorResponse(err))
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
 		default:
-			ctx.JSON(http.StatusInternalServerError, resp.ErrorResponse(err))
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
 		}
 		return
 	}

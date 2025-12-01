@@ -1,4 +1,180 @@
 basePath: /
+definitions:
+  attachments.UploadAttachmentResponse:
+    properties:
+      id:
+        type: string
+    type: object
+  auth.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  auth.LoginResponse:
+    properties:
+      accessToken:
+        type: string
+      refreshToken:
+        type: string
+    type: object
+  auth.LogoutRequest:
+    properties:
+      refreshToken:
+        type: string
+    required:
+    - refreshToken
+    type: object
+  auth.RefreshTokensRequest:
+    properties:
+      refreshToken:
+        type: string
+    required:
+    - refreshToken
+    type: object
+  auth.RefreshTokensResponse:
+    properties:
+      accessToken:
+        type: string
+      refreshToken:
+        type: string
+    type: object
+  employee.CreateEmployeeRequest:
+    properties:
+      bsn:
+        type: string
+      dateOfBirth:
+        type: string
+      email:
+        type: string
+      firstName:
+        type: string
+      gender:
+        type: string
+      lastName:
+        type: string
+      password:
+        type: string
+      phoneNumber:
+        type: string
+      role:
+        type: string
+    required:
+    - bsn
+    - firstName
+    - lastName
+    - password
+    - phoneNumber
+    - role
+    type: object
+  employee.CreateEmployeeResponse:
+    properties:
+      id:
+        type: string
+    type: object
+  employee.ListEmployeesResponse:
+    properties:
+      firstName:
+        type: string
+      id:
+        type: string
+      lastName:
+        type: string
+    type: object
+  registration.CreateRegistrationFormRequest:
+    properties:
+      additionalNotes:
+        type: string
+      attachmentIds:
+        items:
+          type: string
+        type: array
+      bsn:
+        type: string
+      careType:
+        type: string
+      coordinatorId:
+        type: string
+      dateOfBirth:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+      orgContactPerson:
+        type: string
+      orgEmail:
+        type: string
+      orgName:
+        type: string
+      orgPhoneNumber:
+        type: string
+      registrationDate:
+        type: string
+      registrationReason:
+        type: string
+    required:
+    - bsn
+    - careType
+    - coordinatorId
+    - firstName
+    - lastName
+    - orgContactPerson
+    - orgEmail
+    - orgName
+    - orgPhoneNumber
+    - registrationReason
+    type: object
+  registration.CreateRegistrationFormResponse:
+    properties:
+      id:
+        type: string
+    type: object
+  registration.ListRegistrationFormsResponse:
+    properties:
+      bsn:
+        type: string
+      careType:
+        type: string
+      coordinatorFirstName:
+        type: string
+      coordinatorId:
+        type: string
+      coordinatorLastName:
+        type: string
+      dateOfBirth:
+        type: string
+      firstName:
+        type: string
+      id:
+        type: string
+      lastName:
+        type: string
+      numberOfAttachments:
+        type: integer
+      orgName:
+        type: string
+      registrationDate:
+        type: string
+      registrationReason:
+        type: string
+    type: object
+  resp.ErrorResponse:
+    properties:
+      error:
+        example: error message
+        type: string
+    type: object
+  resp.MessageResponse:
+    properties:
+      message:
+        example: success message
+        type: string
+    type: object
 info:
   contact:
     email: your-email@domain.com
@@ -10,7 +186,266 @@ info:
   termsOfService: http://swagger.io/terms/
   title: Care-Cordination API
   version: "1.0"
-paths: {}
+paths:
+  /attachments:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload a file attachment
+      parameters:
+      - description: File to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/attachments.UploadAttachmentResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Upload an attachment
+      tags:
+      - Attachments
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and return access and refresh tokens
+      parameters:
+      - description: Login Request
+        in: body
+        name: loginRequest
+        required: true
+        schema:
+          $ref: '#/definitions/auth.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Login a user
+      tags:
+      - Auth
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Logout user by invalidating the refresh token
+      parameters:
+      - description: Logout Request
+        in: body
+        name: logoutRequest
+        required: true
+        schema:
+          $ref: '#/definitions/auth.LogoutRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Logout a user
+      tags:
+      - Auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Refresh access and refresh tokens using a valid refresh token
+      parameters:
+      - description: Refresh Tokens Request
+        in: body
+        name: refreshTokensRequest
+        required: true
+        schema:
+          $ref: '#/definitions/auth.RefreshTokensRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.RefreshTokensResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Refresh tokens
+      tags:
+      - Auth
+  /employees:
+    get:
+      consumes:
+      - application/json
+      description: List all employees
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/employee.ListEmployeesResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: List employees
+      tags:
+      - Employee
+    post:
+      consumes:
+      - application/json
+      description: Create a new employee
+      parameters:
+      - description: Employee
+        in: body
+        name: employee
+        required: true
+        schema:
+          $ref: '#/definitions/employee.CreateEmployeeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/employee.CreateEmployeeResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Create an employee
+      tags:
+      - Employee
+  /registrations:
+    get:
+      consumes:
+      - application/json
+      description: List all registration forms
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/registration.ListRegistrationFormsResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: List registration forms
+      tags:
+      - Registration
+    post:
+      consumes:
+      - application/json
+      description: Create a new registration form
+      parameters:
+      - description: Registration Form
+        in: body
+        name: registration
+        required: true
+        schema:
+          $ref: '#/definitions/registration.CreateRegistrationFormRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/registration.CreateRegistrationFormResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Create a registration form
+      tags:
+      - Registration
 security:
 - Bearer: []
 securityDefinitions:

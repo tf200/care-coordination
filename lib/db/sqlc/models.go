@@ -143,10 +143,10 @@ func (ns NullRegistrationStatusEnum) Value() (driver.Value, error) {
 }
 
 type Attachment struct {
-	ID         string             `json:"id"`
-	Filekey    string             `json:"filekey"`
-	Url        string             `json:"url"`
-	UploadedAt pgtype.Timestamptz `json:"uploaded_at"`
+	ID          string             `json:"id"`
+	Filekey     string             `json:"filekey"`
+	ContentType string             `json:"content_type"`
+	UploadedAt  pgtype.Timestamptz `json:"uploaded_at"`
 }
 
 type Employee struct {

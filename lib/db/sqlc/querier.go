@@ -9,6 +9,7 @@ import (
 )
 
 type Querier interface {
+	CreateAttachment(ctx context.Context, arg CreateAttachmentParams) error
 	CreateEmployee(ctx context.Context, arg CreateEmployeeParams) error
 	CreateRegistrationForm(ctx context.Context, arg CreateRegistrationFormParams) error
 	CreateUser(ctx context.Context, arg CreateUserParams) (string, error)

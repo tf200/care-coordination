@@ -41,18 +41,18 @@ func (h *EmployeeHandler) SetupEmployeeRoutes(router *gin.Engine) {
 func (h *EmployeeHandler) CreateEmployee(ctx *gin.Context) {
 	var req CreateEmployeeRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, resp.ErrorResponse(ErrInvalidRequest))
+		ctx.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
 		return
 	}
 	result, err := h.employeeService.CreateEmployee(ctx, &req)
 	if err != nil {
 		switch err {
 		case ErrInvalidRequest:
-			ctx.JSON(http.StatusBadRequest, resp.ErrorResponse(err))
+			ctx.JSON(http.StatusBadRequest, resp.Error(err))
 		case ErrInternal:
-			ctx.JSON(http.StatusInternalServerError, resp.ErrorResponse(err))
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
 		default:
-			ctx.JSON(http.StatusInternalServerError, resp.ErrorResponse(err))
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
 		}
 		return
 	}
@@ -74,9 +74,9 @@ func (h *EmployeeHandler) ListEmployees(ctx *gin.Context) {
 	if err != nil {
 		switch err {
 		case ErrInternal:
-			ctx.JSON(http.StatusInternalServerError, resp.ErrorResponse(err))
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
 		default:
-			ctx.JSON(http.StatusInternalServerError, resp.ErrorResponse(err))
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
 		}
 		return
 	}

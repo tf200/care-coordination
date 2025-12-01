@@ -24,6 +24,13 @@ type Config struct {
 	LoginRateLimitWindowIP    time.Duration
 	LoginRateLimitPerEmail    int
 	LoginRateLimitWindowEmail time.Duration
+
+	// Object Storage (MinIO)
+	MinioEndpoint        string
+	MinioAccessKeyID     string
+	MinioSecretAccessKey string
+	MinioUseSSL          bool
+	MinioBucketName      string
 }
 
 func LoadConfig() (*Config, error) {
@@ -74,12 +81,19 @@ func LoadConfig() (*Config, error) {
 		rateLimitEnabled = false
 	}
 
+	minioUseSSL := false
+	if val := os.Getenv("MINIO_USE_SSL"); val == "true" {
+		minioUseSSL = true
+	}
+
 	config := &Config{
 		DBSource:           os.Getenv("DB_SOURCE"),
 		AccessTokenSecret:  os.Getenv("ACCESS_TOKEN_SECRET"),
 		RefreshTokenSecret: os.Getenv("REFRESH_TOKEN_SECRET"),
 		AccessTokenTTL:     accessTokenTTL,
 		RefreshTokenTTL:    refreshTokenTTL,
+		Environment:        os.Getenv("ENVIRONMENT"),
+		ServerAddress:      os.Getenv("SERVER_ADDRESS"),
 
 		// Rate Limiting
 		RedisURL:                  os.Getenv("REDIS_URL"),
@@ -88,6 +102,13 @@ func LoadConfig() (*Config, error) {
 		LoginRateLimitWindowIP:    loginRateLimitWindowIP,
 		LoginRateLimitPerEmail:    loginRateLimitPerEmail,
 		LoginRateLimitWindowEmail: loginRateLimitWindowEmail,
+
+		// Object Storage
+		MinioEndpoint:        os.Getenv("MINIO_ENDPOINT"),
+		MinioAccessKeyID:     os.Getenv("MINIO_ACCESS_KEY_ID"),
+		MinioSecretAccessKey: os.Getenv("MINIO_SECRET_ACCESS_KEY"),
+		MinioUseSSL:          minioUseSSL,
+		MinioBucketName:      os.Getenv("MINIO_BUCKET_NAME"),
 	}
 
 	if err := config.validate(); err != nil {
@@ -117,6 +138,20 @@ func (c *Config) validate() error {
 	// Rate limiting validation (only if enabled)
 	if c.RateLimitEnabled && c.RedisURL == "" {
 		return errors.New("REDIS_URL is required when rate limiting is enabled")
+	}
+
+	// Object Storage validation
+	if c.MinioEndpoint == "" {
+		return errors.New("MINIO_ENDPOINT is not set")
+	}
+	if c.MinioAccessKeyID == "" {
+		return errors.New("MINIO_ACCESS_KEY_ID is not set")
+	}
+	if c.MinioSecretAccessKey == "" {
+		return errors.New("MINIO_SECRET_ACCESS_KEY is not set")
+	}
+	if c.MinioBucketName == "" {
+		return errors.New("MINIO_BUCKET_NAME is not set")
 	}
 
 	return nil

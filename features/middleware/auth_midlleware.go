@@ -13,28 +13,28 @@ func (m *Middleware) AuthMiddleware() gin.HandlerFunc {
 		authorizationHeader := ctx.GetHeader(authorizationHeaderKey)
 		if len(authorizationHeader) == 0 {
 			err := ErrInvalidRequest
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, resp.ErrorResponse(err))
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, resp.Error(err))
 			return
 		}
 
 		fields := strings.Fields(authorizationHeader)
 		if len(fields) < 2 {
 			err := ErrInvalidRequest
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, resp.ErrorResponse(err))
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, resp.Error(err))
 			return
 		}
 
 		authorizationType := strings.ToLower(fields[0])
 		if authorizationType != authorizationTypeBearer {
 			err := ErrInvalidRequest
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, resp.ErrorResponse(err))
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, resp.Error(err))
 			return
 		}
 
 		accessToken := fields[1]
 		payload, err := m.tokenMaker.ValidateAccessToken(accessToken)
 		if err != nil {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, resp.ErrorResponse(err))
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, resp.Error(err))
 			return
 		}
 

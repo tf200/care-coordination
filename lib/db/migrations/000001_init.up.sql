@@ -1,7 +1,7 @@
 CREATE TABLE attachments (
     id TEXT PRIMARY KEY,
     filekey TEXT NOT NULL,
-    url TEXT NOT NULL,
+    content_type TEXT NOT NULL,
     uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 

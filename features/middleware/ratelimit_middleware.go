@@ -48,7 +48,7 @@ func (m *Middleware) RateLimitMiddleware() gin.HandlerFunc {
 			// Set Retry-After header
 			ctx.Header("Retry-After", strconv.Itoa(int(result.RetryAfter.Seconds())))
 
-			ctx.AbortWithStatusJSON(http.StatusTooManyRequests, resp.ErrorResponse(ErrRateLimitExceeded))
+			ctx.AbortWithStatusJSON(http.StatusTooManyRequests, resp.Error(ErrRateLimitExceeded))
 			return
 		}
 
@@ -89,7 +89,7 @@ func (m *Middleware) LoginRateLimitMiddleware(limiter ratelimit.RateLimiter, log
 					zap.Duration("retry_after", ipResult.RetryAfter))
 
 				ctx.Header("Retry-After", strconv.Itoa(int(ipResult.RetryAfter.Seconds())))
-				ctx.AbortWithStatusJSON(http.StatusTooManyRequests, resp.ErrorResponse(ErrRateLimitIP))
+				ctx.AbortWithStatusJSON(http.StatusTooManyRequests, resp.Error(ErrRateLimitIP))
 				return
 			}
 		}
@@ -123,7 +123,7 @@ func (m *Middleware) LoginRateLimitMiddleware(limiter ratelimit.RateLimiter, log
 						zap.Duration("retry_after", emailResult.RetryAfter))
 
 					ctx.Header("Retry-After", strconv.Itoa(int(emailResult.RetryAfter.Seconds())))
-					ctx.AbortWithStatusJSON(http.StatusTooManyRequests, resp.ErrorResponse(ErrRateLimitEmail))
+					ctx.AbortWithStatusJSON(http.StatusTooManyRequests, resp.Error(ErrRateLimitEmail))
 					return
 				}
 			}

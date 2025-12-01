@@ -5,8 +5,182 @@
 package db
 
 import (
+	"database/sql/driver"
+	"fmt"
+
 	"github.com/jackc/pgx/v5/pgtype"
 )
+
+type CareTypeEnum string
+
+const (
+	CareTypeEnumProtectedLiving           CareTypeEnum = "protected_living"
+	CareTypeEnumSemiIndependentLiving     CareTypeEnum = "semi_independent_living"
+	CareTypeEnumIndependentAssistedLiving CareTypeEnum = "independent_assisted_living"
+	CareTypeEnumAmbulatoryCare            CareTypeEnum = "ambulatory_care"
+)
+
+func (e *CareTypeEnum) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = CareTypeEnum(s)
+	case string:
+		*e = CareTypeEnum(s)
+	default:
+		return fmt.Errorf("unsupported scan type for CareTypeEnum: %T", src)
+	}
+	return nil
+}
+
+type NullCareTypeEnum struct {
+	CareTypeEnum CareTypeEnum `json:"care_type_enum"`
+	Valid        bool         `json:"valid"` // Valid is true if CareTypeEnum is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullCareTypeEnum) Scan(value interface{}) error {
+	if value == nil {
+		ns.CareTypeEnum, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.CareTypeEnum.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullCareTypeEnum) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.CareTypeEnum), nil
+}
+
+type GenderEnum string
+
+const (
+	GenderEnumMale   GenderEnum = "male"
+	GenderEnumFemale GenderEnum = "female"
+	GenderEnumOther  GenderEnum = "other"
+)
+
+func (e *GenderEnum) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = GenderEnum(s)
+	case string:
+		*e = GenderEnum(s)
+	default:
+		return fmt.Errorf("unsupported scan type for GenderEnum: %T", src)
+	}
+	return nil
+}
+
+type NullGenderEnum struct {
+	GenderEnum GenderEnum `json:"gender_enum"`
+	Valid      bool       `json:"valid"` // Valid is true if GenderEnum is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullGenderEnum) Scan(value interface{}) error {
+	if value == nil {
+		ns.GenderEnum, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.GenderEnum.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullGenderEnum) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.GenderEnum), nil
+}
+
+type RegistrationStatusEnum string
+
+const (
+	RegistrationStatusEnumPending  RegistrationStatusEnum = "pending"
+	RegistrationStatusEnumApproved RegistrationStatusEnum = "approved"
+	RegistrationStatusEnumRejected RegistrationStatusEnum = "rejected"
+	RegistrationStatusEnumInReview RegistrationStatusEnum = "in_review"
+)
+
+func (e *RegistrationStatusEnum) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = RegistrationStatusEnum(s)
+	case string:
+		*e = RegistrationStatusEnum(s)
+	default:
+		return fmt.Errorf("unsupported scan type for RegistrationStatusEnum: %T", src)
+	}
+	return nil
+}
+
+type NullRegistrationStatusEnum struct {
+	RegistrationStatusEnum RegistrationStatusEnum `json:"registration_status_enum"`
+	Valid                  bool                   `json:"valid"` // Valid is true if RegistrationStatusEnum is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullRegistrationStatusEnum) Scan(value interface{}) error {
+	if value == nil {
+		ns.RegistrationStatusEnum, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.RegistrationStatusEnum.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullRegistrationStatusEnum) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.RegistrationStatusEnum), nil
+}
+
+type Attachment struct {
+	ID         string             `json:"id"`
+	Filekey    string             `json:"filekey"`
+	Url        string             `json:"url"`
+	UploadedAt pgtype.Timestamptz `json:"uploaded_at"`
+}
+
+type Employee struct {
+	ID          string      `json:"id"`
+	UserID      string      `json:"user_id"`
+	FirstName   string      `json:"first_name"`
+	LastName    string      `json:"last_name"`
+	Bsn         string      `json:"bsn"`
+	DateOfBirth pgtype.Date `json:"date_of_birth"`
+	PhoneNumber string      `json:"phone_number"`
+	Gender      GenderEnum  `json:"gender"`
+	Role        string      `json:"role"`
+}
+
+type RegistrationForm struct {
+	ID                 string                     `json:"id"`
+	FirstName          string                     `json:"first_name"`
+	LastName           string                     `json:"last_name"`
+	Bsn                string                     `json:"bsn"`
+	DateOfBirth        pgtype.Date                `json:"date_of_birth"`
+	OrgName            string                     `json:"org_name"`
+	OrgContactPerson   string                     `json:"org_contact_person"`
+	OrgPhoneNumber     string                     `json:"org_phone_number"`
+	OrgEmail           string                     `json:"org_email"`
+	CareType           CareTypeEnum               `json:"care_type"`
+	CoordinatorID      string                     `json:"coordinator_id"`
+	RegistrationDate   pgtype.Timestamp           `json:"registration_date"`
+	RegistrationReason string                     `json:"registration_reason"`
+	AdditionalNotes    *string                    `json:"additional_notes"`
+	Status             NullRegistrationStatusEnum `json:"status"`
+	AttachmentIds      []string                   `json:"attachment_ids"`
+	CreatedAt          pgtype.Timestamptz         `json:"created_at"`
+	UpdatedAt          pgtype.Timestamptz         `json:"updated_at"`
+}
 
 type Session struct {
 	ID          string             `json:"id"`

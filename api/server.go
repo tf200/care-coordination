@@ -19,6 +19,7 @@ package api
 import (
 	"care-cordination/features/auth"
 	"care-cordination/lib/logger"
+	"care-cordination/lib/ratelimit"
 	"context"
 	"net/http"
 	"time"
@@ -36,12 +37,16 @@ type Server struct {
 	router      *gin.Engine
 	authHandler *auth.AuthHandler
 	environment string
+	rateLimiter ratelimit.RateLimiter
+	logger      *logger.Logger
 }
 
-func NewServer(logger *logger.Logger, environment string, authHandler *auth.AuthHandler) *Server {
+func NewServer(logger *logger.Logger, environment string, authHandler *auth.AuthHandler, rateLimiter ratelimit.RateLimiter) *Server {
 	s := &Server{
 		environment: environment,
 		authHandler: authHandler,
+		rateLimiter: rateLimiter,
+		logger:      logger,
 	}
 	s.setupRoutes(logger)
 	return s
@@ -88,6 +93,6 @@ func (s *Server) setupRoutes(logger *logger.Logger) {
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	s.authHandler.SetupAuthRoutes(router)
+	s.authHandler.SetupAuthRoutes(router, s.rateLimiter, logger)
 	s.router = router
 }

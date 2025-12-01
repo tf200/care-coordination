@@ -1,13 +1,16 @@
 package util
 
-import "context"
+import (
+	"context"
+
+	"github.com/gin-gonic/gin"
+)
 
 const UserIDKey = "user_id"
 
 func GetUserID(ctx context.Context) string {
-	userID, ok := ctx.Value(UserIDKey).(string)
-	if !ok {
-		return ""
+	if ginCtx, ok := ctx.(*gin.Context); ok {
+		return ginCtx.GetString(UserIDKey)
 	}
-	return userID
+	return ""
 }

@@ -3,10 +3,11 @@ package main
 import (
 	"care-cordination/api"
 	"care-cordination/features/auth"
+	"care-cordination/features/middleware"
 	"care-cordination/lib/config"
 	db "care-cordination/lib/db/sqlc"
 	"care-cordination/lib/logger"
-	"care-cordination/lib/middleware"
+	"care-cordination/lib/ratelimit"
 	"care-cordination/lib/token"
 	"context"
 	"log"
@@ -50,14 +51,42 @@ func main() {
 		cfg.AccessTokenTTL,
 		cfg.RefreshTokenTTL,
 	)
-	mdw := middleware.NewMiddleware(tokenManager)
+
+	// Initialize Rate Limiter
+	var rateLimiter ratelimit.RateLimiter
+	if cfg.RateLimitEnabled {
+		rlConfig := &ratelimit.Config{
+			RedisURL:       cfg.RedisURL,
+			IPLimit:        cfg.LoginRateLimitPerIP,
+			IPWindow:       cfg.LoginRateLimitWindowIP,
+			EmailLimit:     cfg.LoginRateLimitPerEmail,
+			EmailWindow:    cfg.LoginRateLimitWindowEmail,
+			EnableFallback: true, // Use in-memory fallback if Redis fails
+		}
+
+		rateLimiter, err = ratelimit.NewRateLimiter(rlConfig)
+		if err != nil {
+			l.Warn(ctx, "main", "failed to initialize rate limiter, continuing without rate limiting", zap.Error(err))
+			rateLimiter = nil
+		} else {
+			l.Info(ctx, "main", "rate limiter initialized successfully")
+			defer func() {
+				if err := rateLimiter.Close(); err != nil {
+					l.Error(ctx, "main", "failed to close rate limiter", zap.Error(err))
+				}
+			}()
+		}
+	} else {
+		l.Info(ctx, "main", "rate limiting is disabled")
+	}
 
 	// 5. Initialize Features
+	mdw := middleware.NewMiddleware(tokenManager, rateLimiter, l)
 	authService := auth.NewAuthService(store, tokenManager, l)
 	authHandler := auth.NewAuthHandler(authService, mdw)
 
 	// 6. Initialize Server
-	server := api.NewServer(l, cfg.Environment, authHandler)
+	server := api.NewServer(l, cfg.Environment, authHandler, rateLimiter)
 
 	// 7. Start Server
 	go func() {

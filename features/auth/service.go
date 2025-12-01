@@ -15,21 +15,21 @@ import (
 )
 
 type authService struct {
-	store        *db.Store
+	db           *db.Store
 	tokenManager *token.TokenManager
 	logger       *logger.Logger
 }
 
-func NewAuthService(store *db.Store, tokenManager *token.TokenManager, logger *logger.Logger) AuthService {
+func NewAuthService(db *db.Store, tokenManager *token.TokenManager, logger *logger.Logger) AuthService {
 	return &authService{
-		store:        store,
+		db:           db,
 		tokenManager: tokenManager,
 		logger:       logger,
 	}
 }
 
 func (s *authService) Login(ctx context.Context, req *LoginRequest, userAgent string, ipAddress string) (*LoginResponse, error) {
-	user, err := s.store.GetUserByEmail(ctx, req.Email)
+	user, err := s.db.GetUserByEmail(ctx, req.Email)
 	if err != nil {
 		s.logger.Error(ctx, "Login", "User not found", zap.String("email", req.Email))
 		return nil, ErrInvalidCredentials
@@ -49,7 +49,7 @@ func (s *authService) Login(ctx context.Context, req *LoginRequest, userAgent st
 		s.logger.Error(ctx, "Login", "Failed to generate refresh token", zap.String("email", req.Email))
 		return nil, ErrInternal
 	}
-	if err := s.store.CreateUserSession(ctx,
+	if err := s.db.CreateUserSession(ctx,
 		db.CreateUserSessionParams{
 			ID:          nanoid.Generate(),
 			UserID:      user.ID,
@@ -74,7 +74,7 @@ func (s *authService) RefreshTokens(ctx context.Context, req *RefreshTokensReque
 		s.logger.Error(ctx, "RefreshTokens", "Invalid refresh token", zap.String("refreshToken", req.RefreshToken))
 		return nil, ErrInvalidToken
 	}
-	userSession, err := s.store.GetUserSession(ctx, refreshClaims.TokenHash)
+	userSession, err := s.db.GetUserSession(ctx, refreshClaims.TokenHash)
 	if err != nil {
 		s.logger.Error(ctx, "RefreshTokens", "User session not found", zap.String("refreshToken", req.RefreshToken))
 		return nil, ErrInvalidToken
@@ -93,7 +93,7 @@ func (s *authService) RefreshTokens(ctx context.Context, req *RefreshTokensReque
 		s.logger.Error(ctx, "RefreshTokens", "Failed to generate refresh token", zap.String("refreshToken", req.RefreshToken))
 		return nil, ErrInternal
 	}
-	if err := s.store.UpdateUserSession(ctx,
+	if err := s.db.UpdateUserSession(ctx,
 		db.UpdateUserSessionParams{
 			ID:          userSession.ID,
 			TokenHash:   refreshClaims.TokenHash,
@@ -116,7 +116,7 @@ func (s *authService) Logout(ctx context.Context, req *LogoutRequest) error {
 	if userID == "" {
 		return ErrInvalidToken
 	}
-	if err := s.store.DeleteUserSession(ctx, req.RefreshToken); err != nil {
+	if err := s.db.DeleteUserSession(ctx, req.RefreshToken); err != nil {
 		s.logger.Error(ctx, "Logout", "Failed to delete user session", zap.String("refreshToken", req.RefreshToken))
 		return ErrInternal
 	}

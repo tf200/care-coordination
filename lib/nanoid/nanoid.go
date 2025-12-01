@@ -10,7 +10,7 @@ const (
 func Generate() string {
 	id, err := gonanoid.Generate(chars, size)
 	if err != nil {
-		return ""
+		panic(err)
 	}
 	return id
 }

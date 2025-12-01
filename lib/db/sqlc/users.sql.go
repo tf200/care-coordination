@@ -9,9 +9,10 @@ import (
 	"context"
 )
 
-const createUser = `-- name: CreateUser :exec
+const createUser = `-- name: CreateUser :one
 INSERT INTO users (id, email, password_hash) 
 VALUES ($1, $2, $3)
+RETURNING id
 `
 
 type CreateUserParams struct {
@@ -20,9 +21,11 @@ type CreateUserParams struct {
 	PasswordHash string `json:"password_hash"`
 }
 
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
-	_, err := q.db.Exec(ctx, createUser, arg.ID, arg.Email, arg.PasswordHash)
-	return err
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (string, error) {
+	row := q.db.QueryRow(ctx, createUser, arg.ID, arg.Email, arg.PasswordHash)
+	var id string
+	err := row.Scan(&id)
+	return id, err
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one

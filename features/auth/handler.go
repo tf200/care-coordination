@@ -1,7 +1,9 @@
 package auth
 
 import (
-	"care-cordination/lib/middleware"
+	"care-cordination/features/middleware"
+	"care-cordination/lib/logger"
+	"care-cordination/lib/ratelimit"
 	"care-cordination/lib/resp"
 	"net/http"
 
@@ -10,22 +12,28 @@ import (
 
 type AuthHandler struct {
 	authService AuthService
-	middleware  *middleware.Middleware
+	mdw         *middleware.Middleware
 }
 
-func NewAuthHandler(authService AuthService, middleware *middleware.Middleware) *AuthHandler {
+func NewAuthHandler(authService AuthService, mdw *middleware.Middleware) *AuthHandler {
 	return &AuthHandler{
 		authService: authService,
-		middleware:  middleware,
+		mdw:         mdw,
 	}
 }
 
-func (h *AuthHandler) SetupAuthRoutes(router *gin.Engine) {
+func (h *AuthHandler) SetupAuthRoutes(router *gin.Engine, rateLimiter ratelimit.RateLimiter, logger *logger.Logger) {
 	auth := router.Group("/auth")
-	auth.POST("/login", h.Login)
-	auth.POST("/refresh", h.middleware.AuthMiddleware(), h.RefreshTokens)
-	auth.POST("/logout", h.middleware.AuthMiddleware(), h.Logout)
 
+	// Apply rate limiting to login endpoint
+	if rateLimiter != nil {
+		auth.POST("/login", h.mdw.LoginRateLimitMiddleware(rateLimiter, logger.Logger), h.Login)
+	} else {
+		auth.POST("/login", h.Login)
+	}
+
+	auth.POST("/refresh", h.mdw.AuthMiddleware(), h.RefreshTokens)
+	auth.POST("/logout", h.mdw.AuthMiddleware(), h.Logout)
 }
 
 // @Summary Login a user

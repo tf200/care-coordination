@@ -9,11 +9,15 @@ import (
 )
 
 type Querier interface {
-	CreateUser(ctx context.Context, arg CreateUserParams) error
+	CreateEmployee(ctx context.Context, arg CreateEmployeeParams) error
+	CreateRegistrationForm(ctx context.Context, arg CreateRegistrationFormParams) error
+	CreateUser(ctx context.Context, arg CreateUserParams) (string, error)
 	CreateUserSession(ctx context.Context, arg CreateUserSessionParams) error
 	DeleteUserSession(ctx context.Context, tokenHash string) error
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserSession(ctx context.Context, tokenHash string) (Session, error)
+	ListEmployees(ctx context.Context) ([]Employee, error)
+	ListRegistrationForms(ctx context.Context) ([]ListRegistrationFormsRow, error)
 	UpdateUserSession(ctx context.Context, arg UpdateUserSessionParams) error
 }
 

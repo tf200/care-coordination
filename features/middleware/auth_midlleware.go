@@ -2,28 +2,11 @@ package middleware
 
 import (
 	"care-cordination/lib/resp"
-	"care-cordination/lib/token"
 	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 )
-
-const (
-	authorizationHeaderKey  = "authorization"
-	authorizationTypeBearer = "bearer"
-	UserIDKey               = "user_id"
-)
-
-type Middleware struct {
-	tokenMaker *token.TokenManager
-}
-
-func NewMiddleware(tokenMaker *token.TokenManager) *Middleware {
-	return &Middleware{
-		tokenMaker: tokenMaker,
-	}
-}
 
 func (m *Middleware) AuthMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {

@@ -1,0 +1,22 @@
+basePath: /
+info:
+  contact:
+    email: your-email@domain.com
+    name: API Support
+  description: This is the Care-Cordination server API documentation.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Care-Cordination API
+  version: "1.0"
+paths: {}
+security:
+- Bearer: []
+securityDefinitions:
+  Bearer:
+    description: Add 'Bearer ' prefix before your JWT token for authentication
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

@@ -16,6 +16,7 @@ type Config struct {
 	RefreshTokenTTL    time.Duration
 	Environment        string
 	ServerAddress      string
+	Url                string
 
 	// Rate Limiting
 	RedisURL                  string
@@ -94,6 +95,7 @@ func LoadConfig() (*Config, error) {
 		RefreshTokenTTL:    refreshTokenTTL,
 		Environment:        os.Getenv("ENVIRONMENT"),
 		ServerAddress:      os.Getenv("SERVER_ADDRESS"),
+		Url:                os.Getenv("URL"),
 
 		// Rate Limiting
 		RedisURL:                  os.Getenv("REDIS_URL"),

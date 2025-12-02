@@ -119,7 +119,7 @@ func main() {
 	attachmentsHandler := attachments.NewAttachmentsHandler(attachmentsService, mdw)
 
 	// 6. Initialize Server
-	server := api.NewServer(l, cfg.Environment, authHandler, employeeHandler, registrationHandler, attachmentsHandler, rateLimiter, cfg.ServerAddress)
+	server := api.NewServer(l, cfg.Environment, authHandler, employeeHandler, registrationHandler, attachmentsHandler, rateLimiter, cfg.ServerAddress, cfg.Url)
 
 	// 7. Start Server
 	go func() {

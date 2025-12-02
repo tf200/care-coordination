@@ -47,6 +47,7 @@ type Server struct {
 	rateLimiter         ratelimit.RateLimiter
 	logger              *logger.Logger
 	addr                string
+	url                 string
 }
 
 func NewServer(logger *logger.Logger,
@@ -54,7 +55,7 @@ func NewServer(logger *logger.Logger,
 	employeeHandler *employee.EmployeeHandler,
 	registrationHandler registration.RegistrationHandler,
 	attachmentsHandler *attachments.AttachmentsHandler,
-	rateLimiter ratelimit.RateLimiter, addr string) *Server {
+	rateLimiter ratelimit.RateLimiter, addr string, url string) *Server {
 	s := &Server{
 		environment:         environment,
 		authHandler:         authHandler,
@@ -64,6 +65,7 @@ func NewServer(logger *logger.Logger,
 		rateLimiter:         rateLimiter,
 		logger:              logger,
 		addr:                addr,
+		url:                 url,
 	}
 	s.setupRoutes(logger)
 	return s
@@ -123,7 +125,7 @@ func (s *Server) setupSwagger() {
 	docs.SwaggerInfo.Description = "This is the Care-Cordination server API documentation."
 	docs.SwaggerInfo.Version = "1.0"
 	docs.SwaggerInfo.BasePath = "/"
-	docs.SwaggerInfo.Host = s.addr
+	docs.SwaggerInfo.Host = s.url
 
 	// Set scheme based on environment
 	if s.environment == "production" {

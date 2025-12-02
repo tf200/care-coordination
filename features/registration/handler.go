@@ -22,9 +22,11 @@ func NewRegistrationHandler(rgstService RegistrationService, mdw *middleware.Mid
 
 func (h *RegistrationHandler) SetupRegistrationRoutes(router *gin.Engine) {
 	registration := router.Group("/registrations")
+	registration.Use(h.mdw.AuthMdw())
+	registration.Use(h.mdw.PaginationMdw())
 
-	registration.POST("", h.mdw.AuthMiddleware(), h.CreateRegistrationForm)
-	registration.GET("", h.mdw.AuthMiddleware(), h.ListRegistrationForms)
+	registration.POST("", h.CreateRegistrationForm)
+	registration.GET("", h.mdw.PaginationMdw(), h.ListRegistrationForms)
 }
 
 // @Summary Create a registration form
@@ -38,20 +40,20 @@ func (h *RegistrationHandler) SetupRegistrationRoutes(router *gin.Engine) {
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
 // @Router /registrations [post]
-func (h *RegistrationHandler) CreateRegistrationForm(c *gin.Context) {
+func (h *RegistrationHandler) CreateRegistrationForm(ctx *gin.Context) {
 	var req CreateRegistrationFormRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
 		return
 	}
 
-	result, err := h.rgstService.CreateRegistrationForm(c.Request.Context(), &req)
+	result, err := h.rgstService.CreateRegistrationForm(ctx, &req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, resp.Error(ErrInternal))
+		ctx.JSON(http.StatusInternalServerError, resp.Error(ErrInternal))
 		return
 	}
 
-	c.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, result)
 }
 
 // @Summary List registration forms
@@ -64,11 +66,16 @@ func (h *RegistrationHandler) CreateRegistrationForm(c *gin.Context) {
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
 // @Router /registrations [get]
-func (h *RegistrationHandler) ListRegistrationForms(c *gin.Context) {
-	result, err := h.rgstService.ListRegistrationForms(c.Request.Context())
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, resp.Error(ErrInternal))
+func (h *RegistrationHandler) ListRegistrationForms(ctx *gin.Context) {
+	var req ListRegistrationFormsRequest
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
 		return
 	}
-	c.JSON(http.StatusOK, result)
+	result, err := h.rgstService.ListRegistrationForms(ctx, &req)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, resp.Error(ErrInternal))
+		return
+	}
+	ctx.JSON(http.StatusOK, result)
 }

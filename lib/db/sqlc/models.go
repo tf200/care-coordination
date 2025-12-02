@@ -98,6 +98,48 @@ func (ns NullGenderEnum) Value() (driver.Value, error) {
 	return string(ns.GenderEnum), nil
 }
 
+type IntakeStatusEnum string
+
+const (
+	IntakeStatusEnumCompleted IntakeStatusEnum = "completed"
+	IntakeStatusEnumPending   IntakeStatusEnum = "pending"
+)
+
+func (e *IntakeStatusEnum) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = IntakeStatusEnum(s)
+	case string:
+		*e = IntakeStatusEnum(s)
+	default:
+		return fmt.Errorf("unsupported scan type for IntakeStatusEnum: %T", src)
+	}
+	return nil
+}
+
+type NullIntakeStatusEnum struct {
+	IntakeStatusEnum IntakeStatusEnum `json:"intake_status_enum"`
+	Valid            bool             `json:"valid"` // Valid is true if IntakeStatusEnum is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullIntakeStatusEnum) Scan(value interface{}) error {
+	if value == nil {
+		ns.IntakeStatusEnum, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.IntakeStatusEnum.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullIntakeStatusEnum) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.IntakeStatusEnum), nil
+}
+
 type RegistrationStatusEnum string
 
 const (
@@ -150,15 +192,55 @@ type Attachment struct {
 }
 
 type Employee struct {
-	ID          string      `json:"id"`
-	UserID      string      `json:"user_id"`
-	FirstName   string      `json:"first_name"`
-	LastName    string      `json:"last_name"`
-	Bsn         string      `json:"bsn"`
-	DateOfBirth pgtype.Date `json:"date_of_birth"`
-	PhoneNumber string      `json:"phone_number"`
-	Gender      GenderEnum  `json:"gender"`
-	Role        string      `json:"role"`
+	ID          string           `json:"id"`
+	UserID      string           `json:"user_id"`
+	FirstName   string           `json:"first_name"`
+	LastName    string           `json:"last_name"`
+	Bsn         string           `json:"bsn"`
+	DateOfBirth pgtype.Date      `json:"date_of_birth"`
+	PhoneNumber string           `json:"phone_number"`
+	Gender      GenderEnum       `json:"gender"`
+	Role        string           `json:"role"`
+	CreatedAt   pgtype.Timestamp `json:"created_at"`
+	UpdatedAt   pgtype.Timestamp `json:"updated_at"`
+}
+
+type IntakeForm struct {
+	ID                 string           `json:"id"`
+	RegistrationFormID string           `json:"registration_form_id"`
+	IntakeDate         pgtype.Date      `json:"intake_date"`
+	IntakeTime         pgtype.Time      `json:"intake_time"`
+	LocationID         string           `json:"location_id"`
+	CoordinatorID      string           `json:"coordinator_id"`
+	FamilySituation    *string          `json:"family_situation"`
+	MainProvider       *string          `json:"main_provider"`
+	Limitations        *string          `json:"limitations"`
+	FocusAreas         *string          `json:"focus_areas"`
+	Goals              *string          `json:"goals"`
+	Notes              *string          `json:"notes"`
+	CreatedAt          pgtype.Timestamp `json:"created_at"`
+	UpdatedAt          pgtype.Timestamp `json:"updated_at"`
+}
+
+type Location struct {
+	ID         string             `json:"id"`
+	Name       string             `json:"name"`
+	PostalCode string             `json:"postal_code"`
+	Address    string             `json:"address"`
+	Capacity   int32              `json:"capacity"`
+	Occupied   int32              `json:"occupied"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
+}
+
+type ReferringOrg struct {
+	ID            string             `json:"id"`
+	Name          string             `json:"name"`
+	ContactPerson string             `json:"contact_person"`
+	PhoneNumber   string             `json:"phone_number"`
+	Email         string             `json:"email"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt     pgtype.Timestamptz `json:"updated_at"`
 }
 
 type RegistrationForm struct {
@@ -167,12 +249,8 @@ type RegistrationForm struct {
 	LastName           string                     `json:"last_name"`
 	Bsn                string                     `json:"bsn"`
 	DateOfBirth        pgtype.Date                `json:"date_of_birth"`
-	OrgName            string                     `json:"org_name"`
-	OrgContactPerson   string                     `json:"org_contact_person"`
-	OrgPhoneNumber     string                     `json:"org_phone_number"`
-	OrgEmail           string                     `json:"org_email"`
+	RefferingOrgID     *string                    `json:"reffering_org_id"`
 	CareType           CareTypeEnum               `json:"care_type"`
-	CoordinatorID      string                     `json:"coordinator_id"`
 	RegistrationDate   pgtype.Timestamp           `json:"registration_date"`
 	RegistrationReason string                     `json:"registration_reason"`
 	AdditionalNotes    *string                    `json:"additional_notes"`

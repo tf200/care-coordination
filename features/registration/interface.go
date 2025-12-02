@@ -1,8 +1,11 @@
 package registration
 
-import "context"
+import (
+	"care-cordination/lib/resp"
+	"context"
+)
 
 type RegistrationService interface {
 	CreateRegistrationForm(ctx context.Context, req *CreateRegistrationFormRequest) (*CreateRegistrationFormResponse, error)
-	ListRegistrationForms(ctx context.Context) ([]ListRegistrationFormsResponse, error)
+	ListRegistrationForms(ctx context.Context, req *ListRegistrationFormsRequest) (*resp.PaginationResponse[ListRegistrationFormsResponse], error)
 }

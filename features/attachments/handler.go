@@ -23,7 +23,7 @@ func NewAttachmentsHandler(attachmentsService AttachmentsService, mdw *middlewar
 func (h *AttachmentsHandler) SetupAttachmentsRoutes(router *gin.Engine) {
 	attachments := router.Group("/attachments")
 
-	attachments.POST("", h.mdw.AuthMiddleware(), h.UploadAttachment)
+	attachments.POST("", h.mdw.AuthMdw(), h.UploadAttachment)
 }
 
 // @Summary Upload an attachment

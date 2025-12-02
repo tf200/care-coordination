@@ -14,4 +14,22 @@ INSERT INTO employees (
 );
 
 -- name: ListEmployees :many
-SELECT * FROM employees;
+SELECT
+    e.id,
+    e.user_id,
+    e.first_name,
+    e.last_name,
+    e.bsn,
+    e.date_of_birth,
+    e.phone_number,
+    e.gender,
+    e.role,
+    COUNT(*) OVER() as total_count
+FROM employees e
+WHERE
+    (sqlc.narg('search')::text IS NULL OR
+     LOWER(e.first_name) LIKE LOWER('%' || sqlc.narg('search')::text || '%') OR
+     LOWER(e.last_name) LIKE LOWER('%' || sqlc.narg('search')::text || '%') OR
+     LOWER(CONCAT(e.first_name, ' ', e.last_name)) LIKE LOWER('%' || sqlc.narg('search')::text || '%'))
+ORDER BY e.first_name, e.last_name
+LIMIT $1 OFFSET $2;

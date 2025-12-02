@@ -1,9 +1,11 @@
 package employee
 
 import (
+	"care-cordination/features/middleware"
 	db "care-cordination/lib/db/sqlc"
 	"care-cordination/lib/logger"
 	"care-cordination/lib/nanoid"
+	"care-cordination/lib/resp"
 	"context"
 
 	"github.com/jackc/pgx/v5/pgtype"
@@ -57,19 +59,33 @@ func (s *employeeService) CreateEmployee(ctx context.Context, req *CreateEmploye
 	}, nil
 }
 
-func (s *employeeService) ListEmployees(ctx context.Context) ([]ListEmployeesResponse, error) {
-	employees, err := s.store.ListEmployees(ctx)
+func (s *employeeService) ListEmployees(ctx context.Context, req *ListEmployeesRequest) (*resp.PaginationResponse[ListEmployeesResponse], error) {
+	limit, offset, page, pageSize := middleware.GetPaginationParams(ctx)
+
+	employees, err := s.store.ListEmployees(ctx, db.ListEmployeesParams{
+		Limit:  limit,
+		Offset: offset,
+		Search: req.Search,
+	})
 	if err != nil {
 		s.logger.Error(ctx, "ListEmployees", "Failed to list employees", zap.Error(err))
 		return nil, ErrInternal
 	}
+
 	listEmployeesResponse := []ListEmployeesResponse{}
+	totalCount := 0
+
 	for _, employee := range employees {
 		listEmployeesResponse = append(listEmployeesResponse, ListEmployeesResponse{
 			ID:        employee.ID,
 			FirstName: employee.FirstName,
 			LastName:  employee.LastName,
 		})
+		if totalCount == 0 {
+			totalCount = int(employee.TotalCount)
+		}
 	}
-	return listEmployeesResponse, nil
+
+	result := resp.PagRespWithParams(listEmployeesResponse, totalCount, page, pageSize)
+	return &result, nil
 }

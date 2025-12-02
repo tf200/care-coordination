@@ -23,3 +23,7 @@ type ListEmployeesResponse struct {
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
 }
+
+type ListEmployeesRequest struct {
+	Search *string `form:"search"`
+}

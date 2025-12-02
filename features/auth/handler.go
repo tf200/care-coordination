@@ -32,8 +32,8 @@ func (h *AuthHandler) SetupAuthRoutes(router *gin.Engine, rateLimiter ratelimit.
 		auth.POST("/login", h.Login)
 	}
 
-	auth.POST("/refresh", h.mdw.AuthMiddleware(), h.RefreshTokens)
-	auth.POST("/logout", h.mdw.AuthMiddleware(), h.Logout)
+	auth.POST("/refresh", h.mdw.AuthMdw(), h.RefreshTokens)
+	auth.POST("/logout", h.mdw.AuthMdw(), h.Logout)
 }
 
 // @Summary Login a user

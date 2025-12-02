@@ -11,14 +11,23 @@ import (
 type Querier interface {
 	CreateAttachment(ctx context.Context, arg CreateAttachmentParams) error
 	CreateEmployee(ctx context.Context, arg CreateEmployeeParams) error
+	CreateIntakeForm(ctx context.Context, arg CreateIntakeFormParams) error
+	CreateLocation(ctx context.Context, arg CreateLocationParams) error
+	CreateReferringOrg(ctx context.Context, arg CreateReferringOrgParams) error
 	CreateRegistrationForm(ctx context.Context, arg CreateRegistrationFormParams) error
 	CreateUser(ctx context.Context, arg CreateUserParams) (string, error)
 	CreateUserSession(ctx context.Context, arg CreateUserSessionParams) error
+	DeleteReferringOrg(ctx context.Context, id string) error
 	DeleteUserSession(ctx context.Context, tokenHash string) error
+	GetReferringOrgByID(ctx context.Context, id string) (ReferringOrg, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserSession(ctx context.Context, tokenHash string) (Session, error)
-	ListEmployees(ctx context.Context) ([]Employee, error)
-	ListRegistrationForms(ctx context.Context) ([]ListRegistrationFormsRow, error)
+	ListEmployees(ctx context.Context, arg ListEmployeesParams) ([]ListEmployeesRow, error)
+	ListIntakeForms(ctx context.Context, arg ListIntakeFormsParams) ([]ListIntakeFormsRow, error)
+	ListLocations(ctx context.Context, arg ListLocationsParams) ([]ListLocationsRow, error)
+	ListReferringOrgs(ctx context.Context, arg ListReferringOrgsParams) ([]ListReferringOrgsRow, error)
+	ListRegistrationForms(ctx context.Context, arg ListRegistrationFormsParams) ([]ListRegistrationFormsRow, error)
+	UpdateReferringOrg(ctx context.Context, arg UpdateReferringOrgParams) error
 	UpdateUserSession(ctx context.Context, arg UpdateUserSessionParams) error
 }
 

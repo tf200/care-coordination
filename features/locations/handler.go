@@ -1,4 +1,4 @@
-package employee
+package locations
 
 import (
 	"care-cordination/features/middleware"
@@ -8,43 +8,43 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type EmployeeHandler struct {
-	employeeService EmployeeService
+type LocationHandler struct {
+	locationService LocationService
 	mdw             *middleware.Middleware
 }
 
-func NewEmployeeHandler(employeeService EmployeeService, mdw *middleware.Middleware) *EmployeeHandler {
-	return &EmployeeHandler{
-		employeeService: employeeService,
+func NewLocationHandler(locationService LocationService, mdw *middleware.Middleware) *LocationHandler {
+	return &LocationHandler{
+		locationService: locationService,
 		mdw:             mdw,
 	}
 }
 
-func (h *EmployeeHandler) SetupEmployeeRoutes(router *gin.Engine) {
-	employee := router.Group("/employees")
+func (h *LocationHandler) SetupLocationRoutes(router *gin.Engine) {
+	location := router.Group("/locations")
 
-	employee.POST("", h.mdw.AuthMdw(), h.CreateEmployee)
-	employee.GET("", h.mdw.AuthMdw(), h.mdw.PaginationMdw(), h.ListEmployees)
+	location.POST("", h.mdw.AuthMdw(), h.CreateLocation)
+	location.GET("", h.mdw.AuthMdw(), h.mdw.PaginationMdw(), h.ListLocations)
 }
 
-// @Summary Create an employee
-// @Description Create a new employee
-// @Tags Employee
+// @Summary Create a location
+// @Description Create a new location
+// @Tags Location
 // @Accept json
 // @Produce json
-// @Param employee body CreateEmployeeRequest true "Employee"
-// @Success 200 {object} CreateEmployeeResponse
+// @Param location body CreateLocationRequest true "Location"
+// @Success 200 {object} CreateLocationResponse
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
-// @Router /employees [post]
-func (h *EmployeeHandler) CreateEmployee(ctx *gin.Context) {
-	var req CreateEmployeeRequest
+// @Router /locations [post]
+func (h *LocationHandler) CreateLocation(ctx *gin.Context) {
+	var req CreateLocationRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
 		return
 	}
-	result, err := h.employeeService.CreateEmployee(ctx, &req)
+	result, err := h.locationService.CreateLocation(ctx, &req)
 	if err != nil {
 		switch err {
 		case ErrInvalidRequest:
@@ -59,26 +59,26 @@ func (h *EmployeeHandler) CreateEmployee(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, result)
 }
 
-// @Summary List employees
-// @Description List all employees with pagination and search
-// @Tags Employee
+// @Summary List locations
+// @Description List all locations with pagination and search
+// @Tags Location
 // @Accept json
 // @Produce json
 // @Param page query int false "Page number (default: 1)"
 // @Param page_size query int false "Page size (default: 10, max: 100)"
-// @Param search query string false "Search by first name, last name, or full name"
-// @Success 200 {object} resp.PaginationResponse{data=[]ListEmployeesResponse}
+// @Param search query string false "Search by name, postal code, or address"
+// @Success 200 {object} resp.PaginationResponse{data=[]ListLocationsResponse}
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
-// @Router /employees [get]
-func (h *EmployeeHandler) ListEmployees(ctx *gin.Context) {
-	var req ListEmployeesRequest
+// @Router /locations [get]
+func (h *LocationHandler) ListLocations(ctx *gin.Context) {
+	var req ListLocationsRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
 		return
 	}
-	result, err := h.employeeService.ListEmployees(ctx, &req)
+	result, err := h.locationService.ListLocations(ctx, &req)
 	if err != nil {
 		switch err {
 		case ErrInternal:

@@ -55,18 +55,55 @@ func (q *Queries) CreateEmployee(ctx context.Context, arg CreateEmployeeParams) 
 }
 
 const listEmployees = `-- name: ListEmployees :many
-SELECT id, user_id, first_name, last_name, bsn, date_of_birth, phone_number, gender, role FROM employees
+SELECT
+    e.id,
+    e.user_id,
+    e.first_name,
+    e.last_name,
+    e.bsn,
+    e.date_of_birth,
+    e.phone_number,
+    e.gender,
+    e.role,
+    COUNT(*) OVER() as total_count
+FROM employees e
+WHERE
+    ($3::text IS NULL OR
+     LOWER(e.first_name) LIKE LOWER('%' || $3::text || '%') OR
+     LOWER(e.last_name) LIKE LOWER('%' || $3::text || '%') OR
+     LOWER(CONCAT(e.first_name, ' ', e.last_name)) LIKE LOWER('%' || $3::text || '%'))
+ORDER BY e.first_name, e.last_name
+LIMIT $1 OFFSET $2
 `
 
-func (q *Queries) ListEmployees(ctx context.Context) ([]Employee, error) {
-	rows, err := q.db.Query(ctx, listEmployees)
+type ListEmployeesParams struct {
+	Limit  int32   `json:"limit"`
+	Offset int32   `json:"offset"`
+	Search *string `json:"search"`
+}
+
+type ListEmployeesRow struct {
+	ID          string      `json:"id"`
+	UserID      string      `json:"user_id"`
+	FirstName   string      `json:"first_name"`
+	LastName    string      `json:"last_name"`
+	Bsn         string      `json:"bsn"`
+	DateOfBirth pgtype.Date `json:"date_of_birth"`
+	PhoneNumber string      `json:"phone_number"`
+	Gender      GenderEnum  `json:"gender"`
+	Role        string      `json:"role"`
+	TotalCount  int64       `json:"total_count"`
+}
+
+func (q *Queries) ListEmployees(ctx context.Context, arg ListEmployeesParams) ([]ListEmployeesRow, error) {
+	rows, err := q.db.Query(ctx, listEmployees, arg.Limit, arg.Offset, arg.Search)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []Employee{}
+	items := []ListEmployeesRow{}
 	for rows.Next() {
-		var i Employee
+		var i ListEmployeesRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
@@ -77,6 +114,7 @@ func (q *Queries) ListEmployees(ctx context.Context) ([]Employee, error) {
 			&i.PhoneNumber,
 			&i.Gender,
 			&i.Role,
+			&i.TotalCount,
 		); err != nil {
 			return nil, err
 		}

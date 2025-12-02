@@ -18,19 +18,15 @@ INSERT INTO registration_forms (
     last_name,
     bsn,
     date_of_birth,
-    org_name,
-    org_contact_person,
-    org_phone_number,
-    org_email,
+    reffering_org_id,
     care_type,
-    coordinator_id,
     registration_date,
     registration_reason,
     additional_notes,
     attachment_ids
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8, $9, 
-    $10, $11, $12, $13, $14, $15
+    $1, $2, $3, $4, $5, $6,
+    $7, $8, $9, $10, $11
 )
 `
 
@@ -40,12 +36,8 @@ type CreateRegistrationFormParams struct {
 	LastName           string           `json:"last_name"`
 	Bsn                string           `json:"bsn"`
 	DateOfBirth        pgtype.Date      `json:"date_of_birth"`
-	OrgName            string           `json:"org_name"`
-	OrgContactPerson   string           `json:"org_contact_person"`
-	OrgPhoneNumber     string           `json:"org_phone_number"`
-	OrgEmail           string           `json:"org_email"`
+	RefferingOrgID     *string          `json:"reffering_org_id"`
 	CareType           CareTypeEnum     `json:"care_type"`
-	CoordinatorID      string           `json:"coordinator_id"`
 	RegistrationDate   pgtype.Timestamp `json:"registration_date"`
 	RegistrationReason string           `json:"registration_reason"`
 	AdditionalNotes    *string          `json:"additional_notes"`
@@ -59,12 +51,8 @@ func (q *Queries) CreateRegistrationForm(ctx context.Context, arg CreateRegistra
 		arg.LastName,
 		arg.Bsn,
 		arg.DateOfBirth,
-		arg.OrgName,
-		arg.OrgContactPerson,
-		arg.OrgPhoneNumber,
-		arg.OrgEmail,
+		arg.RefferingOrgID,
 		arg.CareType,
-		arg.CoordinatorID,
 		arg.RegistrationDate,
 		arg.RegistrationReason,
 		arg.AdditionalNotes,
@@ -79,36 +67,63 @@ SELECT r.id,
         r.last_name,
         r.bsn,
         r.date_of_birth,
-        r.org_name,
+        r.reffering_org_id,
         r.care_type,
-        r.coordinator_id,
-        e.first_name AS coordinator_first_name,
-        e.last_name AS coordinator_last_name,
         r.registration_date,
         r.registration_reason,
-        r.attachment_ids
+        r.additional_notes,
+        r.attachment_ids,
+        r.status,
+        ro.name as org_name,
+        ro.contact_person as org_contact_person,
+        ro.phone_number as org_phone_number,
+        ro.email as org_email,
+        COUNT(r.id) OVER () AS total_count
 FROM registration_forms r
-JOIN employees e ON r.coordinator_id = e.id
+LEFT JOIN referring_orgs ro ON r.reffering_org_id = ro.id
+WHERE
+    (
+        -- If search term is NULL or empty, ignore filters
+        $3::text IS NULL OR $3::text = '' OR
+        -- Search by Org Name
+        ro.name ILIKE '%' || $3 || '%' OR
+        -- Search by Client First Name
+        r.first_name ILIKE '%' || $3 || '%' OR
+        -- Search by Client Last Name
+        r.last_name ILIKE '%' || $3 || '%'
+    )
+ORDER BY r.registration_date DESC
+LIMIT $1 OFFSET $2
 `
 
-type ListRegistrationFormsRow struct {
-	ID                   string           `json:"id"`
-	FirstName            string           `json:"first_name"`
-	LastName             string           `json:"last_name"`
-	Bsn                  string           `json:"bsn"`
-	DateOfBirth          pgtype.Date      `json:"date_of_birth"`
-	OrgName              string           `json:"org_name"`
-	CareType             CareTypeEnum     `json:"care_type"`
-	CoordinatorID        string           `json:"coordinator_id"`
-	CoordinatorFirstName string           `json:"coordinator_first_name"`
-	CoordinatorLastName  string           `json:"coordinator_last_name"`
-	RegistrationDate     pgtype.Timestamp `json:"registration_date"`
-	RegistrationReason   string           `json:"registration_reason"`
-	AttachmentIds        []string         `json:"attachment_ids"`
+type ListRegistrationFormsParams struct {
+	Limit  int32   `json:"limit"`
+	Offset int32   `json:"offset"`
+	Search *string `json:"search"`
 }
 
-func (q *Queries) ListRegistrationForms(ctx context.Context) ([]ListRegistrationFormsRow, error) {
-	rows, err := q.db.Query(ctx, listRegistrationForms)
+type ListRegistrationFormsRow struct {
+	ID                 string                     `json:"id"`
+	FirstName          string                     `json:"first_name"`
+	LastName           string                     `json:"last_name"`
+	Bsn                string                     `json:"bsn"`
+	DateOfBirth        pgtype.Date                `json:"date_of_birth"`
+	RefferingOrgID     *string                    `json:"reffering_org_id"`
+	CareType           CareTypeEnum               `json:"care_type"`
+	RegistrationDate   pgtype.Timestamp           `json:"registration_date"`
+	RegistrationReason string                     `json:"registration_reason"`
+	AdditionalNotes    *string                    `json:"additional_notes"`
+	AttachmentIds      []string                   `json:"attachment_ids"`
+	Status             NullRegistrationStatusEnum `json:"status"`
+	OrgName            *string                    `json:"org_name"`
+	OrgContactPerson   *string                    `json:"org_contact_person"`
+	OrgPhoneNumber     *string                    `json:"org_phone_number"`
+	OrgEmail           *string                    `json:"org_email"`
+	TotalCount         int64                      `json:"total_count"`
+}
+
+func (q *Queries) ListRegistrationForms(ctx context.Context, arg ListRegistrationFormsParams) ([]ListRegistrationFormsRow, error) {
+	rows, err := q.db.Query(ctx, listRegistrationForms, arg.Limit, arg.Offset, arg.Search)
 	if err != nil {
 		return nil, err
 	}
@@ -122,14 +137,18 @@ func (q *Queries) ListRegistrationForms(ctx context.Context) ([]ListRegistration
 			&i.LastName,
 			&i.Bsn,
 			&i.DateOfBirth,
-			&i.OrgName,
+			&i.RefferingOrgID,
 			&i.CareType,
-			&i.CoordinatorID,
-			&i.CoordinatorFirstName,
-			&i.CoordinatorLastName,
 			&i.RegistrationDate,
 			&i.RegistrationReason,
+			&i.AdditionalNotes,
 			&i.AttachmentIds,
+			&i.Status,
+			&i.OrgName,
+			&i.OrgContactPerson,
+			&i.OrgPhoneNumber,
+			&i.OrgEmail,
+			&i.TotalCount,
 		); err != nil {
 			return nil, err
 		}

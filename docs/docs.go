@@ -23,6 +23,99 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/referring-orgs": {
+            "get": {
+                "description": "Get a paginated list of referring organizations with optional search",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "referring-orgs"
+                ],
+                "summary": "List referring organizations",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Search term for name, contact person, or email",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default: 10)",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.PaginationResponse-referring_orgs_ListReferringOrgsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new referring organization with the provided details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "referring-orgs"
+                ],
+                "summary": "Create a new referring organization",
+                "parameters": [
+                    {
+                        "description": "Referring Organization data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/referring_orgs.CreateReferringOrgRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/referring_orgs.CreateReferringOrgResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/attachments": {
             "post": {
                 "description": "Upload a file attachment",
@@ -75,6 +168,11 @@ const docTemplate = `{
         },
         "/auth/login": {
             "post": {
+                "security": [
+                    {
+                        "-": []
+                    }
+                ],
                 "description": "Authenticate user and return access and refresh tokens",
                 "consumes": [
                     "application/json"
@@ -231,7 +329,7 @@ const docTemplate = `{
         },
         "/employees": {
             "get": {
-                "description": "List all employees",
+                "description": "List all employees with pagination and search",
                 "consumes": [
                     "application/json"
                 ],
@@ -242,14 +340,31 @@ const docTemplate = `{
                     "Employee"
                 ],
                 "summary": "List employees",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size (default: 10, max: 100)",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by first name, last name, or full name",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/employee.ListEmployeesResponse"
-                            }
+                            "$ref": "#/definitions/resp.PaginationResponse-array_employee_ListEmployeesResponse"
                         }
                     },
                     "400": {
@@ -300,6 +415,219 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/employee.CreateEmployeeResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/intakes": {
+            "get": {
+                "description": "List all intake forms",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Intake"
+                ],
+                "summary": "List intake forms",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Search by client first name or last name",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/intake.ListIntakeFormsResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new intake form",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Intake"
+                ],
+                "summary": "Create an intake form",
+                "parameters": [
+                    {
+                        "description": "Intake Form",
+                        "name": "intake",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/intake.CreateIntakeFormRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/intake.CreateIntakeFormResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/locations": {
+            "get": {
+                "description": "List all locations with pagination and search",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Location"
+                ],
+                "summary": "List locations",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size (default: 10, max: 100)",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by name, postal code, or address",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.PaginationResponse-array_locations_ListLocationsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new location",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Location"
+                ],
+                "summary": "Create a location",
+                "parameters": [
+                    {
+                        "description": "Location",
+                        "name": "location",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/locations.CreateLocationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/locations.CreateLocationResponse"
                         }
                     },
                     "400": {
@@ -548,18 +876,232 @@ const docTemplate = `{
                 }
             }
         },
+        "intake.CreateIntakeFormRequest": {
+            "type": "object",
+            "required": [
+                "coordinatorId",
+                "locationId",
+                "registrationFormId"
+            ],
+            "properties": {
+                "coordinatorId": {
+                    "type": "string"
+                },
+                "familySituation": {
+                    "type": "string"
+                },
+                "focusAreas": {
+                    "type": "string"
+                },
+                "goals": {
+                    "type": "string"
+                },
+                "intakeDate": {
+                    "type": "string"
+                },
+                "intakeTime": {
+                    "type": "string"
+                },
+                "limitations": {
+                    "type": "string"
+                },
+                "locationId": {
+                    "type": "string"
+                },
+                "mainProvider": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "registrationFormId": {
+                    "type": "string"
+                }
+            }
+        },
+        "intake.CreateIntakeFormResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "intake.ListIntakeFormsResponse": {
+            "type": "object",
+            "properties": {
+                "clientBsn": {
+                    "type": "string"
+                },
+                "clientFirstName": {
+                    "type": "string"
+                },
+                "clientLastName": {
+                    "type": "string"
+                },
+                "coordinatorFirstName": {
+                    "type": "string"
+                },
+                "coordinatorId": {
+                    "type": "string"
+                },
+                "coordinatorLastName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "intakeDate": {
+                    "type": "string"
+                },
+                "intakeTime": {
+                    "type": "string"
+                },
+                "locationId": {
+                    "type": "string"
+                },
+                "locationName": {
+                    "type": "string"
+                },
+                "mainProvider": {
+                    "type": "string"
+                },
+                "organizationName": {
+                    "type": "string"
+                },
+                "registrationFormId": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "locations.CreateLocationRequest": {
+            "type": "object",
+            "required": [
+                "address",
+                "capacity",
+                "name",
+                "occupied",
+                "postalCode"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "capacity": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "name": {
+                    "type": "string"
+                },
+                "occupied": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "postalCode": {
+                    "type": "string"
+                }
+            }
+        },
+        "locations.CreateLocationResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "locations.ListLocationsResponse": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "capacity": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "occupied": {
+                    "type": "integer"
+                },
+                "postalCode": {
+                    "type": "string"
+                }
+            }
+        },
+        "referring_orgs.CreateReferringOrgRequest": {
+            "type": "object",
+            "required": [
+                "contactPerson",
+                "email",
+                "name",
+                "phoneNumber"
+            ],
+            "properties": {
+                "contactPerson": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phoneNumber": {
+                    "type": "string"
+                }
+            }
+        },
+        "referring_orgs.CreateReferringOrgResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "referring_orgs.ListReferringOrgsResponse": {
+            "type": "object",
+            "properties": {
+                "contactPerson": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phoneNumber": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
         "registration.CreateRegistrationFormRequest": {
             "type": "object",
             "required": [
                 "bsn",
                 "careType",
-                "coordinatorId",
                 "firstName",
                 "lastName",
-                "orgContactPerson",
-                "orgEmail",
-                "orgName",
-                "orgPhoneNumber",
+                "refferingOrgId",
                 "registrationReason"
             ],
             "properties": {
@@ -578,9 +1120,6 @@ const docTemplate = `{
                 "careType": {
                     "type": "string"
                 },
-                "coordinatorId": {
-                    "type": "string"
-                },
                 "dateOfBirth": {
                     "type": "string"
                 },
@@ -590,16 +1129,7 @@ const docTemplate = `{
                 "lastName": {
                     "type": "string"
                 },
-                "orgContactPerson": {
-                    "type": "string"
-                },
-                "orgEmail": {
-                    "type": "string"
-                },
-                "orgName": {
-                    "type": "string"
-                },
-                "orgPhoneNumber": {
+                "refferingOrgId": {
                     "type": "string"
                 },
                 "registrationDate": {
@@ -621,19 +1151,13 @@ const docTemplate = `{
         "registration.ListRegistrationFormsResponse": {
             "type": "object",
             "properties": {
+                "additionalNotes": {
+                    "type": "string"
+                },
                 "bsn": {
                     "type": "string"
                 },
                 "careType": {
-                    "type": "string"
-                },
-                "coordinatorFirstName": {
-                    "type": "string"
-                },
-                "coordinatorId": {
-                    "type": "string"
-                },
-                "coordinatorLastName": {
                     "type": "string"
                 },
                 "dateOfBirth": {
@@ -651,13 +1175,28 @@ const docTemplate = `{
                 "numberOfAttachments": {
                     "type": "integer"
                 },
+                "orgContactPerson": {
+                    "type": "string"
+                },
+                "orgEmail": {
+                    "type": "string"
+                },
                 "orgName": {
+                    "type": "string"
+                },
+                "orgPhoneNumber": {
+                    "type": "string"
+                },
+                "refferingOrgId": {
                     "type": "string"
                 },
                 "registrationDate": {
                     "type": "string"
                 },
                 "registrationReason": {
+                    "type": "string"
+                },
+                "status": {
                     "type": "string"
                 }
             }
@@ -677,6 +1216,81 @@ const docTemplate = `{
                 "message": {
                     "type": "string",
                     "example": "success message"
+                }
+            }
+        },
+        "resp.PaginationResponse-array_employee_ListEmployeesResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/employee.ListEmployeesResponse"
+                        }
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "pageSize": {
+                    "type": "integer"
+                },
+                "totalCount": {
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "type": "integer"
+                }
+            }
+        },
+        "resp.PaginationResponse-array_locations_ListLocationsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/locations.ListLocationsResponse"
+                        }
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "pageSize": {
+                    "type": "integer"
+                },
+                "totalCount": {
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "type": "integer"
+                }
+            }
+        },
+        "resp.PaginationResponse-referring_orgs_ListReferringOrgsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/referring_orgs.ListReferringOrgsResponse"
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "pageSize": {
+                    "type": "integer"
+                },
+                "totalCount": {
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "type": "integer"
                 }
             }
         }

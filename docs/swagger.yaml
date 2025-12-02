@@ -85,6 +85,152 @@ definitions:
       lastName:
         type: string
     type: object
+  intake.CreateIntakeFormRequest:
+    properties:
+      coordinatorId:
+        type: string
+      familySituation:
+        type: string
+      focusAreas:
+        type: string
+      goals:
+        type: string
+      intakeDate:
+        type: string
+      intakeTime:
+        type: string
+      limitations:
+        type: string
+      locationId:
+        type: string
+      mainProvider:
+        type: string
+      notes:
+        type: string
+      registrationFormId:
+        type: string
+    required:
+    - coordinatorId
+    - locationId
+    - registrationFormId
+    type: object
+  intake.CreateIntakeFormResponse:
+    properties:
+      id:
+        type: string
+    type: object
+  intake.ListIntakeFormsResponse:
+    properties:
+      clientBsn:
+        type: string
+      clientFirstName:
+        type: string
+      clientLastName:
+        type: string
+      coordinatorFirstName:
+        type: string
+      coordinatorId:
+        type: string
+      coordinatorLastName:
+        type: string
+      id:
+        type: string
+      intakeDate:
+        type: string
+      intakeTime:
+        type: string
+      locationId:
+        type: string
+      locationName:
+        type: string
+      mainProvider:
+        type: string
+      organizationName:
+        type: string
+      registrationFormId:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  locations.CreateLocationRequest:
+    properties:
+      address:
+        type: string
+      capacity:
+        minimum: 1
+        type: integer
+      name:
+        type: string
+      occupied:
+        minimum: 0
+        type: integer
+      postalCode:
+        type: string
+    required:
+    - address
+    - capacity
+    - name
+    - occupied
+    - postalCode
+    type: object
+  locations.CreateLocationResponse:
+    properties:
+      id:
+        type: string
+    type: object
+  locations.ListLocationsResponse:
+    properties:
+      address:
+        type: string
+      capacity:
+        type: integer
+      id:
+        type: string
+      name:
+        type: string
+      occupied:
+        type: integer
+      postalCode:
+        type: string
+    type: object
+  referring_orgs.CreateReferringOrgRequest:
+    properties:
+      contactPerson:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      phoneNumber:
+        type: string
+    required:
+    - contactPerson
+    - email
+    - name
+    - phoneNumber
+    type: object
+  referring_orgs.CreateReferringOrgResponse:
+    properties:
+      id:
+        type: string
+    type: object
+  referring_orgs.ListReferringOrgsResponse:
+    properties:
+      contactPerson:
+        type: string
+      createdAt:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      phoneNumber:
+        type: string
+      updatedAt:
+        type: string
+    type: object
   registration.CreateRegistrationFormRequest:
     properties:
       additionalNotes:
@@ -97,21 +243,13 @@ definitions:
         type: string
       careType:
         type: string
-      coordinatorId:
-        type: string
       dateOfBirth:
         type: string
       firstName:
         type: string
       lastName:
         type: string
-      orgContactPerson:
-        type: string
-      orgEmail:
-        type: string
-      orgName:
-        type: string
-      orgPhoneNumber:
+      refferingOrgId:
         type: string
       registrationDate:
         type: string
@@ -120,13 +258,9 @@ definitions:
     required:
     - bsn
     - careType
-    - coordinatorId
     - firstName
     - lastName
-    - orgContactPerson
-    - orgEmail
-    - orgName
-    - orgPhoneNumber
+    - refferingOrgId
     - registrationReason
     type: object
   registration.CreateRegistrationFormResponse:
@@ -136,15 +270,11 @@ definitions:
     type: object
   registration.ListRegistrationFormsResponse:
     properties:
+      additionalNotes:
+        type: string
       bsn:
         type: string
       careType:
-        type: string
-      coordinatorFirstName:
-        type: string
-      coordinatorId:
-        type: string
-      coordinatorLastName:
         type: string
       dateOfBirth:
         type: string
@@ -156,11 +286,21 @@ definitions:
         type: string
       numberOfAttachments:
         type: integer
+      orgContactPerson:
+        type: string
+      orgEmail:
+        type: string
       orgName:
+        type: string
+      orgPhoneNumber:
+        type: string
+      refferingOrgId:
         type: string
       registrationDate:
         type: string
       registrationReason:
+        type: string
+      status:
         type: string
     type: object
   resp.ErrorResponse:
@@ -175,6 +315,55 @@ definitions:
         example: success message
         type: string
     type: object
+  resp.PaginationResponse-array_employee_ListEmployeesResponse:
+    properties:
+      data:
+        items:
+          items:
+            $ref: '#/definitions/employee.ListEmployeesResponse'
+          type: array
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      totalCount:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  resp.PaginationResponse-array_locations_ListLocationsResponse:
+    properties:
+      data:
+        items:
+          items:
+            $ref: '#/definitions/locations.ListLocationsResponse'
+          type: array
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      totalCount:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  resp.PaginationResponse-referring_orgs_ListReferringOrgsResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/referring_orgs.ListReferringOrgsResponse'
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      totalCount:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
 info:
   contact:
     email: your-email@domain.com
@@ -187,6 +376,67 @@ info:
   title: Care-Cordination API
   version: "1.0"
 paths:
+  /api/referring-orgs:
+    get:
+      consumes:
+      - application/json
+      description: Get a paginated list of referring organizations with optional search
+      parameters:
+      - description: Search term for name, contact person, or email
+        in: query
+        name: search
+        type: string
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 10)'
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.PaginationResponse-referring_orgs_ListReferringOrgsResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: List referring organizations
+      tags:
+      - referring-orgs
+    post:
+      consumes:
+      - application/json
+      description: Create a new referring organization with the provided details
+      parameters:
+      - description: Referring Organization data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/referring_orgs.CreateReferringOrgRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/referring_orgs.CreateReferringOrgResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Create a new referring organization
+      tags:
+      - referring-orgs
   /attachments:
     post:
       consumes:
@@ -251,6 +501,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.ErrorResponse'
+      security:
+      - '-': []
       summary: Login a user
       tags:
       - Auth
@@ -326,16 +578,27 @@ paths:
     get:
       consumes:
       - application/json
-      description: List all employees
+      description: List all employees with pagination and search
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Page size (default: 10, max: 100)'
+        in: query
+        name: page_size
+        type: integer
+      - description: Search by first name, last name, or full name
+        in: query
+        name: search
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/employee.ListEmployeesResponse'
-            type: array
+            $ref: '#/definitions/resp.PaginationResponse-array_employee_ListEmployeesResponse'
         "400":
           description: Bad Request
           schema:
@@ -384,6 +647,146 @@ paths:
       summary: Create an employee
       tags:
       - Employee
+  /intakes:
+    get:
+      consumes:
+      - application/json
+      description: List all intake forms
+      parameters:
+      - description: Search by client first name or last name
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/intake.ListIntakeFormsResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: List intake forms
+      tags:
+      - Intake
+    post:
+      consumes:
+      - application/json
+      description: Create a new intake form
+      parameters:
+      - description: Intake Form
+        in: body
+        name: intake
+        required: true
+        schema:
+          $ref: '#/definitions/intake.CreateIntakeFormRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/intake.CreateIntakeFormResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Create an intake form
+      tags:
+      - Intake
+  /locations:
+    get:
+      consumes:
+      - application/json
+      description: List all locations with pagination and search
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Page size (default: 10, max: 100)'
+        in: query
+        name: page_size
+        type: integer
+      - description: Search by name, postal code, or address
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.PaginationResponse-array_locations_ListLocationsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: List locations
+      tags:
+      - Location
+    post:
+      consumes:
+      - application/json
+      description: Create a new location
+      parameters:
+      - description: Location
+        in: body
+        name: location
+        required: true
+        schema:
+          $ref: '#/definitions/locations.CreateLocationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/locations.CreateLocationResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Create a location
+      tags:
+      - Location
   /registrations:
     get:
       consumes:

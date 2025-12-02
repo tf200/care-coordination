@@ -67,7 +67,7 @@ func (h *LocationHandler) CreateLocation(ctx *gin.Context) {
 // @Param page query int false "Page number (default: 1)"
 // @Param page_size query int false "Page size (default: 10, max: 100)"
 // @Param search query string false "Search by name, postal code, or address"
-// @Success 200 {object} resp.PaginationResponse{data=[]ListLocationsResponse}
+// @Success 200 {object} resp.PaginationResponse[[]ListLocationsResponse]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse

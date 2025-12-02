@@ -22,7 +22,7 @@ func NewReferringOrgHandler(service ReferringOrgService, mdw *middleware.Middlew
 }
 
 func (h *ReferringOrgHandler) SetupReferringOrgRoutes(router *gin.Engine, logger *logger.Logger) {
-	orgs := router.Group("/api/referring-orgs")
+	orgs := router.Group("/referring-orgs")
 
 	orgs.POST("", h.mdw.AuthMdw(), h.CreateReferringOrg)
 	orgs.GET("", h.mdw.AuthMdw(), h.ListReferringOrgs)
@@ -37,7 +37,7 @@ func (h *ReferringOrgHandler) SetupReferringOrgRoutes(router *gin.Engine, logger
 // @Success 201 {object} CreateReferringOrgResponse
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
-// @Router /api/referring-orgs [post]
+// @Router /referring-orgs [post]
 func (h *ReferringOrgHandler) CreateReferringOrg(ctx *gin.Context) {
 	var req CreateReferringOrgRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -68,7 +68,7 @@ func (h *ReferringOrgHandler) CreateReferringOrg(ctx *gin.Context) {
 // @Param pageSize query int false "Items per page (default: 10)"
 // @Success 200 {object} resp.PaginationResponse[ListReferringOrgsResponse]
 // @Failure 500 {object} resp.ErrorResponse
-// @Router /api/referring-orgs [get]
+// @Router /referring-orgs [get]
 func (h *ReferringOrgHandler) ListReferringOrgs(ctx *gin.Context) {
 	var req ListReferringOrgsRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {

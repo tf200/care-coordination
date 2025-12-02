@@ -120,51 +120,51 @@ CREATE TABLE intake_forms (
 );
 
 
-CREATE TYPE client_status_enum AS ENUM ('waiting_list', 'in_care', 'discharged');
-CREATE TABLE clients (
-    id TEXT PRIMARY KEY,
-    -- Client personal information (from registration)
-    first_name TEXT NOT NULL,
-    last_name TEXT NOT NULL,
-    bsn TEXT UNIQUE NOT NULL,
-    date_of_birth DATE NOT NULL,
-    phone_number TEXT,
+-- CREATE TYPE client_status_enum AS ENUM ('waiting_list', 'in_care', 'discharged');
+-- CREATE TABLE clients (
+--     id TEXT PRIMARY KEY,
+--     -- Client personal information (from registration)
+--     first_name TEXT NOT NULL,
+--     last_name TEXT NOT NULL,
+--     bsn TEXT UNIQUE NOT NULL,
+--     date_of_birth DATE NOT NULL,
+--     phone_number TEXT,
     
-    -- Registration and intake references
-    registration_form_id TEXT NOT NULL UNIQUE REFERENCES registration_forms(id),
-    intake_form_id TEXT NOT NULL UNIQUE REFERENCES intake_forms(id),
+--     -- Registration and intake references
+--     registration_form_id TEXT NOT NULL UNIQUE REFERENCES registration_forms(id),
+--     intake_form_id TEXT NOT NULL UNIQUE REFERENCES intake_forms(id),
     
-    -- Care information
-    care_type care_type_enum NOT NULL,
-    referring_org_id TEXT REFERENCES referring_orgs(id),
+--     -- Care information
+--     care_type care_type_enum NOT NULL,
+--     referring_org_id TEXT REFERENCES referring_orgs(id),
     
-    -- status Management
-    status client_status_enum DEFAULT 'waiting_list',
-    waiting_list_priority INTEGER,
+--     -- status Management
+--     status client_status_enum DEFAULT 'waiting_list',
+--     waiting_list_priority INTEGER,
 
     
-    -- Assigned location (null while on waiting list)
-    assigned_location_id TEXT REFERENCES locations(id),
+--     -- Assigned location (null while on waiting list)
+--     assigned_location_id TEXT REFERENCES locations(id),
 
     
-    -- Care team
-    coordinator_id TEXT REFERENCES employees(id),
+--     -- Care team
+--     coordinator_id TEXT REFERENCES employees(id),
     
-    -- Additional information
-    family_situation TEXT,
-    limitations TEXT,
-    focus_areas TEXT,
-    goals TEXT,
-    notes TEXT,
+--     -- Additional information
+--     family_situation TEXT,
+--     limitations TEXT,
+--     focus_areas TEXT,
+--     goals TEXT,
+--     notes TEXT,
     
-    created_at TIMESTAMP  DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP  DEFAULT CURRENT_TIMESTAMP
-);
+--     created_at TIMESTAMP  DEFAULT CURRENT_TIMESTAMP,
+--     updated_at TIMESTAMP  DEFAULT CURRENT_TIMESTAMP
+-- );
 
-CREATE INDEX idx_clients_bsn ON clients(bsn);
-CREATE INDEX idx_clients_status ON clients(status);
-CREATE INDEX idx_clients_care_type ON clients(care_type);
-CREATE INDEX idx_clients_waiting_list_position ON clients(waiting_list_position);
-CREATE INDEX idx_clients_assigned_location ON clients(assigned_location_id);
+-- CREATE INDEX idx_clients_bsn ON clients(bsn);
+-- CREATE INDEX idx_clients_status ON clients(status);
+-- CREATE INDEX idx_clients_care_type ON clients(care_type);
+-- CREATE INDEX idx_clients_waiting_list_position ON clients(waiting_list_position);
+-- CREATE INDEX idx_clients_assigned_location ON clients(assigned_location_id);
 
 

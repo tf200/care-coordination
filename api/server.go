@@ -88,6 +88,7 @@ func (s *Server) GetRouter() *gin.Engine {
 }
 
 func (s *Server) setupRoutes(logger *logger.Logger) {
+	s.setupSwagger()
 	gin.SetMode(func() string {
 		if s.environment == "production" {
 			return gin.ReleaseMode
@@ -123,4 +124,11 @@ func (s *Server) setupSwagger() {
 	docs.SwaggerInfo.Version = "1.0"
 	docs.SwaggerInfo.BasePath = "/"
 	docs.SwaggerInfo.Host = s.addr
+
+	// Set scheme based on environment
+	if s.environment == "production" {
+		docs.SwaggerInfo.Schemes = []string{"https"}
+	} else {
+		docs.SwaggerInfo.Schemes = []string{"http"}
+	}
 }

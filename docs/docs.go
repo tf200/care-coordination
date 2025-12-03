@@ -23,99 +23,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/referring-orgs": {
-            "get": {
-                "description": "Get a paginated list of referring organizations with optional search",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "referring-orgs"
-                ],
-                "summary": "List referring organizations",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Search term for name, contact person, or email",
-                        "name": "search",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Page number (default: 1)",
-                        "name": "page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Items per page (default: 10)",
-                        "name": "pageSize",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/resp.PaginationResponse-referring_orgs_ListReferringOrgsResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/resp.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Create a new referring organization with the provided details",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "referring-orgs"
-                ],
-                "summary": "Create a new referring organization",
-                "parameters": [
-                    {
-                        "description": "Referring Organization data",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/referring_orgs.CreateReferringOrgRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/referring_orgs.CreateReferringOrgResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/resp.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/resp.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/attachments": {
             "post": {
                 "description": "Upload a file attachment",
@@ -314,6 +221,129 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/clients/move-to-waiting-list": {
+            "post": {
+                "description": "Move a client from intake form to waiting list by creating a client record",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Client"
+                ],
+                "summary": "Move client to waiting list",
+                "parameters": [
+                    {
+                        "description": "Intake Form ID",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/client.MoveClientToWaitingListRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/client.MoveClientToWaitingListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/clients/{id}/move-to-care": {
+            "post": {
+                "description": "Move a client from waiting list to in care status",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Client"
+                ],
+                "summary": "Move client to in care",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Client ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Care start date and optional ambulatory hours",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/client.MoveClientInCareRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/client.MoveClientInCareResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/resp.ErrorResponse"
                         }
@@ -651,6 +681,99 @@ const docTemplate = `{
                 }
             }
         },
+        "/referring-orgs": {
+            "get": {
+                "description": "Get a paginated list of referring organizations with optional search",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "referring-orgs"
+                ],
+                "summary": "List referring organizations",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Search term for name, contact person, or email",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default: 10)",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.PaginationResponse-referring_orgs_ListReferringOrgsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new referring organization with the provided details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "referring-orgs"
+                ],
+                "summary": "Create a new referring organization",
+                "parameters": [
+                    {
+                        "description": "Referring Organization data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/referring_orgs.CreateReferringOrgRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/referring_orgs.CreateReferringOrgResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/registrations": {
             "get": {
                 "description": "List all registration forms",
@@ -810,6 +933,58 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "refreshToken": {
+                    "type": "string"
+                }
+            }
+        },
+        "client.MoveClientInCareRequest": {
+            "type": "object",
+            "required": [
+                "careStartDate"
+            ],
+            "properties": {
+                "ambulatoryWeeklyHours": {
+                    "type": "integer"
+                },
+                "careEndDate": {
+                    "$ref": "#/definitions/pgtype.Date"
+                },
+                "careStartDate": {
+                    "$ref": "#/definitions/pgtype.Date"
+                }
+            }
+        },
+        "client.MoveClientInCareResponse": {
+            "type": "object",
+            "properties": {
+                "clientId": {
+                    "type": "string"
+                }
+            }
+        },
+        "client.MoveClientToWaitingListRequest": {
+            "type": "object",
+            "required": [
+                "waitingListPriority"
+            ],
+            "properties": {
+                "intakeFormId": {
+                    "type": "string"
+                },
+                "waitingListPriority": {
+                    "type": "string",
+                    "enum": [
+                        "low",
+                        "normal",
+                        "high"
+                    ]
+                }
+            }
+        },
+        "client.MoveClientToWaitingListResponse": {
+            "type": "object",
+            "properties": {
+                "clientId": {
                     "type": "string"
                 }
             }
@@ -1037,6 +1212,34 @@ const docTemplate = `{
                 }
             }
         },
+        "pgtype.Date": {
+            "type": "object",
+            "properties": {
+                "infinityModifier": {
+                    "$ref": "#/definitions/pgtype.InfinityModifier"
+                },
+                "time": {
+                    "type": "string"
+                },
+                "valid": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "pgtype.InfinityModifier": {
+            "type": "integer",
+            "format": "int32",
+            "enum": [
+                1,
+                0,
+                -1
+            ],
+            "x-enum-varnames": [
+                "Infinity",
+                "Finite",
+                "NegativeInfinity"
+            ]
+        },
         "referring_orgs.CreateReferringOrgRequest": {
             "type": "object",
             "required": [
@@ -1098,7 +1301,6 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "bsn",
-                "careType",
                 "firstName",
                 "lastName",
                 "refferingOrgId",
@@ -1124,6 +1326,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "firstName": {
+                    "type": "string"
+                },
+                "gender": {
                     "type": "string"
                 },
                 "lastName": {

@@ -32,6 +32,10 @@ type Config struct {
 	MinioSecretAccessKey string
 	MinioUseSSL          bool
 	MinioBucketName      string
+
+	// Admin Seeding
+	AdminEmail    string
+	AdminPassword string
 }
 
 func LoadConfig() (*Config, error) {
@@ -111,6 +115,10 @@ func LoadConfig() (*Config, error) {
 		MinioSecretAccessKey: os.Getenv("MINIO_SECRET_ACCESS_KEY"),
 		MinioUseSSL:          minioUseSSL,
 		MinioBucketName:      os.Getenv("MINIO_BUCKET_NAME"),
+
+		// Admin Seeding
+		AdminEmail:    os.Getenv("ADMIN_EMAIL"),
+		AdminPassword: os.Getenv("ADMIN_PASSWORD"),
 	}
 
 	if err := config.validate(); err != nil {

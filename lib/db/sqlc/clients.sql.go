@@ -135,3 +135,126 @@ func (q *Queries) CreateClient(ctx context.Context, arg CreateClientParams) (Cre
 	)
 	return i, err
 }
+
+const getClientByID = `-- name: GetClientByID :one
+SELECT id, first_name, last_name, bsn, date_of_birth, phone_number, gender, registration_form_id, intake_form_id, care_type, ambulatory_weekly_hours, referring_org_id, status, waiting_list_priority, care_start_date, care_end_date, assigned_location_id, coordinator_id, family_situation, limitations, focus_areas, goals, notes, created_at, updated_at FROM clients WHERE id = $1
+`
+
+func (q *Queries) GetClientByID(ctx context.Context, id string) (Client, error) {
+	row := q.db.QueryRow(ctx, getClientByID, id)
+	var i Client
+	err := row.Scan(
+		&i.ID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Bsn,
+		&i.DateOfBirth,
+		&i.PhoneNumber,
+		&i.Gender,
+		&i.RegistrationFormID,
+		&i.IntakeFormID,
+		&i.CareType,
+		&i.AmbulatoryWeeklyHours,
+		&i.ReferringOrgID,
+		&i.Status,
+		&i.WaitingListPriority,
+		&i.CareStartDate,
+		&i.CareEndDate,
+		&i.AssignedLocationID,
+		&i.CoordinatorID,
+		&i.FamilySituation,
+		&i.Limitations,
+		&i.FocusAreas,
+		&i.Goals,
+		&i.Notes,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateClient = `-- name: UpdateClient :one
+UPDATE clients SET
+    first_name = COALESCE($2, first_name),
+    last_name = COALESCE($3, last_name),
+    bsn = COALESCE($4, bsn),
+    date_of_birth = COALESCE($5, date_of_birth),
+    phone_number = COALESCE($6, phone_number),
+    gender = COALESCE($7, gender),
+    registration_form_id = COALESCE($8, registration_form_id),
+    intake_form_id = COALESCE($9, intake_form_id),
+    care_type = COALESCE($10, care_type),
+    referring_org_id = COALESCE($11, referring_org_id),
+    waiting_list_priority = COALESCE($12, waiting_list_priority),
+    status = COALESCE($13, status),
+    assigned_location_id = COALESCE($14, assigned_location_id),
+    coordinator_id = COALESCE($15, coordinator_id),
+    family_situation = COALESCE($16, family_situation),
+    limitations = COALESCE($17, limitations),
+    focus_areas = COALESCE($18, focus_areas),
+    goals = COALESCE($19, goals),
+    notes = COALESCE($20, notes),
+    ambulatory_weekly_hours = COALESCE($21, ambulatory_weekly_hours),
+    care_start_date = COALESCE($22, care_start_date),
+    care_end_date = COALESCE($23, care_end_date),
+    updated_at = NOW()
+WHERE id = $1
+RETURNING id
+`
+
+type UpdateClientParams struct {
+	ID                    string                  `json:"id"`
+	FirstName             string                  `json:"first_name"`
+	LastName              string                  `json:"last_name"`
+	Bsn                   string                  `json:"bsn"`
+	DateOfBirth           pgtype.Date             `json:"date_of_birth"`
+	PhoneNumber           *string                 `json:"phone_number"`
+	Gender                GenderEnum              `json:"gender"`
+	RegistrationFormID    string                  `json:"registration_form_id"`
+	IntakeFormID          string                  `json:"intake_form_id"`
+	CareType              CareTypeEnum            `json:"care_type"`
+	ReferringOrgID        *string                 `json:"referring_org_id"`
+	WaitingListPriority   WaitingListPriorityEnum `json:"waiting_list_priority"`
+	Status                ClientStatusEnum        `json:"status"`
+	AssignedLocationID    *string                 `json:"assigned_location_id"`
+	CoordinatorID         *string                 `json:"coordinator_id"`
+	FamilySituation       *string                 `json:"family_situation"`
+	Limitations           *string                 `json:"limitations"`
+	FocusAreas            *string                 `json:"focus_areas"`
+	Goals                 *string                 `json:"goals"`
+	Notes                 *string                 `json:"notes"`
+	AmbulatoryWeeklyHours *int32                  `json:"ambulatory_weekly_hours"`
+	CareStartDate         pgtype.Date             `json:"care_start_date"`
+	CareEndDate           pgtype.Date             `json:"care_end_date"`
+}
+
+func (q *Queries) UpdateClient(ctx context.Context, arg UpdateClientParams) (string, error) {
+	row := q.db.QueryRow(ctx, updateClient,
+		arg.ID,
+		arg.FirstName,
+		arg.LastName,
+		arg.Bsn,
+		arg.DateOfBirth,
+		arg.PhoneNumber,
+		arg.Gender,
+		arg.RegistrationFormID,
+		arg.IntakeFormID,
+		arg.CareType,
+		arg.ReferringOrgID,
+		arg.WaitingListPriority,
+		arg.Status,
+		arg.AssignedLocationID,
+		arg.CoordinatorID,
+		arg.FamilySituation,
+		arg.Limitations,
+		arg.FocusAreas,
+		arg.Goals,
+		arg.Notes,
+		arg.AmbulatoryWeeklyHours,
+		arg.CareStartDate,
+		arg.CareEndDate,
+	)
+	var id string
+	err := row.Scan(&id)
+	return id, err
+}

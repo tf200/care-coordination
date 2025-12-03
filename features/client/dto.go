@@ -1,6 +1,6 @@
 package client
 
-import "time"
+import "github.com/jackc/pgx/v5/pgtype"
 
 type MoveClientToWaitingListRequest struct {
 	IntakeFormID        string `json:"intakeFormId"`
@@ -12,8 +12,9 @@ type MoveClientToWaitingListResponse struct {
 }
 
 type MoveClientInCareRequest struct {
-	CareStartDate time.Time `json:"careStartDate" binding:"required format=2006-01-02"`
-	CareEndDate   time.Time `json:"careEndDate" binding:"omitempty format=2006-01-02"`
+	CareStartDate         pgtype.Date `json:"careStartDate" binding:"required"`
+	CareEndDate           pgtype.Date `json:"careEndDate"`
+	AmbulatoryWeeklyHours *int32      `json:"ambulatoryWeeklyHours"`
 }
 
 type MoveClientInCareResponse struct {

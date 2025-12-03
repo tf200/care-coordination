@@ -20,6 +20,7 @@ type Querier interface {
 	CreateUserSession(ctx context.Context, arg CreateUserSessionParams) error
 	DeleteReferringOrg(ctx context.Context, id string) error
 	DeleteUserSession(ctx context.Context, tokenHash string) error
+	GetClientByID(ctx context.Context, id string) (Client, error)
 	GetIntakeForm(ctx context.Context, id string) (IntakeForm, error)
 	GetReferringOrgByID(ctx context.Context, id string) (ReferringOrg, error)
 	GetRegistrationForm(ctx context.Context, id string) (RegistrationForm, error)
@@ -30,6 +31,7 @@ type Querier interface {
 	ListLocations(ctx context.Context, arg ListLocationsParams) ([]ListLocationsRow, error)
 	ListReferringOrgs(ctx context.Context, arg ListReferringOrgsParams) ([]ListReferringOrgsRow, error)
 	ListRegistrationForms(ctx context.Context, arg ListRegistrationFormsParams) ([]ListRegistrationFormsRow, error)
+	UpdateClient(ctx context.Context, arg UpdateClientParams) (string, error)
 	UpdateReferringOrg(ctx context.Context, arg UpdateReferringOrgParams) error
 	UpdateUserSession(ctx context.Context, arg UpdateUserSessionParams) error
 }

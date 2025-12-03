@@ -7,9 +7,11 @@ DROP TABLE IF EXISTS locations;
 DROP TABLE IF EXISTS sessions;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS attachments;
+DROP TABLE IF EXISTS clients;
 
 DROP TYPE IF EXISTS client_status_enum;
 DROP TYPE IF EXISTS intake_status_enum;
 DROP TYPE IF EXISTS registration_status_enum;
 DROP TYPE IF EXISTS care_type_enum;
 DROP TYPE IF EXISTS gender_enum;
+DROP TYPE IF EXISTS waiting_list_priority_enum;

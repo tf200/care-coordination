@@ -51,7 +51,7 @@ func (h *AuthHandler) SetupAuthRoutes(router *gin.Engine, rateLimiter ratelimit.
 func (h *AuthHandler) Login(ctx *gin.Context) {
 	var req LoginRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
+		ctx.JSON(http.StatusBadRequest, resp.Error(err))
 		return
 	}
 

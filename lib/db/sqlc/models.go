@@ -278,28 +278,31 @@ type Attachment struct {
 }
 
 type Client struct {
-	ID                  string                  `json:"id"`
-	FirstName           string                  `json:"first_name"`
-	LastName            string                  `json:"last_name"`
-	Bsn                 string                  `json:"bsn"`
-	DateOfBirth         pgtype.Date             `json:"date_of_birth"`
-	PhoneNumber         *string                 `json:"phone_number"`
-	Gender              GenderEnum              `json:"gender"`
-	RegistrationFormID  string                  `json:"registration_form_id"`
-	IntakeFormID        string                  `json:"intake_form_id"`
-	CareType            CareTypeEnum            `json:"care_type"`
-	ReferringOrgID      *string                 `json:"referring_org_id"`
-	Status              ClientStatusEnum        `json:"status"`
-	WaitingListPriority WaitingListPriorityEnum `json:"waiting_list_priority"`
-	AssignedLocationID  *string                 `json:"assigned_location_id"`
-	CoordinatorID       *string                 `json:"coordinator_id"`
-	FamilySituation     *string                 `json:"family_situation"`
-	Limitations         *string                 `json:"limitations"`
-	FocusAreas          *string                 `json:"focus_areas"`
-	Goals               *string                 `json:"goals"`
-	Notes               *string                 `json:"notes"`
-	CreatedAt           pgtype.Timestamp        `json:"created_at"`
-	UpdatedAt           pgtype.Timestamp        `json:"updated_at"`
+	ID                    string                  `json:"id"`
+	FirstName             string                  `json:"first_name"`
+	LastName              string                  `json:"last_name"`
+	Bsn                   string                  `json:"bsn"`
+	DateOfBirth           pgtype.Date             `json:"date_of_birth"`
+	PhoneNumber           *string                 `json:"phone_number"`
+	Gender                GenderEnum              `json:"gender"`
+	RegistrationFormID    string                  `json:"registration_form_id"`
+	IntakeFormID          string                  `json:"intake_form_id"`
+	CareType              CareTypeEnum            `json:"care_type"`
+	AmbulatoryWeeklyHours *int32                  `json:"ambulatory_weekly_hours"`
+	ReferringOrgID        *string                 `json:"referring_org_id"`
+	Status                ClientStatusEnum        `json:"status"`
+	WaitingListPriority   WaitingListPriorityEnum `json:"waiting_list_priority"`
+	CareStartDate         pgtype.Date             `json:"care_start_date"`
+	CareEndDate           pgtype.Date             `json:"care_end_date"`
+	AssignedLocationID    *string                 `json:"assigned_location_id"`
+	CoordinatorID         *string                 `json:"coordinator_id"`
+	FamilySituation       *string                 `json:"family_situation"`
+	Limitations           *string                 `json:"limitations"`
+	FocusAreas            *string                 `json:"focus_areas"`
+	Goals                 *string                 `json:"goals"`
+	Notes                 *string                 `json:"notes"`
+	CreatedAt             pgtype.Timestamp        `json:"created_at"`
+	UpdatedAt             pgtype.Timestamp        `json:"updated_at"`
 }
 
 type Employee struct {

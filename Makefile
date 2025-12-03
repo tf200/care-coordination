@@ -31,4 +31,13 @@ migrate-force:
 	@echo "Force migration version (use: make migrate-force VERSION=1)..."
 	go run cmd/migrate/main.go force $(VERSION)
 
-.PHONY: sqlc swagger migrate-up migrate-down migrate-up1 migrate-down1 migrate-version migrate-force
+admin:
+	@echo "Seeding admin user..."
+	go run cmd/admin/main.go
+
+dokcer-rebuild:
+	@echo "Rebuilding docker image..."
+	docker compose rm -s -f app
+	docker compose up --build -d app
+
+.PHONY: sqlc swagger migrate-up migrate-down migrate-up1 migrate-down1 migrate-version migrate-force admin

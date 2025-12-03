@@ -43,6 +43,40 @@ definitions:
       refreshToken:
         type: string
     type: object
+  client.MoveClientInCareRequest:
+    properties:
+      ambulatoryWeeklyHours:
+        type: integer
+      careEndDate:
+        $ref: '#/definitions/pgtype.Date'
+      careStartDate:
+        $ref: '#/definitions/pgtype.Date'
+    required:
+    - careStartDate
+    type: object
+  client.MoveClientInCareResponse:
+    properties:
+      clientId:
+        type: string
+    type: object
+  client.MoveClientToWaitingListRequest:
+    properties:
+      intakeFormId:
+        type: string
+      waitingListPriority:
+        enum:
+        - low
+        - normal
+        - high
+        type: string
+    required:
+    - waitingListPriority
+    type: object
+  client.MoveClientToWaitingListResponse:
+    properties:
+      clientId:
+        type: string
+    type: object
   employee.CreateEmployeeRequest:
     properties:
       bsn:
@@ -193,6 +227,26 @@ definitions:
       postalCode:
         type: string
     type: object
+  pgtype.Date:
+    properties:
+      infinityModifier:
+        $ref: '#/definitions/pgtype.InfinityModifier'
+      time:
+        type: string
+      valid:
+        type: boolean
+    type: object
+  pgtype.InfinityModifier:
+    enum:
+    - 1
+    - 0
+    - -1
+    format: int32
+    type: integer
+    x-enum-varnames:
+    - Infinity
+    - Finite
+    - NegativeInfinity
   referring_orgs.CreateReferringOrgRequest:
     properties:
       contactPerson:
@@ -247,6 +301,8 @@ definitions:
         type: string
       firstName:
         type: string
+      gender:
+        type: string
       lastName:
         type: string
       refferingOrgId:
@@ -257,7 +313,6 @@ definitions:
         type: string
     required:
     - bsn
-    - careType
     - firstName
     - lastName
     - refferingOrgId
@@ -376,67 +431,6 @@ info:
   title: Care-Cordination API
   version: "1.0"
 paths:
-  /api/referring-orgs:
-    get:
-      consumes:
-      - application/json
-      description: Get a paginated list of referring organizations with optional search
-      parameters:
-      - description: Search term for name, contact person, or email
-        in: query
-        name: search
-        type: string
-      - description: 'Page number (default: 1)'
-        in: query
-        name: page
-        type: integer
-      - description: 'Items per page (default: 10)'
-        in: query
-        name: pageSize
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/resp.PaginationResponse-referring_orgs_ListReferringOrgsResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/resp.ErrorResponse'
-      summary: List referring organizations
-      tags:
-      - referring-orgs
-    post:
-      consumes:
-      - application/json
-      description: Create a new referring organization with the provided details
-      parameters:
-      - description: Referring Organization data
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/referring_orgs.CreateReferringOrgRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/referring_orgs.CreateReferringOrgResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/resp.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/resp.ErrorResponse'
-      summary: Create a new referring organization
-      tags:
-      - referring-orgs
   /attachments:
     post:
       consumes:
@@ -574,6 +568,88 @@ paths:
       summary: Refresh tokens
       tags:
       - Auth
+  /clients/{id}/move-to-care:
+    post:
+      consumes:
+      - application/json
+      description: Move a client from waiting list to in care status
+      parameters:
+      - description: Client ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Care start date and optional ambulatory hours
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/client.MoveClientInCareRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/client.MoveClientInCareResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Move client to in care
+      tags:
+      - Client
+  /clients/move-to-waiting-list:
+    post:
+      consumes:
+      - application/json
+      description: Move a client from intake form to waiting list by creating a client
+        record
+      parameters:
+      - description: Intake Form ID
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/client.MoveClientToWaitingListRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/client.MoveClientToWaitingListResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Move client to waiting list
+      tags:
+      - Client
   /employees:
     get:
       consumes:
@@ -787,6 +863,67 @@ paths:
       summary: Create a location
       tags:
       - Location
+  /referring-orgs:
+    get:
+      consumes:
+      - application/json
+      description: Get a paginated list of referring organizations with optional search
+      parameters:
+      - description: Search term for name, contact person, or email
+        in: query
+        name: search
+        type: string
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 10)'
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.PaginationResponse-referring_orgs_ListReferringOrgsResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: List referring organizations
+      tags:
+      - referring-orgs
+    post:
+      consumes:
+      - application/json
+      description: Create a new referring organization with the provided details
+      parameters:
+      - description: Referring Organization data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/referring_orgs.CreateReferringOrgRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/referring_orgs.CreateReferringOrgResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Create a new referring organization
+      tags:
+      - referring-orgs
   /registrations:
     get:
       consumes:

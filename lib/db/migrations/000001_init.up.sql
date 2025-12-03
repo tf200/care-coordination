@@ -139,8 +139,7 @@ CREATE TABLE clients (
     
     -- Care information
     care_type care_type_enum NOT NULL,
-    accomodation_weeks INTEGER NULL,
-    ambulant_care_hours_per_week INTEGER NULL,
+    ambulatory_weekly_hours INTEGER NULL,
     referring_org_id TEXT REFERENCES referring_orgs(id),
     
     -- status Management
@@ -167,7 +166,13 @@ CREATE TABLE clients (
     notes TEXT,
     
     created_at TIMESTAMP  DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP  DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP  DEFAULT CURRENT_TIMESTAMP,
+    
+    -- Constraint: ambulatory_weekly_hours only allowed for ambulatory_care
+    CONSTRAINT chk_ambulatory_hours CHECK (
+        (care_type = 'ambulatory_care' AND ambulatory_weekly_hours IS NOT NULL AND ambulatory_weekly_hours > 0) OR
+        (care_type != 'ambulatory_care' AND ambulatory_weekly_hours IS NULL)
+    )
 );
 
 

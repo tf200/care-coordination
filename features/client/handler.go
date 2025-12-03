@@ -25,6 +25,7 @@ func (h *ClientHandler) SetupClientRoutes(router *gin.Engine) {
 	clients := router.Group("/clients")
 
 	clients.POST("/move-to-waiting-list", h.mdw.AuthMdw(), h.MoveClientToWaitingList)
+	clients.POST("/:id/move-to-care", h.mdw.AuthMdw(), h.MoveClientInCare)
 }
 
 // @Summary Move client to waiting list
@@ -57,6 +58,56 @@ func (h *ClientHandler) MoveClientToWaitingList(ctx *gin.Context) {
 			ctx.JSON(http.StatusNotFound, resp.Error(err))
 		case errors.Is(err, ErrFailedToCreateClient):
 			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
+		case errors.Is(err, ErrInternal):
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
+		default:
+			ctx.JSON(http.StatusInternalServerError, resp.Error(ErrInternal))
+		}
+		return
+	}
+
+	ctx.JSON(http.StatusOK, result)
+}
+
+// @Summary Move client to in care
+// @Description Move a client from waiting list to in care status
+// @Tags Client
+// @Accept json
+// @Produce json
+// @Param id path string true "Client ID"
+// @Param request body MoveClientInCareRequest true "Care start date and optional ambulatory hours"
+// @Success 200 {object} MoveClientInCareResponse
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 404 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /clients/{id}/move-to-care [post]
+func (h *ClientHandler) MoveClientInCare(ctx *gin.Context) {
+	clientID := ctx.Param("id")
+	if clientID == "" {
+		ctx.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
+		return
+	}
+
+	var req MoveClientInCareRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
+		return
+	}
+
+	result, err := h.clientService.MoveClientInCare(ctx, clientID, &req)
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrInvalidRequest):
+			ctx.JSON(http.StatusBadRequest, resp.Error(err))
+		case errors.Is(err, ErrClientNotFound):
+			ctx.JSON(http.StatusNotFound, resp.Error(err))
+		case errors.Is(err, ErrInvalidClientStatus):
+			ctx.JSON(http.StatusBadRequest, resp.Error(err))
+		case errors.Is(err, ErrAmbulatoryHoursRequired):
+			ctx.JSON(http.StatusBadRequest, resp.Error(err))
+		case errors.Is(err, ErrAmbulatoryHoursNotAllowed):
+			ctx.JSON(http.StatusBadRequest, resp.Error(err))
 		case errors.Is(err, ErrInternal):
 			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
 		default:

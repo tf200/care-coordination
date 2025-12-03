@@ -77,4 +77,49 @@ func (s *clientService) MoveClientToWaitingList(ctx context.Context, req *MoveCl
 	}, nil
 }
 
-func (s *clientService) MoveClientInCare(ctx context.Context) error {}
+func (s *clientService) MoveClientInCare(ctx context.Context, clientID string, req *MoveClientInCareRequest) (*MoveClientInCareResponse, error) {
+	client, err := s.db.GetClientByID(ctx, clientID)
+	if err != nil {
+		s.logger.Error(ctx, "MoveClientInCare", "Failed to get client", zap.Error(err))
+		return nil, ErrClientNotFound
+	}
+
+	// Validate client is on waiting list
+	if client.Status != db.ClientStatusEnumWaitingList {
+		s.logger.Error(ctx, "MoveClientInCare", "Client must be on waiting list to move to in care", zap.String("currentStatus", string(client.Status)))
+		return nil, ErrInvalidClientStatus
+	}
+
+	// Validate ambulatory weekly hours based on care type
+	isAmbulatory := client.CareType == db.CareTypeEnumAmbulatoryCare
+
+	if isAmbulatory && (req.AmbulatoryWeeklyHours == nil || *req.AmbulatoryWeeklyHours <= 0) {
+		s.logger.Error(ctx, "MoveClientInCare", "Ambulatory weekly hours required for ambulatory care")
+		return nil, ErrAmbulatoryHoursRequired
+	}
+
+	if !isAmbulatory && req.AmbulatoryWeeklyHours != nil {
+		s.logger.Error(ctx, "MoveClientInCare", "Ambulatory weekly hours should only be set for ambulatory care", zap.String("careType", string(client.CareType)))
+		return nil, ErrAmbulatoryHoursNotAllowed
+	}
+
+	updateParams := db.UpdateClientParams{
+		ID:                    client.ID,
+		Status:                db.ClientStatusEnumInCare,
+		AmbulatoryWeeklyHours: req.AmbulatoryWeeklyHours,
+		CareStartDate:         req.CareStartDate,
+		CareEndDate:           req.CareEndDate,
+	}
+
+	updatedClient, err := s.db.UpdateClient(ctx, updateParams)
+	if err != nil {
+		s.logger.Error(ctx, "MoveClientInCare", "Failed to update client status", zap.Error(err))
+		return nil, ErrInternal
+	}
+
+	s.logger.Info(ctx, "MoveClientInCare", "Client moved to in care successfully", zap.String("clientId", updatedClient))
+
+	return &MoveClientInCareResponse{
+		ClientID: updatedClient,
+	}, nil
+}

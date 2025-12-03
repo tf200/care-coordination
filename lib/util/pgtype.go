@@ -1,50 +1,46 @@
 package util
 
 import (
-	"fmt"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func PgtypeTimeTString(t pgtype.Time) string {
+func PgtypeTimeToString(t pgtype.Time) string {
 	if !t.Valid {
 		return ""
 	}
-	ms := t.Microseconds
-	s := formatTimeFromMicroseconds(ms)
-	return s
-}
 
-func formatTimeFromMicroseconds(ms int64) string {
-	hours := ms / 3600000000
-	ms -= hours * 3600000000
-	minutes := ms / 60000000
-	ms -= minutes * 60000000
-	seconds := ms / 1000000
-	return formatTwoDigits(int(hours)) + ":" + formatTwoDigits(int(minutes)) + ":" + formatTwoDigits(int(seconds))
-}
+	// 1. Convert the microseconds count to a time.Duration
+	offset := time.Duration(t.Microseconds) * time.Microsecond
 
-func formatTwoDigits(n int) string {
-	if n < 10 {
-		return "0" + fmt.Sprint(n)
-	}
-	return fmt.Sprint('0'+(n/10)) + fmt.Sprint('0'+(n%10))
-}
+	// 2. Add that duration to a base "midnight" time (0000-01-01 00:00:00 UTC)
+	// We use UTC to avoid timezone/DST shifts affecting the calculation.
+	tm := time.Date(0, 1, 1, 0, 0, 0, 0, time.UTC).Add(offset)
 
+	// 3. Format using the strict constant "15:04:05"
+	return tm.Format(time.TimeOnly)
+}
 func StrToPgtypeTime(s string) pgtype.Time {
-	var t pgtype.Time
-	var hours, minutes, seconds int64
-	n, err := fmt.Sscanf(s, "%02d:%02d:%02d", &hours, &minutes, &seconds)
+	parsedTime, err := time.Parse(time.TimeOnly, s)
 	if err != nil {
-		t.Valid = false
-		return t
+		return pgtype.Time{Valid: false}
 	}
-	if n != 3 {
-		t.Valid = false
-		return t
+
+	midnight := time.Date(0, 1, 1, 0, 0, 0, 0, time.UTC)
+
+	return pgtype.Time{
+		Microseconds: parsedTime.Sub(midnight).Microseconds(),
+		Valid:        true,
 	}
-	ms := hours*3600000000 + minutes*60000000 + seconds*1000000
-	t.Microseconds = ms
-	t.Valid = true
-	return t
+}
+
+func StrToPgtypeDate(s string) pgtype.Date {
+	// Parse strictly enforces "YYYY-MM-DD"
+	t, err := time.Parse(time.DateOnly, s)
+	if err != nil {
+		return pgtype.Date{Valid: false}
+	}
+
+	return pgtype.Date{Time: t, Valid: true}
 }

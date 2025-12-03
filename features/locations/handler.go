@@ -3,6 +3,7 @@ package locations
 import (
 	"care-cordination/features/middleware"
 	"care-cordination/lib/resp"
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -46,10 +47,10 @@ func (h *LocationHandler) CreateLocation(ctx *gin.Context) {
 	}
 	result, err := h.locationService.CreateLocation(ctx, &req)
 	if err != nil {
-		switch err {
-		case ErrInvalidRequest:
+		switch {
+		case errors.Is(err, ErrInvalidRequest):
 			ctx.JSON(http.StatusBadRequest, resp.Error(err))
-		case ErrInternal:
+		case errors.Is(err, ErrInternal):
 			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
 		default:
 			ctx.JSON(http.StatusInternalServerError, resp.Error(err))

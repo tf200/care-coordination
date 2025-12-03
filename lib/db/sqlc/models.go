@@ -55,6 +55,49 @@ func (ns NullCareTypeEnum) Value() (driver.Value, error) {
 	return string(ns.CareTypeEnum), nil
 }
 
+type ClientStatusEnum string
+
+const (
+	ClientStatusEnumWaitingList ClientStatusEnum = "waiting_list"
+	ClientStatusEnumInCare      ClientStatusEnum = "in_care"
+	ClientStatusEnumDischarged  ClientStatusEnum = "discharged"
+)
+
+func (e *ClientStatusEnum) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = ClientStatusEnum(s)
+	case string:
+		*e = ClientStatusEnum(s)
+	default:
+		return fmt.Errorf("unsupported scan type for ClientStatusEnum: %T", src)
+	}
+	return nil
+}
+
+type NullClientStatusEnum struct {
+	ClientStatusEnum ClientStatusEnum `json:"client_status_enum"`
+	Valid            bool             `json:"valid"` // Valid is true if ClientStatusEnum is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullClientStatusEnum) Scan(value interface{}) error {
+	if value == nil {
+		ns.ClientStatusEnum, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.ClientStatusEnum.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullClientStatusEnum) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.ClientStatusEnum), nil
+}
+
 type GenderEnum string
 
 const (
@@ -184,11 +227,79 @@ func (ns NullRegistrationStatusEnum) Value() (driver.Value, error) {
 	return string(ns.RegistrationStatusEnum), nil
 }
 
+type WaitingListPriorityEnum string
+
+const (
+	WaitingListPriorityEnumLow    WaitingListPriorityEnum = "low"
+	WaitingListPriorityEnumNormal WaitingListPriorityEnum = "normal"
+	WaitingListPriorityEnumHigh   WaitingListPriorityEnum = "high"
+)
+
+func (e *WaitingListPriorityEnum) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = WaitingListPriorityEnum(s)
+	case string:
+		*e = WaitingListPriorityEnum(s)
+	default:
+		return fmt.Errorf("unsupported scan type for WaitingListPriorityEnum: %T", src)
+	}
+	return nil
+}
+
+type NullWaitingListPriorityEnum struct {
+	WaitingListPriorityEnum WaitingListPriorityEnum `json:"waiting_list_priority_enum"`
+	Valid                   bool                    `json:"valid"` // Valid is true if WaitingListPriorityEnum is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullWaitingListPriorityEnum) Scan(value interface{}) error {
+	if value == nil {
+		ns.WaitingListPriorityEnum, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.WaitingListPriorityEnum.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullWaitingListPriorityEnum) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.WaitingListPriorityEnum), nil
+}
+
 type Attachment struct {
 	ID          string             `json:"id"`
 	Filekey     string             `json:"filekey"`
 	ContentType string             `json:"content_type"`
 	UploadedAt  pgtype.Timestamptz `json:"uploaded_at"`
+}
+
+type Client struct {
+	ID                  string                  `json:"id"`
+	FirstName           string                  `json:"first_name"`
+	LastName            string                  `json:"last_name"`
+	Bsn                 string                  `json:"bsn"`
+	DateOfBirth         pgtype.Date             `json:"date_of_birth"`
+	PhoneNumber         *string                 `json:"phone_number"`
+	Gender              GenderEnum              `json:"gender"`
+	RegistrationFormID  string                  `json:"registration_form_id"`
+	IntakeFormID        string                  `json:"intake_form_id"`
+	CareType            CareTypeEnum            `json:"care_type"`
+	ReferringOrgID      *string                 `json:"referring_org_id"`
+	Status              ClientStatusEnum        `json:"status"`
+	WaitingListPriority WaitingListPriorityEnum `json:"waiting_list_priority"`
+	AssignedLocationID  *string                 `json:"assigned_location_id"`
+	CoordinatorID       *string                 `json:"coordinator_id"`
+	FamilySituation     *string                 `json:"family_situation"`
+	Limitations         *string                 `json:"limitations"`
+	FocusAreas          *string                 `json:"focus_areas"`
+	Goals               *string                 `json:"goals"`
+	Notes               *string                 `json:"notes"`
+	CreatedAt           pgtype.Timestamp        `json:"created_at"`
+	UpdatedAt           pgtype.Timestamp        `json:"updated_at"`
 }
 
 type Employee struct {
@@ -249,6 +360,7 @@ type RegistrationForm struct {
 	LastName           string                     `json:"last_name"`
 	Bsn                string                     `json:"bsn"`
 	DateOfBirth        pgtype.Date                `json:"date_of_birth"`
+	Gender             GenderEnum                 `json:"gender"`
 	RefferingOrgID     *string                    `json:"reffering_org_id"`
 	CareType           CareTypeEnum               `json:"care_type"`
 	RegistrationDate   pgtype.Timestamp           `json:"registration_date"`

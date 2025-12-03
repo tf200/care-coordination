@@ -3,6 +3,7 @@ package employee
 import (
 	"care-cordination/features/middleware"
 	"care-cordination/lib/resp"
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -80,8 +81,8 @@ func (h *EmployeeHandler) ListEmployees(ctx *gin.Context) {
 	}
 	result, err := h.employeeService.ListEmployees(ctx, &req)
 	if err != nil {
-		switch err {
-		case ErrInternal:
+		switch {
+		case errors.Is(err, ErrInternal):
 			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
 		default:
 			ctx.JSON(http.StatusInternalServerError, resp.Error(err))

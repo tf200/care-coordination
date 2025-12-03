@@ -67,7 +67,7 @@ func (s *intakeService) ListIntakeForms(ctx context.Context, req *ListIntakeForm
 			ID:                   intakeForm.ID,
 			RegistrationFormID:   intakeForm.RegistrationFormID,
 			IntakeDate:           intakeForm.IntakeDate.Time,
-			IntakeTime:           util.PgtypeTimeTString(intakeForm.IntakeTime),
+			IntakeTime:           util.PgtypeTimeToString(intakeForm.IntakeTime),
 			LocationID:           intakeForm.LocationID,
 			CoordinatorID:        intakeForm.CoordinatorID,
 			MainProvider:         intakeForm.MainProvider,

@@ -54,3 +54,5 @@ LIMIT $1 OFFSET $2;
 
 
 
+-- name: GetIntakeForm :one
+SELECT * FROM intake_forms WHERE id = $1;

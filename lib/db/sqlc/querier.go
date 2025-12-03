@@ -10,6 +10,7 @@ import (
 
 type Querier interface {
 	CreateAttachment(ctx context.Context, arg CreateAttachmentParams) error
+	CreateClient(ctx context.Context, arg CreateClientParams) (CreateClientRow, error)
 	CreateEmployee(ctx context.Context, arg CreateEmployeeParams) error
 	CreateIntakeForm(ctx context.Context, arg CreateIntakeFormParams) error
 	CreateLocation(ctx context.Context, arg CreateLocationParams) error
@@ -19,7 +20,9 @@ type Querier interface {
 	CreateUserSession(ctx context.Context, arg CreateUserSessionParams) error
 	DeleteReferringOrg(ctx context.Context, id string) error
 	DeleteUserSession(ctx context.Context, tokenHash string) error
+	GetIntakeForm(ctx context.Context, id string) (IntakeForm, error)
 	GetReferringOrgByID(ctx context.Context, id string) (ReferringOrg, error)
+	GetRegistrationForm(ctx context.Context, id string) (RegistrationForm, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserSession(ctx context.Context, tokenHash string) (Session, error)
 	ListEmployees(ctx context.Context, arg ListEmployeesParams) ([]ListEmployeesRow, error)

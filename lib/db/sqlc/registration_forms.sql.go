@@ -17,6 +17,7 @@ INSERT INTO registration_forms (
     first_name,
     last_name,
     bsn,
+    gender,
     date_of_birth,
     reffering_org_id,
     care_type,
@@ -26,7 +27,7 @@ INSERT INTO registration_forms (
     attachment_ids
 ) VALUES (
     $1, $2, $3, $4, $5, $6,
-    $7, $8, $9, $10, $11
+    $7, $8, $9, $10, $11, $12
 )
 `
 
@@ -35,6 +36,7 @@ type CreateRegistrationFormParams struct {
 	FirstName          string           `json:"first_name"`
 	LastName           string           `json:"last_name"`
 	Bsn                string           `json:"bsn"`
+	Gender             GenderEnum       `json:"gender"`
 	DateOfBirth        pgtype.Date      `json:"date_of_birth"`
 	RefferingOrgID     *string          `json:"reffering_org_id"`
 	CareType           CareTypeEnum     `json:"care_type"`
@@ -50,6 +52,7 @@ func (q *Queries) CreateRegistrationForm(ctx context.Context, arg CreateRegistra
 		arg.FirstName,
 		arg.LastName,
 		arg.Bsn,
+		arg.Gender,
 		arg.DateOfBirth,
 		arg.RefferingOrgID,
 		arg.CareType,
@@ -59,6 +62,33 @@ func (q *Queries) CreateRegistrationForm(ctx context.Context, arg CreateRegistra
 		arg.AttachmentIds,
 	)
 	return err
+}
+
+const getRegistrationForm = `-- name: GetRegistrationForm :one
+SELECT id, first_name, last_name, bsn, date_of_birth, gender, reffering_org_id, care_type, registration_date, registration_reason, additional_notes, status, attachment_ids, created_at, updated_at FROM registration_forms WHERE id = $1
+`
+
+func (q *Queries) GetRegistrationForm(ctx context.Context, id string) (RegistrationForm, error) {
+	row := q.db.QueryRow(ctx, getRegistrationForm, id)
+	var i RegistrationForm
+	err := row.Scan(
+		&i.ID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Bsn,
+		&i.DateOfBirth,
+		&i.Gender,
+		&i.RefferingOrgID,
+		&i.CareType,
+		&i.RegistrationDate,
+		&i.RegistrationReason,
+		&i.AdditionalNotes,
+		&i.Status,
+		&i.AttachmentIds,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const listRegistrationForms = `-- name: ListRegistrationForms :many

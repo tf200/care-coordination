@@ -33,6 +33,7 @@ func (s *registrationService) CreateRegistrationForm(ctx context.Context, req *C
 		Bsn:                req.BSN,
 		DateOfBirth:        pgtype.Date{Time: req.DateOfBirth, Valid: true},
 		RefferingOrgID:     req.RefferingOrgID,
+		Gender:             db.GenderEnum(req.Gender),
 		CareType:           db.CareTypeEnum(req.CareType),
 		RegistrationDate:   pgtype.Timestamp{Time: req.RegistrationDate, Valid: true},
 		RegistrationReason: req.RegistrationReason,

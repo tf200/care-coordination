@@ -4,6 +4,7 @@ INSERT INTO registration_forms (
     first_name,
     last_name,
     bsn,
+    gender,
     date_of_birth,
     reffering_org_id,
     care_type,
@@ -13,7 +14,7 @@ INSERT INTO registration_forms (
     attachment_ids
 ) VALUES (
     $1, $2, $3, $4, $5, $6,
-    $7, $8, $9, $10, $11
+    $7, $8, $9, $10, $11, $12
 );
 
 
@@ -50,3 +51,7 @@ WHERE
     )
 ORDER BY r.registration_date DESC
 LIMIT $1 OFFSET $2;
+
+
+-- name: GetRegistrationForm :one
+SELECT * FROM registration_forms WHERE id = $1;

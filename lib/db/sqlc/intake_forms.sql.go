@@ -63,6 +63,32 @@ func (q *Queries) CreateIntakeForm(ctx context.Context, arg CreateIntakeFormPara
 	return err
 }
 
+const getIntakeForm = `-- name: GetIntakeForm :one
+SELECT id, registration_form_id, intake_date, intake_time, location_id, coordinator_id, family_situation, main_provider, limitations, focus_areas, goals, notes, created_at, updated_at FROM intake_forms WHERE id = $1
+`
+
+func (q *Queries) GetIntakeForm(ctx context.Context, id string) (IntakeForm, error) {
+	row := q.db.QueryRow(ctx, getIntakeForm, id)
+	var i IntakeForm
+	err := row.Scan(
+		&i.ID,
+		&i.RegistrationFormID,
+		&i.IntakeDate,
+		&i.IntakeTime,
+		&i.LocationID,
+		&i.CoordinatorID,
+		&i.FamilySituation,
+		&i.MainProvider,
+		&i.Limitations,
+		&i.FocusAreas,
+		&i.Goals,
+		&i.Notes,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const listIntakeForms = `-- name: ListIntakeForms :many
 SELECT
     i.id,

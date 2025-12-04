@@ -4,8 +4,14 @@ import (
 	"care-cordination/api"
 	"care-cordination/features/attachments"
 	"care-cordination/features/auth"
+	"care-cordination/features/client"
 	"care-cordination/features/employee"
+	"care-cordination/features/incident"
+	"care-cordination/features/intake"
+	locTransfer "care-cordination/features/location_transfer"
+	"care-cordination/features/locations"
 	"care-cordination/features/middleware"
+	referringOrgs "care-cordination/features/referring_orgs"
 	"care-cordination/features/registration"
 	"care-cordination/lib/bucket"
 	"care-cordination/lib/config"
@@ -118,8 +124,42 @@ func main() {
 	attachmentsService := attachments.NewAttachmentsService(store, bucketClient, l)
 	attachmentsHandler := attachments.NewAttachmentsHandler(attachmentsService, mdw)
 
+	referringOrgService := referringOrgs.NewReferringOrgService(store, l)
+	referringOrgHandler := referringOrgs.NewReferringOrgHandler(referringOrgService, mdw)
+
+	locTransferService := locTransfer.NewLocationTransferService(store, l)
+	locTransferHandler := locTransfer.NewLocTransferHandler(locTransferService, mdw)
+
+	locationService := locations.NewLocationService(store, l)
+	locationHandler := locations.NewLocationHandler(locationService, mdw)
+
+	intakeService := intake.NewIntakeService(store, l)
+	intakeHandler := intake.NewIntakeHandler(intakeService, mdw)
+
+	incidentService := incident.NewIncidentService(store, l)
+	incidentHandler := incident.NewIncidentHandler(incidentService, mdw)
+
+	clientService := client.NewClientService(store, l)
+	clientHandler := client.NewClientHandler(clientService, mdw)
+
 	// 6. Initialize Server
-	server := api.NewServer(l, cfg.Environment, authHandler, employeeHandler, registrationHandler, attachmentsHandler, rateLimiter, cfg.ServerAddress, cfg.Url)
+	server := api.NewServer(
+		l,
+		cfg.Environment,
+		authHandler,
+		employeeHandler,
+		registrationHandler,
+		attachmentsHandler,
+		locationHandler,
+		intakeHandler,
+		incidentHandler,
+		clientHandler,
+		referringOrgHandler,
+		locTransferHandler,
+		rateLimiter,
+		cfg.ServerAddress,
+		cfg.Url,
+	)
 
 	// 7. Start Server
 	go func() {

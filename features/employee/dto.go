@@ -8,7 +8,7 @@ type CreateEmployeeRequest struct {
 	FirstName   string    `json:"firstName" binding:"required"`
 	LastName    string    `json:"lastName" binding:"required"`
 	BSN         string    `json:"bsn" binding:"required"`
-	DateOfBirth time.Time `json:"dateOfBirth" binding:"required format=2006-01-02"`
+	DateOfBirth time.Time `json:"dateOfBirth" binding:"required,datetime=2006-01-02"`
 	PhoneNumber string    `json:"phoneNumber" binding:"required"`
 	Gender      string    `json:"gender" binding:"required oneof=male female other"`
 	Role        string    `json:"role" binding:"required"`

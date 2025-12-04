@@ -54,6 +54,12 @@ UPDATE clients SET
     ambulatory_weekly_hours = COALESCE($21, ambulatory_weekly_hours),
     care_start_date = COALESCE($22, care_start_date),
     care_end_date = COALESCE($23, care_end_date),
+    discharge_date = COALESCE($24, discharge_date),
+    closing_report = COALESCE($25, closing_report),
+    evaluation_report = COALESCE($26, evaluation_report),
+    reason_for_discharge = COALESCE($27, reason_for_discharge),
+    discharge_attachment_ids = COALESCE($28, discharge_attachment_ids),
+    discharge_status = COALESCE($29, discharge_status),
     updated_at = NOW()
 WHERE id = $1
 RETURNING id;

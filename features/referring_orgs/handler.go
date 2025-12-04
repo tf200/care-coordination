@@ -1,8 +1,7 @@
-package referring_orgs
+package referringOrgs
 
 import (
 	"care-cordination/features/middleware"
-	"care-cordination/lib/logger"
 	"care-cordination/lib/resp"
 	"net/http"
 
@@ -21,7 +20,7 @@ func NewReferringOrgHandler(service ReferringOrgService, mdw *middleware.Middlew
 	}
 }
 
-func (h *ReferringOrgHandler) SetupReferringOrgRoutes(router *gin.Engine, logger *logger.Logger) {
+func (h *ReferringOrgHandler) SetupReferringOrgRoutes(router *gin.Engine) {
 	orgs := router.Group("/referring-orgs")
 
 	orgs.POST("", h.mdw.AuthMdw(), h.CreateReferringOrg)

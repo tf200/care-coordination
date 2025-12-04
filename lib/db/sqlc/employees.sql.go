@@ -68,10 +68,12 @@ SELECT
     COUNT(*) OVER() as total_count
 FROM employees e
 WHERE
-    ($3::text IS NULL OR
-     LOWER(e.first_name) LIKE LOWER('%' || $3::text || '%') OR
-     LOWER(e.last_name) LIKE LOWER('%' || $3::text || '%') OR
-     LOWER(CONCAT(e.first_name, ' ', e.last_name)) LIKE LOWER('%' || $3::text || '%'))
+(
+  $3::text IS NULL OR
+  e.first_name ILIKE '%' || $3::text || '%' OR
+  e.last_name ILIKE '%' || $3::text || '%' OR
+  CONCAT(e.first_name, ' ', e.last_name) ILIKE '%' || $3::text || '%'
+)
 ORDER BY e.first_name, e.last_name
 LIMIT $1 OFFSET $2
 `

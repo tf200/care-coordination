@@ -1,4 +1,4 @@
-package referring_orgs
+package referringOrgs
 
 import (
 	"care-cordination/lib/resp"

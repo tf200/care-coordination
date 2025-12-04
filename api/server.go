@@ -20,7 +20,13 @@ import (
 	"care-cordination/docs"
 	"care-cordination/features/attachments"
 	"care-cordination/features/auth"
+	"care-cordination/features/client"
 	"care-cordination/features/employee"
+	"care-cordination/features/incident"
+	"care-cordination/features/intake"
+	locTransfer "care-cordination/features/location_transfer"
+	"care-cordination/features/locations"
+	referringOrgs "care-cordination/features/referring_orgs"
 	"care-cordination/features/registration"
 	"care-cordination/lib/logger"
 	"care-cordination/lib/ratelimit"
@@ -37,24 +43,40 @@ import (
 )
 
 type Server struct {
-	httpServer          *http.Server
-	router              *gin.Engine
+	httpServer *http.Server
+	router     *gin.Engine
+	// handlers
 	authHandler         *auth.AuthHandler
+	locationHandler     *locations.LocationHandler
 	employeeHandler     *employee.EmployeeHandler
-	registrationHandler registration.RegistrationHandler
+	registrationHandler *registration.RegistrationHandler
+	intakeHandler       *intake.IntakeHandler
+	incidentHandler     *incident.IncidentHandler
 	attachmentsHandler  *attachments.AttachmentsHandler
-	environment         string
-	rateLimiter         ratelimit.RateLimiter
-	logger              *logger.Logger
-	addr                string
-	url                 string
+	clientHandler       *client.ClientHandler
+	referringOrgHandler *referringOrgs.ReferringOrgHandler
+	locTransferHandler  *locTransfer.LocTransferHandler
+
+	environment string
+	rateLimiter ratelimit.RateLimiter
+	logger      *logger.Logger
+	addr        string
+	url         string
 }
 
-func NewServer(logger *logger.Logger,
-	environment string, authHandler *auth.AuthHandler,
+func NewServer(
+	logger *logger.Logger,
+	environment string,
+	authHandler *auth.AuthHandler,
 	employeeHandler *employee.EmployeeHandler,
-	registrationHandler registration.RegistrationHandler,
+	registrationHandler *registration.RegistrationHandler,
 	attachmentsHandler *attachments.AttachmentsHandler,
+	locationHandler *locations.LocationHandler,
+	intakeHandler *intake.IntakeHandler,
+	incidentHandler *incident.IncidentHandler,
+	clientHandler *client.ClientHandler,
+	referringOrgHandler *referringOrgs.ReferringOrgHandler,
+	locTransferHandler *locTransfer.LocTransferHandler,
 	rateLimiter ratelimit.RateLimiter, addr string, url string) *Server {
 	s := &Server{
 		environment:         environment,
@@ -63,6 +85,12 @@ func NewServer(logger *logger.Logger,
 		registrationHandler: registrationHandler,
 		attachmentsHandler:  attachmentsHandler,
 		rateLimiter:         rateLimiter,
+		locationHandler:     locationHandler,
+		intakeHandler:       intakeHandler,
+		incidentHandler:     incidentHandler,
+		clientHandler:       clientHandler,
+		referringOrgHandler: referringOrgHandler,
+		locTransferHandler:  locTransferHandler,
 		logger:              logger,
 		addr:                addr,
 		url:                 url,
@@ -117,6 +145,12 @@ func (s *Server) setupRoutes(logger *logger.Logger) {
 	s.employeeHandler.SetupEmployeeRoutes(router)
 	s.registrationHandler.SetupRegistrationRoutes(router)
 	s.attachmentsHandler.SetupAttachmentsRoutes(router)
+	s.locationHandler.SetupLocationRoutes(router)
+	s.intakeHandler.SetupIntakeRoutes(router)
+	s.incidentHandler.SetupIncidentRoutes(router)
+	s.clientHandler.SetupClientRoutes(router)
+	s.referringOrgHandler.SetupReferringOrgRoutes(router)
+	s.locTransferHandler.SetupLocTransferRoutes(router)
 	s.router = router
 }
 

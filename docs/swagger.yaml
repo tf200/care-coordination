@@ -48,11 +48,9 @@ definitions:
       ambulatoryWeeklyHours:
         type: integer
       careEndDate:
-        $ref: '#/definitions/pgtype.Date'
+        type: string
       careStartDate:
-        $ref: '#/definitions/pgtype.Date'
-    required:
-    - careStartDate
+        type: string
     type: object
   client.MoveClientInCareResponse:
     properties:
@@ -99,6 +97,7 @@ definitions:
         type: string
     required:
     - bsn
+    - dateOfBirth
     - firstName
     - lastName
     - password
@@ -117,6 +116,99 @@ definitions:
       id:
         type: string
       lastName:
+        type: string
+    type: object
+  incident.CreateIncidentRequest:
+    properties:
+      actionTaken:
+        type: string
+      clientId:
+        type: string
+      coordinatorId:
+        type: string
+      incidentDate:
+        type: string
+      incidentDescription:
+        type: string
+      incidentSeverity:
+        enum:
+        - minor
+        - moderate
+        - severe
+        type: string
+      incidentTime:
+        type: string
+      incidentType:
+        enum:
+        - aggression
+        - medical_emergency
+        - safety_concern
+        - unwanted_behavior
+        - other
+        type: string
+      locationId:
+        type: string
+      otherParties:
+        type: string
+      status:
+        enum:
+        - pending
+        - under_investigation
+        - completed
+        type: string
+    required:
+    - actionTaken
+    - clientId
+    - coordinatorId
+    - incidentDescription
+    - incidentSeverity
+    - incidentTime
+    - incidentType
+    - locationId
+    - status
+    type: object
+  incident.CreateIncidentResponse:
+    properties:
+      id:
+        type: string
+    type: object
+  incident.ListIncidentsResponse:
+    properties:
+      actionTaken:
+        type: string
+      clientFirstName:
+        type: string
+      clientId:
+        type: string
+      clientLastName:
+        type: string
+      coordinatorFirstName:
+        type: string
+      coordinatorId:
+        type: string
+      coordinatorLastName:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: string
+      incidentDate:
+        type: string
+      incidentDescription:
+        type: string
+      incidentSeverity:
+        type: string
+      incidentTime:
+        type: string
+      incidentType:
+        type: string
+      locationId:
+        type: string
+      locationName:
+        type: string
+      otherParties:
+        type: string
+      status:
         type: string
     type: object
   intake.CreateIntakeFormRequest:
@@ -186,6 +278,60 @@ definitions:
       updatedAt:
         type: string
     type: object
+  location_transfer.ListLocationTransfersResponse:
+    properties:
+      clientFirstName:
+        type: string
+      clientId:
+        type: string
+      clientLastName:
+        type: string
+      currentCoordinatorFirstName:
+        type: string
+      currentCoordinatorId:
+        type: string
+      currentCoordinatorLastName:
+        type: string
+      fromLocationId:
+        type: string
+      fromLocationName:
+        type: string
+      id:
+        type: string
+      newCoordinatorFirstName:
+        type: string
+      newCoordinatorId:
+        type: string
+      newCoordinatorLastName:
+        type: string
+      reason:
+        type: string
+      toLocationId:
+        type: string
+      toLocationName:
+        type: string
+      transferDate:
+        description: or time.Time, but for JSON, string
+        type: string
+    type: object
+  location_transfer.RegisterLocationTransferRequest:
+    properties:
+      clientId:
+        type: string
+      newCoordinatorId:
+        type: string
+      newLocationId:
+        type: string
+    required:
+    - clientId
+    - newCoordinatorId
+    - newLocationId
+    type: object
+  location_transfer.RegisterLocationTransferResponse:
+    properties:
+      transferId:
+        type: string
+    type: object
   locations.CreateLocationRequest:
     properties:
       address:
@@ -227,26 +373,6 @@ definitions:
       postalCode:
         type: string
     type: object
-  pgtype.Date:
-    properties:
-      infinityModifier:
-        $ref: '#/definitions/pgtype.InfinityModifier'
-      time:
-        type: string
-      valid:
-        type: boolean
-    type: object
-  pgtype.InfinityModifier:
-    enum:
-    - 1
-    - 0
-    - -1
-    format: int32
-    type: integer
-    x-enum-varnames:
-    - Infinity
-    - Finite
-    - NegativeInfinity
   referring_orgs.CreateReferringOrgRequest:
     properties:
       contactPerson:
@@ -376,6 +502,40 @@ definitions:
         items:
           items:
             $ref: '#/definitions/employee.ListEmployeesResponse'
+          type: array
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      totalCount:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  resp.PaginationResponse-array_incident_ListIncidentsResponse:
+    properties:
+      data:
+        items:
+          items:
+            $ref: '#/definitions/incident.ListIncidentsResponse'
+          type: array
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      totalCount:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  resp.PaginationResponse-array_location_transfer_ListLocationTransfersResponse:
+    properties:
+      data:
+        items:
+          items:
+            $ref: '#/definitions/location_transfer.ListLocationTransfersResponse'
           type: array
         type: array
       page:
@@ -723,6 +883,79 @@ paths:
       summary: Create an employee
       tags:
       - Employee
+  /incidents:
+    get:
+      consumes:
+      - application/json
+      description: List all incidents with pagination and search by client name
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Page size (default: 10, max: 100)'
+        in: query
+        name: page_size
+        type: integer
+      - description: Search by client first name, last name, or full name
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.PaginationResponse-array_incident_ListIncidentsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: List incidents
+      tags:
+      - Incident
+    post:
+      consumes:
+      - application/json
+      description: Create a new incident
+      parameters:
+      - description: Incident
+        in: body
+        name: incident
+        required: true
+        schema:
+          $ref: '#/definitions/incident.CreateIncidentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/incident.CreateIncidentResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Create an incident
+      tags:
+      - Incident
   /intakes:
     get:
       consumes:
@@ -790,6 +1023,83 @@ paths:
       summary: Create an intake form
       tags:
       - Intake
+  /location-transfers:
+    get:
+      consumes:
+      - application/json
+      description: List all location transfers with pagination and search
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Page size (default: 10, max: 100)'
+        in: query
+        name: page_size
+        type: integer
+      - description: Search by client name
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.PaginationResponse-array_location_transfer_ListLocationTransfersResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: List location transfers
+      tags:
+      - LocationTransfer
+    post:
+      consumes:
+      - application/json
+      description: Register a new location transfer for a client
+      parameters:
+      - description: Location Transfer Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/location_transfer.RegisterLocationTransferRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/location_transfer.RegisterLocationTransferResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Register a location transfer
+      tags:
+      - LocationTransfer
   /locations:
     get:
       consumes:

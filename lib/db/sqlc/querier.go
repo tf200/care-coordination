@@ -12,8 +12,10 @@ type Querier interface {
 	CreateAttachment(ctx context.Context, arg CreateAttachmentParams) error
 	CreateClient(ctx context.Context, arg CreateClientParams) (CreateClientRow, error)
 	CreateEmployee(ctx context.Context, arg CreateEmployeeParams) error
+	CreateIncident(ctx context.Context, arg CreateIncidentParams) error
 	CreateIntakeForm(ctx context.Context, arg CreateIntakeFormParams) error
 	CreateLocation(ctx context.Context, arg CreateLocationParams) error
+	CreateLocationTransfer(ctx context.Context, arg CreateLocationTransferParams) (CreateLocationTransferRow, error)
 	CreateReferringOrg(ctx context.Context, arg CreateReferringOrgParams) error
 	CreateRegistrationForm(ctx context.Context, arg CreateRegistrationFormParams) error
 	CreateUser(ctx context.Context, arg CreateUserParams) (string, error)
@@ -27,7 +29,9 @@ type Querier interface {
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserSession(ctx context.Context, tokenHash string) (Session, error)
 	ListEmployees(ctx context.Context, arg ListEmployeesParams) ([]ListEmployeesRow, error)
+	ListIncidents(ctx context.Context, arg ListIncidentsParams) ([]ListIncidentsRow, error)
 	ListIntakeForms(ctx context.Context, arg ListIntakeFormsParams) ([]ListIntakeFormsRow, error)
+	ListLocationTransfers(ctx context.Context, arg ListLocationTransfersParams) ([]ListLocationTransfersRow, error)
 	ListLocations(ctx context.Context, arg ListLocationsParams) ([]ListLocationsRow, error)
 	ListReferringOrgs(ctx context.Context, arg ListReferringOrgsParams) ([]ListReferringOrgsRow, error)
 	ListRegistrationForms(ctx context.Context, arg ListRegistrationFormsParams) ([]ListRegistrationFormsRow, error)

@@ -40,4 +40,12 @@ dokcer-rebuild:
 	docker compose rm -s -f app
 	docker compose up --build -d app
 
-.PHONY: sqlc swagger migrate-up migrate-down migrate-up1 migrate-down1 migrate-version migrate-force admin
+add-feature:
+	@echo "Adding new feature (use: make add-feature NAME=feature_name)..."
+	mkdir -p features/$(NAME)
+	touch features/$(NAME)/interface.go
+	touch features/$(NAME)/service.go
+	touch features/$(NAME)/dto.go
+	touch features/$(NAME)/handler.go
+
+.PHONY: sqlc swagger migrate-up migrate-down migrate-up1 migrate-down1 migrate-version migrate-force admin dokcer-rebuild add-feature

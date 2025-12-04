@@ -98,6 +98,94 @@ func (ns NullClientStatusEnum) Value() (driver.Value, error) {
 	return string(ns.ClientStatusEnum), nil
 }
 
+type DischargeReasonEnum string
+
+const (
+	DischargeReasonEnumTreatmentCompleted             DischargeReasonEnum = "treatment_completed"
+	DischargeReasonEnumTerminatedByMutualAgreement    DischargeReasonEnum = "terminated_by_mutual_agreement"
+	DischargeReasonEnumTerminatedByClient             DischargeReasonEnum = "terminated_by_client"
+	DischargeReasonEnumTerminatedByProvider           DischargeReasonEnum = "terminated_by_provider"
+	DischargeReasonEnumTerminatedDueToExternalFactors DischargeReasonEnum = "terminated_due_to_external_factors"
+	DischargeReasonEnumOther                          DischargeReasonEnum = "other"
+)
+
+func (e *DischargeReasonEnum) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = DischargeReasonEnum(s)
+	case string:
+		*e = DischargeReasonEnum(s)
+	default:
+		return fmt.Errorf("unsupported scan type for DischargeReasonEnum: %T", src)
+	}
+	return nil
+}
+
+type NullDischargeReasonEnum struct {
+	DischargeReasonEnum DischargeReasonEnum `json:"discharge_reason_enum"`
+	Valid               bool                `json:"valid"` // Valid is true if DischargeReasonEnum is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullDischargeReasonEnum) Scan(value interface{}) error {
+	if value == nil {
+		ns.DischargeReasonEnum, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.DischargeReasonEnum.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullDischargeReasonEnum) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.DischargeReasonEnum), nil
+}
+
+type DischargeStatusEnum string
+
+const (
+	DischargeStatusEnumInProgress DischargeStatusEnum = "in_progress"
+	DischargeStatusEnumCompleted  DischargeStatusEnum = "completed"
+)
+
+func (e *DischargeStatusEnum) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = DischargeStatusEnum(s)
+	case string:
+		*e = DischargeStatusEnum(s)
+	default:
+		return fmt.Errorf("unsupported scan type for DischargeStatusEnum: %T", src)
+	}
+	return nil
+}
+
+type NullDischargeStatusEnum struct {
+	DischargeStatusEnum DischargeStatusEnum `json:"discharge_status_enum"`
+	Valid               bool                `json:"valid"` // Valid is true if DischargeStatusEnum is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullDischargeStatusEnum) Scan(value interface{}) error {
+	if value == nil {
+		ns.DischargeStatusEnum, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.DischargeStatusEnum.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullDischargeStatusEnum) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.DischargeStatusEnum), nil
+}
+
 type GenderEnum string
 
 const (
@@ -139,6 +227,137 @@ func (ns NullGenderEnum) Value() (driver.Value, error) {
 		return nil, nil
 	}
 	return string(ns.GenderEnum), nil
+}
+
+type IncidentSeverityEnum string
+
+const (
+	IncidentSeverityEnumMinor    IncidentSeverityEnum = "minor"
+	IncidentSeverityEnumModerate IncidentSeverityEnum = "moderate"
+	IncidentSeverityEnumSevere   IncidentSeverityEnum = "severe"
+)
+
+func (e *IncidentSeverityEnum) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = IncidentSeverityEnum(s)
+	case string:
+		*e = IncidentSeverityEnum(s)
+	default:
+		return fmt.Errorf("unsupported scan type for IncidentSeverityEnum: %T", src)
+	}
+	return nil
+}
+
+type NullIncidentSeverityEnum struct {
+	IncidentSeverityEnum IncidentSeverityEnum `json:"incident_severity_enum"`
+	Valid                bool                 `json:"valid"` // Valid is true if IncidentSeverityEnum is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullIncidentSeverityEnum) Scan(value interface{}) error {
+	if value == nil {
+		ns.IncidentSeverityEnum, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.IncidentSeverityEnum.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullIncidentSeverityEnum) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.IncidentSeverityEnum), nil
+}
+
+type IncidentStatusEnum string
+
+const (
+	IncidentStatusEnumPending            IncidentStatusEnum = "pending"
+	IncidentStatusEnumUnderInvestigation IncidentStatusEnum = "under_investigation"
+	IncidentStatusEnumCompleted          IncidentStatusEnum = "completed"
+)
+
+func (e *IncidentStatusEnum) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = IncidentStatusEnum(s)
+	case string:
+		*e = IncidentStatusEnum(s)
+	default:
+		return fmt.Errorf("unsupported scan type for IncidentStatusEnum: %T", src)
+	}
+	return nil
+}
+
+type NullIncidentStatusEnum struct {
+	IncidentStatusEnum IncidentStatusEnum `json:"incident_status_enum"`
+	Valid              bool               `json:"valid"` // Valid is true if IncidentStatusEnum is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullIncidentStatusEnum) Scan(value interface{}) error {
+	if value == nil {
+		ns.IncidentStatusEnum, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.IncidentStatusEnum.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullIncidentStatusEnum) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.IncidentStatusEnum), nil
+}
+
+type IncidentTypeEnum string
+
+const (
+	IncidentTypeEnumAggression       IncidentTypeEnum = "aggression"
+	IncidentTypeEnumMedicalEmergency IncidentTypeEnum = "medical_emergency"
+	IncidentTypeEnumSafetyConcern    IncidentTypeEnum = "safety_concern"
+	IncidentTypeEnumUnwantedBehavior IncidentTypeEnum = "unwanted_behavior"
+	IncidentTypeEnumOther            IncidentTypeEnum = "other"
+)
+
+func (e *IncidentTypeEnum) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = IncidentTypeEnum(s)
+	case string:
+		*e = IncidentTypeEnum(s)
+	default:
+		return fmt.Errorf("unsupported scan type for IncidentTypeEnum: %T", src)
+	}
+	return nil
+}
+
+type NullIncidentTypeEnum struct {
+	IncidentTypeEnum IncidentTypeEnum `json:"incident_type_enum"`
+	Valid            bool             `json:"valid"` // Valid is true if IncidentTypeEnum is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullIncidentTypeEnum) Scan(value interface{}) error {
+	if value == nil {
+		ns.IncidentTypeEnum, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.IncidentTypeEnum.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullIncidentTypeEnum) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.IncidentTypeEnum), nil
 }
 
 type IntakeStatusEnum string
@@ -278,31 +497,50 @@ type Attachment struct {
 }
 
 type Client struct {
-	ID                    string                  `json:"id"`
-	FirstName             string                  `json:"first_name"`
-	LastName              string                  `json:"last_name"`
-	Bsn                   string                  `json:"bsn"`
-	DateOfBirth           pgtype.Date             `json:"date_of_birth"`
-	PhoneNumber           *string                 `json:"phone_number"`
-	Gender                GenderEnum              `json:"gender"`
-	RegistrationFormID    string                  `json:"registration_form_id"`
-	IntakeFormID          string                  `json:"intake_form_id"`
-	CareType              CareTypeEnum            `json:"care_type"`
-	AmbulatoryWeeklyHours *int32                  `json:"ambulatory_weekly_hours"`
-	ReferringOrgID        *string                 `json:"referring_org_id"`
-	Status                ClientStatusEnum        `json:"status"`
-	WaitingListPriority   WaitingListPriorityEnum `json:"waiting_list_priority"`
-	CareStartDate         pgtype.Date             `json:"care_start_date"`
-	CareEndDate           pgtype.Date             `json:"care_end_date"`
-	AssignedLocationID    *string                 `json:"assigned_location_id"`
-	CoordinatorID         *string                 `json:"coordinator_id"`
-	FamilySituation       *string                 `json:"family_situation"`
-	Limitations           *string                 `json:"limitations"`
-	FocusAreas            *string                 `json:"focus_areas"`
-	Goals                 *string                 `json:"goals"`
-	Notes                 *string                 `json:"notes"`
-	CreatedAt             pgtype.Timestamp        `json:"created_at"`
-	UpdatedAt             pgtype.Timestamp        `json:"updated_at"`
+	ID                     string                  `json:"id"`
+	FirstName              string                  `json:"first_name"`
+	LastName               string                  `json:"last_name"`
+	Bsn                    string                  `json:"bsn"`
+	DateOfBirth            pgtype.Date             `json:"date_of_birth"`
+	PhoneNumber            *string                 `json:"phone_number"`
+	Gender                 GenderEnum              `json:"gender"`
+	RegistrationFormID     string                  `json:"registration_form_id"`
+	IntakeFormID           string                  `json:"intake_form_id"`
+	CareType               CareTypeEnum            `json:"care_type"`
+	AmbulatoryWeeklyHours  *int32                  `json:"ambulatory_weekly_hours"`
+	ReferringOrgID         *string                 `json:"referring_org_id"`
+	Status                 ClientStatusEnum        `json:"status"`
+	WaitingListPriority    WaitingListPriorityEnum `json:"waiting_list_priority"`
+	CareStartDate          pgtype.Date             `json:"care_start_date"`
+	CareEndDate            pgtype.Date             `json:"care_end_date"`
+	DischargeDate          pgtype.Date             `json:"discharge_date"`
+	ClosingReport          *string                 `json:"closing_report"`
+	EvaluationReport       *string                 `json:"evaluation_report"`
+	ReasonForDischarge     NullDischargeReasonEnum `json:"reason_for_discharge"`
+	DischargeAttachmentIds []string                `json:"discharge_attachment_ids"`
+	DischargeStatus        NullDischargeStatusEnum `json:"discharge_status"`
+	AssignedLocationID     string                  `json:"assigned_location_id"`
+	CoordinatorID          string                  `json:"coordinator_id"`
+	FamilySituation        *string                 `json:"family_situation"`
+	Limitations            *string                 `json:"limitations"`
+	FocusAreas             *string                 `json:"focus_areas"`
+	Goals                  *string                 `json:"goals"`
+	Notes                  *string                 `json:"notes"`
+	CreatedAt              pgtype.Timestamp        `json:"created_at"`
+	UpdatedAt              pgtype.Timestamp        `json:"updated_at"`
+}
+
+type ClientLocationTransfer struct {
+	ID                   string           `json:"id"`
+	ClientID             string           `json:"client_id"`
+	FromLocationID       *string          `json:"from_location_id"`
+	ToLocationID         string           `json:"to_location_id"`
+	CurrentCoordinatorID string           `json:"current_coordinator_id"`
+	NewCoordinatorID     string           `json:"new_coordinator_id"`
+	TransferDate         pgtype.Timestamp `json:"transfer_date"`
+	Reason               *string          `json:"reason"`
+	CreatedAt            pgtype.Timestamp `json:"created_at"`
+	UpdatedAt            pgtype.Timestamp `json:"updated_at"`
 }
 
 type Employee struct {
@@ -317,6 +555,23 @@ type Employee struct {
 	Role        string           `json:"role"`
 	CreatedAt   pgtype.Timestamp `json:"created_at"`
 	UpdatedAt   pgtype.Timestamp `json:"updated_at"`
+}
+
+type Incident struct {
+	ID                  string               `json:"id"`
+	ClientID            string               `json:"client_id"`
+	IncidentDate        pgtype.Date          `json:"incident_date"`
+	IncidentTime        pgtype.Time          `json:"incident_time"`
+	IncidentType        IncidentTypeEnum     `json:"incident_type"`
+	IncidentSeverity    IncidentSeverityEnum `json:"incident_severity"`
+	LocationID          string               `json:"location_id"`
+	CoordinatorID       string               `json:"coordinator_id"`
+	IncidentDescription string               `json:"incident_description"`
+	ActionTaken         string               `json:"action_taken"`
+	OtherParties        *string              `json:"other_parties"`
+	Status              IncidentStatusEnum   `json:"status"`
+	CreatedAt           pgtype.Timestamp     `json:"created_at"`
+	UpdatedAt           pgtype.Timestamp     `json:"updated_at"`
 }
 
 type IntakeForm struct {

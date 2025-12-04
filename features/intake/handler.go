@@ -13,8 +13,8 @@ type IntakeHandler struct {
 	mdw           *middleware.Middleware
 }
 
-func NewIntakeHandler(intakeService IntakeService, mdw *middleware.Middleware) IntakeHandler {
-	return IntakeHandler{
+func NewIntakeHandler(intakeService IntakeService, mdw *middleware.Middleware) *IntakeHandler {
+	return &IntakeHandler{
 		intakeService: intakeService,
 		mdw:           mdw,
 	}

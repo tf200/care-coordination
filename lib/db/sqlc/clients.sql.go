@@ -53,8 +53,8 @@ type CreateClientParams struct {
 	ReferringOrgID      *string                 `json:"referring_org_id"`
 	WaitingListPriority WaitingListPriorityEnum `json:"waiting_list_priority"`
 	Status              ClientStatusEnum        `json:"status"`
-	AssignedLocationID  *string                 `json:"assigned_location_id"`
-	CoordinatorID       *string                 `json:"coordinator_id"`
+	AssignedLocationID  string                  `json:"assigned_location_id"`
+	CoordinatorID       string                  `json:"coordinator_id"`
 	FamilySituation     *string                 `json:"family_situation"`
 	Limitations         *string                 `json:"limitations"`
 	FocusAreas          *string                 `json:"focus_areas"`
@@ -75,8 +75,8 @@ type CreateClientRow struct {
 	CareType           CareTypeEnum     `json:"care_type"`
 	ReferringOrgID     *string          `json:"referring_org_id"`
 	Status             ClientStatusEnum `json:"status"`
-	AssignedLocationID *string          `json:"assigned_location_id"`
-	CoordinatorID      *string          `json:"coordinator_id"`
+	AssignedLocationID string           `json:"assigned_location_id"`
+	CoordinatorID      string           `json:"coordinator_id"`
 	FamilySituation    *string          `json:"family_situation"`
 	Limitations        *string          `json:"limitations"`
 	FocusAreas         *string          `json:"focus_areas"`
@@ -137,7 +137,7 @@ func (q *Queries) CreateClient(ctx context.Context, arg CreateClientParams) (Cre
 }
 
 const getClientByID = `-- name: GetClientByID :one
-SELECT id, first_name, last_name, bsn, date_of_birth, phone_number, gender, registration_form_id, intake_form_id, care_type, ambulatory_weekly_hours, referring_org_id, status, waiting_list_priority, care_start_date, care_end_date, assigned_location_id, coordinator_id, family_situation, limitations, focus_areas, goals, notes, created_at, updated_at FROM clients WHERE id = $1
+SELECT id, first_name, last_name, bsn, date_of_birth, phone_number, gender, registration_form_id, intake_form_id, care_type, ambulatory_weekly_hours, referring_org_id, status, waiting_list_priority, care_start_date, care_end_date, discharge_date, closing_report, evaluation_report, reason_for_discharge, discharge_attachment_ids, discharge_status, assigned_location_id, coordinator_id, family_situation, limitations, focus_areas, goals, notes, created_at, updated_at FROM clients WHERE id = $1
 `
 
 func (q *Queries) GetClientByID(ctx context.Context, id string) (Client, error) {
@@ -160,6 +160,12 @@ func (q *Queries) GetClientByID(ctx context.Context, id string) (Client, error) 
 		&i.WaitingListPriority,
 		&i.CareStartDate,
 		&i.CareEndDate,
+		&i.DischargeDate,
+		&i.ClosingReport,
+		&i.EvaluationReport,
+		&i.ReasonForDischarge,
+		&i.DischargeAttachmentIds,
+		&i.DischargeStatus,
 		&i.AssignedLocationID,
 		&i.CoordinatorID,
 		&i.FamilySituation,
@@ -197,35 +203,47 @@ UPDATE clients SET
     ambulatory_weekly_hours = COALESCE($21, ambulatory_weekly_hours),
     care_start_date = COALESCE($22, care_start_date),
     care_end_date = COALESCE($23, care_end_date),
+    discharge_date = COALESCE($24, discharge_date),
+    closing_report = COALESCE($25, closing_report),
+    evaluation_report = COALESCE($26, evaluation_report),
+    reason_for_discharge = COALESCE($27, reason_for_discharge),
+    discharge_attachment_ids = COALESCE($28, discharge_attachment_ids),
+    discharge_status = COALESCE($29, discharge_status),
     updated_at = NOW()
 WHERE id = $1
 RETURNING id
 `
 
 type UpdateClientParams struct {
-	ID                    string                  `json:"id"`
-	FirstName             string                  `json:"first_name"`
-	LastName              string                  `json:"last_name"`
-	Bsn                   string                  `json:"bsn"`
-	DateOfBirth           pgtype.Date             `json:"date_of_birth"`
-	PhoneNumber           *string                 `json:"phone_number"`
-	Gender                GenderEnum              `json:"gender"`
-	RegistrationFormID    string                  `json:"registration_form_id"`
-	IntakeFormID          string                  `json:"intake_form_id"`
-	CareType              CareTypeEnum            `json:"care_type"`
-	ReferringOrgID        *string                 `json:"referring_org_id"`
-	WaitingListPriority   WaitingListPriorityEnum `json:"waiting_list_priority"`
-	Status                ClientStatusEnum        `json:"status"`
-	AssignedLocationID    *string                 `json:"assigned_location_id"`
-	CoordinatorID         *string                 `json:"coordinator_id"`
-	FamilySituation       *string                 `json:"family_situation"`
-	Limitations           *string                 `json:"limitations"`
-	FocusAreas            *string                 `json:"focus_areas"`
-	Goals                 *string                 `json:"goals"`
-	Notes                 *string                 `json:"notes"`
-	AmbulatoryWeeklyHours *int32                  `json:"ambulatory_weekly_hours"`
-	CareStartDate         pgtype.Date             `json:"care_start_date"`
-	CareEndDate           pgtype.Date             `json:"care_end_date"`
+	ID                     string                  `json:"id"`
+	FirstName              string                  `json:"first_name"`
+	LastName               string                  `json:"last_name"`
+	Bsn                    string                  `json:"bsn"`
+	DateOfBirth            pgtype.Date             `json:"date_of_birth"`
+	PhoneNumber            *string                 `json:"phone_number"`
+	Gender                 GenderEnum              `json:"gender"`
+	RegistrationFormID     string                  `json:"registration_form_id"`
+	IntakeFormID           string                  `json:"intake_form_id"`
+	CareType               CareTypeEnum            `json:"care_type"`
+	ReferringOrgID         *string                 `json:"referring_org_id"`
+	WaitingListPriority    WaitingListPriorityEnum `json:"waiting_list_priority"`
+	Status                 ClientStatusEnum        `json:"status"`
+	AssignedLocationID     string                  `json:"assigned_location_id"`
+	CoordinatorID          string                  `json:"coordinator_id"`
+	FamilySituation        *string                 `json:"family_situation"`
+	Limitations            *string                 `json:"limitations"`
+	FocusAreas             *string                 `json:"focus_areas"`
+	Goals                  *string                 `json:"goals"`
+	Notes                  *string                 `json:"notes"`
+	AmbulatoryWeeklyHours  *int32                  `json:"ambulatory_weekly_hours"`
+	CareStartDate          pgtype.Date             `json:"care_start_date"`
+	CareEndDate            pgtype.Date             `json:"care_end_date"`
+	DischargeDate          pgtype.Date             `json:"discharge_date"`
+	ClosingReport          *string                 `json:"closing_report"`
+	EvaluationReport       *string                 `json:"evaluation_report"`
+	ReasonForDischarge     NullDischargeReasonEnum `json:"reason_for_discharge"`
+	DischargeAttachmentIds []string                `json:"discharge_attachment_ids"`
+	DischargeStatus        NullDischargeStatusEnum `json:"discharge_status"`
 }
 
 func (q *Queries) UpdateClient(ctx context.Context, arg UpdateClientParams) (string, error) {
@@ -253,6 +271,12 @@ func (q *Queries) UpdateClient(ctx context.Context, arg UpdateClientParams) (str
 		arg.AmbulatoryWeeklyHours,
 		arg.CareStartDate,
 		arg.CareEndDate,
+		arg.DischargeDate,
+		arg.ClosingReport,
+		arg.EvaluationReport,
+		arg.ReasonForDischarge,
+		arg.DischargeAttachmentIds,
+		arg.DischargeStatus,
 	)
 	var id string
 	err := row.Scan(&id)

@@ -12,4 +12,5 @@ var (
 	ErrInvalidClientStatus       = errors.New("client must be on waiting list to move to in care")
 	ErrAmbulatoryHoursRequired   = errors.New("ambulatory weekly hours required for ambulatory care")
 	ErrAmbulatoryHoursNotAllowed = errors.New("ambulatory weekly hours should only be set for ambulatory care")
+	ErrClientNotInCare           = errors.New("client must be in care to be discharged")
 )

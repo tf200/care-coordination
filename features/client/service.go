@@ -4,6 +4,7 @@ import (
 	db "care-cordination/lib/db/sqlc"
 	"care-cordination/lib/logger"
 	"care-cordination/lib/nanoid"
+	"care-cordination/lib/util"
 	"context"
 
 	"go.uber.org/zap"
@@ -54,8 +55,8 @@ func (s *clientService) MoveClientToWaitingList(ctx context.Context, req *MoveCl
 		CareType:            registrationForm.CareType,
 		ReferringOrgID:      registrationForm.RefferingOrgID,
 		Status:              db.ClientStatusEnumWaitingList,
-		AssignedLocationID:  &intakeForm.LocationID,
-		CoordinatorID:       &intakeForm.CoordinatorID,
+		AssignedLocationID:  intakeForm.LocationID,
+		CoordinatorID:       intakeForm.CoordinatorID,
 		FamilySituation:     intakeForm.FamilySituation,
 		Limitations:         intakeForm.Limitations,
 		FocusAreas:          intakeForm.FocusAreas,
@@ -107,8 +108,8 @@ func (s *clientService) MoveClientInCare(ctx context.Context, clientID string, r
 		ID:                    client.ID,
 		Status:                db.ClientStatusEnumInCare,
 		AmbulatoryWeeklyHours: req.AmbulatoryWeeklyHours,
-		CareStartDate:         req.CareStartDate,
-		CareEndDate:           req.CareEndDate,
+		CareStartDate:         util.StrToPgtypeDate(req.CareStartDate),
+		CareEndDate:           util.StrToPgtypeDate(req.CareEndDate),
 	}
 
 	updatedClient, err := s.db.UpdateClient(ctx, updateParams)
@@ -120,6 +121,43 @@ func (s *clientService) MoveClientInCare(ctx context.Context, clientID string, r
 	s.logger.Info(ctx, "MoveClientInCare", "Client moved to in care successfully", zap.String("clientId", updatedClient))
 
 	return &MoveClientInCareResponse{
+		ClientID: updatedClient,
+	}, nil
+}
+
+func (s *clientService) DischargeClient(ctx context.Context, clientID string, req *DischargeClientRequest) (*DischargeClientResponse, error) {
+	client, err := s.db.GetClientByID(ctx, clientID)
+	if err != nil {
+		s.logger.Error(ctx, "DischargeClient", "Failed to get client", zap.Error(err))
+		return nil, ErrClientNotFound
+	}
+
+	// Validate client is in care
+	if client.Status != db.ClientStatusEnumInCare {
+		s.logger.Error(ctx, "DischargeClient", "Client must be in care to be discharged", zap.String("currentStatus", string(client.Status)))
+		return nil, ErrClientNotInCare
+	}
+
+	updateParams := db.UpdateClientParams{
+		ID:                     client.ID,
+		Status:                 db.ClientStatusEnumDischarged,
+		DischargeDate:          util.StrToPgtypeDate(req.DischargeDate),
+		ClosingReport:          req.ClosingReport,
+		EvaluationReport:       req.EvaluationReport,
+		ReasonForDischarge:     db.NullDischargeReasonEnum{DischargeReasonEnum: db.DischargeReasonEnum(req.ReasonForDischarge), Valid: true},
+		DischargeAttachmentIds: req.DischargeAttachmentIDs,
+		DischargeStatus:        db.NullDischargeStatusEnum{DischargeStatusEnum: db.DischargeStatusEnum(req.DischargeStatus), Valid: true},
+	}
+
+	updatedClient, err := s.db.UpdateClient(ctx, updateParams)
+	if err != nil {
+		s.logger.Error(ctx, "DischargeClient", "Failed to update client status", zap.Error(err))
+		return nil, ErrInternal
+	}
+
+	s.logger.Info(ctx, "DischargeClient", "Client discharged successfully", zap.String("clientId", updatedClient))
+
+	return &DischargeClientResponse{
 		ClientID: updatedClient,
 	}, nil
 }

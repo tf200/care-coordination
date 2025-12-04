@@ -468,6 +468,117 @@ const docTemplate = `{
                 }
             }
         },
+        "/incidents": {
+            "get": {
+                "description": "List all incidents with pagination and search by client name",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Incident"
+                ],
+                "summary": "List incidents",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size (default: 10, max: 100)",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by client first name, last name, or full name",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.PaginationResponse-array_incident_ListIncidentsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new incident",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Incident"
+                ],
+                "summary": "Create an incident",
+                "parameters": [
+                    {
+                        "description": "Incident",
+                        "name": "incident",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/incident.CreateIncidentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/incident.CreateIncidentResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/intakes": {
             "get": {
                 "description": "List all intake forms",
@@ -557,6 +668,123 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/location-transfers": {
+            "get": {
+                "description": "List all location transfers with pagination and search",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "LocationTransfer"
+                ],
+                "summary": "List location transfers",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size (default: 10, max: 100)",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by client name",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.PaginationResponse-array_location_transfer_ListLocationTransfersResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Register a new location transfer for a client",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "LocationTransfer"
+                ],
+                "summary": "Register a location transfer",
+                "parameters": [
+                    {
+                        "description": "Location Transfer Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/location_transfer.RegisterLocationTransferRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/location_transfer.RegisterLocationTransferResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/resp.ErrorResponse"
                         }
@@ -939,18 +1167,15 @@ const docTemplate = `{
         },
         "client.MoveClientInCareRequest": {
             "type": "object",
-            "required": [
-                "careStartDate"
-            ],
             "properties": {
                 "ambulatoryWeeklyHours": {
                     "type": "integer"
                 },
                 "careEndDate": {
-                    "$ref": "#/definitions/pgtype.Date"
+                    "type": "string"
                 },
                 "careStartDate": {
-                    "$ref": "#/definitions/pgtype.Date"
+                    "type": "string"
                 }
             }
         },
@@ -993,6 +1218,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "bsn",
+                "dateOfBirth",
                 "firstName",
                 "lastName",
                 "password",
@@ -1047,6 +1273,139 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "lastName": {
+                    "type": "string"
+                }
+            }
+        },
+        "incident.CreateIncidentRequest": {
+            "type": "object",
+            "required": [
+                "actionTaken",
+                "clientId",
+                "coordinatorId",
+                "incidentDescription",
+                "incidentSeverity",
+                "incidentTime",
+                "incidentType",
+                "locationId",
+                "status"
+            ],
+            "properties": {
+                "actionTaken": {
+                    "type": "string"
+                },
+                "clientId": {
+                    "type": "string"
+                },
+                "coordinatorId": {
+                    "type": "string"
+                },
+                "incidentDate": {
+                    "type": "string"
+                },
+                "incidentDescription": {
+                    "type": "string"
+                },
+                "incidentSeverity": {
+                    "type": "string",
+                    "enum": [
+                        "minor",
+                        "moderate",
+                        "severe"
+                    ]
+                },
+                "incidentTime": {
+                    "type": "string"
+                },
+                "incidentType": {
+                    "type": "string",
+                    "enum": [
+                        "aggression",
+                        "medical_emergency",
+                        "safety_concern",
+                        "unwanted_behavior",
+                        "other"
+                    ]
+                },
+                "locationId": {
+                    "type": "string"
+                },
+                "otherParties": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "pending",
+                        "under_investigation",
+                        "completed"
+                    ]
+                }
+            }
+        },
+        "incident.CreateIncidentResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "incident.ListIncidentsResponse": {
+            "type": "object",
+            "properties": {
+                "actionTaken": {
+                    "type": "string"
+                },
+                "clientFirstName": {
+                    "type": "string"
+                },
+                "clientId": {
+                    "type": "string"
+                },
+                "clientLastName": {
+                    "type": "string"
+                },
+                "coordinatorFirstName": {
+                    "type": "string"
+                },
+                "coordinatorId": {
+                    "type": "string"
+                },
+                "coordinatorLastName": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "incidentDate": {
+                    "type": "string"
+                },
+                "incidentDescription": {
+                    "type": "string"
+                },
+                "incidentSeverity": {
+                    "type": "string"
+                },
+                "incidentTime": {
+                    "type": "string"
+                },
+                "incidentType": {
+                    "type": "string"
+                },
+                "locationId": {
+                    "type": "string"
+                },
+                "locationName": {
+                    "type": "string"
+                },
+                "otherParties": {
+                    "type": "string"
+                },
+                "status": {
                     "type": "string"
                 }
             }
@@ -1152,6 +1511,87 @@ const docTemplate = `{
                 }
             }
         },
+        "location_transfer.ListLocationTransfersResponse": {
+            "type": "object",
+            "properties": {
+                "clientFirstName": {
+                    "type": "string"
+                },
+                "clientId": {
+                    "type": "string"
+                },
+                "clientLastName": {
+                    "type": "string"
+                },
+                "currentCoordinatorFirstName": {
+                    "type": "string"
+                },
+                "currentCoordinatorId": {
+                    "type": "string"
+                },
+                "currentCoordinatorLastName": {
+                    "type": "string"
+                },
+                "fromLocationId": {
+                    "type": "string"
+                },
+                "fromLocationName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "newCoordinatorFirstName": {
+                    "type": "string"
+                },
+                "newCoordinatorId": {
+                    "type": "string"
+                },
+                "newCoordinatorLastName": {
+                    "type": "string"
+                },
+                "reason": {
+                    "type": "string"
+                },
+                "toLocationId": {
+                    "type": "string"
+                },
+                "toLocationName": {
+                    "type": "string"
+                },
+                "transferDate": {
+                    "description": "or time.Time, but for JSON, string",
+                    "type": "string"
+                }
+            }
+        },
+        "location_transfer.RegisterLocationTransferRequest": {
+            "type": "object",
+            "required": [
+                "clientId",
+                "newCoordinatorId",
+                "newLocationId"
+            ],
+            "properties": {
+                "clientId": {
+                    "type": "string"
+                },
+                "newCoordinatorId": {
+                    "type": "string"
+                },
+                "newLocationId": {
+                    "type": "string"
+                }
+            }
+        },
+        "location_transfer.RegisterLocationTransferResponse": {
+            "type": "object",
+            "properties": {
+                "transferId": {
+                    "type": "string"
+                }
+            }
+        },
         "locations.CreateLocationRequest": {
             "type": "object",
             "required": [
@@ -1211,34 +1651,6 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
-        },
-        "pgtype.Date": {
-            "type": "object",
-            "properties": {
-                "infinityModifier": {
-                    "$ref": "#/definitions/pgtype.InfinityModifier"
-                },
-                "time": {
-                    "type": "string"
-                },
-                "valid": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "pgtype.InfinityModifier": {
-            "type": "integer",
-            "format": "int32",
-            "enum": [
-                1,
-                0,
-                -1
-            ],
-            "x-enum-varnames": [
-                "Infinity",
-                "Finite",
-                "NegativeInfinity"
-            ]
         },
         "referring_orgs.CreateReferringOrgRequest": {
             "type": "object",
@@ -1433,6 +1845,58 @@ const docTemplate = `{
                         "type": "array",
                         "items": {
                             "$ref": "#/definitions/employee.ListEmployeesResponse"
+                        }
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "pageSize": {
+                    "type": "integer"
+                },
+                "totalCount": {
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "type": "integer"
+                }
+            }
+        },
+        "resp.PaginationResponse-array_incident_ListIncidentsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/incident.ListIncidentsResponse"
+                        }
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "pageSize": {
+                    "type": "integer"
+                },
+                "totalCount": {
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "type": "integer"
+                }
+            }
+        },
+        "resp.PaginationResponse-array_location_transfer_ListLocationTransfersResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/location_transfer.ListLocationTransfersResponse"
                         }
                     }
                 },

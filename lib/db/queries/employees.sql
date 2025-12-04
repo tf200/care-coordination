@@ -27,9 +27,11 @@ SELECT
     COUNT(*) OVER() as total_count
 FROM employees e
 WHERE
-    (sqlc.narg('search')::text IS NULL OR
-     LOWER(e.first_name) LIKE LOWER('%' || sqlc.narg('search')::text || '%') OR
-     LOWER(e.last_name) LIKE LOWER('%' || sqlc.narg('search')::text || '%') OR
-     LOWER(CONCAT(e.first_name, ' ', e.last_name)) LIKE LOWER('%' || sqlc.narg('search')::text || '%'))
+(
+  sqlc.narg('search')::text IS NULL OR
+  e.first_name ILIKE '%' || sqlc.narg('search')::text || '%' OR
+  e.last_name ILIKE '%' || sqlc.narg('search')::text || '%' OR
+  CONCAT(e.first_name, ' ', e.last_name) ILIKE '%' || sqlc.narg('search')::text || '%'
+)
 ORDER BY e.first_name, e.last_name
 LIMIT $1 OFFSET $2;

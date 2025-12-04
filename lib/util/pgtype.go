@@ -35,6 +35,14 @@ func StrToPgtypeTime(s string) pgtype.Time {
 	}
 }
 
+func TimeToPgtypeTime(t time.Time) pgtype.Time {
+	midnight := time.Date(0, 1, 1, 0, 0, 0, 0, time.UTC)
+	return pgtype.Time{
+		Microseconds: t.Sub(midnight).Microseconds(),
+		Valid:        true,
+	}
+}
+
 func StrToPgtypeDate(s string) pgtype.Date {
 	// Parse strictly enforces "YYYY-MM-DD"
 	t, err := time.Parse(time.DateOnly, s)

@@ -1,4 +1,4 @@
-package referring_orgs
+package referringOrgs
 
 import "errors"
 

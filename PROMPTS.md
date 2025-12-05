@@ -1,4 +1,4 @@
-Write integration tests for @[lib/db/sqlc/registration_forms.sql.go]
+Write integration tests for @[lib/db/sqlc/locations.go]
 
 Follow the testing patterns in @[lib/db/sqlc/README.md]
 
@@ -8,7 +8,7 @@ Use the existing infrastructure:
 - @[lib/db/sqlc/users_test.go] - example test file with table-driven tests
 
 Requirements:
-1. Create `registration_forms_test.go` in the same directory
+1. Create `locations.go` in the same directory
 2. Use **idiomatic Go table-driven tests** with test struct containing: name, setup, wantErr, checkErr, validate
 3. Test every query function in the source file
 4. For each query, include test cases for:

@@ -5,17 +5,17 @@ import (
 )
 
 type CreateIntakeFormRequest struct {
-	RegistrationFormID string    `json:"registrationFormId" binding:"required"`
-	IntakeDate         time.Time `json:"intakeDate" binding:"required format=2006-01-02"`
-	IntakeTime         string    `json:"intakeTime" binding:"required format=15:04:05"`
-	LocationID         string    `json:"locationId" binding:"required"`
-	CoordinatorID      string    `json:"coordinatorId" binding:"required"`
-	FamilySituation    *string   `json:"familySituation"`
-	MainProvider       *string   `json:"mainProvider"`
-	Limitations        *string   `json:"limitations"`
-	FocusAreas         *string   `json:"focusAreas"`
-	Goals              *string   `json:"goals"`
-	Notes              *string   `json:"notes"`
+	RegistrationFormID string  `json:"registrationFormId" binding:"required"`
+	IntakeDate         string  `json:"intakeDate" binding:"required format=2006-01-02"`
+	IntakeTime         string  `json:"intakeTime" binding:"required format=15:04:05"`
+	LocationID         string  `json:"locationId" binding:"required"`
+	CoordinatorID      string  `json:"coordinatorId" binding:"required"`
+	FamilySituation    *string `json:"familySituation"`
+	MainProvider       *string `json:"mainProvider"`
+	Limitations        *string `json:"limitations"`
+	FocusAreas         *string `json:"focusAreas"`
+	Goals              *string `json:"goals"`
+	Notes              *string `json:"notes"`
 }
 
 type CreateIntakeFormResponse struct {

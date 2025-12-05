@@ -9,7 +9,6 @@ import (
 	"care-cordination/lib/util"
 	"context"
 
-	"github.com/jackc/pgx/v5/pgtype"
 	"go.uber.org/zap"
 )
 
@@ -30,7 +29,7 @@ func (s *intakeService) CreateIntakeForm(ctx context.Context, req *CreateIntakeF
 	err := s.db.CreateIntakeForm(ctx, db.CreateIntakeFormParams{
 		ID:                 id,
 		RegistrationFormID: req.RegistrationFormID,
-		IntakeDate:         pgtype.Date{Time: req.IntakeDate, Valid: true},
+		IntakeDate:         util.StrToPgtypeDate(req.IntakeDate),
 		IntakeTime:         util.StrToPgtypeTime(req.IntakeTime),
 		LocationID:         req.LocationID,
 		CoordinatorID:      req.CoordinatorID,

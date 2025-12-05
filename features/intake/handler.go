@@ -43,7 +43,7 @@ func (h *IntakeHandler) SetupIntakeRoutes(router *gin.Engine) {
 func (h *IntakeHandler) CreateIntakeForm(ctx *gin.Context) {
 	var req CreateIntakeFormRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
+		ctx.JSON(http.StatusBadRequest, resp.Error(err))
 		return
 	}
 
@@ -62,7 +62,7 @@ func (h *IntakeHandler) CreateIntakeForm(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param search query string false "Search by client first name or last name"
-// @Success 200 {object} []ListIntakeFormsResponse
+// @Success 200 {object} resp.PaginationResponse[ListIntakeFormsResponse]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
@@ -70,7 +70,7 @@ func (h *IntakeHandler) CreateIntakeForm(ctx *gin.Context) {
 func (h *IntakeHandler) ListIntakeForms(ctx *gin.Context) {
 	var req ListIntakeFormsRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
+		ctx.JSON(http.StatusBadRequest, resp.Error(err))
 		return
 	}
 	if req.Search == nil {

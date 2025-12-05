@@ -43,7 +43,7 @@ func (h *RegistrationHandler) SetupRegistrationRoutes(router *gin.Engine) {
 func (h *RegistrationHandler) CreateRegistrationForm(ctx *gin.Context) {
 	var req CreateRegistrationFormRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
+		ctx.JSON(http.StatusBadRequest, resp.Error(err))
 		return
 	}
 

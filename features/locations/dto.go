@@ -4,8 +4,8 @@ type CreateLocationRequest struct {
 	Name       string `json:"name" binding:"required"`
 	PostalCode string `json:"postalCode" binding:"required"`
 	Address    string `json:"address" binding:"required"`
-	Capacity   int32  `json:"capacity" binding:"required,min=1"`
-	Occupied   int32  `json:"occupied" binding:"required,min=0"`
+	Capacity   int32  `json:"capacity" binding:"min=1"`
+	Occupied   int32  `json:"occupied" binding:"min=0"`
 }
 
 type CreateLocationResponse struct {

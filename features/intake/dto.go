@@ -7,7 +7,7 @@ import (
 type CreateIntakeFormRequest struct {
 	RegistrationFormID string  `json:"registrationFormId" binding:"required"`
 	IntakeDate         string  `json:"intakeDate" binding:"required,datetime=2006-01-02"`
-	IntakeTime         string  `json:"intakeTime" binding:"required,datetime=15:04:05"`
+	IntakeTime         string  `json:"intakeTime" binding:"required,datetime=15:04"`
 	LocationID         string  `json:"locationId" binding:"required"`
 	CoordinatorID      string  `json:"coordinatorId" binding:"required"`
 	FamilySituation    *string `json:"familySituation"`

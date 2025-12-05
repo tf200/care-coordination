@@ -122,6 +122,12 @@ WHERE
         -- Search by Client Last Name
         r.last_name ILIKE '%' || $3 || '%'
     )
+    AND (
+        -- If status is NULL or empty, ignore filter
+        $4::text IS NULL OR $4::text = '' OR
+        -- Filter by status
+        r.status::text = $4::text
+    )
 ORDER BY r.registration_date DESC
 LIMIT $1 OFFSET $2
 `
@@ -130,6 +136,7 @@ type ListRegistrationFormsParams struct {
 	Limit  int32   `json:"limit"`
 	Offset int32   `json:"offset"`
 	Search *string `json:"search"`
+	Status *string `json:"status"`
 }
 
 type ListRegistrationFormsRow struct {
@@ -153,7 +160,12 @@ type ListRegistrationFormsRow struct {
 }
 
 func (q *Queries) ListRegistrationForms(ctx context.Context, arg ListRegistrationFormsParams) ([]ListRegistrationFormsRow, error) {
-	rows, err := q.db.Query(ctx, listRegistrationForms, arg.Limit, arg.Offset, arg.Search)
+	rows, err := q.db.Query(ctx, listRegistrationForms,
+		arg.Limit,
+		arg.Offset,
+		arg.Search,
+		arg.Status,
+	)
 	if err != nil {
 		return nil, err
 	}

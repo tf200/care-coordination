@@ -55,6 +55,7 @@ func (s *registrationService) ListRegistrationForms(ctx context.Context, req *Li
 		Limit:  limit,
 		Offset: offset,
 		Search: req.Search,
+		Status: req.Status,
 	})
 	if err != nil {
 		s.logger.Error(ctx, "ListRegistrationForms", "Failed to list registration forms", zap.Error(err))

@@ -49,6 +49,12 @@ WHERE
         -- Search by Client Last Name
         r.last_name ILIKE '%' || sqlc.narg('search') || '%'
     )
+    AND (
+        -- If status is NULL or empty, ignore filter
+        sqlc.narg('status')::text IS NULL OR sqlc.narg('status')::text = '' OR
+        -- Filter by status
+        r.status::text = sqlc.narg('status')::text
+    )
 ORDER BY r.registration_date DESC
 LIMIT $1 OFFSET $2;
 

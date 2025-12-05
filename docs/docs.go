@@ -1005,9 +1005,6 @@ const docTemplate = `{
         "/registrations": {
             "get": {
                 "description": "List all registration forms",
-                "consumes": [
-                    "application/json"
-                ],
                 "produces": [
                     "application/json"
                 ],
@@ -1015,14 +1012,37 @@ const docTemplate = `{
                     "Registration"
                 ],
                 "summary": "List registration forms",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by status (pending, approved, rejected, in_review)",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/registration.ListRegistrationFormsResponse"
-                            }
+                            "$ref": "#/definitions/resp.PaginationResponse-registration_ListRegistrationFormsResponse"
                         }
                     },
                     "400": {
@@ -1506,6 +1526,9 @@ const docTemplate = `{
                 "registrationFormId": {
                     "type": "string"
                 },
+                "status": {
+                    "type": "string"
+                },
                 "updatedAt": {
                     "type": "string"
                 }
@@ -1947,6 +1970,29 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/referring_orgs.ListReferringOrgsResponse"
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "pageSize": {
+                    "type": "integer"
+                },
+                "totalCount": {
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "type": "integer"
+                }
+            }
+        },
+        "resp.PaginationResponse-registration_ListRegistrationFormsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/registration.ListRegistrationFormsResponse"
                     }
                 },
                 "page": {

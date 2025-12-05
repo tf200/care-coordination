@@ -24,6 +24,7 @@ type CreateRegistrationFormResponse struct {
 
 type ListRegistrationFormsRequest struct {
 	Search *string `form:"search"`
+	Status *string `form:"status"`
 }
 
 type ListRegistrationFormsResponse struct {

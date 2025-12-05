@@ -59,9 +59,12 @@ func (h *RegistrationHandler) CreateRegistrationForm(ctx *gin.Context) {
 // @Summary List registration forms
 // @Description List all registration forms
 // @Tags Registration
-// @Accept json
+// @Param page query int false "Page number"
+// @Param page_size query int false "Page size"
+// @Param search query string false "Search"
+// @Param status query string false "Filter by status (pending, approved, rejected, in_review)"
 // @Produce json
-// @Success 200 {object} []ListRegistrationFormsResponse
+// @Success 200 {object} resp.PaginationResponse[ListRegistrationFormsResponse]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse

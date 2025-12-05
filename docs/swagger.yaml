@@ -275,6 +275,8 @@ definitions:
         type: string
       registrationFormId:
         type: string
+      status:
+        type: string
       updatedAt:
         type: string
     type: object
@@ -569,6 +571,21 @@ definitions:
       data:
         items:
           $ref: '#/definitions/referring_orgs.ListReferringOrgsResponse'
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      totalCount:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  resp.PaginationResponse-registration_ListRegistrationFormsResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/registration.ListRegistrationFormsResponse'
         type: array
       page:
         type: integer
@@ -1236,18 +1253,31 @@ paths:
       - referring-orgs
   /registrations:
     get:
-      consumes:
-      - application/json
       description: List all registration forms
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      - description: Search
+        in: query
+        name: search
+        type: string
+      - description: Filter by status (pending, approved, rejected, in_review)
+        in: query
+        name: status
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/registration.ListRegistrationFormsResponse'
-            type: array
+            $ref: '#/definitions/resp.PaginationResponse-registration_ListRegistrationFormsResponse'
         "400":
           description: Bad Request
           schema:

@@ -33,7 +33,7 @@ func (h *AuthHandler) SetupAuthRoutes(router *gin.Engine, rateLimiter ratelimit.
 		auth.POST("/login", h.Login)
 	}
 
-	auth.POST("/refresh", h.mdw.AuthMdw(), h.RefreshTokens)
+	auth.POST("/refresh", h.RefreshTokens)
 	auth.POST("/logout", h.mdw.AuthMdw(), h.Logout)
 }
 

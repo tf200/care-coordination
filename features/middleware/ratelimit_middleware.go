@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"go.uber.org/zap"
 )
 
@@ -102,7 +103,8 @@ func (m *Middleware) LoginRateLimitMiddleware(limiter ratelimit.RateLimiter, log
 
 		// Bind JSON but allow continuing even if it fails
 		// (the actual handler will do proper validation)
-		if err := ctx.ShouldBindJSON(&loginReq); err == nil && loginReq.Email != "" {
+		// Use ShouldBindBodyWith to cache the body so it can be re-read by the handler
+		if err := ctx.ShouldBindBodyWith(&loginReq, binding.JSON); err == nil && loginReq.Email != "" {
 			// Check email-based rate limit
 			emailResult, err := limiter.CheckEmailLimit(ctx, loginReq.Email)
 			if err != nil {

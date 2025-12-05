@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 )
 
 type AuthHandler struct {
@@ -50,7 +51,8 @@ func (h *AuthHandler) SetupAuthRoutes(router *gin.Engine, rateLimiter ratelimit.
 // @Security -
 func (h *AuthHandler) Login(ctx *gin.Context) {
 	var req LoginRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
+	// Use ShouldBindBodyWith to read from cached body (if rate limiting middleware ran)
+	if err := ctx.ShouldBindBodyWith(&req, binding.JSON); err != nil {
 		ctx.JSON(http.StatusBadRequest, resp.Error(err))
 		return
 	}

@@ -622,7 +622,7 @@ type RegistrationForm struct {
 	Gender             GenderEnum                 `json:"gender"`
 	RefferingOrgID     *string                    `json:"reffering_org_id"`
 	CareType           CareTypeEnum               `json:"care_type"`
-	RegistrationDate   pgtype.Timestamp           `json:"registration_date"`
+	RegistrationDate   pgtype.Date                `json:"registration_date"`
 	RegistrationReason string                     `json:"registration_reason"`
 	AdditionalNotes    *string                    `json:"additional_notes"`
 	Status             NullRegistrationStatusEnum `json:"status"`

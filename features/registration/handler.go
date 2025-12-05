@@ -72,7 +72,7 @@ func (h *RegistrationHandler) CreateRegistrationForm(ctx *gin.Context) {
 func (h *RegistrationHandler) ListRegistrationForms(ctx *gin.Context) {
 	var req ListRegistrationFormsRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
+		ctx.JSON(http.StatusBadRequest, resp.Error(err))
 		return
 	}
 	result, err := h.rgstService.ListRegistrationForms(ctx, &req)

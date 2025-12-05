@@ -92,7 +92,7 @@ CREATE TYPE registration_status_enum AS ENUM ('pending', 'approved', 'rejected',
     reffering_org_id TEXT REFERENCES referring_orgs(id),
 -- registration for 
     care_type care_type_enum NOT NULL,
-    registration_date TIMESTAMP  DEFAULT CURRENT_TIMESTAMP,
+    registration_date DATE  DEFAULT CURRENT_DATE,
     registration_reason TEXT NOT NULL,
     additional_notes TEXT,
     status registration_status_enum DEFAULT 'pending',

@@ -5,17 +5,17 @@ import (
 )
 
 type CreateRegistrationFormRequest struct {
-	FirstName          string    `json:"firstName" binding:"required"`
-	LastName           string    `json:"lastName" binding:"required"`
-	BSN                string    `json:"bsn" binding:"required"`
-	DateOfBirth        time.Time `json:"dateOfBirth" binding:"required"`
-	Gender             string    `json:"gender" binding:"required,oneof=male female other"`
-	RefferingOrgID     *string   `json:"refferingOrgId" binding:"required"`
-	CareType           string    `json:"careType" binding:"required,oneof=protected_living semi_independent_living independent_assisted_living ambulatory_care"`
-	RegistrationDate   time.Time `json:"registrationDate" binding:"required"`
-	RegistrationReason string    `json:"registrationReason" binding:"required"`
-	AdditionalNotes    *string   `json:"additionalNotes"`
-	AttachmentIDs      []string  `json:"attachmentIds"`
+	FirstName          string   `json:"firstName" binding:"required"`
+	LastName           string   `json:"lastName" binding:"required"`
+	BSN                string   `json:"bsn" binding:"required"`
+	DateOfBirth        string   `json:"dateOfBirth" binding:"required" format:"2006-01-02"`
+	Gender             string   `json:"gender" binding:"required,oneof=male female other"`
+	RefferingOrgID     *string  `json:"refferingOrgId" binding:"required"`
+	CareType           string   `json:"careType" binding:"required,oneof=protected_living semi_independent_living independent_assisted_living ambulatory_care"`
+	RegistrationDate   string   `json:"registrationDate" binding:"required" format:"2006-01-02"`
+	RegistrationReason string   `json:"registrationReason" binding:"required"`
+	AdditionalNotes    *string  `json:"additionalNotes"`
+	AttachmentIDs      []string `json:"attachmentIds"`
 }
 
 type CreateRegistrationFormResponse struct {

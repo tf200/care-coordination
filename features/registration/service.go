@@ -6,9 +6,9 @@ import (
 	"care-cordination/lib/logger"
 	"care-cordination/lib/nanoid"
 	"care-cordination/lib/resp"
+	"care-cordination/lib/util"
 	"context"
 
-	"github.com/jackc/pgx/v5/pgtype"
 	"go.uber.org/zap"
 )
 
@@ -31,11 +31,11 @@ func (s *registrationService) CreateRegistrationForm(ctx context.Context, req *C
 		FirstName:          req.FirstName,
 		LastName:           req.LastName,
 		Bsn:                req.BSN,
-		DateOfBirth:        pgtype.Date{Time: req.DateOfBirth, Valid: true},
+		DateOfBirth:        util.StrToPgtypeDate(req.DateOfBirth),
 		RefferingOrgID:     req.RefferingOrgID,
 		Gender:             db.GenderEnum(req.Gender),
 		CareType:           db.CareTypeEnum(req.CareType),
-		RegistrationDate:   pgtype.Timestamp{Time: req.RegistrationDate, Valid: true},
+		RegistrationDate:   util.StrToPgtypeDate(req.RegistrationDate),
 		RegistrationReason: req.RegistrationReason,
 		AdditionalNotes:    req.AdditionalNotes,
 		AttachmentIds:      req.AttachmentIDs,

@@ -32,18 +32,18 @@ INSERT INTO registration_forms (
 `
 
 type CreateRegistrationFormParams struct {
-	ID                 string           `json:"id"`
-	FirstName          string           `json:"first_name"`
-	LastName           string           `json:"last_name"`
-	Bsn                string           `json:"bsn"`
-	Gender             GenderEnum       `json:"gender"`
-	DateOfBirth        pgtype.Date      `json:"date_of_birth"`
-	RefferingOrgID     *string          `json:"reffering_org_id"`
-	CareType           CareTypeEnum     `json:"care_type"`
-	RegistrationDate   pgtype.Timestamp `json:"registration_date"`
-	RegistrationReason string           `json:"registration_reason"`
-	AdditionalNotes    *string          `json:"additional_notes"`
-	AttachmentIds      []string         `json:"attachment_ids"`
+	ID                 string       `json:"id"`
+	FirstName          string       `json:"first_name"`
+	LastName           string       `json:"last_name"`
+	Bsn                string       `json:"bsn"`
+	Gender             GenderEnum   `json:"gender"`
+	DateOfBirth        pgtype.Date  `json:"date_of_birth"`
+	RefferingOrgID     *string      `json:"reffering_org_id"`
+	CareType           CareTypeEnum `json:"care_type"`
+	RegistrationDate   pgtype.Date  `json:"registration_date"`
+	RegistrationReason string       `json:"registration_reason"`
+	AdditionalNotes    *string      `json:"additional_notes"`
+	AttachmentIds      []string     `json:"attachment_ids"`
 }
 
 func (q *Queries) CreateRegistrationForm(ctx context.Context, arg CreateRegistrationFormParams) error {
@@ -147,7 +147,7 @@ type ListRegistrationFormsRow struct {
 	DateOfBirth        pgtype.Date                `json:"date_of_birth"`
 	RefferingOrgID     *string                    `json:"reffering_org_id"`
 	CareType           CareTypeEnum               `json:"care_type"`
-	RegistrationDate   pgtype.Timestamp           `json:"registration_date"`
+	RegistrationDate   pgtype.Date                `json:"registration_date"`
 	RegistrationReason string                     `json:"registration_reason"`
 	AdditionalNotes    *string                    `json:"additional_notes"`
 	AttachmentIds      []string                   `json:"attachment_ids"`

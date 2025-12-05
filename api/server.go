@@ -34,6 +34,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -126,6 +127,17 @@ func (s *Server) setupRoutes(logger *logger.Logger) {
 		return gin.DebugMode
 	}())
 	router := gin.New()
+
+	// CORS middleware - must be before other middleware
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"}, // In production, specify exact origins
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: false,
+		MaxAge:           12 * time.Hour,
+	}))
+
 	router.Use(ginzap.GinzapWithConfig(logger.Logger, &ginzap.Config{
 		UTC:        true,
 		TimeFormat: "2006-01-02 15:04:05",

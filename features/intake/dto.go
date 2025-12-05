@@ -42,4 +42,5 @@ type ListIntakeFormsResponse struct {
 	LocationName         *string   `json:"locationName"`
 	CoordinatorFirstName *string   `json:"coordinatorFirstName"`
 	CoordinatorLastName  *string   `json:"coordinatorLastName"`
+	Status               string    `json:"status"`
 }

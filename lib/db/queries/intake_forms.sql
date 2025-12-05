@@ -25,6 +25,7 @@ SELECT
     i.location_id,
     i.coordinator_id,
     i.main_provider,
+    i.status,
     r.first_name,
     r.last_name,
     r.bsn,

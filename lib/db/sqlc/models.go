@@ -587,6 +587,7 @@ type IntakeForm struct {
 	FocusAreas         *string          `json:"focus_areas"`
 	Goals              *string          `json:"goals"`
 	Notes              *string          `json:"notes"`
+	Status             IntakeStatusEnum `json:"status"`
 	CreatedAt          pgtype.Timestamp `json:"created_at"`
 	UpdatedAt          pgtype.Timestamp `json:"updated_at"`
 }

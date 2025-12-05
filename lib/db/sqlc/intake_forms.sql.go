@@ -64,7 +64,7 @@ func (q *Queries) CreateIntakeForm(ctx context.Context, arg CreateIntakeFormPara
 }
 
 const getIntakeForm = `-- name: GetIntakeForm :one
-SELECT id, registration_form_id, intake_date, intake_time, location_id, coordinator_id, family_situation, main_provider, limitations, focus_areas, goals, notes, created_at, updated_at FROM intake_forms WHERE id = $1
+SELECT id, registration_form_id, intake_date, intake_time, location_id, coordinator_id, family_situation, main_provider, limitations, focus_areas, goals, notes, status, created_at, updated_at FROM intake_forms WHERE id = $1
 `
 
 func (q *Queries) GetIntakeForm(ctx context.Context, id string) (IntakeForm, error) {
@@ -83,6 +83,7 @@ func (q *Queries) GetIntakeForm(ctx context.Context, id string) (IntakeForm, err
 		&i.FocusAreas,
 		&i.Goals,
 		&i.Notes,
+		&i.Status,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -98,6 +99,7 @@ SELECT
     i.location_id,
     i.coordinator_id,
     i.main_provider,
+    i.status,
     r.first_name,
     r.last_name,
     r.bsn,
@@ -133,21 +135,22 @@ type ListIntakeFormsParams struct {
 }
 
 type ListIntakeFormsRow struct {
-	ID                   string      `json:"id"`
-	RegistrationFormID   string      `json:"registration_form_id"`
-	IntakeDate           pgtype.Date `json:"intake_date"`
-	IntakeTime           pgtype.Time `json:"intake_time"`
-	LocationID           string      `json:"location_id"`
-	CoordinatorID        string      `json:"coordinator_id"`
-	MainProvider         *string     `json:"main_provider"`
-	FirstName            *string     `json:"first_name"`
-	LastName             *string     `json:"last_name"`
-	Bsn                  *string     `json:"bsn"`
-	OrgName              *string     `json:"org_name"`
-	LocationName         *string     `json:"location_name"`
-	CoordinatorFirstName *string     `json:"coordinator_first_name"`
-	CoordinatorLastName  *string     `json:"coordinator_last_name"`
-	TotalCount           int64       `json:"total_count"`
+	ID                   string           `json:"id"`
+	RegistrationFormID   string           `json:"registration_form_id"`
+	IntakeDate           pgtype.Date      `json:"intake_date"`
+	IntakeTime           pgtype.Time      `json:"intake_time"`
+	LocationID           string           `json:"location_id"`
+	CoordinatorID        string           `json:"coordinator_id"`
+	MainProvider         *string          `json:"main_provider"`
+	Status               IntakeStatusEnum `json:"status"`
+	FirstName            *string          `json:"first_name"`
+	LastName             *string          `json:"last_name"`
+	Bsn                  *string          `json:"bsn"`
+	OrgName              *string          `json:"org_name"`
+	LocationName         *string          `json:"location_name"`
+	CoordinatorFirstName *string          `json:"coordinator_first_name"`
+	CoordinatorLastName  *string          `json:"coordinator_last_name"`
+	TotalCount           int64            `json:"total_count"`
 }
 
 func (q *Queries) ListIntakeForms(ctx context.Context, arg ListIntakeFormsParams) ([]ListIntakeFormsRow, error) {
@@ -167,6 +170,7 @@ func (q *Queries) ListIntakeForms(ctx context.Context, arg ListIntakeFormsParams
 			&i.LocationID,
 			&i.CoordinatorID,
 			&i.MainProvider,
+			&i.Status,
 			&i.FirstName,
 			&i.LastName,
 			&i.Bsn,

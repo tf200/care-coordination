@@ -116,6 +116,7 @@ CREATE TABLE intake_forms (
     focus_areas TEXT,
     goals TEXT,
     notes TEXT,
+    status intake_status_enum NOT NULL DEFAULT 'pending',
     created_at TIMESTAMP  DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP  DEFAULT CURRENT_TIMESTAMP
 );

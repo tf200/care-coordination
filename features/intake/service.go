@@ -78,6 +78,7 @@ func (s *intakeService) ListIntakeForms(ctx context.Context, req *ListIntakeForm
 			LocationName:         intakeForm.LocationName,
 			CoordinatorFirstName: intakeForm.CoordinatorFirstName,
 			CoordinatorLastName:  intakeForm.CoordinatorLastName,
+			Status:               string(intakeForm.Status),
 		})
 	}
 	totalCount := 0

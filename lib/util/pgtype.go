@@ -22,9 +22,14 @@ func PgtypeTimeToString(t pgtype.Time) string {
 	return tm.Format(time.TimeOnly)
 }
 func StrToPgtypeTime(s string) pgtype.Time {
+	// Try parsing with full time format (15:04:05) first
 	parsedTime, err := time.Parse(time.TimeOnly, s)
 	if err != nil {
-		return pgtype.Time{Valid: false}
+		// Fall back to short format (15:04)
+		parsedTime, err = time.Parse("15:04", s)
+		if err != nil {
+			return pgtype.Time{Valid: false}
+		}
 	}
 
 	midnight := time.Date(0, 1, 1, 0, 0, 0, 0, time.UTC)

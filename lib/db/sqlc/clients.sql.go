@@ -179,6 +179,108 @@ func (q *Queries) GetClientByID(ctx context.Context, id string) (Client, error) 
 	return i, err
 }
 
+const listInCareClients = `-- name: ListInCareClients :many
+SELECT
+    c.id,
+    c.first_name,
+    c.last_name,
+    c.bsn,
+    c.date_of_birth,
+    c.phone_number,
+    c.gender,
+    c.care_type,
+    c.care_start_date,
+    c.care_end_date,
+    c.ambulatory_weekly_hours,
+    c.created_at,
+    l.id AS location_id,
+    l.name AS location_name,
+    e.id AS coordinator_id,
+    e.first_name AS coordinator_first_name,
+    e.last_name AS coordinator_last_name,
+    ro.name AS referring_org_name,
+    COUNT(*) OVER() AS total_count
+FROM clients c
+JOIN locations l ON c.assigned_location_id = l.id
+JOIN employees e ON c.coordinator_id = e.id
+LEFT JOIN referring_orgs ro ON c.referring_org_id = ro.id
+WHERE c.status = 'in_care'
+    AND ($3::text IS NULL OR
+         LOWER(c.first_name) LIKE LOWER('%' || $3::text || '%') OR
+         LOWER(c.last_name) LIKE LOWER('%' || $3::text || '%') OR
+         LOWER(c.first_name || ' ' || c.last_name) LIKE LOWER('%' || $3::text || '%'))
+ORDER BY c.care_start_date DESC
+LIMIT $1 OFFSET $2
+`
+
+type ListInCareClientsParams struct {
+	Limit  int32   `json:"limit"`
+	Offset int32   `json:"offset"`
+	Search *string `json:"search"`
+}
+
+type ListInCareClientsRow struct {
+	ID                    string           `json:"id"`
+	FirstName             string           `json:"first_name"`
+	LastName              string           `json:"last_name"`
+	Bsn                   string           `json:"bsn"`
+	DateOfBirth           pgtype.Date      `json:"date_of_birth"`
+	PhoneNumber           *string          `json:"phone_number"`
+	Gender                GenderEnum       `json:"gender"`
+	CareType              CareTypeEnum     `json:"care_type"`
+	CareStartDate         pgtype.Date      `json:"care_start_date"`
+	CareEndDate           pgtype.Date      `json:"care_end_date"`
+	AmbulatoryWeeklyHours *int32           `json:"ambulatory_weekly_hours"`
+	CreatedAt             pgtype.Timestamp `json:"created_at"`
+	LocationID            string           `json:"location_id"`
+	LocationName          string           `json:"location_name"`
+	CoordinatorID         string           `json:"coordinator_id"`
+	CoordinatorFirstName  string           `json:"coordinator_first_name"`
+	CoordinatorLastName   string           `json:"coordinator_last_name"`
+	ReferringOrgName      *string          `json:"referring_org_name"`
+	TotalCount            int64            `json:"total_count"`
+}
+
+func (q *Queries) ListInCareClients(ctx context.Context, arg ListInCareClientsParams) ([]ListInCareClientsRow, error) {
+	rows, err := q.db.Query(ctx, listInCareClients, arg.Limit, arg.Offset, arg.Search)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListInCareClientsRow{}
+	for rows.Next() {
+		var i ListInCareClientsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.FirstName,
+			&i.LastName,
+			&i.Bsn,
+			&i.DateOfBirth,
+			&i.PhoneNumber,
+			&i.Gender,
+			&i.CareType,
+			&i.CareStartDate,
+			&i.CareEndDate,
+			&i.AmbulatoryWeeklyHours,
+			&i.CreatedAt,
+			&i.LocationID,
+			&i.LocationName,
+			&i.CoordinatorID,
+			&i.CoordinatorFirstName,
+			&i.CoordinatorLastName,
+			&i.ReferringOrgName,
+			&i.TotalCount,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listWaitingListClients = `-- name: ListWaitingListClients :many
 SELECT
     c.id,

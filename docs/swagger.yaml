@@ -43,6 +43,86 @@ definitions:
       refreshToken:
         type: string
     type: object
+  client.ListInCareClientsResponse:
+    properties:
+      bsn:
+        type: string
+      careEndDate:
+        type: string
+      careStartDate:
+        type: string
+      careType:
+        type: string
+      coordinatorFirstName:
+        type: string
+      coordinatorId:
+        type: string
+      coordinatorLastName:
+        type: string
+      dateOfBirth:
+        type: string
+      firstName:
+        type: string
+      gender:
+        type: string
+      id:
+        type: string
+      lastName:
+        type: string
+      locationId:
+        type: string
+      locationName:
+        type: string
+      phoneNumber:
+        type: string
+      referringOrgName:
+        type: string
+      usedAmbulatoryHours:
+        description: For ambulatory_care only
+        type: integer
+      weeksInAccommodation:
+        description: For protected_living, semi_independent_living, independent_assisted_living
+        type: integer
+    type: object
+  client.ListWaitingListClientsResponse:
+    properties:
+      bsn:
+        type: string
+      careType:
+        type: string
+      coordinatorFirstName:
+        type: string
+      coordinatorId:
+        type: string
+      coordinatorLastName:
+        type: string
+      createdAt:
+        type: string
+      dateOfBirth:
+        type: string
+      firstName:
+        type: string
+      focusAreas:
+        type: string
+      gender:
+        type: string
+      id:
+        type: string
+      lastName:
+        type: string
+      locationId:
+        type: string
+      locationName:
+        type: string
+      notes:
+        type: string
+      phoneNumber:
+        type: string
+      referringOrgName:
+        type: string
+      waitingListPriority:
+        type: string
+    type: object
   client.MoveClientInCareRequest:
     properties:
       ambulatoryWeeklyHours:
@@ -237,6 +317,8 @@ definitions:
         type: string
     required:
     - coordinatorId
+    - intakeDate
+    - intakeTime
     - locationId
     - registrationFormId
     type: object
@@ -247,6 +329,8 @@ definitions:
     type: object
   intake.ListIntakeFormsResponse:
     properties:
+      careType:
+        type: string
       clientBsn:
         type: string
       clientFirstName:
@@ -350,9 +434,7 @@ definitions:
         type: string
     required:
     - address
-    - capacity
     - name
-    - occupied
     - postalCode
     type: object
   locations.CreateLocationResponse:
@@ -424,26 +506,41 @@ definitions:
       bsn:
         type: string
       careType:
+        enum:
+        - protected_living
+        - semi_independent_living
+        - independent_assisted_living
+        - ambulatory_care
         type: string
       dateOfBirth:
+        format: "2006-01-02"
         type: string
       firstName:
         type: string
       gender:
+        enum:
+        - male
+        - female
+        - other
         type: string
       lastName:
         type: string
       refferingOrgId:
         type: string
       registrationDate:
+        format: "2006-01-02"
         type: string
       registrationReason:
         type: string
     required:
     - bsn
+    - careType
+    - dateOfBirth
     - firstName
+    - gender
     - lastName
     - refferingOrgId
+    - registrationDate
     - registrationReason
     type: object
   registration.CreateRegistrationFormResponse:
@@ -497,6 +594,40 @@ definitions:
       message:
         example: success message
         type: string
+    type: object
+  resp.PaginationResponse-array_client_ListInCareClientsResponse:
+    properties:
+      data:
+        items:
+          items:
+            $ref: '#/definitions/client.ListInCareClientsResponse'
+          type: array
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      totalCount:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  resp.PaginationResponse-array_client_ListWaitingListClientsResponse:
+    properties:
+      data:
+        items:
+          items:
+            $ref: '#/definitions/client.ListWaitingListClientsResponse'
+          type: array
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      totalCount:
+        type: integer
+      totalPages:
+        type: integer
     type: object
   resp.PaginationResponse-array_employee_ListEmployeesResponse:
     properties:
@@ -556,6 +687,21 @@ definitions:
           items:
             $ref: '#/definitions/locations.ListLocationsResponse'
           type: array
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      totalCount:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  resp.PaginationResponse-intake_ListIntakeFormsResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/intake.ListIntakeFormsResponse'
         type: array
       page:
         type: integer
@@ -788,6 +934,48 @@ paths:
       summary: Move client to in care
       tags:
       - Client
+  /clients/in-care:
+    get:
+      consumes:
+      - application/json
+      description: List all clients currently in care with pagination and search.
+        Returns weeks in accommodation for living care types or used ambulatory hours
+        for ambulatory care.
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Page size (default: 10, max: 100)'
+        in: query
+        name: page_size
+        type: integer
+      - description: Search by client first name or last name
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.PaginationResponse-array_client_ListInCareClientsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: List in-care clients
+      tags:
+      - Client
   /clients/move-to-waiting-list:
     post:
       consumes:
@@ -825,6 +1013,46 @@ paths:
           schema:
             $ref: '#/definitions/resp.ErrorResponse'
       summary: Move client to waiting list
+      tags:
+      - Client
+  /clients/waiting-list:
+    get:
+      consumes:
+      - application/json
+      description: List all clients on the waiting list with pagination and search
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Page size (default: 10, max: 100)'
+        in: query
+        name: page_size
+        type: integer
+      - description: Search by client first name or last name
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.PaginationResponse-array_client_ListWaitingListClientsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: List waiting list clients
       tags:
       - Client
   /employees:
@@ -989,9 +1217,7 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/intake.ListIntakeFormsResponse'
-            type: array
+            $ref: '#/definitions/resp.PaginationResponse-intake_ListIntakeFormsResponse'
         "400":
           description: Bad Request
           schema:

@@ -234,6 +234,67 @@ const docTemplate = `{
                 }
             }
         },
+        "/clients/in-care": {
+            "get": {
+                "description": "List all clients currently in care with pagination and search. Returns weeks in accommodation for living care types or used ambulatory hours for ambulatory care.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Client"
+                ],
+                "summary": "List in-care clients",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size (default: 10, max: 100)",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by client first name or last name",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.PaginationResponse-array_client_ListInCareClientsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/clients/move-to-waiting-list": {
             "post": {
                 "description": "Move a client from intake form to waiting list by creating a client record",
@@ -279,6 +340,67 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/clients/waiting-list": {
+            "get": {
+                "description": "List all clients on the waiting list with pagination and search",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Client"
+                ],
+                "summary": "List waiting list clients",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size (default: 10, max: 100)",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by client first name or last name",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.PaginationResponse-array_client_ListWaitingListClientsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/resp.ErrorResponse"
                         }
@@ -604,10 +726,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/intake.ListIntakeFormsResponse"
-                            }
+                            "$ref": "#/definitions/resp.PaginationResponse-intake_ListIntakeFormsResponse"
                         }
                     },
                     "400": {
@@ -1185,6 +1304,126 @@ const docTemplate = `{
                 }
             }
         },
+        "client.ListInCareClientsResponse": {
+            "type": "object",
+            "properties": {
+                "bsn": {
+                    "type": "string"
+                },
+                "careEndDate": {
+                    "type": "string"
+                },
+                "careStartDate": {
+                    "type": "string"
+                },
+                "careType": {
+                    "type": "string"
+                },
+                "coordinatorFirstName": {
+                    "type": "string"
+                },
+                "coordinatorId": {
+                    "type": "string"
+                },
+                "coordinatorLastName": {
+                    "type": "string"
+                },
+                "dateOfBirth": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "locationId": {
+                    "type": "string"
+                },
+                "locationName": {
+                    "type": "string"
+                },
+                "phoneNumber": {
+                    "type": "string"
+                },
+                "referringOrgName": {
+                    "type": "string"
+                },
+                "usedAmbulatoryHours": {
+                    "description": "For ambulatory_care only",
+                    "type": "integer"
+                },
+                "weeksInAccommodation": {
+                    "description": "For protected_living, semi_independent_living, independent_assisted_living",
+                    "type": "integer"
+                }
+            }
+        },
+        "client.ListWaitingListClientsResponse": {
+            "type": "object",
+            "properties": {
+                "bsn": {
+                    "type": "string"
+                },
+                "careType": {
+                    "type": "string"
+                },
+                "coordinatorFirstName": {
+                    "type": "string"
+                },
+                "coordinatorId": {
+                    "type": "string"
+                },
+                "coordinatorLastName": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "dateOfBirth": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "focusAreas": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "locationId": {
+                    "type": "string"
+                },
+                "locationName": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "phoneNumber": {
+                    "type": "string"
+                },
+                "referringOrgName": {
+                    "type": "string"
+                },
+                "waitingListPriority": {
+                    "type": "string"
+                }
+            }
+        },
         "client.MoveClientInCareRequest": {
             "type": "object",
             "properties": {
@@ -1434,6 +1673,8 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "coordinatorId",
+                "intakeDate",
+                "intakeTime",
                 "locationId",
                 "registrationFormId"
             ],
@@ -1484,6 +1725,9 @@ const docTemplate = `{
         "intake.ListIntakeFormsResponse": {
             "type": "object",
             "properties": {
+                "careType": {
+                    "type": "string"
+                },
                 "clientBsn": {
                     "type": "string"
                 },
@@ -1619,9 +1863,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "address",
-                "capacity",
                 "name",
-                "occupied",
                 "postalCode"
             ],
             "properties": {
@@ -1736,9 +1978,13 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "bsn",
+                "careType",
+                "dateOfBirth",
                 "firstName",
+                "gender",
                 "lastName",
                 "refferingOrgId",
+                "registrationDate",
                 "registrationReason"
             ],
             "properties": {
@@ -1755,16 +2001,28 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "careType": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "protected_living",
+                        "semi_independent_living",
+                        "independent_assisted_living",
+                        "ambulatory_care"
+                    ]
                 },
                 "dateOfBirth": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "2006-01-02"
                 },
                 "firstName": {
                     "type": "string"
                 },
                 "gender": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "male",
+                        "female",
+                        "other"
+                    ]
                 },
                 "lastName": {
                     "type": "string"
@@ -1773,7 +2031,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "registrationDate": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "2006-01-02"
                 },
                 "registrationReason": {
                     "type": "string"
@@ -1856,6 +2115,58 @@ const docTemplate = `{
                 "message": {
                     "type": "string",
                     "example": "success message"
+                }
+            }
+        },
+        "resp.PaginationResponse-array_client_ListInCareClientsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/client.ListInCareClientsResponse"
+                        }
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "pageSize": {
+                    "type": "integer"
+                },
+                "totalCount": {
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "type": "integer"
+                }
+            }
+        },
+        "resp.PaginationResponse-array_client_ListWaitingListClientsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/client.ListWaitingListClientsResponse"
+                        }
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "pageSize": {
+                    "type": "integer"
+                },
+                "totalCount": {
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "type": "integer"
                 }
             }
         },
@@ -1947,6 +2258,29 @@ const docTemplate = `{
                         "items": {
                             "$ref": "#/definitions/locations.ListLocationsResponse"
                         }
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "pageSize": {
+                    "type": "integer"
+                },
+                "totalCount": {
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "type": "integer"
+                }
+            }
+        },
+        "resp.PaginationResponse-intake_ListIntakeFormsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/intake.ListIntakeFormsResponse"
                     }
                 },
                 "page": {

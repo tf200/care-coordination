@@ -27,6 +27,7 @@ func (h *ClientHandler) SetupClientRoutes(router *gin.Engine) {
 	clients.POST("/move-to-waiting-list", h.mdw.AuthMdw(), h.MoveClientToWaitingList)
 	clients.POST("/:id/move-to-care", h.mdw.AuthMdw(), h.MoveClientInCare)
 	clients.GET("/waiting-list", h.mdw.AuthMdw(), h.mdw.PaginationMdw(), h.ListWaitingListClients)
+	clients.GET("/in-care", h.mdw.AuthMdw(), h.mdw.PaginationMdw(), h.ListInCareClients)
 }
 
 // @Summary Move client to waiting list
@@ -141,6 +142,40 @@ func (h *ClientHandler) ListWaitingListClients(ctx *gin.Context) {
 	}
 
 	result, err := h.clientService.ListWaitingListClients(ctx, &req)
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrInternal):
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
+		default:
+			ctx.JSON(http.StatusInternalServerError, resp.Error(ErrInternal))
+		}
+		return
+	}
+
+	ctx.JSON(http.StatusOK, result)
+}
+
+// @Summary List in-care clients
+// @Description List all clients currently in care with pagination and search. Returns weeks in accommodation for living care types or used ambulatory hours for ambulatory care.
+// @Tags Client
+// @Accept json
+// @Produce json
+// @Param page query int false "Page number (default: 1)"
+// @Param page_size query int false "Page size (default: 10, max: 100)"
+// @Param search query string false "Search by client first name or last name"
+// @Success 200 {object} resp.PaginationResponse[[]ListInCareClientsResponse]
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /clients/in-care [get]
+func (h *ClientHandler) ListInCareClients(ctx *gin.Context) {
+	var req ListInCareClientsRequest
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, resp.Error(err))
+		return
+	}
+
+	result, err := h.clientService.ListInCareClients(ctx, &req)
 	if err != nil {
 		switch {
 		case errors.Is(err, ErrInternal):

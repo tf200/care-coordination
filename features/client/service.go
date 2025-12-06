@@ -8,6 +8,8 @@ import (
 	"care-cordination/lib/resp"
 	"care-cordination/lib/util"
 	"context"
+	"math/rand"
+	"time"
 
 	"go.uber.org/zap"
 )
@@ -205,6 +207,69 @@ func (s *clientService) ListWaitingListClients(ctx context.Context, req *ListWai
 			CoordinatorLastName:  client.CoordinatorLastName,
 			ReferringOrgName:     client.ReferringOrgName,
 		})
+		if totalCount == 0 {
+			totalCount = int(client.TotalCount)
+		}
+	}
+
+	result := resp.PagRespWithParams(listClientsResponse, totalCount, page, pageSize)
+	return &result, nil
+}
+
+func (s *clientService) ListInCareClients(ctx context.Context, req *ListInCareClientsRequest) (*resp.PaginationResponse[ListInCareClientsResponse], error) {
+	limit, offset, page, pageSize := middleware.GetPaginationParams(ctx)
+
+	clients, err := s.db.ListInCareClients(ctx, db.ListInCareClientsParams{
+		Limit:  limit,
+		Offset: offset,
+		Search: req.Search,
+	})
+	if err != nil {
+		s.logger.Error(ctx, "ListInCareClients", "Failed to list in care clients", zap.Error(err))
+		return nil, ErrInternal
+	}
+
+	listClientsResponse := []ListInCareClientsResponse{}
+	totalCount := 0
+	now := time.Now()
+
+	for _, client := range clients {
+		response := ListInCareClientsResponse{
+			ID:                   client.ID,
+			FirstName:            client.FirstName,
+			LastName:             client.LastName,
+			Bsn:                  client.Bsn,
+			DateOfBirth:          util.PgtypeDateToStr(client.DateOfBirth),
+			PhoneNumber:          client.PhoneNumber,
+			Gender:               string(client.Gender),
+			CareType:             string(client.CareType),
+			CareStartDate:        util.PgtypeDateToStr(client.CareStartDate),
+			CareEndDate:          util.PgtypeDateToStr(client.CareEndDate),
+			LocationID:           client.LocationID,
+			LocationName:         client.LocationName,
+			CoordinatorID:        client.CoordinatorID,
+			CoordinatorFirstName: client.CoordinatorFirstName,
+			CoordinatorLastName:  client.CoordinatorLastName,
+			ReferringOrgName:     client.ReferringOrgName,
+		}
+
+		// Calculate weeks in accommodation or used ambulatory hours based on care type
+		if client.CareType == db.CareTypeEnumAmbulatoryCare {
+			// For ambulatory care: generate random used hours for demo purposes
+			randomHours := rand.Intn(100) + 1 // 1-100 hours
+			response.UsedAmbulatoryHours = &randomHours
+		} else {
+			// For protected_living, semi_independent_living, independent_assisted_living
+			// Calculate weeks from care start date
+			if client.CareStartDate.Valid {
+				startDate := client.CareStartDate.Time
+				duration := now.Sub(startDate)
+				weeks := int(duration.Hours() / 24 / 7)
+				response.WeeksInAccommodation = &weeks
+			}
+		}
+
+		listClientsResponse = append(listClientsResponse, response)
 		if totalCount == 0 {
 			totalCount = int(client.TotalCount)
 		}

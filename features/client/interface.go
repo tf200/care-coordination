@@ -10,4 +10,5 @@ type ClientService interface {
 	MoveClientInCare(ctx context.Context, clientID string, req *MoveClientInCareRequest) (*MoveClientInCareResponse, error)
 	DischargeClient(ctx context.Context, clientID string, req *DischargeClientRequest) (*DischargeClientResponse, error)
 	ListWaitingListClients(ctx context.Context, req *ListWaitingListClientsRequest) (*resp.PaginationResponse[ListWaitingListClientsResponse], error)
+	ListInCareClients(ctx context.Context, req *ListInCareClientsRequest) (*resp.PaginationResponse[ListInCareClientsResponse], error)
 }

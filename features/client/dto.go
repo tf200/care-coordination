@@ -56,3 +56,30 @@ type ListWaitingListClientsResponse struct {
 	CoordinatorLastName  string  `json:"coordinatorLastName"`
 	ReferringOrgName     *string `json:"referringOrgName"`
 }
+
+type ListInCareClientsRequest struct {
+	Search *string `form:"search"`
+}
+
+type ListInCareClientsResponse struct {
+	ID                   string  `json:"id"`
+	FirstName            string  `json:"firstName"`
+	LastName             string  `json:"lastName"`
+	Bsn                  string  `json:"bsn"`
+	DateOfBirth          string  `json:"dateOfBirth"`
+	PhoneNumber          *string `json:"phoneNumber"`
+	Gender               string  `json:"gender"`
+	CareType             string  `json:"careType"`
+	CareStartDate        string  `json:"careStartDate"`
+	CareEndDate          string  `json:"careEndDate"`
+	LocationID           string  `json:"locationId"`
+	LocationName         string  `json:"locationName"`
+	CoordinatorID        string  `json:"coordinatorId"`
+	CoordinatorFirstName string  `json:"coordinatorFirstName"`
+	CoordinatorLastName  string  `json:"coordinatorLastName"`
+	ReferringOrgName     *string `json:"referringOrgName"`
+	// For protected_living, semi_independent_living, independent_assisted_living
+	WeeksInAccommodation *int `json:"weeksInAccommodation,omitempty"`
+	// For ambulatory_care only
+	UsedAmbulatoryHours *int `json:"usedAmbulatoryHours,omitempty"`
+}

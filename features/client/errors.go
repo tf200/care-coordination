@@ -13,4 +13,6 @@ var (
 	ErrAmbulatoryHoursRequired   = errors.New("ambulatory weekly hours required for ambulatory care")
 	ErrAmbulatoryHoursNotAllowed = errors.New("ambulatory weekly hours should only be set for ambulatory care")
 	ErrClientNotInCare           = errors.New("client must be in care to be discharged")
+	ErrDischargeAlreadyStarted   = errors.New("discharge has already been started for this client")
+	ErrDischargeNotStarted       = errors.New("discharge must be started before completing")
 )

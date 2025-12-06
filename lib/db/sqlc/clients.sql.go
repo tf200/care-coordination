@@ -179,6 +179,125 @@ func (q *Queries) GetClientByID(ctx context.Context, id string) (Client, error) 
 	return i, err
 }
 
+const listDischargedClients = `-- name: ListDischargedClients :many
+SELECT
+    c.id,
+    c.first_name,
+    c.last_name,
+    c.bsn,
+    c.date_of_birth,
+    c.phone_number,
+    c.gender,
+    c.care_type,
+    c.care_start_date,
+    c.discharge_date,
+    c.reason_for_discharge,
+    c.discharge_status,
+    c.closing_report,
+    c.evaluation_report,
+    c.created_at,
+    l.id AS location_id,
+    l.name AS location_name,
+    e.id AS coordinator_id,
+    e.first_name AS coordinator_first_name,
+    e.last_name AS coordinator_last_name,
+    ro.name AS referring_org_name,
+    COUNT(*) OVER() AS total_count
+FROM clients c
+JOIN locations l ON c.assigned_location_id = l.id
+JOIN employees e ON c.coordinator_id = e.id
+LEFT JOIN referring_orgs ro ON c.referring_org_id = ro.id
+WHERE c.discharge_status IS NOT NULL
+    AND ($3::text IS NULL OR
+         LOWER(c.first_name) LIKE LOWER('%' || $3::text || '%') OR
+         LOWER(c.last_name) LIKE LOWER('%' || $3::text || '%') OR
+         LOWER(c.first_name || ' ' || c.last_name) LIKE LOWER('%' || $3::text || '%'))
+    AND ($4::discharge_status_enum IS NULL OR
+         c.discharge_status = $4::discharge_status_enum)
+ORDER BY c.discharge_date DESC
+LIMIT $1 OFFSET $2
+`
+
+type ListDischargedClientsParams struct {
+	Limit           int32                   `json:"limit"`
+	Offset          int32                   `json:"offset"`
+	Search          *string                 `json:"search"`
+	DischargeStatus NullDischargeStatusEnum `json:"discharge_status"`
+}
+
+type ListDischargedClientsRow struct {
+	ID                   string                  `json:"id"`
+	FirstName            string                  `json:"first_name"`
+	LastName             string                  `json:"last_name"`
+	Bsn                  string                  `json:"bsn"`
+	DateOfBirth          pgtype.Date             `json:"date_of_birth"`
+	PhoneNumber          *string                 `json:"phone_number"`
+	Gender               GenderEnum              `json:"gender"`
+	CareType             CareTypeEnum            `json:"care_type"`
+	CareStartDate        pgtype.Date             `json:"care_start_date"`
+	DischargeDate        pgtype.Date             `json:"discharge_date"`
+	ReasonForDischarge   NullDischargeReasonEnum `json:"reason_for_discharge"`
+	DischargeStatus      NullDischargeStatusEnum `json:"discharge_status"`
+	ClosingReport        *string                 `json:"closing_report"`
+	EvaluationReport     *string                 `json:"evaluation_report"`
+	CreatedAt            pgtype.Timestamp        `json:"created_at"`
+	LocationID           string                  `json:"location_id"`
+	LocationName         string                  `json:"location_name"`
+	CoordinatorID        string                  `json:"coordinator_id"`
+	CoordinatorFirstName string                  `json:"coordinator_first_name"`
+	CoordinatorLastName  string                  `json:"coordinator_last_name"`
+	ReferringOrgName     *string                 `json:"referring_org_name"`
+	TotalCount           int64                   `json:"total_count"`
+}
+
+func (q *Queries) ListDischargedClients(ctx context.Context, arg ListDischargedClientsParams) ([]ListDischargedClientsRow, error) {
+	rows, err := q.db.Query(ctx, listDischargedClients,
+		arg.Limit,
+		arg.Offset,
+		arg.Search,
+		arg.DischargeStatus,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListDischargedClientsRow{}
+	for rows.Next() {
+		var i ListDischargedClientsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.FirstName,
+			&i.LastName,
+			&i.Bsn,
+			&i.DateOfBirth,
+			&i.PhoneNumber,
+			&i.Gender,
+			&i.CareType,
+			&i.CareStartDate,
+			&i.DischargeDate,
+			&i.ReasonForDischarge,
+			&i.DischargeStatus,
+			&i.ClosingReport,
+			&i.EvaluationReport,
+			&i.CreatedAt,
+			&i.LocationID,
+			&i.LocationName,
+			&i.CoordinatorID,
+			&i.CoordinatorFirstName,
+			&i.CoordinatorLastName,
+			&i.ReferringOrgName,
+			&i.TotalCount,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listInCareClients = `-- name: ListInCareClients :many
 SELECT
     c.id,

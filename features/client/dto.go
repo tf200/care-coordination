@@ -19,16 +19,24 @@ type MoveClientInCareResponse struct {
 	ClientID string `json:"clientId"`
 }
 
-type DischargeClientRequest struct {
-	DischargeDate          string   `json:"dischargeDate" binding:"required format=2006-01-02"`
-	ClosingReport          *string  `json:"closingReport"`
-	EvaluationReport       *string  `json:"evaluationReport"`
-	ReasonForDischarge     string   `json:"reasonForDischarge" binding:"required,oneof=treatment_completed terminated_by_mutual_agreement terminated_by_client terminated_by_provider terminated_due_to_external_factors other"`
-	DischargeAttachmentIDs []string `json:"dischargeAttachmentIds"`
-	DischargeStatus        string   `json:"dischargeStatus" binding:"required,oneof=in_progress completed"`
+// Phase 1: Start Discharge - initiates discharge process, client remains in_care
+type StartDischargeRequest struct {
+	DischargeDate      string `json:"dischargeDate" binding:"required,datetime=2006-01-02"`
+	ReasonForDischarge string `json:"reasonForDischarge" binding:"required,oneof=treatment_completed terminated_by_mutual_agreement terminated_by_client terminated_by_provider terminated_due_to_external_factors other"`
 }
 
-type DischargeClientResponse struct {
+type StartDischargeResponse struct {
+	ClientID string `json:"clientId"`
+}
+
+// Phase 2: Complete Discharge - finalizes discharge, requires reports
+type CompleteDischargeRequest struct {
+	ClosingReport          string   `json:"closingReport" binding:"required"`
+	EvaluationReport       string   `json:"evaluationReport" binding:"required"`
+	DischargeAttachmentIDs []string `json:"dischargeAttachmentIds"`
+}
+
+type CompleteDischargeResponse struct {
 	ClientID string `json:"clientId"`
 }
 
@@ -82,4 +90,32 @@ type ListInCareClientsResponse struct {
 	WeeksInAccommodation *int `json:"weeksInAccommodation,omitempty"`
 	// For ambulatory_care only
 	UsedAmbulatoryHours *int `json:"usedAmbulatoryHours,omitempty"`
+}
+
+type ListDischargedClientsRequest struct {
+	Search          *string `form:"search"`
+	DischargeStatus *string `form:"dischargeStatus" binding:"omitempty,oneof=in_progress completed"`
+}
+
+type ListDischargedClientsResponse struct {
+	ID                   string  `json:"id"`
+	FirstName            string  `json:"firstName"`
+	LastName             string  `json:"lastName"`
+	Bsn                  string  `json:"bsn"`
+	DateOfBirth          string  `json:"dateOfBirth"`
+	PhoneNumber          *string `json:"phoneNumber"`
+	Gender               string  `json:"gender"`
+	CareType             string  `json:"careType"`
+	CareStartDate        string  `json:"careStartDate"`
+	DischargeDate        string  `json:"dischargeDate"`
+	ReasonForDischarge   string  `json:"reasonForDischarge"`
+	DischargeStatus      string  `json:"dischargeStatus"`
+	ClosingReport        *string `json:"closingReport"`
+	EvaluationReport     *string `json:"evaluationReport"`
+	LocationID           string  `json:"locationId"`
+	LocationName         string  `json:"locationName"`
+	CoordinatorID        string  `json:"coordinatorId"`
+	CoordinatorFirstName string  `json:"coordinatorFirstName"`
+	CoordinatorLastName  string  `json:"coordinatorLastName"`
+	ReferringOrgName     *string `json:"referringOrgName"`
 }

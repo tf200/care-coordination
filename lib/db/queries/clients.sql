@@ -135,3 +135,41 @@ WHERE c.status = 'in_care'
          LOWER(c.first_name || ' ' || c.last_name) LIKE LOWER('%' || sqlc.narg('search')::text || '%'))
 ORDER BY c.care_start_date DESC
 LIMIT $1 OFFSET $2;
+
+-- name: ListDischargedClients :many
+SELECT
+    c.id,
+    c.first_name,
+    c.last_name,
+    c.bsn,
+    c.date_of_birth,
+    c.phone_number,
+    c.gender,
+    c.care_type,
+    c.care_start_date,
+    c.discharge_date,
+    c.reason_for_discharge,
+    c.discharge_status,
+    c.closing_report,
+    c.evaluation_report,
+    c.created_at,
+    l.id AS location_id,
+    l.name AS location_name,
+    e.id AS coordinator_id,
+    e.first_name AS coordinator_first_name,
+    e.last_name AS coordinator_last_name,
+    ro.name AS referring_org_name,
+    COUNT(*) OVER() AS total_count
+FROM clients c
+JOIN locations l ON c.assigned_location_id = l.id
+JOIN employees e ON c.coordinator_id = e.id
+LEFT JOIN referring_orgs ro ON c.referring_org_id = ro.id
+WHERE c.discharge_status IS NOT NULL
+    AND (sqlc.narg('search')::text IS NULL OR
+         LOWER(c.first_name) LIKE LOWER('%' || sqlc.narg('search')::text || '%') OR
+         LOWER(c.last_name) LIKE LOWER('%' || sqlc.narg('search')::text || '%') OR
+         LOWER(c.first_name || ' ' || c.last_name) LIKE LOWER('%' || sqlc.narg('search')::text || '%'))
+    AND (sqlc.narg('discharge_status')::discharge_status_enum IS NULL OR
+         c.discharge_status = sqlc.narg('discharge_status')::discharge_status_enum)
+ORDER BY c.discharge_date DESC
+LIMIT $1 OFFSET $2;

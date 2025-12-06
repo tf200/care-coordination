@@ -234,6 +234,73 @@ const docTemplate = `{
                 }
             }
         },
+        "/clients/discharged": {
+            "get": {
+                "description": "List all clients with discharge status (both in_progress and completed) with pagination, search, and discharge status filter",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Client"
+                ],
+                "summary": "List discharged clients",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size (default: 10, max: 100)",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by client first name or last name",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by discharge status (in_progress or completed)",
+                        "name": "dischargeStatus",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.PaginationResponse-array_client_ListDischargedClientsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/clients/in-care": {
             "get": {
                 "description": "List all clients currently in care with pagination and search. Returns weeks in accommodation for living care types or used ambulatory hours for ambulatory care.",
@@ -414,6 +481,71 @@ const docTemplate = `{
                 }
             }
         },
+        "/clients/{id}/complete-discharge": {
+            "post": {
+                "description": "Complete the discharge process for a client. Requires closing and evaluation reports. Client status changes to discharged.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Client"
+                ],
+                "summary": "Complete client discharge",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Client ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Reports and optional attachments",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/client.CompleteDischargeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/client.CompleteDischargeResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/clients/{id}/move-to-care": {
             "post": {
                 "description": "Move a client from waiting list to in care status",
@@ -450,6 +582,71 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/client.MoveClientInCareResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/clients/{id}/start-discharge": {
+            "post": {
+                "description": "Start the discharge process for a client. Client remains in care with discharge_status = in_progress",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Client"
+                ],
+                "summary": "Start client discharge",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Client ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Discharge date and reason",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/client.StartDischargeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/client.StartDischargeResponse"
                         }
                     },
                     "400": {
@@ -1304,6 +1501,100 @@ const docTemplate = `{
                 }
             }
         },
+        "client.CompleteDischargeRequest": {
+            "type": "object",
+            "required": [
+                "closingReport",
+                "evaluationReport"
+            ],
+            "properties": {
+                "closingReport": {
+                    "type": "string"
+                },
+                "dischargeAttachmentIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "evaluationReport": {
+                    "type": "string"
+                }
+            }
+        },
+        "client.CompleteDischargeResponse": {
+            "type": "object",
+            "properties": {
+                "clientId": {
+                    "type": "string"
+                }
+            }
+        },
+        "client.ListDischargedClientsResponse": {
+            "type": "object",
+            "properties": {
+                "bsn": {
+                    "type": "string"
+                },
+                "careStartDate": {
+                    "type": "string"
+                },
+                "careType": {
+                    "type": "string"
+                },
+                "closingReport": {
+                    "type": "string"
+                },
+                "coordinatorFirstName": {
+                    "type": "string"
+                },
+                "coordinatorId": {
+                    "type": "string"
+                },
+                "coordinatorLastName": {
+                    "type": "string"
+                },
+                "dateOfBirth": {
+                    "type": "string"
+                },
+                "dischargeDate": {
+                    "type": "string"
+                },
+                "dischargeStatus": {
+                    "type": "string"
+                },
+                "evaluationReport": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "locationId": {
+                    "type": "string"
+                },
+                "locationName": {
+                    "type": "string"
+                },
+                "phoneNumber": {
+                    "type": "string"
+                },
+                "reasonForDischarge": {
+                    "type": "string"
+                },
+                "referringOrgName": {
+                    "type": "string"
+                }
+            }
+        },
         "client.ListInCareClientsResponse": {
             "type": "object",
             "properties": {
@@ -1466,6 +1757,37 @@ const docTemplate = `{
             }
         },
         "client.MoveClientToWaitingListResponse": {
+            "type": "object",
+            "properties": {
+                "clientId": {
+                    "type": "string"
+                }
+            }
+        },
+        "client.StartDischargeRequest": {
+            "type": "object",
+            "required": [
+                "dischargeDate",
+                "reasonForDischarge"
+            ],
+            "properties": {
+                "dischargeDate": {
+                    "type": "string"
+                },
+                "reasonForDischarge": {
+                    "type": "string",
+                    "enum": [
+                        "treatment_completed",
+                        "terminated_by_mutual_agreement",
+                        "terminated_by_client",
+                        "terminated_by_provider",
+                        "terminated_due_to_external_factors",
+                        "other"
+                    ]
+                }
+            }
+        },
+        "client.StartDischargeResponse": {
             "type": "object",
             "properties": {
                 "clientId": {
@@ -2115,6 +2437,32 @@ const docTemplate = `{
                 "message": {
                     "type": "string",
                     "example": "success message"
+                }
+            }
+        },
+        "resp.PaginationResponse-array_client_ListDischargedClientsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/client.ListDischargedClientsResponse"
+                        }
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "pageSize": {
+                    "type": "integer"
+                },
+                "totalCount": {
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "type": "integer"
                 }
             }
         },

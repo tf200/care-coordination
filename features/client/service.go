@@ -133,39 +133,83 @@ func (s *clientService) MoveClientInCare(ctx context.Context, clientID string, r
 	}, nil
 }
 
-func (s *clientService) DischargeClient(ctx context.Context, clientID string, req *DischargeClientRequest) (*DischargeClientResponse, error) {
+func (s *clientService) StartDischarge(ctx context.Context, clientID string, req *StartDischargeRequest) (*StartDischargeResponse, error) {
 	client, err := s.db.GetClientByID(ctx, clientID)
 	if err != nil {
-		s.logger.Error(ctx, "DischargeClient", "Failed to get client", zap.Error(err))
+		s.logger.Error(ctx, "StartDischarge", "Failed to get client", zap.Error(err))
 		return nil, ErrClientNotFound
 	}
 
 	// Validate client is in care
 	if client.Status != db.ClientStatusEnumInCare {
-		s.logger.Error(ctx, "DischargeClient", "Client must be in care to be discharged", zap.String("currentStatus", string(client.Status)))
+		s.logger.Error(ctx, "StartDischarge", "Client must be in care to start discharge", zap.String("currentStatus", string(client.Status)))
 		return nil, ErrClientNotInCare
 	}
 
+	// Validate discharge has not already been started
+	if client.DischargeStatus.Valid {
+		s.logger.Error(ctx, "StartDischarge", "Discharge already started for this client", zap.String("dischargeStatus", string(client.DischargeStatus.DischargeStatusEnum)))
+		return nil, ErrDischargeAlreadyStarted
+	}
+
 	updateParams := db.UpdateClientParams{
-		ID:                     client.ID,
-		Status:                 db.ClientStatusEnumDischarged,
-		DischargeDate:          util.StrToPgtypeDate(req.DischargeDate),
-		ClosingReport:          req.ClosingReport,
-		EvaluationReport:       req.EvaluationReport,
-		ReasonForDischarge:     db.NullDischargeReasonEnum{DischargeReasonEnum: db.DischargeReasonEnum(req.ReasonForDischarge), Valid: true},
-		DischargeAttachmentIds: req.DischargeAttachmentIDs,
-		DischargeStatus:        db.NullDischargeStatusEnum{DischargeStatusEnum: db.DischargeStatusEnum(req.DischargeStatus), Valid: true},
+		ID:                 client.ID,
+		Status:             db.ClientStatusEnumInCare, // Client remains in care during phase 1
+		DischargeDate:      util.StrToPgtypeDate(req.DischargeDate),
+		ReasonForDischarge: db.NullDischargeReasonEnum{DischargeReasonEnum: db.DischargeReasonEnum(req.ReasonForDischarge), Valid: true},
+		DischargeStatus:    db.NullDischargeStatusEnum{DischargeStatusEnum: db.DischargeStatusEnumInProgress, Valid: true},
 	}
 
 	updatedClient, err := s.db.UpdateClient(ctx, updateParams)
 	if err != nil {
-		s.logger.Error(ctx, "DischargeClient", "Failed to update client status", zap.Error(err))
+		s.logger.Error(ctx, "StartDischarge", "Failed to update client", zap.Error(err))
 		return nil, ErrInternal
 	}
 
-	s.logger.Info(ctx, "DischargeClient", "Client discharged successfully", zap.String("clientId", updatedClient))
+	s.logger.Info(ctx, "StartDischarge", "Discharge process started for client", zap.String("clientId", updatedClient))
 
-	return &DischargeClientResponse{
+	return &StartDischargeResponse{
+		ClientID: updatedClient,
+	}, nil
+}
+
+func (s *clientService) CompleteDischarge(ctx context.Context, clientID string, req *CompleteDischargeRequest) (*CompleteDischargeResponse, error) {
+	client, err := s.db.GetClientByID(ctx, clientID)
+	if err != nil {
+		s.logger.Error(ctx, "CompleteDischarge", "Failed to get client", zap.Error(err))
+		return nil, ErrClientNotFound
+	}
+
+	// Validate client is in care
+	if client.Status != db.ClientStatusEnumInCare {
+		s.logger.Error(ctx, "CompleteDischarge", "Client must be in care to complete discharge", zap.String("currentStatus", string(client.Status)))
+		return nil, ErrClientNotInCare
+	}
+
+	// Validate discharge has been started (phase 1 completed)
+	if !client.DischargeStatus.Valid || client.DischargeStatus.DischargeStatusEnum != db.DischargeStatusEnumInProgress {
+		s.logger.Error(ctx, "CompleteDischarge", "Discharge must be started before completing")
+		return nil, ErrDischargeNotStarted
+	}
+
+	updateParams := db.UpdateClientParams{
+		ID:                     client.ID,
+		Status:                 db.ClientStatusEnumDischarged, // Now move to discharged
+		ClosingReport:          &req.ClosingReport,
+		EvaluationReport:       &req.EvaluationReport,
+		DischargeAttachmentIds: req.DischargeAttachmentIDs,
+		DischargeStatus:        db.NullDischargeStatusEnum{DischargeStatusEnum: db.DischargeStatusEnumCompleted, Valid: true},
+	}
+
+	updatedClient, err := s.db.UpdateClient(ctx, updateParams)
+	if err != nil {
+		s.logger.Error(ctx, "CompleteDischarge", "Failed to update client", zap.Error(err))
+		return nil, ErrInternal
+	}
+
+	s.logger.Info(ctx, "CompleteDischarge", "Client discharge completed", zap.String("clientId", updatedClient))
+
+	return &CompleteDischargeResponse{
 		ClientID: updatedClient,
 	}, nil
 }
@@ -267,6 +311,66 @@ func (s *clientService) ListInCareClients(ctx context.Context, req *ListInCareCl
 				weeks := int(duration.Hours() / 24 / 7)
 				response.WeeksInAccommodation = &weeks
 			}
+		}
+
+		listClientsResponse = append(listClientsResponse, response)
+		if totalCount == 0 {
+			totalCount = int(client.TotalCount)
+		}
+	}
+
+	result := resp.PagRespWithParams(listClientsResponse, totalCount, page, pageSize)
+	return &result, nil
+}
+
+func (s *clientService) ListDischargedClients(ctx context.Context, req *ListDischargedClientsRequest) (*resp.PaginationResponse[ListDischargedClientsResponse], error) {
+	limit, offset, page, pageSize := middleware.GetPaginationParams(ctx)
+
+	// Build discharge status filter
+	var dischargeStatusFilter db.NullDischargeStatusEnum
+	if req.DischargeStatus != nil {
+		dischargeStatusFilter = db.NullDischargeStatusEnum{
+			DischargeStatusEnum: db.DischargeStatusEnum(*req.DischargeStatus),
+			Valid:               true,
+		}
+	}
+
+	clients, err := s.db.ListDischargedClients(ctx, db.ListDischargedClientsParams{
+		Limit:           limit,
+		Offset:          offset,
+		Search:          req.Search,
+		DischargeStatus: dischargeStatusFilter,
+	})
+	if err != nil {
+		s.logger.Error(ctx, "ListDischargedClients", "Failed to list discharged clients", zap.Error(err))
+		return nil, ErrInternal
+	}
+
+	listClientsResponse := []ListDischargedClientsResponse{}
+	totalCount := 0
+
+	for _, client := range clients {
+		response := ListDischargedClientsResponse{
+			ID:                   client.ID,
+			FirstName:            client.FirstName,
+			LastName:             client.LastName,
+			Bsn:                  client.Bsn,
+			DateOfBirth:          util.PgtypeDateToStr(client.DateOfBirth),
+			PhoneNumber:          client.PhoneNumber,
+			Gender:               string(client.Gender),
+			CareType:             string(client.CareType),
+			CareStartDate:        util.PgtypeDateToStr(client.CareStartDate),
+			DischargeDate:        util.PgtypeDateToStr(client.DischargeDate),
+			ReasonForDischarge:   string(client.ReasonForDischarge.DischargeReasonEnum),
+			DischargeStatus:      string(client.DischargeStatus.DischargeStatusEnum),
+			ClosingReport:        client.ClosingReport,
+			EvaluationReport:     client.EvaluationReport,
+			LocationID:           client.LocationID,
+			LocationName:         client.LocationName,
+			CoordinatorID:        client.CoordinatorID,
+			CoordinatorFirstName: client.CoordinatorFirstName,
+			CoordinatorLastName:  client.CoordinatorLastName,
+			ReferringOrgName:     client.ReferringOrgName,
 		}
 
 		listClientsResponse = append(listClientsResponse, response)

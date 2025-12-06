@@ -43,6 +43,68 @@ definitions:
       refreshToken:
         type: string
     type: object
+  client.CompleteDischargeRequest:
+    properties:
+      closingReport:
+        type: string
+      dischargeAttachmentIds:
+        items:
+          type: string
+        type: array
+      evaluationReport:
+        type: string
+    required:
+    - closingReport
+    - evaluationReport
+    type: object
+  client.CompleteDischargeResponse:
+    properties:
+      clientId:
+        type: string
+    type: object
+  client.ListDischargedClientsResponse:
+    properties:
+      bsn:
+        type: string
+      careStartDate:
+        type: string
+      careType:
+        type: string
+      closingReport:
+        type: string
+      coordinatorFirstName:
+        type: string
+      coordinatorId:
+        type: string
+      coordinatorLastName:
+        type: string
+      dateOfBirth:
+        type: string
+      dischargeDate:
+        type: string
+      dischargeStatus:
+        type: string
+      evaluationReport:
+        type: string
+      firstName:
+        type: string
+      gender:
+        type: string
+      id:
+        type: string
+      lastName:
+        type: string
+      locationId:
+        type: string
+      locationName:
+        type: string
+      phoneNumber:
+        type: string
+      reasonForDischarge:
+        type: string
+      referringOrgName:
+        type: string
+    type: object
   client.ListInCareClientsResponse:
     properties:
       bsn:
@@ -151,6 +213,28 @@ definitions:
     - waitingListPriority
     type: object
   client.MoveClientToWaitingListResponse:
+    properties:
+      clientId:
+        type: string
+    type: object
+  client.StartDischargeRequest:
+    properties:
+      dischargeDate:
+        type: string
+      reasonForDischarge:
+        enum:
+        - treatment_completed
+        - terminated_by_mutual_agreement
+        - terminated_by_client
+        - terminated_by_provider
+        - terminated_due_to_external_factors
+        - other
+        type: string
+    required:
+    - dischargeDate
+    - reasonForDischarge
+    type: object
+  client.StartDischargeResponse:
     properties:
       clientId:
         type: string
@@ -595,6 +679,23 @@ definitions:
         example: success message
         type: string
     type: object
+  resp.PaginationResponse-array_client_ListDischargedClientsResponse:
+    properties:
+      data:
+        items:
+          items:
+            $ref: '#/definitions/client.ListDischargedClientsResponse'
+          type: array
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      totalCount:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
   resp.PaginationResponse-array_client_ListInCareClientsResponse:
     properties:
       data:
@@ -891,6 +992,50 @@ paths:
       summary: Refresh tokens
       tags:
       - Auth
+  /clients/{id}/complete-discharge:
+    post:
+      consumes:
+      - application/json
+      description: Complete the discharge process for a client. Requires closing and
+        evaluation reports. Client status changes to discharged.
+      parameters:
+      - description: Client ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Reports and optional attachments
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/client.CompleteDischargeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/client.CompleteDischargeResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Complete client discharge
+      tags:
+      - Client
   /clients/{id}/move-to-care:
     post:
       consumes:
@@ -932,6 +1077,95 @@ paths:
           schema:
             $ref: '#/definitions/resp.ErrorResponse'
       summary: Move client to in care
+      tags:
+      - Client
+  /clients/{id}/start-discharge:
+    post:
+      consumes:
+      - application/json
+      description: Start the discharge process for a client. Client remains in care
+        with discharge_status = in_progress
+      parameters:
+      - description: Client ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Discharge date and reason
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/client.StartDischargeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/client.StartDischargeResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Start client discharge
+      tags:
+      - Client
+  /clients/discharged:
+    get:
+      consumes:
+      - application/json
+      description: List all clients with discharge status (both in_progress and completed)
+        with pagination, search, and discharge status filter
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Page size (default: 10, max: 100)'
+        in: query
+        name: page_size
+        type: integer
+      - description: Search by client first name or last name
+        in: query
+        name: search
+        type: string
+      - description: Filter by discharge status (in_progress or completed)
+        in: query
+        name: dischargeStatus
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.PaginationResponse-array_client_ListDischargedClientsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: List discharged clients
       tags:
       - Client
   /clients/in-care:

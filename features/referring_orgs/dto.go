@@ -20,11 +20,14 @@ type ListReferringOrgsRequest struct {
 }
 
 type ListReferringOrgsResponse struct {
-	ID            string    `json:"id"`
-	Name          string    `json:"name"`
-	ContactPerson string    `json:"contactPerson"`
-	PhoneNumber   string    `json:"phoneNumber"`
-	Email         string    `json:"email"`
-	CreatedAt     time.Time `json:"createdAt"`
-	UpdatedAt     time.Time `json:"updatedAt"`
+	ID               string    `json:"id"`
+	Name             string    `json:"name"`
+	ContactPerson    string    `json:"contactPerson"`
+	PhoneNumber      string    `json:"phoneNumber"`
+	Email            string    `json:"email"`
+	InCareCount      int64     `json:"inCareCount"`
+	WaitingListCount int64     `json:"waitingListCount"`
+	DischargedCount  int64     `json:"dischargedCount"`
+	CreatedAt        time.Time `json:"createdAt"`
+	UpdatedAt        time.Time `json:"updatedAt"`
 }

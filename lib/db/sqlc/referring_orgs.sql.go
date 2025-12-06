@@ -82,27 +82,32 @@ func (q *Queries) GetReferringOrgByID(ctx context.Context, id string) (Referring
 
 const listReferringOrgs = `-- name: ListReferringOrgs :many
 SELECT
-    id,
-    name,
-    contact_person,
-    phone_number,
-    email,
-    created_at,
-    updated_at,
-    COUNT(id) OVER () AS total_count
-FROM referring_orgs
+    ro.id,
+    ro.name,
+    ro.contact_person,
+    ro.phone_number,
+    ro.email,
+    ro.created_at,
+    ro.updated_at,
+    COUNT(CASE WHEN c.status = 'in_care' THEN 1 END)::bigint AS in_care_count,
+    COUNT(CASE WHEN c.status = 'waiting_list' THEN 1 END)::bigint AS waiting_list_count,
+    COUNT(CASE WHEN c.status = 'discharged' THEN 1 END)::bigint AS discharged_count,
+    COUNT(ro.id) OVER () AS total_count
+FROM referring_orgs ro
+LEFT JOIN clients c ON c.referring_org_id = ro.id
 WHERE
     (
         -- If search term is NULL or empty, ignore filters
         $3::text IS NULL OR $3::text = '' OR
         -- Search by Org Name
-        name ILIKE '%' || $3 || '%' OR
+        ro.name ILIKE '%' || $3 || '%' OR
         -- Search by Contact Person
-        contact_person ILIKE '%' || $3 || '%' OR
+        ro.contact_person ILIKE '%' || $3 || '%' OR
         -- Search by Email
-        email ILIKE '%' || $3 || '%'
+        ro.email ILIKE '%' || $3 || '%'
     )
-ORDER BY name
+GROUP BY ro.id, ro.name, ro.contact_person, ro.phone_number, ro.email, ro.created_at, ro.updated_at
+ORDER BY ro.name
 LIMIT $1 OFFSET $2
 `
 
@@ -113,14 +118,17 @@ type ListReferringOrgsParams struct {
 }
 
 type ListReferringOrgsRow struct {
-	ID            string             `json:"id"`
-	Name          string             `json:"name"`
-	ContactPerson string             `json:"contact_person"`
-	PhoneNumber   string             `json:"phone_number"`
-	Email         string             `json:"email"`
-	CreatedAt     pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt     pgtype.Timestamptz `json:"updated_at"`
-	TotalCount    int64              `json:"total_count"`
+	ID               string             `json:"id"`
+	Name             string             `json:"name"`
+	ContactPerson    string             `json:"contact_person"`
+	PhoneNumber      string             `json:"phone_number"`
+	Email            string             `json:"email"`
+	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
+	InCareCount      int64              `json:"in_care_count"`
+	WaitingListCount int64              `json:"waiting_list_count"`
+	DischargedCount  int64              `json:"discharged_count"`
+	TotalCount       int64              `json:"total_count"`
 }
 
 func (q *Queries) ListReferringOrgs(ctx context.Context, arg ListReferringOrgsParams) ([]ListReferringOrgsRow, error) {
@@ -140,6 +148,9 @@ func (q *Queries) ListReferringOrgs(ctx context.Context, arg ListReferringOrgsPa
 			&i.Email,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.InCareCount,
+			&i.WaitingListCount,
+			&i.DischargedCount,
 			&i.TotalCount,
 		); err != nil {
 			return nil, err

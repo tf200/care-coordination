@@ -55,13 +55,16 @@ func (s *referringOrgService) ListReferringOrgs(ctx context.Context, req *ListRe
 	listReferringOrgsResponse := []ListReferringOrgsResponse{}
 	for _, referringOrg := range referringOrgs {
 		listReferringOrgsResponse = append(listReferringOrgsResponse, ListReferringOrgsResponse{
-			ID:            referringOrg.ID,
-			Name:          referringOrg.Name,
-			ContactPerson: referringOrg.ContactPerson,
-			PhoneNumber:   referringOrg.PhoneNumber,
-			Email:         referringOrg.Email,
-			CreatedAt:     referringOrg.CreatedAt.Time,
-			UpdatedAt:     referringOrg.UpdatedAt.Time,
+			ID:               referringOrg.ID,
+			Name:             referringOrg.Name,
+			ContactPerson:    referringOrg.ContactPerson,
+			PhoneNumber:      referringOrg.PhoneNumber,
+			Email:            referringOrg.Email,
+			InCareCount:      referringOrg.InCareCount,
+			WaitingListCount: referringOrg.WaitingListCount,
+			DischargedCount:  referringOrg.DischargedCount,
+			CreatedAt:        referringOrg.CreatedAt.Time,
+			UpdatedAt:        referringOrg.UpdatedAt.Time,
 		})
 	}
 	totalCount := 0

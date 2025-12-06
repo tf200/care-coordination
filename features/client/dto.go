@@ -31,3 +31,28 @@ type DischargeClientRequest struct {
 type DischargeClientResponse struct {
 	ClientID string `json:"clientId"`
 }
+
+type ListWaitingListClientsRequest struct {
+	Search *string `form:"search"`
+}
+
+type ListWaitingListClientsResponse struct {
+	ID                   string  `json:"id"`
+	FirstName            string  `json:"firstName"`
+	LastName             string  `json:"lastName"`
+	Bsn                  string  `json:"bsn"`
+	DateOfBirth          string  `json:"dateOfBirth"`
+	PhoneNumber          *string `json:"phoneNumber"`
+	Gender               string  `json:"gender"`
+	CareType             string  `json:"careType"`
+	WaitingListPriority  string  `json:"waitingListPriority"`
+	FocusAreas           *string `json:"focusAreas"`
+	Notes                *string `json:"notes"`
+	CreatedAt            string  `json:"createdAt"`
+	LocationID           string  `json:"locationId"`
+	LocationName         string  `json:"locationName"`
+	CoordinatorID        string  `json:"coordinatorId"`
+	CoordinatorFirstName string  `json:"coordinatorFirstName"`
+	CoordinatorLastName  string  `json:"coordinatorLastName"`
+	ReferringOrgName     *string `json:"referringOrgName"`
+}

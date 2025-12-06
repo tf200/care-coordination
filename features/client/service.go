@@ -1,9 +1,11 @@
 package client
 
 import (
+	"care-cordination/features/middleware"
 	db "care-cordination/lib/db/sqlc"
 	"care-cordination/lib/logger"
 	"care-cordination/lib/nanoid"
+	"care-cordination/lib/resp"
 	"care-cordination/lib/util"
 	"context"
 
@@ -64,17 +66,21 @@ func (s *clientService) MoveClientToWaitingList(ctx context.Context, req *MoveCl
 		Notes:               intakeForm.Notes,
 	}
 
-	// Create the client
-	createdClient, err := s.db.CreateClient(ctx, createClientParams)
+	// Create the client and update intake form status in a transaction
+	result, err := s.db.MoveClientToWaitingListTx(ctx, db.MoveClientToWaitingListTxParams{
+		Client:              createClientParams,
+		IntakeFormID:        intakeForm.ID,
+		IntakeFormNewStatus: db.IntakeStatusEnumCompleted,
+	})
 	if err != nil {
-		s.logger.Error(ctx, "MoveClientToWaitingList", "Failed to create client", zap.Error(err))
+		s.logger.Error(ctx, "MoveClientToWaitingList", "Failed to create client and update intake form", zap.Error(err))
 		return nil, ErrFailedToCreateClient
 	}
 
-	s.logger.Info(ctx, "MoveClientToWaitingList", "Client created successfully", zap.String("clientId", createdClient.ID))
+	s.logger.Info(ctx, "MoveClientToWaitingList", "Client created and intake form completed successfully", zap.String("clientId", result.ClientID))
 
 	return &MoveClientToWaitingListResponse{
-		ClientID: createdClient.ID,
+		ClientID: result.ClientID,
 	}, nil
 }
 
@@ -160,4 +166,50 @@ func (s *clientService) DischargeClient(ctx context.Context, clientID string, re
 	return &DischargeClientResponse{
 		ClientID: updatedClient,
 	}, nil
+}
+
+func (s *clientService) ListWaitingListClients(ctx context.Context, req *ListWaitingListClientsRequest) (*resp.PaginationResponse[ListWaitingListClientsResponse], error) {
+	limit, offset, page, pageSize := middleware.GetPaginationParams(ctx)
+
+	clients, err := s.db.ListWaitingListClients(ctx, db.ListWaitingListClientsParams{
+		Limit:  limit,
+		Offset: offset,
+		Search: req.Search,
+	})
+	if err != nil {
+		s.logger.Error(ctx, "ListWaitingListClients", "Failed to list waiting list clients", zap.Error(err))
+		return nil, ErrInternal
+	}
+
+	listClientsResponse := []ListWaitingListClientsResponse{}
+	totalCount := 0
+
+	for _, client := range clients {
+		listClientsResponse = append(listClientsResponse, ListWaitingListClientsResponse{
+			ID:                   client.ID,
+			FirstName:            client.FirstName,
+			LastName:             client.LastName,
+			Bsn:                  client.Bsn,
+			DateOfBirth:          util.PgtypeDateToStr(client.DateOfBirth),
+			PhoneNumber:          client.PhoneNumber,
+			Gender:               string(client.Gender),
+			CareType:             string(client.CareType),
+			WaitingListPriority:  string(client.WaitingListPriority),
+			FocusAreas:           client.FocusAreas,
+			Notes:                client.Notes,
+			CreatedAt:            util.PgtypeTimestampToStr(client.CreatedAt),
+			LocationID:           client.LocationID,
+			LocationName:         client.LocationName,
+			CoordinatorID:        client.CoordinatorID,
+			CoordinatorFirstName: client.CoordinatorFirstName,
+			CoordinatorLastName:  client.CoordinatorLastName,
+			ReferringOrgName:     client.ReferringOrgName,
+		})
+		if totalCount == 0 {
+			totalCount = int(client.TotalCount)
+		}
+	}
+
+	result := resp.PagRespWithParams(listClientsResponse, totalCount, page, pageSize)
+	return &result, nil
 }

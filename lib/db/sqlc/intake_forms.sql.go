@@ -103,6 +103,7 @@ SELECT
     r.first_name,
     r.last_name,
     r.bsn,
+    r.care_type,
     ro.name as org_name,
     l.name as location_name,
     e.first_name as coordinator_first_name,
@@ -146,6 +147,7 @@ type ListIntakeFormsRow struct {
 	FirstName            *string          `json:"first_name"`
 	LastName             *string          `json:"last_name"`
 	Bsn                  *string          `json:"bsn"`
+	CareType             NullCareTypeEnum `json:"care_type"`
 	OrgName              *string          `json:"org_name"`
 	LocationName         *string          `json:"location_name"`
 	CoordinatorFirstName *string          `json:"coordinator_first_name"`
@@ -174,6 +176,7 @@ func (q *Queries) ListIntakeForms(ctx context.Context, arg ListIntakeFormsParams
 			&i.FirstName,
 			&i.LastName,
 			&i.Bsn,
+			&i.CareType,
 			&i.OrgName,
 			&i.LocationName,
 			&i.CoordinatorFirstName,
@@ -188,4 +191,18 @@ func (q *Queries) ListIntakeForms(ctx context.Context, arg ListIntakeFormsParams
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateIntakeFormStatus = `-- name: UpdateIntakeFormStatus :exec
+UPDATE intake_forms SET status = $2, updated_at = NOW() WHERE id = $1
+`
+
+type UpdateIntakeFormStatusParams struct {
+	ID     string           `json:"id"`
+	Status IntakeStatusEnum `json:"status"`
+}
+
+func (q *Queries) UpdateIntakeFormStatus(ctx context.Context, arg UpdateIntakeFormStatusParams) error {
+	_, err := q.db.Exec(ctx, updateIntakeFormStatus, arg.ID, arg.Status)
+	return err
 }

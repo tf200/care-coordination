@@ -57,3 +57,17 @@ func StrToPgtypeDate(s string) pgtype.Date {
 
 	return pgtype.Date{Time: t, Valid: true}
 }
+
+func PgtypeDateToStr(d pgtype.Date) string {
+	if !d.Valid {
+		return ""
+	}
+	return d.Time.Format(time.DateOnly)
+}
+
+func PgtypeTimestampToStr(t pgtype.Timestamp) string {
+	if !t.Valid {
+		return ""
+	}
+	return t.Time.Format(time.RFC3339)
+}

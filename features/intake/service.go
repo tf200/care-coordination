@@ -62,6 +62,11 @@ func (s *intakeService) ListIntakeForms(ctx context.Context, req *ListIntakeForm
 	}
 	listIntakeFormsResponse := []ListIntakeFormsResponse{}
 	for _, intakeForm := range intakeForms {
+		var careType *string
+		if intakeForm.CareType.Valid {
+			ct := string(intakeForm.CareType.CareTypeEnum)
+			careType = &ct
+		}
 		listIntakeFormsResponse = append(listIntakeFormsResponse, ListIntakeFormsResponse{
 			ID:                   intakeForm.ID,
 			RegistrationFormID:   intakeForm.RegistrationFormID,
@@ -73,6 +78,7 @@ func (s *intakeService) ListIntakeForms(ctx context.Context, req *ListIntakeForm
 			ClientFirstName:      intakeForm.FirstName,
 			ClientLastName:       intakeForm.LastName,
 			ClientBSN:            intakeForm.Bsn,
+			CareType:             careType,
 			OrganizationName:     intakeForm.OrgName,
 			LocationName:         intakeForm.LocationName,
 			CoordinatorFirstName: intakeForm.CoordinatorFirstName,

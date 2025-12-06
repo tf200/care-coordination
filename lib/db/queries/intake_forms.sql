@@ -29,6 +29,7 @@ SELECT
     r.first_name,
     r.last_name,
     r.bsn,
+    r.care_type,
     ro.name as org_name,
     l.name as location_name,
     e.first_name as coordinator_first_name,
@@ -57,3 +58,6 @@ LIMIT $1 OFFSET $2;
 
 -- name: GetIntakeForm :one
 SELECT * FROM intake_forms WHERE id = $1;
+
+-- name: UpdateIntakeFormStatus :exec
+UPDATE intake_forms SET status = $2, updated_at = NOW() WHERE id = $1;

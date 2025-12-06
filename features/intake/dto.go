@@ -38,6 +38,7 @@ type ListIntakeFormsResponse struct {
 	ClientFirstName      *string   `json:"clientFirstName"`
 	ClientLastName       *string   `json:"clientLastName"`
 	ClientBSN            *string   `json:"clientBsn"`
+	CareType             *string   `json:"careType"`
 	OrganizationName     *string   `json:"organizationName"`
 	LocationName         *string   `json:"locationName"`
 	CoordinatorFirstName *string   `json:"coordinatorFirstName"`

@@ -26,6 +26,7 @@ func (h *ClientHandler) SetupClientRoutes(router *gin.Engine) {
 
 	clients.POST("/move-to-waiting-list", h.mdw.AuthMdw(), h.MoveClientToWaitingList)
 	clients.POST("/:id/move-to-care", h.mdw.AuthMdw(), h.MoveClientInCare)
+	clients.GET("/waiting-list", h.mdw.AuthMdw(), h.mdw.PaginationMdw(), h.ListWaitingListClients)
 }
 
 // @Summary Move client to waiting list
@@ -108,6 +109,40 @@ func (h *ClientHandler) MoveClientInCare(ctx *gin.Context) {
 			ctx.JSON(http.StatusBadRequest, resp.Error(err))
 		case errors.Is(err, ErrAmbulatoryHoursNotAllowed):
 			ctx.JSON(http.StatusBadRequest, resp.Error(err))
+		case errors.Is(err, ErrInternal):
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
+		default:
+			ctx.JSON(http.StatusInternalServerError, resp.Error(ErrInternal))
+		}
+		return
+	}
+
+	ctx.JSON(http.StatusOK, result)
+}
+
+// @Summary List waiting list clients
+// @Description List all clients on the waiting list with pagination and search
+// @Tags Client
+// @Accept json
+// @Produce json
+// @Param page query int false "Page number (default: 1)"
+// @Param page_size query int false "Page size (default: 10, max: 100)"
+// @Param search query string false "Search by client first name or last name"
+// @Success 200 {object} resp.PaginationResponse[[]ListWaitingListClientsResponse]
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /clients/waiting-list [get]
+func (h *ClientHandler) ListWaitingListClients(ctx *gin.Context) {
+	var req ListWaitingListClientsRequest
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, resp.Error(err))
+		return
+	}
+
+	result, err := h.clientService.ListWaitingListClients(ctx, &req)
+	if err != nil {
+		switch {
 		case errors.Is(err, ErrInternal):
 			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
 		default:

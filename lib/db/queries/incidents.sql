@@ -1,5 +1,6 @@
 -- name: CreateIncident :exec
 INSERT INTO incidents (
+    id,
     client_id,
     incident_date,
     incident_time,
@@ -12,7 +13,7 @@ INSERT INTO incidents (
     other_parties,
     status
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
 );
 
 

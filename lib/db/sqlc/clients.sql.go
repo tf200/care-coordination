@@ -515,13 +515,13 @@ UPDATE clients SET
     bsn = COALESCE($4, bsn),
     date_of_birth = COALESCE($5, date_of_birth),
     phone_number = COALESCE($6, phone_number),
-    gender = COALESCE($7, gender),
+    gender = COALESCE($7::gender_enum, gender),
     registration_form_id = COALESCE($8, registration_form_id),
     intake_form_id = COALESCE($9, intake_form_id),
-    care_type = COALESCE($10, care_type),
+    care_type = COALESCE($10::care_type_enum, care_type),
     referring_org_id = COALESCE($11, referring_org_id),
-    waiting_list_priority = COALESCE($12, waiting_list_priority),
-    status = COALESCE($13, status),
+    waiting_list_priority = COALESCE($12::waiting_list_priority_enum, waiting_list_priority),
+    status = COALESCE($13::client_status_enum, status),
     assigned_location_id = COALESCE($14, assigned_location_id),
     coordinator_id = COALESCE($15, coordinator_id),
     family_situation = COALESCE($16, family_situation),
@@ -535,44 +535,44 @@ UPDATE clients SET
     discharge_date = COALESCE($24, discharge_date),
     closing_report = COALESCE($25, closing_report),
     evaluation_report = COALESCE($26, evaluation_report),
-    reason_for_discharge = COALESCE($27, reason_for_discharge),
+    reason_for_discharge = COALESCE($27::discharge_reason_enum, reason_for_discharge),
     discharge_attachment_ids = COALESCE($28, discharge_attachment_ids),
-    discharge_status = COALESCE($29, discharge_status),
+    discharge_status = COALESCE($29::discharge_status_enum, discharge_status),
     updated_at = NOW()
 WHERE id = $1
 RETURNING id
 `
 
 type UpdateClientParams struct {
-	ID                     string                  `json:"id"`
-	FirstName              string                  `json:"first_name"`
-	LastName               string                  `json:"last_name"`
-	Bsn                    string                  `json:"bsn"`
-	DateOfBirth            pgtype.Date             `json:"date_of_birth"`
-	PhoneNumber            *string                 `json:"phone_number"`
-	Gender                 GenderEnum              `json:"gender"`
-	RegistrationFormID     string                  `json:"registration_form_id"`
-	IntakeFormID           string                  `json:"intake_form_id"`
-	CareType               CareTypeEnum            `json:"care_type"`
-	ReferringOrgID         *string                 `json:"referring_org_id"`
-	WaitingListPriority    WaitingListPriorityEnum `json:"waiting_list_priority"`
-	Status                 ClientStatusEnum        `json:"status"`
-	AssignedLocationID     string                  `json:"assigned_location_id"`
-	CoordinatorID          string                  `json:"coordinator_id"`
-	FamilySituation        *string                 `json:"family_situation"`
-	Limitations            *string                 `json:"limitations"`
-	FocusAreas             *string                 `json:"focus_areas"`
-	Goals                  *string                 `json:"goals"`
-	Notes                  *string                 `json:"notes"`
-	AmbulatoryWeeklyHours  *int32                  `json:"ambulatory_weekly_hours"`
-	CareStartDate          pgtype.Date             `json:"care_start_date"`
-	CareEndDate            pgtype.Date             `json:"care_end_date"`
-	DischargeDate          pgtype.Date             `json:"discharge_date"`
-	ClosingReport          *string                 `json:"closing_report"`
-	EvaluationReport       *string                 `json:"evaluation_report"`
-	ReasonForDischarge     NullDischargeReasonEnum `json:"reason_for_discharge"`
-	DischargeAttachmentIds []string                `json:"discharge_attachment_ids"`
-	DischargeStatus        NullDischargeStatusEnum `json:"discharge_status"`
+	ID                     string                      `json:"id"`
+	FirstName              *string                     `json:"first_name"`
+	LastName               *string                     `json:"last_name"`
+	Bsn                    *string                     `json:"bsn"`
+	DateOfBirth            pgtype.Date                 `json:"date_of_birth"`
+	PhoneNumber            *string                     `json:"phone_number"`
+	Gender                 NullGenderEnum              `json:"gender"`
+	RegistrationFormID     *string                     `json:"registration_form_id"`
+	IntakeFormID           *string                     `json:"intake_form_id"`
+	CareType               NullCareTypeEnum            `json:"care_type"`
+	ReferringOrgID         *string                     `json:"referring_org_id"`
+	WaitingListPriority    NullWaitingListPriorityEnum `json:"waiting_list_priority"`
+	Status                 NullClientStatusEnum        `json:"status"`
+	AssignedLocationID     *string                     `json:"assigned_location_id"`
+	CoordinatorID          *string                     `json:"coordinator_id"`
+	FamilySituation        *string                     `json:"family_situation"`
+	Limitations            *string                     `json:"limitations"`
+	FocusAreas             *string                     `json:"focus_areas"`
+	Goals                  *string                     `json:"goals"`
+	Notes                  *string                     `json:"notes"`
+	AmbulatoryWeeklyHours  *int32                      `json:"ambulatory_weekly_hours"`
+	CareStartDate          pgtype.Date                 `json:"care_start_date"`
+	CareEndDate            pgtype.Date                 `json:"care_end_date"`
+	DischargeDate          pgtype.Date                 `json:"discharge_date"`
+	ClosingReport          *string                     `json:"closing_report"`
+	EvaluationReport       *string                     `json:"evaluation_report"`
+	ReasonForDischarge     NullDischargeReasonEnum     `json:"reason_for_discharge"`
+	DischargeAttachmentIds []string                    `json:"discharge_attachment_ids"`
+	DischargeStatus        NullDischargeStatusEnum     `json:"discharge_status"`
 }
 
 func (q *Queries) UpdateClient(ctx context.Context, arg UpdateClientParams) (string, error) {

@@ -45,6 +45,358 @@ var (
 		db.GenderEnumFemale,
 		db.GenderEnumOther,
 	}
+
+	// Referring Organizations sample data
+	orgNames = []string{
+		"GGZ Noord-Holland",
+		"Zorginstelling De Brug",
+		"Mentale Gezondheid Utrecht",
+		"Huisartspraktijk Centrum",
+		"Sociaal Wijkteam Amsterdam",
+		"GGZ Friesland",
+		"Verslavingszorg Nederland",
+		"Praktijk voor Psychologie Leiden",
+		"Jeugdzorg Brabant",
+		"Maatschappelijk Werk Rotterdam",
+		"GGZ Limburg",
+		"CAD Nijmegen",
+		"Arkin Amsterdam",
+		"Parnassia Groep",
+		"Lentis Groningen",
+	}
+
+	orgContactFirstNames = []string{
+		"Marieke", "Pieter", "Annemarie", "Wouter", "Liesbeth",
+		"Jeroen", "Sandra", "Bas", "Ingrid", "Marcel",
+	}
+
+	// Care types for registration forms (excluding ambulatory_care which requires ambulatory_weekly_hours)
+	careTypes = []db.CareTypeEnum{
+		db.CareTypeEnumProtectedLiving,
+		db.CareTypeEnumSemiIndependentLiving,
+		db.CareTypeEnumIndependentAssistedLiving,
+		// Note: ambulatory_care excluded because CreateClient doesn't support ambulatory_weekly_hours
+		// which is required by the chk_ambulatory_hours constraint
+	}
+
+	// Registration reasons (Dutch)
+	registrationReasons = []string{
+		"Cliënt heeft ondersteuning nodig bij dagelijkse activiteiten",
+		"Verwijzing van huisarts vanwege psychische klachten",
+		"Behoefte aan beschermd wonen na ziekenhuisopname",
+		"Cliënt kan niet meer zelfstandig wonen",
+		"Verslavingsproblematiek vereist begeleide woonvorm",
+		"Sociale isolatie en behoefte aan 24-uurs zorg",
+		"Uitstroom uit GGZ-instelling, overgang naar begeleid wonen",
+		"Jongvolwassene met ontwikkelingsstoornis zoekt passende woonvorm",
+		"Mantelzorg valt weg, cliënt heeft externe hulp nodig",
+		"Na scheiding tijdelijke woonplek met begeleiding nodig",
+		"Cliënt herstelt van burn-out en heeft rust nodig",
+		"Psychiatrische behandeling afgerond, begeleiding naar zelfstandigheid",
+	}
+
+	// Additional notes (Dutch)
+	additionalNotes = []string{
+		"Cliënt heeft voorkeur voor locatie in de buurt van familie",
+		"Allergisch voor bepaalde medicatie",
+		"Spreekt naast Nederlands ook Turks",
+		"Heeft huisdier (kat) die mee moet kunnen",
+		"Voorgeschiedenis van agressieve episode onder stress",
+		"Werkt parttime en heeft flexibele begeleiding nodig",
+		"Heeft jonge kinderen die op bezoek komen",
+		"Rookt, heeft voorkeur voor rookruimte",
+		"Vegetarisch dieet",
+		"Heeft begeleiding bij financiën nodig",
+		"",
+		"",
+		"",
+	}
+
+	// Location names (Dutch care facilities)
+	locationNames = []string{
+		"Woonlocatie De Zonnetuin",
+		"Beschermd Wonen Centrum",
+		"Huize De Linde",
+		"Woongroep Horizon",
+		"Villa Sereniteit",
+		"Locatie Oost",
+		"Huize Tranquil",
+		"Wooncentrum De Haven",
+		"Zorgvilla Het Park",
+		"Locatie Nieuw Begin",
+	}
+
+	// Dutch cities for addresses
+	dutchCities = []string{
+		"Amsterdam", "Rotterdam", "Den Haag", "Utrecht", "Eindhoven",
+		"Groningen", "Tilburg", "Almere", "Breda", "Nijmegen",
+		"Haarlem", "Arnhem", "Zaanstad", "Amersfoort", "Apeldoorn",
+	}
+
+	// Street names
+	streetNames = []string{
+		"Hoofdstraat", "Kerkstraat", "Dorpsstraat", "Stationsweg",
+		"Molenweg", "Julianalaan", "Wilhelminastraat", "Beatrixlaan",
+		"Oranjestraat", "Zonnelaan", "Parklaan", "Bosweg",
+	}
+
+	// Family situations (Dutch)
+	familySituations = []string{
+		"Alleenstaand, geen kinderen",
+		"Gescheiden, 2 kinderen (wonen bij ex-partner)",
+		"Weduwe/weduwnaar, volwassen kinderen",
+		"Gehuwd, partner woont thuis",
+		"Alleenstaand, wekelijks contact met familie",
+		"Ouders overleden, broer/zus als naaste familie",
+		"Gescheiden, co-ouderschap met 1 kind",
+		"Alleenstaand, beperkt contact met familie",
+		"Samenlevend met partner, geen kinderen",
+		"Familie woont in het buitenland",
+	}
+
+	// Limitations (Dutch)
+	limitations = []string{
+		"Beperkte mobiliteit, rollator nodig",
+		"Verminderd gehoor, draagt gehoorapparaat",
+		"Diabetespatiënt, insulineafhankelijk",
+		"Cognitieve beperkingen door hersenletsel",
+		"Angststoornis, heeft moeite met drukte",
+		"Chronische vermoeidheid",
+		"Beperkt zicht, leest met vergroting",
+		"Geen fysieke beperkingen",
+		"ADHD, heeft structuur nodig",
+		"Autismespectrumstoornis",
+	}
+
+	// Focus areas (Dutch)
+	focusAreas = []string{
+		"Zelfstandig wonen en huishouden",
+		"Sociale contacten opbouwen",
+		"Dagstructuur en dagbesteding",
+		"Financieel beheer",
+		"Medicatietrouw",
+		"Arbeidsparticipatie",
+		"Omgaan met stress en emoties",
+		"Verslavingsherstel",
+		"Persoonlijke verzorging",
+		"Opbouwen van een sociaal netwerk",
+	}
+
+	// Goals (Dutch)
+	goals = []string{
+		"Binnen 6 maanden zelfstandig boodschappen kunnen doen",
+		"Stabiele dagstructuur ontwikkelen",
+		"Werk of dagbesteding vinden binnen 3 maanden",
+		"Medicatie zelfstandig kunnen beheren",
+		"Schulden aflossen en financieel stabiel worden",
+		"Sociale vaardigheden verbeteren",
+		"Doorstromen naar zelfstandige woonvorm",
+		"Clean blijven en terugval voorkomen",
+		"Contact herstellen met familieleden",
+		"Hobby of vrijetijdsbesteding vinden",
+	}
+
+	// Main providers (Dutch)
+	mainProviders = []string{
+		"GGZ Noord-Holland",
+		"Gemeentelijke sociale dienst",
+		"Huisarts",
+		"Verslavingsarts",
+		"Psychiater",
+		"Maatschappelijk werker",
+		"Ambulante begeleider",
+		"Geen hoofdbehandelaar",
+		"Praktijkondersteuner GGZ",
+		"FACT-team",
+	}
+
+	// Intake notes (Dutch)
+	intakeNotes = []string{
+		"Cliënt is gemotiveerd om te werken aan doelen",
+		"Kennismaking verliep positief, goede klik met team",
+		"Cliënt toont inzicht in eigen situatie",
+		"Afspraken gemaakt over huisregels en dagindeling",
+		"Familie is betrokken bij intake",
+		"Cliënt heeft vragen over uitkeringsaanvraag",
+		"Medicatie moet nog worden afgestemd met behandelaar",
+		"",
+		"",
+		"",
+	}
+
+	// Client notes (Dutch) - more detailed for ongoing care
+	clientNotes = []string{
+		"Cliënt maakt goede voortgang met dagstructuur",
+		"Wekelijks contact met behandelaar gepland",
+		"Medicatie is stabiel ingesteld",
+		"Cliënt heeft moeite met groepsactiviteiten",
+		"Goede samenwerking met externe hulpverleners",
+		"Financiële situatie is verbeterd",
+		"Cliënt werkt toe naar meer zelfstandigheid",
+		"Aandachtspunt: sociale contacten uitbreiden",
+		"",
+		"",
+	}
+
+	// Waiting list priorities
+	waitingListPriorities = []db.WaitingListPriorityEnum{
+		db.WaitingListPriorityEnumLow,
+		db.WaitingListPriorityEnumNormal,
+		db.WaitingListPriorityEnumNormal,
+		db.WaitingListPriorityEnumNormal,
+		db.WaitingListPriorityEnumHigh,
+	}
+
+	// Closing reports (Dutch) - for discharged clients
+	closingReports = []string{
+		"Cliënt heeft alle behandeldoelen behaald en is klaar voor uitstroom naar zelfstandig wonen.",
+		"Traject succesvol afgerond. Cliënt woont nu zelfstandig met ambulante begeleiding.",
+		"Na 18 maanden is cliënt doorgestroomd naar beschermd wonen op eigen verzoek.",
+		"Cliënt heeft zelf besloten te stoppen met begeleiding. Overdracht naar huisarts.",
+		"Behandeling afgerond wegens verhuizing naar andere regio.",
+		"Cliënt is hersteld en heeft geen verdere ondersteuning nodig.",
+	}
+
+	// Evaluation reports (Dutch) - for discharged clients
+	evaluationReports = []string{
+		"Gedurende het traject heeft cliënt grote stappen gemaakt in zelfstandigheid. Dagstructuur is verbeterd van chaotisch naar gestructureerd. Financiën worden nu zelfstandig beheerd.",
+		"Cliënt kwam binnen met ernstige sociale angst. Na behandeling kan cliënt nu zelfstandig boodschappen doen en heeft een klein sociaal netwerk opgebouwd.",
+		"Verslavingsproblematiek is onder controle. Cliënt is al 12 maanden clean en heeft werk gevonden.",
+		"Psychiatrische symptomen zijn stabiel met huidige medicatie. Cliënt heeft inzicht in eigen situatie en weet wanneer hulp te zoeken.",
+		"Traject was uitdagend vanwege terugval halverwege. Uiteindelijk toch positief afgerond dankzij intensieve begeleiding.",
+		"Korter traject dan gepland, maar cliënt had sterke eigen motivatie en netwerk.",
+	}
+
+	// Discharge reasons
+	dischargeReasons = []db.DischargeReasonEnum{
+		db.DischargeReasonEnumTreatmentCompleted,
+		db.DischargeReasonEnumTreatmentCompleted,
+		db.DischargeReasonEnumTerminatedByMutualAgreement,
+		db.DischargeReasonEnumTerminatedByClient,
+		db.DischargeReasonEnumTerminatedDueToExternalFactors,
+	}
+
+	// Transfer reasons (Dutch) - for location transfers
+	transferReasons = []string{
+		"Cliënt heeft behoefte aan meer zelfstandigheid",
+		"Betere match met zorgvraag op nieuwe locatie",
+		"Dichter bij familie en sociaal netwerk",
+		"Overplaatsing wegens capaciteitsproblemen",
+		"Cliënt voelt zich niet thuis op huidige locatie",
+		"Nieuwe coördinator met betere expertise voor cliënt",
+		"Conflictsituatie op huidige locatie",
+		"Medische reden: toegankelijkheid nieuwe locatie",
+		"Wens van cliënt om dichter bij werk te wonen",
+		"Afbouw naar lichtere zorgvorm",
+	}
+
+	// Incident types
+	incidentTypes = []db.IncidentTypeEnum{
+		db.IncidentTypeEnumAggression,
+		db.IncidentTypeEnumMedicalEmergency,
+		db.IncidentTypeEnumSafetyConcern,
+		db.IncidentTypeEnumUnwantedBehavior,
+		db.IncidentTypeEnumOther,
+	}
+
+	// Incident severities
+	incidentSeverities = []db.IncidentSeverityEnum{
+		db.IncidentSeverityEnumMinor,
+		db.IncidentSeverityEnumMinor,
+		db.IncidentSeverityEnumModerate,
+		db.IncidentSeverityEnumModerate,
+		db.IncidentSeverityEnumSevere,
+	}
+
+	// Incident statuses
+	incidentStatuses = []db.IncidentStatusEnum{
+		db.IncidentStatusEnumPending,
+		db.IncidentStatusEnumUnderInvestigation,
+		db.IncidentStatusEnumCompleted,
+		db.IncidentStatusEnumCompleted,
+	}
+
+	// Incident descriptions (Dutch)
+	incidentDescriptions = map[db.IncidentTypeEnum][]string{
+		db.IncidentTypeEnumAggression: {
+			"Cliënt werd verbaal agressief naar medebewoner tijdens avondeten",
+			"Fysieke confrontatie tussen twee cliënten in gemeenschappelijke ruimte",
+			"Cliënt schreeuwde en gooide voorwerpen in eigen kamer",
+			"Verbale intimidatie richting begeleider tijdens medicatiemoment",
+		},
+		db.IncidentTypeEnumMedicalEmergency: {
+			"Cliënt viel flauw in de gang, 112 gebeld",
+			"Epileptische aanval tijdens groepsactiviteit",
+			"Cliënt klaagde over pijn op de borst, ambulance ingeschakeld",
+			"Allergische reactie na maaltijd, spoedhulp verleend",
+		},
+		db.IncidentTypeEnumSafetyConcern: {
+			"Brandmelder ging af door roken op kamer",
+			"Voordeur stond 's nachts open, cliënt was afwezig",
+			"Gaslucht gemeld in keuken, noodprocedure gestart",
+			"Cliënt uitgesproken gedachten over zelfbeschadiging",
+		},
+		db.IncidentTypeEnumUnwantedBehavior: {
+			"Cliënt heeft alcohol gebruikt ondanks huisregels",
+			"Bezoek na sluitingstijd zonder toestemming",
+			"Cliënt weigerde deel te nemen aan verplichte groepsactiviteit",
+			"Ongewenst bezoek van derden op locatie",
+		},
+		db.IncidentTypeEnumOther: {
+			"Schade aan gemeenschappelijk meubilair",
+			"Klacht van buren over geluidsoverlast",
+			"Verlies van persoonlijke eigendommen gemeld",
+			"Miscommunicatie over afspraken met externe hulpverlener",
+		},
+	}
+
+	// Actions taken (Dutch)
+	actionsTaken = map[db.IncidentTypeEnum][]string{
+		db.IncidentTypeEnumAggression: {
+			"Cliënten gescheiden, gesprek gevoerd met beide partijen, afkoelperiode ingesteld",
+			"De-escalatie technieken toegepast, cliënt naar eigen kamer begeleid",
+			"Incident besproken in teamoverleg, gedragsplan aangepast",
+			"Waarschuwing gegeven, afspraken vastgelegd in begeleidingsplan",
+		},
+		db.IncidentTypeEnumMedicalEmergency: {
+			"EHBO verleend, ambulance gebeld, cliënt naar ziekenhuis vervoerd",
+			"Protocollen gevolgd, cliënt gestabiliseerd, arts geconsulteerd",
+			"Spoedhulp verleend, medicatie toegediend, observatie gestart",
+			"112 gebeld, eerste hulp verleend, familie geïnformeerd",
+		},
+		db.IncidentTypeEnumSafetyConcern: {
+			"Ruimte geventileerd, brandweer geïnformeerd, cliënt aangesproken",
+			"Cliënt teruggevonden, gesprek gevoerd, extra controles ingesteld",
+			"Ontruimingsprotocol gestart, technische dienst ingeschakeld",
+			"Direct gesprek met cliënt, crisisdienst ingeschakeld, 1-op-1 begeleiding",
+		},
+		db.IncidentTypeEnumUnwantedBehavior: {
+			"Gesprek gevoerd over huisregels, consequenties besproken",
+			"Bezoeker weggestuurd, afspraken aangescherpt",
+			"Motiverend gesprek gehouden, alternatief aangeboden",
+			"Huisregels herhaald, schriftelijke waarschuwing gegeven",
+		},
+		db.IncidentTypeEnumOther: {
+			"Schade gedocumenteerd, herstelkosten berekend",
+			"Excuses aangeboden aan buren, geluidsbeperkende maatregelen getroffen",
+			"Zoektocht gestart, verzekering geïnformeerd",
+			"Overleg met externe partij gepland, afspraken verduidelijkt",
+		},
+	}
+
+	// Other parties (Dutch)
+	otherParties = []string{
+		"Medebewoner (naam geanonimiseerd)",
+		"Familielid van cliënt",
+		"Externe bezoeker",
+		"Collega van andere afdeling",
+		"Ambulancepersoneel",
+		"Politie",
+		"Buurman/buurvrouw",
+		"",
+		"",
+		"",
+	}
 )
 
 func main() {
@@ -66,30 +418,79 @@ func main() {
 	// Create store
 	store := db.NewStore(connPool)
 
-	// Seed employees
-	if err := seedEmployees(ctx, store, 20); err != nil {
+	// Seed employees (returns employee IDs for coordinator assignment)
+	employeeIDs, err := seedEmployees(ctx, store, 20)
+	if err != nil {
 		log.Fatalf("Failed to seed employees: %v", err)
+	}
+
+	// Seed referring organizations
+	orgIDs, err := seedReferringOrganizations(ctx, store, 10)
+	if err != nil {
+		log.Fatalf("Failed to seed referring organizations: %v", err)
+	}
+
+	// Seed locations (needed for intake forms and clients)
+	locationIDs, err := seedLocations(ctx, store, 8)
+	if err != nil {
+		log.Fatalf("Failed to seed locations: %v", err)
+	}
+
+	// Seed registration forms (returns form IDs for intake forms)
+	// 30 total: 20 will have intakes, 10 will become waiting_list clients
+	registrationFormIDs, err := seedRegistrationForms(ctx, store, orgIDs, 30)
+	if err != nil {
+		log.Fatalf("Failed to seed registration forms: %v", err)
+	}
+
+	// Seed intake forms for first 20 registration forms
+	intakeInfos, err := seedIntakeForms(ctx, store, registrationFormIDs[:20], locationIDs, employeeIDs)
+	if err != nil {
+		log.Fatalf("Failed to seed intake forms: %v", err)
+	}
+
+	// Seed clients with different statuses:
+	// - 10 waiting_list clients (from registrations without intake)
+	// - 8 in_care clients (from intake forms)
+	// - 5 discharged clients (from intake forms)
+	inCareClients, err := seedClients(ctx, store, registrationFormIDs[20:], intakeInfos, locationIDs, employeeIDs, orgIDs)
+	if err != nil {
+		log.Fatalf("Failed to seed clients: %v", err)
+	}
+
+	// Seed location transfers for some in_care clients
+	if err := seedLocationTransfers(ctx, store, inCareClients, locationIDs, employeeIDs); err != nil {
+		log.Fatalf("Failed to seed location transfers: %v", err)
+	}
+
+	// Seed incidents for in_care clients
+	if err := seedIncidents(ctx, store, inCareClients, locationIDs, employeeIDs); err != nil {
+		log.Fatalf("Failed to seed incidents: %v", err)
 	}
 
 	fmt.Println("✅ Successfully seeded database!")
 }
 
-func seedEmployees(ctx context.Context, store *db.Store, count int) error {
+func seedEmployees(ctx context.Context, store *db.Store, count int) ([]string, error) {
 	fmt.Printf("🌱 Seeding %d employees...\n", count)
+
+	employeeIDs := make([]string, 0, count)
 
 	for i := 0; i < count; i++ {
 		employee, err := createRandomEmployee(ctx, store)
 		if err != nil {
-			return fmt.Errorf("failed to create employee %d: %w", i+1, err)
+			return nil, fmt.Errorf("failed to create employee %d: %w", i+1, err)
 		}
+		employeeIDs = append(employeeIDs, employee.ID)
 		fmt.Printf("  ✓ Created employee: %s %s (%s)\n", employee.FirstName, employee.LastName, employee.Role)
 	}
 
 	fmt.Printf("✅ Successfully seeded %d employees\n", count)
-	return nil
+	return employeeIDs, nil
 }
 
 type EmployeeInfo struct {
+	ID        string
 	FirstName string
 	LastName  string
 	Role      string
@@ -142,6 +543,7 @@ func createRandomEmployee(ctx context.Context, store *db.Store) (*EmployeeInfo, 
 	}
 
 	return &EmployeeInfo{
+		ID:        employeeID,
 		FirstName: firstName,
 		LastName:  lastName,
 		Role:      role,
@@ -202,4 +604,896 @@ func generateRandomDateOfBirth() pgtype.Date {
 func generatePhoneNumber() string {
 	// Generate a Dutch mobile phone number format
 	return fmt.Sprintf("06%08d", rand.Intn(100000000))
+}
+
+func generateLandlineNumber() string {
+	// Generate a Dutch landline phone number format (area codes 010-079)
+	areaCode := 10 + rand.Intn(70)
+	return fmt.Sprintf("0%d-%07d", areaCode, rand.Intn(10000000))
+}
+
+// ============================================================
+// Referring Organizations Seeding
+// ============================================================
+
+func seedReferringOrganizations(ctx context.Context, store *db.Store, count int) ([]string, error) {
+	fmt.Printf("🌱 Seeding %d referring organizations...\n", count)
+
+	orgIDs := make([]string, 0, count)
+
+	for i := 0; i < count && i < len(orgNames); i++ {
+		org, err := createRandomReferringOrg(ctx, store, i)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create referring org %d: %w", i+1, err)
+		}
+		orgIDs = append(orgIDs, org.ID)
+		fmt.Printf("  ✓ Created referring org: %s (%s)\n", org.Name, org.ContactPerson)
+	}
+
+	fmt.Printf("✅ Successfully seeded %d referring organizations\n", len(orgIDs))
+	return orgIDs, nil
+}
+
+type ReferringOrgInfo struct {
+	ID            string
+	Name          string
+	ContactPerson string
+}
+
+func createRandomReferringOrg(ctx context.Context, store *db.Store, index int) (*ReferringOrgInfo, error) {
+	// Generate ID
+	orgID, err := gonanoid.New()
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate org ID: %w", err)
+	}
+
+	// Use predefined org name or generate one
+	orgName := orgNames[index%len(orgNames)]
+
+	// Generate contact person
+	contactFirstName := randomElement(orgContactFirstNames)
+	contactLastName := randomElement(lastNames)
+	contactPerson := fmt.Sprintf("%s %s", contactFirstName, contactLastName)
+
+	// Generate email based on org name
+	suffix, _ := gonanoid.Generate("0123456789", 3)
+	orgEmail := fmt.Sprintf("info.%s@%s.nl",
+		suffix,
+		normalizeForEmail(orgName))
+
+	err = store.CreateReferringOrg(ctx, db.CreateReferringOrgParams{
+		ID:            orgID,
+		Name:          orgName,
+		ContactPerson: contactPerson,
+		PhoneNumber:   generateLandlineNumber(),
+		Email:         orgEmail,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create referring org: %w", err)
+	}
+
+	return &ReferringOrgInfo{
+		ID:            orgID,
+		Name:          orgName,
+		ContactPerson: contactPerson,
+	}, nil
+}
+
+// ============================================================
+// Registration Forms Seeding
+// ============================================================
+
+func seedRegistrationForms(ctx context.Context, store *db.Store, orgIDs []string, count int) ([]string, error) {
+	fmt.Printf("🌱 Seeding %d registration forms...\n", count)
+
+	formIDs := make([]string, 0, count)
+
+	for i := 0; i < count; i++ {
+		form, err := createRandomRegistrationForm(ctx, store, orgIDs)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create registration form %d: %w", i+1, err)
+		}
+		formIDs = append(formIDs, form.ID)
+		fmt.Printf("  ✓ Created registration: %s %s (BSN: %s)\n",
+			form.FirstName, form.LastName, form.BSN)
+	}
+
+	fmt.Printf("✅ Successfully seeded %d registration forms\n", count)
+	return formIDs, nil
+}
+
+type RegistrationFormInfo struct {
+	ID        string
+	FirstName string
+	LastName  string
+	BSN       string
+}
+
+func createRandomRegistrationForm(ctx context.Context, store *db.Store, orgIDs []string) (*RegistrationFormInfo, error) {
+	// Generate ID
+	formID, err := gonanoid.New()
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate form ID: %w", err)
+	}
+
+	// Generate random client data
+	firstName := randomElement(firstNames)
+	lastName := randomElement(lastNames)
+	bsn := generateBSN()
+
+	// Randomly assign a referring organization (80% chance) or nil (20% chance)
+	var refferingOrgID *string
+	if rand.Float32() < 0.8 && len(orgIDs) > 0 {
+		orgID := randomElement(orgIDs)
+		refferingOrgID = &orgID
+	}
+
+	// Generate date of birth for client (18-75 years old)
+	dob := generateClientDateOfBirth()
+
+	// Generate registration date (within last 90 days)
+	regDate := generateRecentDate(90)
+
+	// Random care type
+	careType := randomElement(careTypes)
+
+	// Random registration reason
+	reason := randomElement(registrationReasons)
+
+	// Random additional notes (may be nil)
+	var notes *string
+	note := randomElement(additionalNotes)
+	if note != "" {
+		notes = &note
+	}
+
+	err = store.CreateRegistrationForm(ctx, db.CreateRegistrationFormParams{
+		ID:                 formID,
+		FirstName:          firstName,
+		LastName:           lastName,
+		Bsn:                bsn,
+		Gender:             randomGender(),
+		DateOfBirth:        dob,
+		RefferingOrgID:     refferingOrgID,
+		CareType:           careType,
+		RegistrationDate:   regDate,
+		RegistrationReason: reason,
+		AdditionalNotes:    notes,
+		AttachmentIds:      []string{}, // Empty for seeding
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create registration form: %w", err)
+	}
+
+	return &RegistrationFormInfo{
+		ID:        formID,
+		FirstName: firstName,
+		LastName:  lastName,
+		BSN:       bsn,
+	}, nil
+}
+
+func generateClientDateOfBirth() pgtype.Date {
+	// Generate a date of birth between 18 and 75 years ago
+	minAge, maxAge := 18, 75
+	yearsAgo := minAge + rand.Intn(maxAge-minAge)
+
+	dob := time.Now().AddDate(-yearsAgo, -rand.Intn(12), -rand.Intn(28))
+
+	return pgtype.Date{
+		Time:  dob,
+		Valid: true,
+	}
+}
+
+func generateRecentDate(daysAgo int) pgtype.Date {
+	// Generate a random date within the last N days
+	days := rand.Intn(daysAgo)
+	date := time.Now().AddDate(0, 0, -days)
+
+	return pgtype.Date{
+		Time:  date,
+		Valid: true,
+	}
+}
+
+// ============================================================
+// Locations Seeding
+// ============================================================
+
+func seedLocations(ctx context.Context, store *db.Store, count int) ([]string, error) {
+	fmt.Printf("🌱 Seeding %d locations...\n", count)
+
+	locationIDs := make([]string, 0, count)
+
+	for i := 0; i < count && i < len(locationNames); i++ {
+		loc, err := createRandomLocation(ctx, store, i)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create location %d: %w", i+1, err)
+		}
+		locationIDs = append(locationIDs, loc.ID)
+		fmt.Printf("  ✓ Created location: %s (capacity: %d)\n", loc.Name, loc.Capacity)
+	}
+
+	fmt.Printf("✅ Successfully seeded %d locations\n", len(locationIDs))
+	return locationIDs, nil
+}
+
+type LocationInfo struct {
+	ID       string
+	Name     string
+	Capacity int32
+}
+
+func createRandomLocation(ctx context.Context, store *db.Store, index int) (*LocationInfo, error) {
+	// Generate ID
+	locID, err := gonanoid.New()
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate location ID: %w", err)
+	}
+
+	// Use predefined location name
+	locName := locationNames[index%len(locationNames)]
+
+	// Generate address
+	streetName := randomElement(streetNames)
+	houseNumber := rand.Intn(200) + 1
+	city := randomElement(dutchCities)
+	address := fmt.Sprintf("%s %d, %s", streetName, houseNumber, city)
+
+	// Generate postal code (Dutch format: 4 digits + 2 letters)
+	postalCode := fmt.Sprintf("%04d%s", 1000+rand.Intn(9000), randomPostalLetters())
+
+	// Random capacity between 8 and 30
+	capacity := int32(8 + rand.Intn(23))
+
+	// Random occupied (0 to capacity-1, leave some room)
+	occupied := int32(rand.Intn(int(capacity)))
+
+	err = store.CreateLocation(ctx, db.CreateLocationParams{
+		ID:         locID,
+		Name:       locName,
+		PostalCode: postalCode,
+		Address:    address,
+		Capacity:   capacity,
+		Occupied:   occupied,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create location: %w", err)
+	}
+
+	return &LocationInfo{
+		ID:       locID,
+		Name:     locName,
+		Capacity: capacity,
+	}, nil
+}
+
+func randomPostalLetters() string {
+	letters := "ABCDEFGHJKLMNPRSTUVWXYZ" // Dutch postal codes don't use all letters
+	return string(letters[rand.Intn(len(letters))]) + string(letters[rand.Intn(len(letters))])
+}
+
+// ============================================================
+// Intake Forms Seeding
+// ============================================================
+
+func seedIntakeForms(ctx context.Context, store *db.Store, registrationFormIDs, locationIDs, employeeIDs []string) ([]IntakeFormInfo, error) {
+	count := len(registrationFormIDs)
+	fmt.Printf("🌱 Seeding %d intake forms...\n", count)
+
+	intakeInfos := make([]IntakeFormInfo, 0, count)
+
+	for i, regFormID := range registrationFormIDs {
+		intake, err := createRandomIntakeForm(ctx, store, regFormID, locationIDs, employeeIDs)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create intake form %d: %w", i+1, err)
+		}
+		intakeInfos = append(intakeInfos, *intake)
+		fmt.Printf("  ✓ Created intake: %s (location: %s)\n", intake.ID[:8], intake.LocationID[:8])
+	}
+
+	fmt.Printf("✅ Successfully seeded %d intake forms\n", count)
+	return intakeInfos, nil
+}
+
+type IntakeFormInfo struct {
+	ID                 string
+	RegistrationFormID string
+	LocationID         string
+	CoordinatorID      string
+	FamilySituation    *string
+	Limitations        *string
+	FocusAreas         *string
+	Goals              *string
+	Notes              *string
+}
+
+func createRandomIntakeForm(ctx context.Context, store *db.Store, registrationFormID string, locationIDs, employeeIDs []string) (*IntakeFormInfo, error) {
+	// Generate ID
+	intakeID, err := gonanoid.New()
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate intake ID: %w", err)
+	}
+
+	// Pick random location and coordinator
+	locationID := randomElement(locationIDs)
+	coordinatorID := randomElement(employeeIDs)
+
+	// Generate intake date (within last 60 days)
+	intakeDate := generateRecentDate(60)
+
+	// Generate intake time (between 9:00 and 17:00)
+	hour := 9 + rand.Intn(8)
+	minute := rand.Intn(4) * 15 // 0, 15, 30, or 45
+	intakeTime := pgtype.Time{
+		Microseconds: int64(hour*3600+minute*60) * 1000000,
+		Valid:        true,
+	}
+
+	// Random optional fields
+	var familySituation, mainProvider, limitationsStr, focusAreasStr, goalsStr, notes *string
+
+	if rand.Float32() < 0.9 {
+		fs := randomElement(familySituations)
+		familySituation = &fs
+	}
+	if rand.Float32() < 0.8 {
+		mp := randomElement(mainProviders)
+		mainProvider = &mp
+	}
+	if rand.Float32() < 0.85 {
+		l := randomElement(limitations)
+		limitationsStr = &l
+	}
+	if rand.Float32() < 0.9 {
+		fa := randomElement(focusAreas)
+		focusAreasStr = &fa
+	}
+	if rand.Float32() < 0.9 {
+		g := randomElement(goals)
+		goalsStr = &g
+	}
+	// Notes: include if not empty string
+	noteContent := randomElement(intakeNotes)
+	if noteContent != "" {
+		notes = &noteContent
+	}
+
+	err = store.CreateIntakeForm(ctx, db.CreateIntakeFormParams{
+		ID:                 intakeID,
+		RegistrationFormID: registrationFormID,
+		IntakeDate:         intakeDate,
+		IntakeTime:         intakeTime,
+		LocationID:         locationID,
+		CoordinatorID:      coordinatorID,
+		FamilySituation:    familySituation,
+		MainProvider:       mainProvider,
+		Limitations:        limitationsStr,
+		FocusAreas:         focusAreasStr,
+		Goals:              goalsStr,
+		Notes:              notes,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create intake form: %w", err)
+	}
+
+	return &IntakeFormInfo{
+		ID:                 intakeID,
+		RegistrationFormID: registrationFormID,
+		LocationID:         locationID,
+		CoordinatorID:      coordinatorID,
+		FamilySituation:    familySituation,
+		Limitations:        limitationsStr,
+		FocusAreas:         focusAreasStr,
+		Goals:              goalsStr,
+		Notes:              notes,
+	}, nil
+}
+
+// ============================================================
+// Clients Seeding
+// ============================================================
+
+// ClientInfo holds info about created clients for use in subsequent seeding
+type ClientInfo struct {
+	ID            string
+	LocationID    string
+	CoordinatorID string
+}
+
+func seedClients(ctx context.Context, store *db.Store, waitingListRegIDs []string, intakeInfos []IntakeFormInfo, locationIDs, employeeIDs, orgIDs []string) ([]ClientInfo, error) {
+	fmt.Println("🌱 Seeding clients...")
+
+	// Get registration forms data for waiting list clients
+	waitingListCount := len(waitingListRegIDs)
+	inCareCount := 8
+	dischargedCount := 5
+
+	if inCareCount+dischargedCount > len(intakeInfos) {
+		inCareCount = len(intakeInfos) - dischargedCount
+		if inCareCount < 0 {
+			inCareCount = 0
+			dischargedCount = len(intakeInfos)
+		}
+	}
+
+	inCareClients := make([]ClientInfo, 0, inCareCount)
+
+	// Seed waiting list clients (from registrations without intake)
+	fmt.Printf("  Seeding %d waiting_list clients...\n", waitingListCount)
+	for i, regFormID := range waitingListRegIDs {
+		err := createWaitingListClient(ctx, store, regFormID, locationIDs, employeeIDs, orgIDs)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create waiting_list client %d: %w", i+1, err)
+		}
+	}
+	fmt.Printf("  ✓ Created %d waiting_list clients\n", waitingListCount)
+
+	// Seed in_care clients (from intake forms)
+	fmt.Printf("  Seeding %d in_care clients...\n", inCareCount)
+	for i := 0; i < inCareCount; i++ {
+		clientInfo, err := createInCareClient(ctx, store, intakeInfos[i], orgIDs)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create in_care client %d: %w", i+1, err)
+		}
+		inCareClients = append(inCareClients, *clientInfo)
+	}
+	fmt.Printf("  ✓ Created %d in_care clients\n", inCareCount)
+
+	// Seed discharged clients (from remaining intake forms)
+	fmt.Printf("  Seeding %d discharged clients...\n", dischargedCount)
+	for i := 0; i < dischargedCount; i++ {
+		intakeIdx := inCareCount + i
+		err := createDischargedClient(ctx, store, intakeInfos[intakeIdx], orgIDs)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create discharged client %d: %w", i+1, err)
+		}
+	}
+	fmt.Printf("  ✓ Created %d discharged clients\n", dischargedCount)
+
+	totalClients := waitingListCount + inCareCount + dischargedCount
+	fmt.Printf("✅ Successfully seeded %d clients\n", totalClients)
+	return inCareClients, nil
+}
+
+func createWaitingListClient(ctx context.Context, store *db.Store, registrationFormID string, locationIDs, employeeIDs, orgIDs []string) error {
+	// Get registration form data
+	regForm, err := store.GetRegistrationForm(ctx, registrationFormID)
+	if err != nil {
+		return fmt.Errorf("failed to get registration form: %w", err)
+	}
+
+	clientID, err := gonanoid.New()
+	if err != nil {
+		return fmt.Errorf("failed to generate client ID: %w", err)
+	}
+
+	// For waiting list, we need a temporary intake form ID (create a placeholder)
+	intakeID, err := gonanoid.New()
+	if err != nil {
+		return fmt.Errorf("failed to generate intake ID: %w", err)
+	}
+
+	// Create placeholder intake form for waiting list client
+	locationID := randomElement(locationIDs)
+	coordinatorID := randomElement(employeeIDs)
+
+	err = store.CreateIntakeForm(ctx, db.CreateIntakeFormParams{
+		ID:                 intakeID,
+		RegistrationFormID: registrationFormID,
+		IntakeDate:         generateRecentDate(30),
+		IntakeTime: pgtype.Time{
+			Microseconds: int64(10*3600) * 1000000,
+			Valid:        true,
+		},
+		LocationID:    locationID,
+		CoordinatorID: coordinatorID,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create placeholder intake: %w", err)
+	}
+
+	// Random phone number
+	phone := generatePhoneNumber()
+
+	// Random focus areas and notes for waiting list
+	var focusAreasStr, notesStr *string
+	if rand.Float32() < 0.8 {
+		fa := randomElement(focusAreas)
+		focusAreasStr = &fa
+	}
+	noteContent := randomElement(clientNotes)
+	if noteContent != "" {
+		notesStr = &noteContent
+	}
+
+	// Pick random referring org (may be same as registration form's org or different)
+	var referringOrgID *string
+	if regForm.RefferingOrgID != nil {
+		referringOrgID = regForm.RefferingOrgID
+	} else if rand.Float32() < 0.7 {
+		orgID := randomElement(orgIDs)
+		referringOrgID = &orgID
+	}
+
+	_, err = store.CreateClient(ctx, db.CreateClientParams{
+		ID:                  clientID,
+		FirstName:           regForm.FirstName,
+		LastName:            regForm.LastName,
+		Bsn:                 regForm.Bsn,
+		DateOfBirth:         regForm.DateOfBirth,
+		PhoneNumber:         &phone,
+		Gender:              regForm.Gender,
+		RegistrationFormID:  registrationFormID,
+		IntakeFormID:        intakeID,
+		CareType:            regForm.CareType,
+		ReferringOrgID:      referringOrgID,
+		WaitingListPriority: randomElement(waitingListPriorities),
+		Status:              db.ClientStatusEnumWaitingList,
+		AssignedLocationID:  locationID,
+		CoordinatorID:       coordinatorID,
+		FocusAreas:          focusAreasStr,
+		Notes:               notesStr,
+	})
+
+	return err
+}
+
+func createInCareClient(ctx context.Context, store *db.Store, intakeInfo IntakeFormInfo, orgIDs []string) (*ClientInfo, error) {
+	// Get registration form data
+	regForm, err := store.GetRegistrationForm(ctx, intakeInfo.RegistrationFormID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get registration form: %w", err)
+	}
+
+	clientID, err := gonanoid.New()
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate client ID: %w", err)
+	}
+
+	// Random phone number
+	phone := generatePhoneNumber()
+
+	// Pick random referring org
+	var referringOrgID *string
+	if regForm.RefferingOrgID != nil {
+		referringOrgID = regForm.RefferingOrgID
+	} else if rand.Float32() < 0.7 {
+		orgID := randomElement(orgIDs)
+		referringOrgID = &orgID
+	}
+
+	// Generate care start date (30-180 days ago for in-care)
+	careStartDate := generateRecentDate(180)
+
+	// Client notes for in-care clients
+	var notesStr *string
+	noteContent := randomElement(clientNotes)
+	if noteContent != "" {
+		notesStr = &noteContent
+	}
+
+	// Create client first as waiting_list (to satisfy constraints)
+	_, err = store.CreateClient(ctx, db.CreateClientParams{
+		ID:                  clientID,
+		FirstName:           regForm.FirstName,
+		LastName:            regForm.LastName,
+		Bsn:                 regForm.Bsn,
+		DateOfBirth:         regForm.DateOfBirth,
+		PhoneNumber:         &phone,
+		Gender:              regForm.Gender,
+		RegistrationFormID:  intakeInfo.RegistrationFormID,
+		IntakeFormID:        intakeInfo.ID,
+		CareType:            regForm.CareType,
+		ReferringOrgID:      referringOrgID,
+		WaitingListPriority: db.WaitingListPriorityEnumNormal,
+		Status:              db.ClientStatusEnumWaitingList, // Create as waiting_list first
+		AssignedLocationID:  intakeInfo.LocationID,
+		CoordinatorID:       intakeInfo.CoordinatorID,
+		FamilySituation:     intakeInfo.FamilySituation,
+		Limitations:         intakeInfo.Limitations,
+		FocusAreas:          intakeInfo.FocusAreas,
+		Goals:               intakeInfo.Goals,
+		Notes:               notesStr,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// Update to in_care with care_start_date in single call to satisfy chk_in_care_fields constraint
+	_, err = store.UpdateClient(ctx, db.UpdateClientParams{
+		ID: clientID,
+		Status: db.NullClientStatusEnum{
+			ClientStatusEnum: db.ClientStatusEnumInCare,
+			Valid:            true,
+		},
+		CareStartDate: careStartDate,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &ClientInfo{
+		ID:            clientID,
+		LocationID:    intakeInfo.LocationID,
+		CoordinatorID: intakeInfo.CoordinatorID,
+	}, nil
+}
+
+func createDischargedClient(ctx context.Context, store *db.Store, intakeInfo IntakeFormInfo, orgIDs []string) error {
+	// Get registration form data
+	regForm, err := store.GetRegistrationForm(ctx, intakeInfo.RegistrationFormID)
+	if err != nil {
+		return fmt.Errorf("failed to get registration form: %w", err)
+	}
+
+	clientID, err := gonanoid.New()
+	if err != nil {
+		return fmt.Errorf("failed to generate client ID: %w", err)
+	}
+
+	// Random phone number
+	phone := generatePhoneNumber()
+
+	// Pick random referring org
+	var referringOrgID *string
+	if regForm.RefferingOrgID != nil {
+		referringOrgID = regForm.RefferingOrgID
+	} else if rand.Float32() < 0.7 {
+		orgID := randomElement(orgIDs)
+		referringOrgID = &orgID
+	}
+
+	// Generate dates for discharged clients
+	// Care started 6-18 months ago
+	careStartDaysAgo := 180 + rand.Intn(365)
+	careStartDate := pgtype.Date{
+		Time:  time.Now().AddDate(0, 0, -careStartDaysAgo),
+		Valid: true,
+	}
+
+	// Discharged 7-60 days ago
+	dischargeDaysAgo := 7 + rand.Intn(53)
+	dischargeDate := pgtype.Date{
+		Time:  time.Now().AddDate(0, 0, -dischargeDaysAgo),
+		Valid: true,
+	}
+
+	// Discharge-specific data
+	closingReport := randomElement(closingReports)
+	evaluationReport := randomElement(evaluationReports)
+	dischargeReason := randomElement(dischargeReasons)
+
+	// STEP 1: Create client as waiting_list (initial state)
+	_, err = store.CreateClient(ctx, db.CreateClientParams{
+		ID:                  clientID,
+		FirstName:           regForm.FirstName,
+		LastName:            regForm.LastName,
+		Bsn:                 regForm.Bsn,
+		DateOfBirth:         regForm.DateOfBirth,
+		PhoneNumber:         &phone,
+		Gender:              regForm.Gender,
+		RegistrationFormID:  intakeInfo.RegistrationFormID,
+		IntakeFormID:        intakeInfo.ID,
+		CareType:            regForm.CareType,
+		ReferringOrgID:      referringOrgID,
+		WaitingListPriority: db.WaitingListPriorityEnumNormal,
+		Status:              db.ClientStatusEnumWaitingList,
+		AssignedLocationID:  intakeInfo.LocationID,
+		CoordinatorID:       intakeInfo.CoordinatorID,
+		FamilySituation:     intakeInfo.FamilySituation,
+		Limitations:         intakeInfo.Limitations,
+		FocusAreas:          intakeInfo.FocusAreas,
+		Goals:               intakeInfo.Goals,
+	})
+	if err != nil {
+		return fmt.Errorf("step 1 (create waiting_list) failed: %w", err)
+	}
+
+	// STEP 2: Move to in_care with care_start_date
+	_, err = store.UpdateClient(ctx, db.UpdateClientParams{
+		ID: clientID,
+		Status: db.NullClientStatusEnum{
+			ClientStatusEnum: db.ClientStatusEnumInCare,
+			Valid:            true,
+		},
+		CareStartDate: careStartDate,
+	})
+	if err != nil {
+		return fmt.Errorf("step 2 (move to in_care) failed: %w", err)
+	}
+
+	// STEP 3: Discharge client with all required discharge fields
+	_, err = store.UpdateClient(ctx, db.UpdateClientParams{
+		ID: clientID,
+		Status: db.NullClientStatusEnum{
+			ClientStatusEnum: db.ClientStatusEnumDischarged,
+			Valid:            true,
+		},
+		DischargeDate:    dischargeDate,
+		ClosingReport:    &closingReport,
+		EvaluationReport: &evaluationReport,
+		ReasonForDischarge: db.NullDischargeReasonEnum{
+			DischargeReasonEnum: dischargeReason,
+			Valid:               true,
+		},
+		DischargeStatus: db.NullDischargeStatusEnum{
+			DischargeStatusEnum: db.DischargeStatusEnumCompleted,
+			Valid:               true,
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("step 3 (discharge) failed: %w", err)
+	}
+
+	return nil
+}
+
+// ============================================================
+// Location Transfers Seeding
+// ============================================================
+
+func seedLocationTransfers(ctx context.Context, store *db.Store, inCareClients []ClientInfo, locationIDs, employeeIDs []string) error {
+	// Create transfers for about half of the in_care clients
+	transferCount := len(inCareClients) / 2
+	if transferCount < 1 && len(inCareClients) > 0 {
+		transferCount = 1
+	}
+
+	fmt.Printf("🌱 Seeding %d location transfers...\n", transferCount)
+
+	for i := 0; i < transferCount; i++ {
+		client := inCareClients[i]
+
+		// Find a different location for the transfer
+		var newLocationID string
+		for _, locID := range locationIDs {
+			if locID != client.LocationID {
+				newLocationID = locID
+				break
+			}
+		}
+		// If all locations are the same, just use the first different one or same
+		if newLocationID == "" {
+			newLocationID = locationIDs[0]
+		}
+
+		// Find a different coordinator
+		var newCoordinatorID string
+		for _, empID := range employeeIDs {
+			if empID != client.CoordinatorID {
+				newCoordinatorID = empID
+				break
+			}
+		}
+		if newCoordinatorID == "" {
+			newCoordinatorID = employeeIDs[0]
+		}
+
+		err := createLocationTransfer(ctx, store, client, newLocationID, newCoordinatorID)
+		if err != nil {
+			return fmt.Errorf("failed to create location transfer %d: %w", i+1, err)
+		}
+	}
+
+	fmt.Printf("✅ Successfully seeded %d location transfers\n", transferCount)
+	return nil
+}
+
+func createLocationTransfer(ctx context.Context, store *db.Store, client ClientInfo, newLocationID, newCoordinatorID string) error {
+	transferID, err := gonanoid.New()
+	if err != nil {
+		return fmt.Errorf("failed to generate transfer ID: %w", err)
+	}
+
+	// Generate a transfer date (within last 30 days)
+	daysAgo := rand.Intn(30)
+	transferDate := pgtype.Timestamp{
+		Time:  time.Now().AddDate(0, 0, -daysAgo),
+		Valid: true,
+	}
+
+	// Random transfer reason
+	reason := randomElement(transferReasons)
+
+	_, err = store.CreateLocationTransfer(ctx, db.CreateLocationTransferParams{
+		ID:                   transferID,
+		ClientID:             client.ID,
+		FromLocationID:       &client.LocationID,
+		ToLocationID:         newLocationID,
+		CurrentCoordinatorID: client.CoordinatorID,
+		NewCoordinatorID:     newCoordinatorID,
+		TransferDate:         transferDate,
+		Reason:               &reason,
+	})
+
+	return err
+}
+
+// ============================================================
+// Incidents Seeding
+// ============================================================
+
+func seedIncidents(ctx context.Context, store *db.Store, inCareClients []ClientInfo, locationIDs, employeeIDs []string) error {
+	// Create 2-4 incidents per in_care client
+	fmt.Println("🌱 Seeding incidents...")
+
+	totalIncidents := 0
+	for _, client := range inCareClients {
+		// Random number of incidents per client (1-3)
+		numIncidents := 1 + rand.Intn(3)
+		for j := 0; j < numIncidents; j++ {
+			err := createIncident(ctx, store, client)
+			if err != nil {
+				return fmt.Errorf("failed to create incident for client %s: %w", client.ID[:8], err)
+			}
+			totalIncidents++
+		}
+	}
+
+	fmt.Printf("✅ Successfully seeded %d incidents\n", totalIncidents)
+	return nil
+}
+
+func createIncident(ctx context.Context, store *db.Store, client ClientInfo) error {
+	// Generate incident date (within last 90 days)
+	daysAgo := rand.Intn(90)
+	incidentDate := pgtype.Date{
+		Time:  time.Now().AddDate(0, 0, -daysAgo),
+		Valid: true,
+	}
+
+	// Generate incident time (between 6:00 and 23:00)
+	hour := 6 + rand.Intn(17)
+	minute := rand.Intn(60)
+	incidentTime := pgtype.Time{
+		Microseconds: int64(hour*3600+minute*60) * 1000000,
+		Valid:        true,
+	}
+
+	// Random incident type
+	incidentType := randomElement(incidentTypes)
+
+	// Get description based on type
+	descriptions := incidentDescriptions[incidentType]
+	description := randomElement(descriptions)
+
+	// Get action taken based on type
+	actions := actionsTaken[incidentType]
+	actionTaken := randomElement(actions)
+
+	// Random severity and status
+	severity := randomElement(incidentSeverities)
+	status := randomElement(incidentStatuses)
+
+	// Other parties (optional)
+	var otherPartiesStr *string
+	party := randomElement(otherParties)
+	if party != "" {
+		otherPartiesStr = &party
+	}
+
+	// Generate ID
+	incidentID, err := gonanoid.New()
+	if err != nil {
+		return fmt.Errorf("failed to generate incident ID: %w", err)
+	}
+
+	err = store.CreateIncident(ctx, db.CreateIncidentParams{
+		ID:                  incidentID,
+		ClientID:            client.ID,
+		IncidentDate:        incidentDate,
+		IncidentTime:        incidentTime,
+		IncidentType:        incidentType,
+		IncidentSeverity:    severity,
+		LocationID:          client.LocationID,
+		CoordinatorID:       client.CoordinatorID,
+		IncidentDescription: description,
+		ActionTaken:         actionTaken,
+		OtherParties:        otherPartiesStr,
+		Status:              status,
+	})
+
+	return err
 }

@@ -114,7 +114,7 @@ func (s *clientService) MoveClientInCare(ctx context.Context, clientID string, r
 
 	updateParams := db.UpdateClientParams{
 		ID:                    client.ID,
-		Status:                db.ClientStatusEnumInCare,
+		Status:                db.NullClientStatusEnum{ClientStatusEnum: db.ClientStatusEnumInCare, Valid: true},
 		AmbulatoryWeeklyHours: req.AmbulatoryWeeklyHours,
 		CareStartDate:         util.StrToPgtypeDate(req.CareStartDate),
 		CareEndDate:           util.StrToPgtypeDate(req.CareEndDate),
@@ -154,7 +154,7 @@ func (s *clientService) StartDischarge(ctx context.Context, clientID string, req
 
 	updateParams := db.UpdateClientParams{
 		ID:                 client.ID,
-		Status:             db.ClientStatusEnumInCare, // Client remains in care during phase 1
+		Status:             db.NullClientStatusEnum{ClientStatusEnum: db.ClientStatusEnumInCare, Valid: true}, // Client remains in care during phase 1
 		DischargeDate:      util.StrToPgtypeDate(req.DischargeDate),
 		ReasonForDischarge: db.NullDischargeReasonEnum{DischargeReasonEnum: db.DischargeReasonEnum(req.ReasonForDischarge), Valid: true},
 		DischargeStatus:    db.NullDischargeStatusEnum{DischargeStatusEnum: db.DischargeStatusEnumInProgress, Valid: true},
@@ -194,7 +194,7 @@ func (s *clientService) CompleteDischarge(ctx context.Context, clientID string, 
 
 	updateParams := db.UpdateClientParams{
 		ID:                     client.ID,
-		Status:                 db.ClientStatusEnumDischarged, // Now move to discharged
+		Status:                 db.NullClientStatusEnum{ClientStatusEnum: db.ClientStatusEnumDischarged, Valid: true}, // Now move to discharged
 		ClosingReport:          &req.ClosingReport,
 		EvaluationReport:       &req.EvaluationReport,
 		DischargeAttachmentIds: req.DischargeAttachmentIDs,

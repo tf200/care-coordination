@@ -23,6 +23,31 @@ WHERE id = $1;
 
 -- name: ListReferringOrgs :many
 SELECT
+    id,
+    name,
+    contact_person,
+    phone_number,
+    email,
+    created_at,
+    updated_at,
+    COUNT(id) OVER () AS total_count
+FROM referring_orgs
+WHERE
+    (
+        -- If search term is NULL or empty, ignore filters
+        sqlc.narg('search')::text IS NULL OR sqlc.narg('search')::text = '' OR
+        -- Search by Org Name
+        name ILIKE '%' || sqlc.narg('search') || '%' OR
+        -- Search by Contact Person
+        contact_person ILIKE '%' || sqlc.narg('search') || '%' OR
+        -- Search by Email
+        email ILIKE '%' || sqlc.narg('search') || '%'
+    )
+ORDER BY name
+LIMIT $1 OFFSET $2;
+
+-- name: ListReferringOrgsWithCounts :many
+SELECT
     ro.id,
     ro.name,
     ro.contact_person,

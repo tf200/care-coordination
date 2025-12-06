@@ -82,6 +82,78 @@ func (q *Queries) GetReferringOrgByID(ctx context.Context, id string) (Referring
 
 const listReferringOrgs = `-- name: ListReferringOrgs :many
 SELECT
+    id,
+    name,
+    contact_person,
+    phone_number,
+    email,
+    created_at,
+    updated_at,
+    COUNT(id) OVER () AS total_count
+FROM referring_orgs
+WHERE
+    (
+        -- If search term is NULL or empty, ignore filters
+        $3::text IS NULL OR $3::text = '' OR
+        -- Search by Org Name
+        name ILIKE '%' || $3 || '%' OR
+        -- Search by Contact Person
+        contact_person ILIKE '%' || $3 || '%' OR
+        -- Search by Email
+        email ILIKE '%' || $3 || '%'
+    )
+ORDER BY name
+LIMIT $1 OFFSET $2
+`
+
+type ListReferringOrgsParams struct {
+	Limit  int32   `json:"limit"`
+	Offset int32   `json:"offset"`
+	Search *string `json:"search"`
+}
+
+type ListReferringOrgsRow struct {
+	ID            string             `json:"id"`
+	Name          string             `json:"name"`
+	ContactPerson string             `json:"contact_person"`
+	PhoneNumber   string             `json:"phone_number"`
+	Email         string             `json:"email"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt     pgtype.Timestamptz `json:"updated_at"`
+	TotalCount    int64              `json:"total_count"`
+}
+
+func (q *Queries) ListReferringOrgs(ctx context.Context, arg ListReferringOrgsParams) ([]ListReferringOrgsRow, error) {
+	rows, err := q.db.Query(ctx, listReferringOrgs, arg.Limit, arg.Offset, arg.Search)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListReferringOrgsRow{}
+	for rows.Next() {
+		var i ListReferringOrgsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.ContactPerson,
+			&i.PhoneNumber,
+			&i.Email,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.TotalCount,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listReferringOrgsWithCounts = `-- name: ListReferringOrgsWithCounts :many
+SELECT
     ro.id,
     ro.name,
     ro.contact_person,
@@ -111,13 +183,13 @@ ORDER BY ro.name
 LIMIT $1 OFFSET $2
 `
 
-type ListReferringOrgsParams struct {
+type ListReferringOrgsWithCountsParams struct {
 	Limit  int32   `json:"limit"`
 	Offset int32   `json:"offset"`
 	Search *string `json:"search"`
 }
 
-type ListReferringOrgsRow struct {
+type ListReferringOrgsWithCountsRow struct {
 	ID               string             `json:"id"`
 	Name             string             `json:"name"`
 	ContactPerson    string             `json:"contact_person"`
@@ -131,15 +203,15 @@ type ListReferringOrgsRow struct {
 	TotalCount       int64              `json:"total_count"`
 }
 
-func (q *Queries) ListReferringOrgs(ctx context.Context, arg ListReferringOrgsParams) ([]ListReferringOrgsRow, error) {
-	rows, err := q.db.Query(ctx, listReferringOrgs, arg.Limit, arg.Offset, arg.Search)
+func (q *Queries) ListReferringOrgsWithCounts(ctx context.Context, arg ListReferringOrgsWithCountsParams) ([]ListReferringOrgsWithCountsRow, error) {
+	rows, err := q.db.Query(ctx, listReferringOrgsWithCounts, arg.Limit, arg.Offset, arg.Search)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []ListReferringOrgsRow{}
+	items := []ListReferringOrgsWithCountsRow{}
 	for rows.Next() {
-		var i ListReferringOrgsRow
+		var i ListReferringOrgsWithCountsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,

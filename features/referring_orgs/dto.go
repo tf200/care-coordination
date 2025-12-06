@@ -16,7 +16,8 @@ type CreateReferringOrgResponse struct {
 }
 
 type ListReferringOrgsRequest struct {
-	Search *string `form:"search"`
+	Search        *string `form:"search"`
+	IncludeCounts bool    `form:"includeCounts"`
 }
 
 type ListReferringOrgsResponse struct {
@@ -25,9 +26,9 @@ type ListReferringOrgsResponse struct {
 	ContactPerson    string    `json:"contactPerson"`
 	PhoneNumber      string    `json:"phoneNumber"`
 	Email            string    `json:"email"`
-	InCareCount      int64     `json:"inCareCount"`
-	WaitingListCount int64     `json:"waitingListCount"`
-	DischargedCount  int64     `json:"dischargedCount"`
+	InCareCount      *int64    `json:"inCareCount,omitempty"`
+	WaitingListCount *int64    `json:"waitingListCount,omitempty"`
+	DischargedCount  *int64    `json:"dischargedCount,omitempty"`
 	CreatedAt        time.Time `json:"createdAt"`
 	UpdatedAt        time.Time `json:"updatedAt"`
 }

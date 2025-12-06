@@ -36,6 +36,7 @@ type Querier interface {
 	ListLocationTransfers(ctx context.Context, arg ListLocationTransfersParams) ([]ListLocationTransfersRow, error)
 	ListLocations(ctx context.Context, arg ListLocationsParams) ([]ListLocationsRow, error)
 	ListReferringOrgs(ctx context.Context, arg ListReferringOrgsParams) ([]ListReferringOrgsRow, error)
+	ListReferringOrgsWithCounts(ctx context.Context, arg ListReferringOrgsWithCountsParams) ([]ListReferringOrgsWithCountsRow, error)
 	ListRegistrationForms(ctx context.Context, arg ListRegistrationFormsParams) ([]ListRegistrationFormsRow, error)
 	ListWaitingListClients(ctx context.Context, arg ListWaitingListClientsParams) ([]ListWaitingListClientsRow, error)
 	UpdateClient(ctx context.Context, arg UpdateClientParams) (string, error)

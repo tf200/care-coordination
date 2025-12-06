@@ -13,6 +13,7 @@ import (
 
 const createIncident = `-- name: CreateIncident :exec
 INSERT INTO incidents (
+    id,
     client_id,
     incident_date,
     incident_time,
@@ -25,11 +26,12 @@ INSERT INTO incidents (
     other_parties,
     status
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
 )
 `
 
 type CreateIncidentParams struct {
+	ID                  string               `json:"id"`
 	ClientID            string               `json:"client_id"`
 	IncidentDate        pgtype.Date          `json:"incident_date"`
 	IncidentTime        pgtype.Time          `json:"incident_time"`
@@ -45,6 +47,7 @@ type CreateIncidentParams struct {
 
 func (q *Queries) CreateIncident(ctx context.Context, arg CreateIncidentParams) error {
 	_, err := q.db.Exec(ctx, createIncident,
+		arg.ID,
 		arg.ClientID,
 		arg.IncidentDate,
 		arg.IncidentTime,

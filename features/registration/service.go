@@ -52,10 +52,11 @@ func (s *registrationService) CreateRegistrationForm(ctx context.Context, req *C
 func (s *registrationService) ListRegistrationForms(ctx context.Context, req *ListRegistrationFormsRequest) (*resp.PaginationResponse[ListRegistrationFormsResponse], error) {
 	limit, offset, page, pageSize := middleware.GetPaginationParams(ctx)
 	registrationForms, err := s.db.ListRegistrationForms(ctx, db.ListRegistrationFormsParams{
-		Limit:  limit,
-		Offset: offset,
-		Search: req.Search,
-		Status: req.Status,
+		Limit:           limit,
+		Offset:          offset,
+		Search:          req.Search,
+		Status:          req.Status,
+		IntakeCompleted: req.IntakeCompleted,
 	})
 	if err != nil {
 		s.logger.Error(ctx, "ListRegistrationForms", "Failed to list registration forms", zap.Error(err))
@@ -85,6 +86,7 @@ func (s *registrationService) ListRegistrationForms(ctx context.Context, req *Li
 			AdditionalNotes:     registrationForm.AdditionalNotes,
 			NumberOfAttachments: len(registrationForm.AttachmentIds),
 			Status:              &status,
+			IntakeCompleted:     registrationForm.IntakeCompleted,
 		})
 	}
 	totalCount := 0

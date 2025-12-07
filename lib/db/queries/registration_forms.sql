@@ -35,6 +35,7 @@ SELECT r.id,
         ro.contact_person as org_contact_person,
         ro.phone_number as org_phone_number,
         ro.email as org_email,
+        EXISTS (SELECT 1 FROM intake_forms inf WHERE inf.registration_form_id = r.id) AS intake_completed,
         COUNT(r.id) OVER () AS total_count
 FROM registration_forms r
 LEFT JOIN referring_orgs ro ON r.reffering_org_id = ro.id
@@ -54,6 +55,12 @@ WHERE
         sqlc.narg('status')::text IS NULL OR sqlc.narg('status')::text = '' OR
         -- Filter by status
         r.status::text = sqlc.narg('status')::text
+    )
+    AND (
+        -- If intake_completed is NULL, ignore filter
+        sqlc.narg('intake_completed')::boolean IS NULL OR
+        -- Filter by intake completion status
+        EXISTS (SELECT 1 FROM intake_forms inf WHERE inf.registration_form_id = r.id) = sqlc.narg('intake_completed')::boolean
     )
 ORDER BY r.registration_date DESC
 LIMIT $1 OFFSET $2;

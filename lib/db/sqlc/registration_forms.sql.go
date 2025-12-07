@@ -108,6 +108,7 @@ SELECT r.id,
         ro.contact_person as org_contact_person,
         ro.phone_number as org_phone_number,
         ro.email as org_email,
+        EXISTS (SELECT 1 FROM intake_forms inf WHERE inf.registration_form_id = r.id) AS intake_completed,
         COUNT(r.id) OVER () AS total_count
 FROM registration_forms r
 LEFT JOIN referring_orgs ro ON r.reffering_org_id = ro.id
@@ -128,15 +129,22 @@ WHERE
         -- Filter by status
         r.status::text = $4::text
     )
+    AND (
+        -- If intake_completed is NULL, ignore filter
+        $5::boolean IS NULL OR
+        -- Filter by intake completion status
+        EXISTS (SELECT 1 FROM intake_forms inf WHERE inf.registration_form_id = r.id) = $5::boolean
+    )
 ORDER BY r.registration_date DESC
 LIMIT $1 OFFSET $2
 `
 
 type ListRegistrationFormsParams struct {
-	Limit  int32   `json:"limit"`
-	Offset int32   `json:"offset"`
-	Search *string `json:"search"`
-	Status *string `json:"status"`
+	Limit           int32   `json:"limit"`
+	Offset          int32   `json:"offset"`
+	Search          *string `json:"search"`
+	Status          *string `json:"status"`
+	IntakeCompleted *bool   `json:"intake_completed"`
 }
 
 type ListRegistrationFormsRow struct {
@@ -156,6 +164,7 @@ type ListRegistrationFormsRow struct {
 	OrgContactPerson   *string                    `json:"org_contact_person"`
 	OrgPhoneNumber     *string                    `json:"org_phone_number"`
 	OrgEmail           *string                    `json:"org_email"`
+	IntakeCompleted    bool                       `json:"intake_completed"`
 	TotalCount         int64                      `json:"total_count"`
 }
 
@@ -165,6 +174,7 @@ func (q *Queries) ListRegistrationForms(ctx context.Context, arg ListRegistratio
 		arg.Offset,
 		arg.Search,
 		arg.Status,
+		arg.IntakeCompleted,
 	)
 	if err != nil {
 		return nil, err
@@ -190,6 +200,7 @@ func (q *Queries) ListRegistrationForms(ctx context.Context, arg ListRegistratio
 			&i.OrgContactPerson,
 			&i.OrgPhoneNumber,
 			&i.OrgEmail,
+			&i.IntakeCompleted,
 			&i.TotalCount,
 		); err != nil {
 			return nil, err

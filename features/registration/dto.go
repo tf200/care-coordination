@@ -23,8 +23,9 @@ type CreateRegistrationFormResponse struct {
 }
 
 type ListRegistrationFormsRequest struct {
-	Search *string `form:"search"`
-	Status *string `form:"status"`
+	Search          *string `form:"search"`
+	Status          *string `form:"status"`
+	IntakeCompleted *bool   `form:"intakeCompleted"`
 }
 
 type ListRegistrationFormsResponse struct {
@@ -44,4 +45,5 @@ type ListRegistrationFormsResponse struct {
 	AdditionalNotes     *string   `json:"additionalNotes"`
 	NumberOfAttachments int       `json:"numberOfAttachments"`
 	Status              *string   `json:"status"`
+	IntakeCompleted     bool      `json:"intakeCompleted"`
 }

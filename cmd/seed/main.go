@@ -1136,8 +1136,15 @@ func createWaitingListClient(ctx context.Context, store *db.Store, registrationF
 		FocusAreas:          focusAreasStr,
 		Notes:               notesStr,
 	})
+	if err != nil {
+		return err
+	}
 
-	return err
+	// Update intake form status to completed since client is now in waiting list
+	return store.UpdateIntakeFormStatus(ctx, db.UpdateIntakeFormStatusParams{
+		ID:     intakeID,
+		Status: db.IntakeStatusEnumCompleted,
+	})
 }
 
 func createInCareClient(ctx context.Context, store *db.Store, intakeInfo IntakeFormInfo, orgIDs []string) (*ClientInfo, error) {
@@ -1209,6 +1216,15 @@ func createInCareClient(ctx context.Context, store *db.Store, intakeInfo IntakeF
 			Valid:            true,
 		},
 		CareStartDate: careStartDate,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// Update intake form status to completed since client is now in care
+	err = store.UpdateIntakeFormStatus(ctx, db.UpdateIntakeFormStatusParams{
+		ID:     intakeInfo.ID,
+		Status: db.IntakeStatusEnumCompleted,
 	})
 	if err != nil {
 		return nil, err
@@ -1325,6 +1341,15 @@ func createDischargedClient(ctx context.Context, store *db.Store, intakeInfo Int
 	})
 	if err != nil {
 		return fmt.Errorf("step 3 (discharge) failed: %w", err)
+	}
+
+	// Update intake form status to completed since client was processed
+	err = store.UpdateIntakeFormStatus(ctx, db.UpdateIntakeFormStatusParams{
+		ID:     intakeInfo.ID,
+		Status: db.IntakeStatusEnumCompleted,
+	})
+	if err != nil {
+		return fmt.Errorf("step 4 (update intake status) failed: %w", err)
 	}
 
 	return nil

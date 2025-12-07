@@ -138,9 +138,9 @@ CREATE TABLE clients (
     -- Client personal information (from registration)
     first_name TEXT NOT NULL,
     last_name TEXT NOT NULL,
-    bsn TEXT UNIQUE NOT NULL,
+    bsn TEXT  NOT NULL,
     date_of_birth DATE NOT NULL,
-    phone_number TEXT,
+    phone_number TEXT,  
     gender gender_enum NOT NULL,
     
     -- Registration and intake references

@@ -97,3 +97,101 @@ func (s *registrationService) ListRegistrationForms(ctx context.Context, req *Li
 	result := resp.PagRespWithParams(listRegistrationFormsResponse, totalCount, page, pageSize)
 	return &result, nil
 }
+
+func (s *registrationService) UpdateRegistrationForm(ctx context.Context, id string, req *UpdateRegistrationFormRequest) (*UpdateRegistrationFormResponse, error) {
+	// Check if a client exists for this registration form
+	regFormDetails, err := s.db.GetRegistrationFormWithDetails(ctx, id)
+	if err != nil {
+		s.logger.Error(ctx, "UpdateRegistrationForm", "Failed to get registration form details", zap.Error(err))
+		return nil, ErrInternal
+	}
+
+	// Build the update params - only set fields that are provided
+	params := db.UpdateRegistrationFormParams{
+		ID:                 id,
+		FirstName:          req.FirstName,
+		LastName:           req.LastName,
+		Bsn:                req.BSN,
+		RefferingOrgID:     req.RefferingOrgID,
+		RegistrationReason: req.RegistrationReason,
+		AdditionalNotes:    req.AdditionalNotes,
+		AttachmentIds:      req.AttachmentIDs,
+	}
+
+	// Handle date fields
+	if req.DateOfBirth != nil {
+		params.DateOfBirth = util.StrToPgtypeDate(*req.DateOfBirth)
+	}
+	if req.RegistrationDate != nil {
+		params.RegistrationDate = util.StrToPgtypeDate(*req.RegistrationDate)
+	}
+
+	// Handle enum fields
+	if req.Gender != nil {
+		params.Gender = db.NullGenderEnum{
+			GenderEnum: db.GenderEnum(*req.Gender),
+			Valid:      true,
+		}
+	}
+	if req.CareType != nil {
+		params.CareType = db.NullCareTypeEnum{
+			CareTypeEnum: db.CareTypeEnum(*req.CareType),
+			Valid:        true,
+		}
+	}
+	if req.Status != nil {
+		params.Status = db.NullRegistrationStatusEnum{
+			RegistrationStatusEnum: db.RegistrationStatusEnum(*req.Status),
+			Valid:                  true,
+		}
+	}
+
+	// Use transaction to update both registration form and client (if exists)
+	err = s.db.UpdateRegistrationFormTx(ctx, db.UpdateRegistrationFormTxParams{
+		RegistrationForm: params,
+		UpdateClient:     regFormDetails.HasClient,
+	})
+	if err != nil {
+		s.logger.Error(ctx, "UpdateRegistrationForm", "Failed to update registration form", zap.Error(err))
+		return nil, ErrInternal
+	}
+
+	return &UpdateRegistrationFormResponse{
+		ID: id,
+	}, nil
+}
+
+func (s *registrationService) GetRegistrationForm(ctx context.Context, id string) (*GetRegistrationFormResponse, error) {
+	regForm, err := s.db.GetRegistrationFormWithDetails(ctx, id)
+	if err != nil {
+		s.logger.Error(ctx, "GetRegistrationForm", "Failed to get registration form", zap.Error(err))
+		return nil, ErrInternal
+	}
+
+	status := ""
+	if regForm.Status.Valid {
+		status = string(regForm.Status.RegistrationStatusEnum)
+	}
+
+	return &GetRegistrationFormResponse{
+		ID:                 regForm.ID,
+		FirstName:          regForm.FirstName,
+		LastName:           regForm.LastName,
+		Bsn:                regForm.Bsn,
+		Gender:             string(regForm.Gender),
+		DateOfBirth:        regForm.DateOfBirth.Time,
+		RefferingOrgID:     regForm.RefferingOrgID,
+		OrgName:            regForm.OrgName,
+		OrgContactPerson:   regForm.OrgContactPerson,
+		OrgPhoneNumber:     regForm.OrgPhoneNumber,
+		OrgEmail:           regForm.OrgEmail,
+		CareType:           string(regForm.CareType),
+		RegistrationDate:   regForm.RegistrationDate.Time,
+		RegistrationReason: regForm.RegistrationReason,
+		AdditionalNotes:    regForm.AdditionalNotes,
+		AttachmentIDs:      regForm.AttachmentIds,
+		Status:             &status,
+		IntakeCompleted:    regForm.IntakeCompleted,
+		HasClient:          regForm.HasClient,
+	}, nil
+}

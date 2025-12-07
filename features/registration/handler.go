@@ -27,6 +27,8 @@ func (h *RegistrationHandler) SetupRegistrationRoutes(router *gin.Engine) {
 
 	registration.POST("", h.CreateRegistrationForm)
 	registration.GET("", h.mdw.PaginationMdw(), h.ListRegistrationForms)
+	registration.GET("/:id", h.GetRegistrationForm)
+	registration.PUT("/:id", h.UpdateRegistrationForm)
 }
 
 // @Summary Create a registration form
@@ -80,5 +82,66 @@ func (h *RegistrationHandler) ListRegistrationForms(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, resp.Error(ErrInternal))
 		return
 	}
+	ctx.JSON(http.StatusOK, result)
+}
+
+// @Summary Get a registration form
+// @Description Get a registration form by ID with details
+// @Tags Registration
+// @Produce json
+// @Param id path string true "Registration Form ID"
+// @Success 200 {object} GetRegistrationFormResponse
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 404 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /registrations/{id} [get]
+func (h *RegistrationHandler) GetRegistrationForm(ctx *gin.Context) {
+	id := ctx.Param("id")
+	if id == "" {
+		ctx.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
+		return
+	}
+
+	result, err := h.rgstService.GetRegistrationForm(ctx, id)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, resp.Error(ErrInternal))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, result)
+}
+
+// @Summary Update a registration form
+// @Description Update an existing registration form
+// @Tags Registration
+// @Accept json
+// @Produce json
+// @Param id path string true "Registration Form ID"
+// @Param registration body UpdateRegistrationFormRequest true "Registration Form Update"
+// @Success 200 {object} UpdateRegistrationFormResponse
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /registrations/{id} [put]
+func (h *RegistrationHandler) UpdateRegistrationForm(ctx *gin.Context) {
+	id := ctx.Param("id")
+	if id == "" {
+		ctx.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
+		return
+	}
+
+	var req UpdateRegistrationFormRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, resp.Error(err))
+		return
+	}
+
+	result, err := h.rgstService.UpdateRegistrationForm(ctx, id, &req)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, resp.Error(ErrInternal))
+		return
+	}
+
 	ctx.JSON(http.StatusOK, result)
 }

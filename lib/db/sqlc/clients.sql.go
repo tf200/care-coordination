@@ -611,3 +611,41 @@ func (q *Queries) UpdateClient(ctx context.Context, arg UpdateClientParams) (str
 	err := row.Scan(&id)
 	return id, err
 }
+
+const updateClientByRegistrationFormID = `-- name: UpdateClientByRegistrationFormID :exec
+UPDATE clients SET
+    first_name = COALESCE($2, first_name),
+    last_name = COALESCE($3, last_name),
+    bsn = COALESCE($4, bsn),
+    date_of_birth = COALESCE($5, date_of_birth),
+    gender = COALESCE($6::gender_enum, gender),
+    care_type = COALESCE($7::care_type_enum, care_type),
+    referring_org_id = COALESCE($8, referring_org_id),
+    updated_at = NOW()
+WHERE registration_form_id = $1
+`
+
+type UpdateClientByRegistrationFormIDParams struct {
+	RegistrationFormID string           `json:"registration_form_id"`
+	FirstName          *string          `json:"first_name"`
+	LastName           *string          `json:"last_name"`
+	Bsn                *string          `json:"bsn"`
+	DateOfBirth        pgtype.Date      `json:"date_of_birth"`
+	Gender             NullGenderEnum   `json:"gender"`
+	CareType           NullCareTypeEnum `json:"care_type"`
+	ReferringOrgID     *string          `json:"referring_org_id"`
+}
+
+func (q *Queries) UpdateClientByRegistrationFormID(ctx context.Context, arg UpdateClientByRegistrationFormIDParams) error {
+	_, err := q.db.Exec(ctx, updateClientByRegistrationFormID,
+		arg.RegistrationFormID,
+		arg.FirstName,
+		arg.LastName,
+		arg.Bsn,
+		arg.DateOfBirth,
+		arg.Gender,
+		arg.CareType,
+		arg.ReferringOrgID,
+	)
+	return err
+}

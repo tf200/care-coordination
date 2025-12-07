@@ -960,19 +960,26 @@ func createRandomIntakeForm(ctx context.Context, store *db.Store, registrationFo
 		notes = &noteContent
 	}
 
-	err = store.CreateIntakeForm(ctx, db.CreateIntakeFormParams{
-		ID:                 intakeID,
+	_, err = store.CreateIntakeFormTx(ctx, db.CreateIntakeFormTxParams{
+		IntakeForm: db.CreateIntakeFormParams{
+			ID:                 intakeID,
+			RegistrationFormID: registrationFormID,
+			IntakeDate:         intakeDate,
+			IntakeTime:         intakeTime,
+			LocationID:         locationID,
+			CoordinatorID:      coordinatorID,
+			FamilySituation:    familySituation,
+			MainProvider:       mainProvider,
+			Limitations:        limitationsStr,
+			FocusAreas:         focusAreasStr,
+			Goals:              goalsStr,
+			Notes:              notes,
+		},
 		RegistrationFormID: registrationFormID,
-		IntakeDate:         intakeDate,
-		IntakeTime:         intakeTime,
-		LocationID:         locationID,
-		CoordinatorID:      coordinatorID,
-		FamilySituation:    familySituation,
-		MainProvider:       mainProvider,
-		Limitations:        limitationsStr,
-		FocusAreas:         focusAreasStr,
-		Goals:              goalsStr,
-		Notes:              notes,
+		RegistrationFormStatus: db.NullRegistrationStatusEnum{
+			RegistrationStatusEnum: db.RegistrationStatusEnumApproved,
+			Valid:                  true,
+		},
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create intake form: %w", err)
@@ -1079,16 +1086,23 @@ func createWaitingListClient(ctx context.Context, store *db.Store, registrationF
 	locationID := randomElement(locationIDs)
 	coordinatorID := randomElement(employeeIDs)
 
-	err = store.CreateIntakeForm(ctx, db.CreateIntakeFormParams{
-		ID:                 intakeID,
-		RegistrationFormID: registrationFormID,
-		IntakeDate:         generateRecentDate(30),
-		IntakeTime: pgtype.Time{
-			Microseconds: int64(10*3600) * 1000000,
-			Valid:        true,
+	_, err = store.CreateIntakeFormTx(ctx, db.CreateIntakeFormTxParams{
+		IntakeForm: db.CreateIntakeFormParams{
+			ID:                 intakeID,
+			RegistrationFormID: registrationFormID,
+			IntakeDate:         generateRecentDate(30),
+			IntakeTime: pgtype.Time{
+				Microseconds: int64(10*3600) * 1000000,
+				Valid:        true,
+			},
+			LocationID:    locationID,
+			CoordinatorID: coordinatorID,
 		},
-		LocationID:    locationID,
-		CoordinatorID: coordinatorID,
+		RegistrationFormID: registrationFormID,
+		RegistrationFormStatus: db.NullRegistrationStatusEnum{
+			RegistrationStatusEnum: db.RegistrationStatusEnumApproved,
+			Valid:                  true,
+		},
 	})
 	if err != nil {
 		return fmt.Errorf("failed to create placeholder intake: %w", err)

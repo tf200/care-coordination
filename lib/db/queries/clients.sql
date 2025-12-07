@@ -173,3 +173,15 @@ WHERE c.discharge_status IS NOT NULL
          c.discharge_status = sqlc.narg('discharge_status')::discharge_status_enum)
 ORDER BY c.discharge_date DESC
 LIMIT $1 OFFSET $2;
+
+-- name: UpdateClientByRegistrationFormID :exec
+UPDATE clients SET
+    first_name = COALESCE(sqlc.narg('first_name'), first_name),
+    last_name = COALESCE(sqlc.narg('last_name'), last_name),
+    bsn = COALESCE(sqlc.narg('bsn'), bsn),
+    date_of_birth = COALESCE(sqlc.narg('date_of_birth'), date_of_birth),
+    gender = COALESCE(sqlc.narg('gender')::gender_enum, gender),
+    care_type = COALESCE(sqlc.narg('care_type')::care_type_enum, care_type),
+    referring_org_id = COALESCE(sqlc.narg('referring_org_id'), referring_org_id),
+    updated_at = NOW()
+WHERE registration_form_id = $1;

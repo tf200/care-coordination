@@ -47,5 +47,8 @@ add-feature:
 	touch features/$(NAME)/service.go
 	touch features/$(NAME)/dto.go
 	touch features/$(NAME)/handler.go
+seed:
+	@echo "Seeding admin user..."
+	go run cmd/seed/main.go
 
-.PHONY: sqlc swagger migrate-up migrate-down migrate-up1 migrate-down1 migrate-version migrate-force admin dokcer-rebuild add-feature
+.PHONY: sqlc swagger migrate-up migrate-down migrate-up1 migrate-down1 migrate-version migrate-force admin dokcer-rebuild add-feature seed

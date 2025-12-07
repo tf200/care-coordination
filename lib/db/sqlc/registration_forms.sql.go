@@ -91,6 +91,80 @@ func (q *Queries) GetRegistrationForm(ctx context.Context, id string) (Registrat
 	return i, err
 }
 
+const getRegistrationFormWithDetails = `-- name: GetRegistrationFormWithDetails :one
+SELECT r.id,
+        r.first_name,
+        r.last_name,
+        r.bsn,
+        r.gender,
+        r.date_of_birth,
+        r.reffering_org_id,
+        r.care_type,
+        r.registration_date,
+        r.registration_reason,
+        r.additional_notes,
+        r.attachment_ids,
+        r.status,
+        ro.name as org_name,
+        ro.contact_person as org_contact_person,
+        ro.phone_number as org_phone_number,
+        ro.email as org_email,
+        EXISTS (SELECT 1 FROM intake_forms inf WHERE inf.registration_form_id = r.id) AS intake_completed,
+        EXISTS (SELECT 1 FROM clients c WHERE c.registration_form_id = r.id) AS has_client
+FROM registration_forms r
+LEFT JOIN referring_orgs ro ON r.reffering_org_id = ro.id
+WHERE r.id = $1
+`
+
+type GetRegistrationFormWithDetailsRow struct {
+	ID                 string                     `json:"id"`
+	FirstName          string                     `json:"first_name"`
+	LastName           string                     `json:"last_name"`
+	Bsn                string                     `json:"bsn"`
+	Gender             GenderEnum                 `json:"gender"`
+	DateOfBirth        pgtype.Date                `json:"date_of_birth"`
+	RefferingOrgID     *string                    `json:"reffering_org_id"`
+	CareType           CareTypeEnum               `json:"care_type"`
+	RegistrationDate   pgtype.Date                `json:"registration_date"`
+	RegistrationReason string                     `json:"registration_reason"`
+	AdditionalNotes    *string                    `json:"additional_notes"`
+	AttachmentIds      []string                   `json:"attachment_ids"`
+	Status             NullRegistrationStatusEnum `json:"status"`
+	OrgName            *string                    `json:"org_name"`
+	OrgContactPerson   *string                    `json:"org_contact_person"`
+	OrgPhoneNumber     *string                    `json:"org_phone_number"`
+	OrgEmail           *string                    `json:"org_email"`
+	IntakeCompleted    bool                       `json:"intake_completed"`
+	HasClient          bool                       `json:"has_client"`
+}
+
+func (q *Queries) GetRegistrationFormWithDetails(ctx context.Context, id string) (GetRegistrationFormWithDetailsRow, error) {
+	row := q.db.QueryRow(ctx, getRegistrationFormWithDetails, id)
+	var i GetRegistrationFormWithDetailsRow
+	err := row.Scan(
+		&i.ID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Bsn,
+		&i.Gender,
+		&i.DateOfBirth,
+		&i.RefferingOrgID,
+		&i.CareType,
+		&i.RegistrationDate,
+		&i.RegistrationReason,
+		&i.AdditionalNotes,
+		&i.AttachmentIds,
+		&i.Status,
+		&i.OrgName,
+		&i.OrgContactPerson,
+		&i.OrgPhoneNumber,
+		&i.OrgEmail,
+		&i.IntakeCompleted,
+		&i.HasClient,
+	)
+	return i, err
+}
+
 const listRegistrationForms = `-- name: ListRegistrationForms :many
 SELECT r.id,
         r.first_name,
@@ -211,4 +285,71 @@ func (q *Queries) ListRegistrationForms(ctx context.Context, arg ListRegistratio
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateRegistrationForm = `-- name: UpdateRegistrationForm :exec
+UPDATE registration_forms SET
+    first_name = COALESCE($2, first_name),
+    last_name = COALESCE($3, last_name),
+    bsn = COALESCE($4, bsn),
+    gender = COALESCE($5, gender),
+    date_of_birth = COALESCE($6, date_of_birth),
+    reffering_org_id = COALESCE($7, reffering_org_id),
+    care_type = COALESCE($8, care_type),
+    registration_date = COALESCE($9, registration_date),
+    registration_reason = COALESCE($10, registration_reason),
+    additional_notes = COALESCE($11, additional_notes),
+    status = COALESCE($12, status),
+    attachment_ids = COALESCE($13, attachment_ids),
+    updated_at = NOW()
+WHERE id = $1
+`
+
+type UpdateRegistrationFormParams struct {
+	ID                 string                     `json:"id"`
+	FirstName          *string                    `json:"first_name"`
+	LastName           *string                    `json:"last_name"`
+	Bsn                *string                    `json:"bsn"`
+	Gender             NullGenderEnum             `json:"gender"`
+	DateOfBirth        pgtype.Date                `json:"date_of_birth"`
+	RefferingOrgID     *string                    `json:"reffering_org_id"`
+	CareType           NullCareTypeEnum           `json:"care_type"`
+	RegistrationDate   pgtype.Date                `json:"registration_date"`
+	RegistrationReason *string                    `json:"registration_reason"`
+	AdditionalNotes    *string                    `json:"additional_notes"`
+	Status             NullRegistrationStatusEnum `json:"status"`
+	AttachmentIds      []string                   `json:"attachment_ids"`
+}
+
+func (q *Queries) UpdateRegistrationForm(ctx context.Context, arg UpdateRegistrationFormParams) error {
+	_, err := q.db.Exec(ctx, updateRegistrationForm,
+		arg.ID,
+		arg.FirstName,
+		arg.LastName,
+		arg.Bsn,
+		arg.Gender,
+		arg.DateOfBirth,
+		arg.RefferingOrgID,
+		arg.CareType,
+		arg.RegistrationDate,
+		arg.RegistrationReason,
+		arg.AdditionalNotes,
+		arg.Status,
+		arg.AttachmentIds,
+	)
+	return err
+}
+
+const updateRegistrationFormStatus = `-- name: UpdateRegistrationFormStatus :exec
+UPDATE registration_forms SET status = $2, updated_at = NOW() WHERE id = $1
+`
+
+type UpdateRegistrationFormStatusParams struct {
+	ID     string                     `json:"id"`
+	Status NullRegistrationStatusEnum `json:"status"`
+}
+
+func (q *Queries) UpdateRegistrationFormStatus(ctx context.Context, arg UpdateRegistrationFormStatusParams) error {
+	_, err := q.db.Exec(ctx, updateRegistrationFormStatus, arg.ID, arg.Status)
+	return err
 }

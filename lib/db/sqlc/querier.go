@@ -26,6 +26,7 @@ type Querier interface {
 	GetIntakeForm(ctx context.Context, id string) (IntakeForm, error)
 	GetReferringOrgByID(ctx context.Context, id string) (ReferringOrg, error)
 	GetRegistrationForm(ctx context.Context, id string) (RegistrationForm, error)
+	GetRegistrationFormWithDetails(ctx context.Context, id string) (GetRegistrationFormWithDetailsRow, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserSession(ctx context.Context, tokenHash string) (Session, error)
 	ListDischargedClients(ctx context.Context, arg ListDischargedClientsParams) ([]ListDischargedClientsRow, error)
@@ -40,8 +41,11 @@ type Querier interface {
 	ListRegistrationForms(ctx context.Context, arg ListRegistrationFormsParams) ([]ListRegistrationFormsRow, error)
 	ListWaitingListClients(ctx context.Context, arg ListWaitingListClientsParams) ([]ListWaitingListClientsRow, error)
 	UpdateClient(ctx context.Context, arg UpdateClientParams) (string, error)
+	UpdateClientByRegistrationFormID(ctx context.Context, arg UpdateClientByRegistrationFormIDParams) error
 	UpdateIntakeFormStatus(ctx context.Context, arg UpdateIntakeFormStatusParams) error
 	UpdateReferringOrg(ctx context.Context, arg UpdateReferringOrgParams) error
+	UpdateRegistrationForm(ctx context.Context, arg UpdateRegistrationFormParams) error
+	UpdateRegistrationFormStatus(ctx context.Context, arg UpdateRegistrationFormStatusParams) error
 	UpdateUserSession(ctx context.Context, arg UpdateUserSessionParams) error
 }
 

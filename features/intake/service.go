@@ -26,19 +26,26 @@ func NewIntakeService(db *db.Store, logger *logger.Logger) IntakeService {
 
 func (s *intakeService) CreateIntakeForm(ctx context.Context, req *CreateIntakeFormRequest) (*CreateIntakeFormResponse, error) {
 	id := nanoid.Generate()
-	err := s.db.CreateIntakeForm(ctx, db.CreateIntakeFormParams{
-		ID:                 id,
+	_, err := s.db.CreateIntakeFormTx(ctx, db.CreateIntakeFormTxParams{
+		IntakeForm: db.CreateIntakeFormParams{
+			ID:                 id,
+			RegistrationFormID: req.RegistrationFormID,
+			IntakeDate:         util.StrToPgtypeDate(req.IntakeDate),
+			IntakeTime:         util.StrToPgtypeTime(req.IntakeTime),
+			LocationID:         req.LocationID,
+			CoordinatorID:      req.CoordinatorID,
+			FamilySituation:    req.FamilySituation,
+			MainProvider:       req.MainProvider,
+			Limitations:        req.Limitations,
+			FocusAreas:         req.FocusAreas,
+			Goals:              req.Goals,
+			Notes:              req.Notes,
+		},
 		RegistrationFormID: req.RegistrationFormID,
-		IntakeDate:         util.StrToPgtypeDate(req.IntakeDate),
-		IntakeTime:         util.StrToPgtypeTime(req.IntakeTime),
-		LocationID:         req.LocationID,
-		CoordinatorID:      req.CoordinatorID,
-		FamilySituation:    req.FamilySituation,
-		MainProvider:       req.MainProvider,
-		Limitations:        req.Limitations,
-		FocusAreas:         req.FocusAreas,
-		Goals:              req.Goals,
-		Notes:              req.Notes,
+		RegistrationFormStatus: db.NullRegistrationStatusEnum{
+			RegistrationStatusEnum: db.RegistrationStatusEnumApproved,
+			Valid:                  true,
+		},
 	})
 	if err != nil {
 		s.logger.Error(ctx, "CreateIntakeForm", "Failed to create intake form", zap.Error(err))

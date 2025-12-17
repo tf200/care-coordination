@@ -52,6 +52,18 @@ func (h *RBACHandler) SetupRBACRoutes(router *gin.Engine) {
 // Role Handlers
 // ============================================================
 
+// @Summary Create a role
+// @Description Create a new role with optional permissions
+// @Tags RBAC - Roles
+// @Accept json
+// @Produce json
+// @Param role body CreateRoleRequest true "Role data"
+// @Success 201 {object} CreateRoleResponse
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 409 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /admin/roles [post]
 func (h *RBACHandler) CreateRole(ctx *gin.Context) {
 	var req CreateRoleRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -71,6 +83,16 @@ func (h *RBACHandler) CreateRole(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, result)
 }
 
+// @Summary Get a role
+// @Description Get a role by ID with its permissions
+// @Tags RBAC - Roles
+// @Produce json
+// @Param id path string true "Role ID"
+// @Success 200 {object} RoleResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 404 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /admin/roles/{id} [get]
 func (h *RBACHandler) GetRole(ctx *gin.Context) {
 	id := ctx.Param("id")
 	result, err := h.rbacService.GetRole(ctx, id)
@@ -86,6 +108,16 @@ func (h *RBACHandler) GetRole(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, result)
 }
 
+// @Summary List roles
+// @Description List all roles with permission and user counts
+// @Tags RBAC - Roles
+// @Produce json
+// @Param page query int false "Page number"
+// @Param page_size query int false "Page size"
+// @Success 200 {object} resp.PaginationResponse[RoleListItem]
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /admin/roles [get]
 func (h *RBACHandler) ListRoles(ctx *gin.Context) {
 	var req ListRolesRequest
 	result, err := h.rbacService.ListRoles(ctx, &req)
@@ -96,6 +128,18 @@ func (h *RBACHandler) ListRoles(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, result)
 }
 
+// @Summary Update a role
+// @Description Update an existing role
+// @Tags RBAC - Roles
+// @Accept json
+// @Produce json
+// @Param id path string true "Role ID"
+// @Param role body UpdateRoleRequest true "Role update data"
+// @Success 200 {object} RoleResponse
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /admin/roles/{id} [put]
 func (h *RBACHandler) UpdateRole(ctx *gin.Context) {
 	id := ctx.Param("id")
 	var req UpdateRoleRequest
@@ -111,6 +155,15 @@ func (h *RBACHandler) UpdateRole(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, result)
 }
 
+// @Summary Delete a role
+// @Description Delete a role by ID
+// @Tags RBAC - Roles
+// @Produce json
+// @Param id path string true "Role ID"
+// @Success 200 {object} resp.MessageResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /admin/roles/{id} [delete]
 func (h *RBACHandler) DeleteRole(ctx *gin.Context) {
 	id := ctx.Param("id")
 	err := h.rbacService.DeleteRole(ctx, id)
@@ -125,6 +178,16 @@ func (h *RBACHandler) DeleteRole(ctx *gin.Context) {
 // Permission Handlers (read-only)
 // ============================================================
 
+// @Summary List permissions
+// @Description List all available permissions
+// @Tags RBAC - Permissions
+// @Produce json
+// @Param page query int false "Page number"
+// @Param page_size query int false "Page size"
+// @Success 200 {object} resp.PaginationResponse[PermissionResponse]
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /admin/permissions [get]
 func (h *RBACHandler) ListPermissions(ctx *gin.Context) {
 	var req ListPermissionsRequest
 	result, err := h.rbacService.ListPermissions(ctx, &req)
@@ -139,6 +202,15 @@ func (h *RBACHandler) ListPermissions(ctx *gin.Context) {
 // Role-Permission Assignment Handlers
 // ============================================================
 
+// @Summary List permissions for a role
+// @Description Get all permissions assigned to a specific role
+// @Tags RBAC - Role Permissions
+// @Produce json
+// @Param id path string true "Role ID"
+// @Success 200 {array} PermissionResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /admin/roles/{id}/permissions [get]
 func (h *RBACHandler) ListPermissionsForRole(ctx *gin.Context) {
 	roleID := ctx.Param("id")
 	result, err := h.rbacService.ListPermissionsForRole(ctx, roleID)
@@ -149,6 +221,18 @@ func (h *RBACHandler) ListPermissionsForRole(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, result)
 }
 
+// @Summary Assign permission to role
+// @Description Assign a permission to a specific role
+// @Tags RBAC - Role Permissions
+// @Accept json
+// @Produce json
+// @Param id path string true "Role ID"
+// @Param permission body AssignPermissionRequest true "Permission assignment"
+// @Success 200 {object} resp.MessageResponse
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /admin/roles/{id}/permissions [post]
 func (h *RBACHandler) AssignPermissionToRole(ctx *gin.Context) {
 	roleID := ctx.Param("id")
 	var req AssignPermissionRequest
@@ -164,6 +248,16 @@ func (h *RBACHandler) AssignPermissionToRole(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp.MessageResonse("Permission assigned successfully"))
 }
 
+// @Summary Remove permission from role
+// @Description Remove a permission from a specific role
+// @Tags RBAC - Role Permissions
+// @Produce json
+// @Param id path string true "Role ID"
+// @Param permissionId path string true "Permission ID"
+// @Success 200 {object} resp.MessageResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /admin/roles/{id}/permissions/{permissionId} [delete]
 func (h *RBACHandler) RemovePermissionFromRole(ctx *gin.Context) {
 	roleID := ctx.Param("id")
 	permissionID := ctx.Param("permissionId")
@@ -179,6 +273,17 @@ func (h *RBACHandler) RemovePermissionFromRole(ctx *gin.Context) {
 // User-Role Assignment Handlers
 // ============================================================
 
+// @Summary Assign role to user
+// @Description Assign a role to a specific user
+// @Tags RBAC - User Roles
+// @Accept json
+// @Produce json
+// @Param assignment body AssignRoleToUserRequest true "User-Role assignment"
+// @Success 200 {object} resp.MessageResponse
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /admin/user-roles [post]
 func (h *RBACHandler) AssignRoleToUser(ctx *gin.Context) {
 	var req AssignRoleToUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -193,6 +298,17 @@ func (h *RBACHandler) AssignRoleToUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp.MessageResonse("Role assigned successfully"))
 }
 
+// @Summary Remove role from user
+// @Description Remove a role from a specific user
+// @Tags RBAC - User Roles
+// @Accept json
+// @Produce json
+// @Param assignment body RemoveRoleFromUserRequest true "User-Role removal"
+// @Success 200 {object} resp.MessageResponse
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /admin/user-roles [delete]
 func (h *RBACHandler) RemoveRoleFromUser(ctx *gin.Context) {
 	var req RemoveRoleFromUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -207,6 +323,15 @@ func (h *RBACHandler) RemoveRoleFromUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp.MessageResonse("Role removed successfully"))
 }
 
+// @Summary List roles for user
+// @Description Get all roles assigned to a specific user
+// @Tags RBAC - User Roles
+// @Produce json
+// @Param userId path string true "User ID"
+// @Success 200 {array} RoleResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /admin/user-roles/user/{userId} [get]
 func (h *RBACHandler) ListRolesForUser(ctx *gin.Context) {
 	userID := ctx.Param("userId")
 	result, err := h.rbacService.ListRolesForUser(ctx, userID)

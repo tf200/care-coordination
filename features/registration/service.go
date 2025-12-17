@@ -195,3 +195,14 @@ func (s *registrationService) GetRegistrationForm(ctx context.Context, id string
 		HasClient:          regForm.HasClient,
 	}, nil
 }
+
+func (s *registrationService) DeleteRegistrationForm(ctx context.Context, id string) (*DeleteRegistrationFormResponse, error) {
+	err := s.db.SoftDeleteRegistrationForm(ctx, id)
+	if err != nil {
+		s.logger.Error(ctx, "DeleteRegistrationForm", "Failed to delete registration form", zap.Error(err))
+		return nil, ErrInternal
+	}
+	return &DeleteRegistrationFormResponse{
+		ID: id,
+	}, nil
+}

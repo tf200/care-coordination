@@ -29,6 +29,7 @@ func (h *RegistrationHandler) SetupRegistrationRoutes(router *gin.Engine) {
 	registration.GET("", h.mdw.PaginationMdw(), h.ListRegistrationForms)
 	registration.GET("/:id", h.GetRegistrationForm)
 	registration.PUT("/:id", h.UpdateRegistrationForm)
+	registration.DELETE("/:id", h.DeleteRegistrationForm)
 }
 
 // @Summary Create a registration form
@@ -138,6 +139,32 @@ func (h *RegistrationHandler) UpdateRegistrationForm(ctx *gin.Context) {
 	}
 
 	result, err := h.rgstService.UpdateRegistrationForm(ctx, id, &req)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, resp.Error(ErrInternal))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, result)
+}
+
+// @Summary Delete a registration form
+// @Description Soft delete a registration form by ID
+// @Tags Registration
+// @Produce json
+// @Param id path string true "Registration Form ID"
+// @Success 200 {object} DeleteRegistrationFormResponse
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /registrations/{id} [delete]
+func (h *RegistrationHandler) DeleteRegistrationForm(ctx *gin.Context) {
+	id := ctx.Param("id")
+	if id == "" {
+		ctx.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
+		return
+	}
+
+	result, err := h.rgstService.DeleteRegistrationForm(ctx, id)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, resp.Error(ErrInternal))
 		return

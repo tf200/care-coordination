@@ -88,3 +88,7 @@ type GetRegistrationFormResponse struct {
 	IntakeCompleted    bool      `json:"intakeCompleted"`
 	HasClient          bool      `json:"hasClient"`
 }
+
+type DeleteRegistrationFormResponse struct {
+	ID string `json:"id"`
+}

@@ -65,7 +65,7 @@ func (q *Queries) CreateRegistrationForm(ctx context.Context, arg CreateRegistra
 }
 
 const getRegistrationForm = `-- name: GetRegistrationForm :one
-SELECT id, first_name, last_name, bsn, date_of_birth, gender, reffering_org_id, care_type, registration_date, registration_reason, additional_notes, status, attachment_ids, created_at, updated_at FROM registration_forms WHERE id = $1
+SELECT id, first_name, last_name, bsn, date_of_birth, gender, reffering_org_id, care_type, registration_date, registration_reason, additional_notes, status, attachment_ids, created_at, updated_at, is_deleted FROM registration_forms WHERE id = $1
 `
 
 func (q *Queries) GetRegistrationForm(ctx context.Context, id string) (RegistrationForm, error) {
@@ -87,6 +87,7 @@ func (q *Queries) GetRegistrationForm(ctx context.Context, id string) (Registrat
 		&i.AttachmentIds,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.IsDeleted,
 	)
 	return i, err
 }
@@ -285,6 +286,15 @@ func (q *Queries) ListRegistrationForms(ctx context.Context, arg ListRegistratio
 		return nil, err
 	}
 	return items, nil
+}
+
+const softDeleteRegistrationForm = `-- name: SoftDeleteRegistrationForm :exec
+UPDATE registration_forms SET is_deleted = TRUE, updated_at = NOW() WHERE id = $1
+`
+
+func (q *Queries) SoftDeleteRegistrationForm(ctx context.Context, id string) error {
+	_, err := q.db.Exec(ctx, softDeleteRegistrationForm, id)
+	return err
 }
 
 const updateRegistrationForm = `-- name: UpdateRegistrationForm :exec

@@ -112,3 +112,6 @@ UPDATE registration_forms SET
     attachment_ids = COALESCE(sqlc.narg('attachment_ids'), attachment_ids),
     updated_at = NOW()
 WHERE id = $1;
+
+-- name: SoftDeleteRegistrationForm :exec
+UPDATE registration_forms SET is_deleted = TRUE, updated_at = NOW() WHERE id = $1;

@@ -629,6 +629,7 @@ type RegistrationForm struct {
 	AttachmentIds      []string                   `json:"attachment_ids"`
 	CreatedAt          pgtype.Timestamptz         `json:"created_at"`
 	UpdatedAt          pgtype.Timestamptz         `json:"updated_at"`
+	IsDeleted          *bool                      `json:"is_deleted"`
 }
 
 type Session struct {

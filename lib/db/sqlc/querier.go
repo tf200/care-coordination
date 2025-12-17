@@ -40,6 +40,7 @@ type Querier interface {
 	ListReferringOrgsWithCounts(ctx context.Context, arg ListReferringOrgsWithCountsParams) ([]ListReferringOrgsWithCountsRow, error)
 	ListRegistrationForms(ctx context.Context, arg ListRegistrationFormsParams) ([]ListRegistrationFormsRow, error)
 	ListWaitingListClients(ctx context.Context, arg ListWaitingListClientsParams) ([]ListWaitingListClientsRow, error)
+	SoftDeleteRegistrationForm(ctx context.Context, id string) error
 	UpdateClient(ctx context.Context, arg UpdateClientParams) (string, error)
 	UpdateClientByRegistrationFormID(ctx context.Context, arg UpdateClientByRegistrationFormIDParams) error
 	UpdateIntakeFormStatus(ctx context.Context, arg UpdateIntakeFormStatusParams) error

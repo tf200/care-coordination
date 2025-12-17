@@ -98,7 +98,8 @@ CREATE TYPE registration_status_enum AS ENUM ('pending', 'approved', 'rejected',
     status registration_status_enum DEFAULT 'pending',
     attachment_ids TEXT[],
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    is_deleted BOOLEAN DEFAULT FALSE
 );
 
 

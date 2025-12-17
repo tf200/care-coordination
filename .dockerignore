@@ -49,3 +49,4 @@ docker-compose*
 # Logs
 *.log
 logs/
+main

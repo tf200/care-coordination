@@ -51,7 +51,7 @@ func (s *clientService) MoveClientToWaitingList(ctx context.Context, req *MoveCl
 		LastName:            registrationForm.LastName,
 		Bsn:                 registrationForm.Bsn,
 		DateOfBirth:         registrationForm.DateOfBirth,
-		PhoneNumber:         nil, // Not available in intake/registration forms
+		PhoneNumber:         registrationForm.PhoneNumber,
 		WaitingListPriority: db.WaitingListPriorityEnum(req.WaitingListPriority),
 		Gender:              registrationForm.Gender,
 		RegistrationFormID:  registrationForm.ID,

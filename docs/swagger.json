@@ -1424,6 +1424,161 @@
                     }
                 }
             }
+        },
+        "/registrations/{id}": {
+            "get": {
+                "description": "Get a registration form by ID with details",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Registration"
+                ],
+                "summary": "Get a registration form",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Registration Form ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/registration.GetRegistrationFormResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update an existing registration form",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Registration"
+                ],
+                "summary": "Update a registration form",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Registration Form ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Registration Form Update",
+                        "name": "registration",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/registration.UpdateRegistrationFormRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/registration.UpdateRegistrationFormResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Soft delete a registration form by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Registration"
+                ],
+                "summary": "Delete a registration form",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Registration Form ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/registration.DeleteRegistrationFormResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -2272,11 +2427,17 @@
                 "createdAt": {
                     "type": "string"
                 },
+                "dischargedCount": {
+                    "type": "integer"
+                },
                 "email": {
                     "type": "string"
                 },
                 "id": {
                     "type": "string"
+                },
+                "inCareCount": {
+                    "type": "integer"
                 },
                 "name": {
                     "type": "string"
@@ -2286,6 +2447,9 @@
                 },
                 "updatedAt": {
                     "type": "string"
+                },
+                "waitingListCount": {
+                    "type": "integer"
                 }
             }
         },
@@ -2342,6 +2506,9 @@
                 "lastName": {
                     "type": "string"
                 },
+                "phoneNumber": {
+                    "type": "string"
+                },
                 "refferingOrgId": {
                     "type": "string"
                 },
@@ -2358,6 +2525,79 @@
             "type": "object",
             "properties": {
                 "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "registration.DeleteRegistrationFormResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "registration.GetRegistrationFormResponse": {
+            "type": "object",
+            "properties": {
+                "additionalNotes": {
+                    "type": "string"
+                },
+                "attachmentIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "bsn": {
+                    "type": "string"
+                },
+                "careType": {
+                    "type": "string"
+                },
+                "dateOfBirth": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "hasClient": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "intakeCompleted": {
+                    "type": "boolean"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "orgContactPerson": {
+                    "type": "string"
+                },
+                "orgEmail": {
+                    "type": "string"
+                },
+                "orgName": {
+                    "type": "string"
+                },
+                "orgPhoneNumber": {
+                    "type": "string"
+                },
+                "refferingOrgId": {
+                    "type": "string"
+                },
+                "registrationDate": {
+                    "type": "string"
+                },
+                "registrationReason": {
+                    "type": "string"
+                },
+                "status": {
                     "type": "string"
                 }
             }
@@ -2382,6 +2622,9 @@
                 },
                 "id": {
                     "type": "string"
+                },
+                "intakeCompleted": {
+                    "type": "boolean"
                 },
                 "lastName": {
                     "type": "string"
@@ -2411,6 +2654,80 @@
                     "type": "string"
                 },
                 "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "registration.UpdateRegistrationFormRequest": {
+            "type": "object",
+            "properties": {
+                "additionalNotes": {
+                    "type": "string"
+                },
+                "attachmentIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "bsn": {
+                    "type": "string"
+                },
+                "careType": {
+                    "type": "string",
+                    "enum": [
+                        "protected_living",
+                        "semi_independent_living",
+                        "independent_assisted_living",
+                        "ambulatory_care"
+                    ]
+                },
+                "dateOfBirth": {
+                    "type": "string",
+                    "format": "2006-01-02"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string",
+                    "enum": [
+                        "male",
+                        "female",
+                        "other"
+                    ]
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "phoneNumber": {
+                    "type": "string"
+                },
+                "refferingOrgId": {
+                    "type": "string"
+                },
+                "registrationDate": {
+                    "type": "string",
+                    "format": "2006-01-02"
+                },
+                "registrationReason": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "pending",
+                        "approved",
+                        "rejected",
+                        "in_review"
+                    ]
+                }
+            }
+        },
+        "registration.UpdateRegistrationFormResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
                     "type": "string"
                 }
             }

@@ -20,10 +20,9 @@ INSERT INTO employees (
     bsn,
     date_of_birth,
     phone_number,
-    gender,
-    role
+    gender
 ) VALUES (
- $1, $2, $3, $4, $5, $6, $7, $8, $9
+ $1, $2, $3, $4, $5, $6, $7, $8
 )
 `
 
@@ -36,7 +35,6 @@ type CreateEmployeeParams struct {
 	DateOfBirth pgtype.Date `json:"date_of_birth"`
 	PhoneNumber string      `json:"phone_number"`
 	Gender      GenderEnum  `json:"gender"`
-	Role        string      `json:"role"`
 }
 
 func (q *Queries) CreateEmployee(ctx context.Context, arg CreateEmployeeParams) error {
@@ -49,9 +47,30 @@ func (q *Queries) CreateEmployee(ctx context.Context, arg CreateEmployeeParams) 
 		arg.DateOfBirth,
 		arg.PhoneNumber,
 		arg.Gender,
-		arg.Role,
 	)
 	return err
+}
+
+const getEmployeeByUserID = `-- name: GetEmployeeByUserID :one
+SELECT id, user_id, first_name, last_name, bsn, date_of_birth, phone_number, gender, created_at, updated_at FROM employees WHERE user_id = $1 LIMIT 1
+`
+
+func (q *Queries) GetEmployeeByUserID(ctx context.Context, userID string) (Employee, error) {
+	row := q.db.QueryRow(ctx, getEmployeeByUserID, userID)
+	var i Employee
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Bsn,
+		&i.DateOfBirth,
+		&i.PhoneNumber,
+		&i.Gender,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const listEmployees = `-- name: ListEmployees :many
@@ -64,7 +83,6 @@ SELECT
     e.date_of_birth,
     e.phone_number,
     e.gender,
-    e.role,
     COUNT(*) OVER() as total_count
 FROM employees e
 WHERE
@@ -93,7 +111,6 @@ type ListEmployeesRow struct {
 	DateOfBirth pgtype.Date `json:"date_of_birth"`
 	PhoneNumber string      `json:"phone_number"`
 	Gender      GenderEnum  `json:"gender"`
-	Role        string      `json:"role"`
 	TotalCount  int64       `json:"total_count"`
 }
 
@@ -115,7 +132,6 @@ func (q *Queries) ListEmployees(ctx context.Context, arg ListEmployeesParams) ([
 			&i.DateOfBirth,
 			&i.PhoneNumber,
 			&i.Gender,
-			&i.Role,
 			&i.TotalCount,
 		); err != nil {
 			return nil, err

@@ -19,7 +19,8 @@ type TokenManager struct {
 }
 
 type AccessTokenClaims struct {
-	Scope string `json:"scope,omitempty"`
+	Scope      string `json:"scope,omitempty"`
+	EmployeeID string `json:"employee_id,omitempty"`
 	jwt.RegisteredClaims
 }
 
@@ -40,11 +41,12 @@ func NewTokenManager(accessSecret, refreshSecret string, accessTTL, refreshTTL t
 	}
 }
 
-func (tm *TokenManager) GenerateAccessToken(userID string, now time.Time) (string, error) {
+func (tm *TokenManager) GenerateAccessToken(userID, employeeID string, now time.Time) (string, error) {
 
 	accessExpire := now.Add(tm.accessTTL)
 
 	accessClaims := &AccessTokenClaims{
+		EmployeeID: employeeID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    tm.issuer,
 			Audience:  jwt.ClaimStrings{tm.audience},

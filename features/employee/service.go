@@ -42,7 +42,6 @@ func (s *employeeService) CreateEmployee(ctx context.Context, req *CreateEmploye
 			DateOfBirth: pgtype.Date{Time: req.DateOfBirth, Valid: true},
 			PhoneNumber: req.PhoneNumber,
 			Gender:      db.GenderEnum(req.Gender),
-			Role:        req.Role,
 		},
 		User: db.CreateUserParams{
 			ID:           nanoid.Generate(),

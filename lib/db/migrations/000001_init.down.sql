@@ -1,6 +1,10 @@
 -- Drop tables in reverse order of creation (respecting foreign key dependencies)
 -- Most dependent tables first, then their dependencies
 
+DROP TABLE IF EXISTS role_permissions;
+DROP TABLE IF EXISTS user_roles;
+DROP TABLE IF EXISTS permissions;
+DROP TABLE IF EXISTS roles;
 DROP TABLE IF EXISTS incidents;
 DROP TABLE IF EXISTS client_location_transfers;
 DROP TABLE IF EXISTS clients;

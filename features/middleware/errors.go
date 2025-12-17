@@ -4,6 +4,9 @@ import "errors"
 
 var (
 	ErrInvalidRequest = errors.New("invalid request")
+	ErrUnauthorized   = errors.New("unauthorized")
+	ErrForbidden      = errors.New("forbidden")
+	ErrInternal       = errors.New("internal server error")
 
 	// Rate limiting errors
 	ErrRateLimitExceeded = errors.New("rate limit exceeded, please try again later")

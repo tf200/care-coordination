@@ -39,7 +39,14 @@ func (s *authService) Login(ctx context.Context, req *LoginRequest, userAgent st
 		s.logger.Error(ctx, "Login", "Invalid password", zap.String("email", req.Email))
 		return nil, ErrInvalidCredentials
 	}
-	accessToken, err := s.tokenManager.GenerateAccessToken(user.ID, time.Now())
+	// Try to get employee ID
+	employeeID := ""
+	employee, err := s.db.GetEmployeeByUserID(ctx, user.ID)
+	if err == nil {
+		employeeID = employee.ID
+	}
+
+	accessToken, err := s.tokenManager.GenerateAccessToken(user.ID, employeeID, time.Now())
 	if err != nil {
 		s.logger.Error(ctx, "Login", "Failed to generate access token", zap.String("email", req.Email))
 		return nil, ErrInternal
@@ -83,7 +90,14 @@ func (s *authService) RefreshTokens(ctx context.Context, req *RefreshTokensReque
 		s.logger.Error(ctx, "RefreshTokens", "Invalid refresh token", zap.String("refreshToken", req.RefreshToken))
 		return nil, ErrInvalidToken
 	}
-	accessToken, err := s.tokenManager.GenerateAccessToken(userSession.UserID, time.Now())
+	// Try to get employee ID
+	employeeID := ""
+	employee, err := s.db.GetEmployeeByUserID(ctx, userSession.UserID)
+	if err == nil {
+		employeeID = employee.ID
+	}
+
+	accessToken, err := s.tokenManager.GenerateAccessToken(userSession.UserID, employeeID, time.Now())
 	if err != nil {
 		s.logger.Error(ctx, "RefreshTokens", "Failed to generate access token", zap.String("refreshToken", req.RefreshToken))
 		return nil, ErrInternal

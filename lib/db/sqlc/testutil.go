@@ -266,7 +266,6 @@ type CreateTestEmployeeOptions struct {
 	DateOfBirth *time.Time
 	PhoneNumber *string
 	Gender      *GenderEnum
-	Role        *string
 }
 
 // CreateTestEmployee creates an employee for testing.
@@ -315,11 +314,6 @@ func CreateTestEmployee(t *testing.T, q *Queries, opts CreateTestEmployeeOptions
 		gender = *opts.Gender
 	}
 
-	role := "coordinator"
-	if opts.Role != nil {
-		role = *opts.Role
-	}
-
 	err := q.CreateEmployee(ctx, CreateEmployeeParams{
 		ID:          id,
 		UserID:      opts.UserID,
@@ -329,7 +323,6 @@ func CreateTestEmployee(t *testing.T, q *Queries, opts CreateTestEmployeeOptions
 		DateOfBirth: toPgDate(dob),
 		PhoneNumber: phoneNumber,
 		Gender:      gender,
-		Role:        role,
 	})
 	if err != nil {
 		t.Fatalf("CreateTestEmployee failed: %v", err)

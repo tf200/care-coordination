@@ -19,6 +19,7 @@ INSERT INTO registration_forms (
     bsn,
     gender,
     date_of_birth,
+    phone_number,
     reffering_org_id,
     care_type,
     registration_date,
@@ -26,8 +27,8 @@ INSERT INTO registration_forms (
     additional_notes,
     attachment_ids
 ) VALUES (
-    $1, $2, $3, $4, $5, $6,
-    $7, $8, $9, $10, $11, $12
+    $1, $2, $3, $4, $5, $6, $7,
+    $8, $9, $10, $11, $12, $13
 )
 `
 
@@ -38,6 +39,7 @@ type CreateRegistrationFormParams struct {
 	Bsn                string       `json:"bsn"`
 	Gender             GenderEnum   `json:"gender"`
 	DateOfBirth        pgtype.Date  `json:"date_of_birth"`
+	PhoneNumber        *string      `json:"phone_number"`
 	RefferingOrgID     *string      `json:"reffering_org_id"`
 	CareType           CareTypeEnum `json:"care_type"`
 	RegistrationDate   pgtype.Date  `json:"registration_date"`
@@ -54,6 +56,7 @@ func (q *Queries) CreateRegistrationForm(ctx context.Context, arg CreateRegistra
 		arg.Bsn,
 		arg.Gender,
 		arg.DateOfBirth,
+		arg.PhoneNumber,
 		arg.RefferingOrgID,
 		arg.CareType,
 		arg.RegistrationDate,
@@ -65,7 +68,7 @@ func (q *Queries) CreateRegistrationForm(ctx context.Context, arg CreateRegistra
 }
 
 const getRegistrationForm = `-- name: GetRegistrationForm :one
-SELECT id, first_name, last_name, bsn, date_of_birth, gender, reffering_org_id, care_type, registration_date, registration_reason, additional_notes, status, attachment_ids, created_at, updated_at, is_deleted FROM registration_forms WHERE id = $1
+SELECT id, first_name, last_name, bsn, date_of_birth, phone_number, gender, reffering_org_id, care_type, registration_date, registration_reason, additional_notes, status, attachment_ids, created_at, updated_at, is_deleted FROM registration_forms WHERE id = $1
 `
 
 func (q *Queries) GetRegistrationForm(ctx context.Context, id string) (RegistrationForm, error) {
@@ -77,6 +80,7 @@ func (q *Queries) GetRegistrationForm(ctx context.Context, id string) (Registrat
 		&i.LastName,
 		&i.Bsn,
 		&i.DateOfBirth,
+		&i.PhoneNumber,
 		&i.Gender,
 		&i.RefferingOrgID,
 		&i.CareType,
@@ -304,13 +308,14 @@ UPDATE registration_forms SET
     bsn = COALESCE($4, bsn),
     gender = COALESCE($5, gender),
     date_of_birth = COALESCE($6, date_of_birth),
-    reffering_org_id = COALESCE($7, reffering_org_id),
-    care_type = COALESCE($8, care_type),
-    registration_date = COALESCE($9, registration_date),
-    registration_reason = COALESCE($10, registration_reason),
-    additional_notes = COALESCE($11, additional_notes),
-    status = COALESCE($12, status),
-    attachment_ids = COALESCE($13, attachment_ids),
+    phone_number = COALESCE($7, phone_number),
+    reffering_org_id = COALESCE($8, reffering_org_id),
+    care_type = COALESCE($9, care_type),
+    registration_date = COALESCE($10, registration_date),
+    registration_reason = COALESCE($11, registration_reason),
+    additional_notes = COALESCE($12, additional_notes),
+    status = COALESCE($13, status),
+    attachment_ids = COALESCE($14, attachment_ids),
     updated_at = NOW()
 WHERE id = $1
 `
@@ -322,6 +327,7 @@ type UpdateRegistrationFormParams struct {
 	Bsn                *string                    `json:"bsn"`
 	Gender             NullGenderEnum             `json:"gender"`
 	DateOfBirth        pgtype.Date                `json:"date_of_birth"`
+	PhoneNumber        *string                    `json:"phone_number"`
 	RefferingOrgID     *string                    `json:"reffering_org_id"`
 	CareType           NullCareTypeEnum           `json:"care_type"`
 	RegistrationDate   pgtype.Date                `json:"registration_date"`
@@ -339,6 +345,7 @@ func (q *Queries) UpdateRegistrationForm(ctx context.Context, arg UpdateRegistra
 		arg.Bsn,
 		arg.Gender,
 		arg.DateOfBirth,
+		arg.PhoneNumber,
 		arg.RefferingOrgID,
 		arg.CareType,
 		arg.RegistrationDate,

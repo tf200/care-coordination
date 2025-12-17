@@ -11,6 +11,7 @@ import (
 	locTransfer "care-cordination/features/location_transfer"
 	"care-cordination/features/locations"
 	"care-cordination/features/middleware"
+	"care-cordination/features/rbac"
 	referringOrgs "care-cordination/features/referring_orgs"
 	"care-cordination/features/registration"
 	"care-cordination/lib/bucket"
@@ -110,7 +111,7 @@ func main() {
 	}
 
 	// 5. Initialize Features
-	mdw := middleware.NewMiddleware(tokenManager, rateLimiter, l)
+	mdw := middleware.NewMiddleware(tokenManager, rateLimiter, l, store)
 
 	authService := auth.NewAuthService(store, tokenManager, l)
 	authHandler := auth.NewAuthHandler(authService, mdw)
@@ -142,6 +143,9 @@ func main() {
 	clientService := client.NewClientService(store, l)
 	clientHandler := client.NewClientHandler(clientService, mdw)
 
+	rbacService := rbac.NewRBACService(store, l)
+	rbacHandler := rbac.NewRBACHandler(rbacService, mdw)
+
 	// 6. Initialize Server
 	server := api.NewServer(
 		l,
@@ -156,6 +160,7 @@ func main() {
 		clientHandler,
 		referringOrgHandler,
 		locTransferHandler,
+		rbacHandler,
 		rateLimiter,
 		cfg.ServerAddress,
 		cfg.Url,

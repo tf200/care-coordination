@@ -26,6 +26,7 @@ import (
 	"care-cordination/features/intake"
 	locTransfer "care-cordination/features/location_transfer"
 	"care-cordination/features/locations"
+	"care-cordination/features/rbac"
 	referringOrgs "care-cordination/features/referring_orgs"
 	"care-cordination/features/registration"
 	"care-cordination/lib/logger"
@@ -57,6 +58,7 @@ type Server struct {
 	clientHandler       *client.ClientHandler
 	referringOrgHandler *referringOrgs.ReferringOrgHandler
 	locTransferHandler  *locTransfer.LocTransferHandler
+	rbacHandler         *rbac.RBACHandler
 
 	environment string
 	rateLimiter ratelimit.RateLimiter
@@ -78,6 +80,7 @@ func NewServer(
 	clientHandler *client.ClientHandler,
 	referringOrgHandler *referringOrgs.ReferringOrgHandler,
 	locTransferHandler *locTransfer.LocTransferHandler,
+	rbacHandler *rbac.RBACHandler,
 	rateLimiter ratelimit.RateLimiter, addr string, url string) *Server {
 	s := &Server{
 		environment:         environment,
@@ -92,6 +95,7 @@ func NewServer(
 		clientHandler:       clientHandler,
 		referringOrgHandler: referringOrgHandler,
 		locTransferHandler:  locTransferHandler,
+		rbacHandler:         rbacHandler,
 		logger:              logger,
 		addr:                addr,
 		url:                 url,
@@ -163,6 +167,7 @@ func (s *Server) setupRoutes(logger *logger.Logger) {
 	s.clientHandler.SetupClientRoutes(router)
 	s.referringOrgHandler.SetupReferringOrgRoutes(router)
 	s.locTransferHandler.SetupLocTransferRoutes(router)
+	s.rbacHandler.SetupRBACRoutes(router)
 	s.router = router
 }
 

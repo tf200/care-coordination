@@ -552,7 +552,6 @@ type Employee struct {
 	DateOfBirth pgtype.Date      `json:"date_of_birth"`
 	PhoneNumber string           `json:"phone_number"`
 	Gender      GenderEnum       `json:"gender"`
-	Role        string           `json:"role"`
 	CreatedAt   pgtype.Timestamp `json:"created_at"`
 	UpdatedAt   pgtype.Timestamp `json:"updated_at"`
 }
@@ -603,6 +602,14 @@ type Location struct {
 	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
 }
 
+type Permission struct {
+	ID          string             `json:"id"`
+	Resource    string             `json:"resource"`
+	Action      string             `json:"action"`
+	Description *string            `json:"description"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+}
+
 type ReferringOrg struct {
 	ID            string             `json:"id"`
 	Name          string             `json:"name"`
@@ -619,6 +626,7 @@ type RegistrationForm struct {
 	LastName           string                     `json:"last_name"`
 	Bsn                string                     `json:"bsn"`
 	DateOfBirth        pgtype.Date                `json:"date_of_birth"`
+	PhoneNumber        *string                    `json:"phone_number"`
 	Gender             GenderEnum                 `json:"gender"`
 	RefferingOrgID     *string                    `json:"reffering_org_id"`
 	CareType           CareTypeEnum               `json:"care_type"`
@@ -630,6 +638,19 @@ type RegistrationForm struct {
 	CreatedAt          pgtype.Timestamptz         `json:"created_at"`
 	UpdatedAt          pgtype.Timestamptz         `json:"updated_at"`
 	IsDeleted          *bool                      `json:"is_deleted"`
+}
+
+type Role struct {
+	ID          string             `json:"id"`
+	Name        string             `json:"name"`
+	Description *string            `json:"description"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+}
+
+type RolePermission struct {
+	RoleID       string             `json:"role_id"`
+	PermissionID string             `json:"permission_id"`
+	AssignedAt   pgtype.Timestamptz `json:"assigned_at"`
 }
 
 type Session struct {
@@ -650,4 +671,10 @@ type User struct {
 	PasswordHash string             `json:"password_hash"`
 	CreatedAt    pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+}
+
+type UserRole struct {
+	UserID     string             `json:"user_id"`
+	RoleID     string             `json:"role_id"`
+	AssignedAt pgtype.Timestamptz `json:"assigned_at"`
 }

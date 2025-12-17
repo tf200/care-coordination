@@ -535,7 +535,6 @@ func createRandomEmployee(ctx context.Context, store *db.Store) (*EmployeeInfo, 
 			DateOfBirth: generateRandomDateOfBirth(),
 			PhoneNumber: generatePhoneNumber(),
 			Gender:      randomGender(),
-			Role:        role,
 		},
 	})
 	if err != nil {

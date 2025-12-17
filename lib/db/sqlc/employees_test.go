@@ -33,7 +33,6 @@ func TestCreateEmployee(t *testing.T) {
 					DateOfBirth: toPgDate(time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)),
 					PhoneNumber: "+31612345678",
 					Gender:      GenderEnumMale,
-					Role:        "coordinator",
 				}
 			},
 			wantErr: false,
@@ -55,8 +54,7 @@ func TestCreateEmployee(t *testing.T) {
 					DateOfBirth: toPgDate(time.Date(1992, 2, 2, 0, 0, 0, 0, time.UTC)),
 					PhoneNumber: "+31687654321",
 					Gender:      GenderEnumFemale,
-					Role:        "nurse",
-				}
+					}
 			},
 			wantErr: true,
 			checkErr: func(t *testing.T, err error) {
@@ -79,7 +77,6 @@ func TestCreateEmployee(t *testing.T) {
 					DateOfBirth: toPgDate(time.Date(1985, 5, 5, 0, 0, 0, 0, time.UTC)),
 					PhoneNumber: "+31611223344",
 					Gender:      GenderEnumOther,
-					Role:        "admin",
 				}
 			},
 			wantErr: true,
@@ -99,7 +96,6 @@ func TestCreateEmployee(t *testing.T) {
 					DateOfBirth: toPgDate(time.Date(1980, 10, 10, 0, 0, 0, 0, time.UTC)),
 					PhoneNumber: "+31699887766",
 					Gender:      GenderEnumMale,
-					Role:        "doctor",
 				}
 			},
 			wantErr: true,

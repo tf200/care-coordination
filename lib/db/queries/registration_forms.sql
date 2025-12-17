@@ -6,6 +6,7 @@ INSERT INTO registration_forms (
     bsn,
     gender,
     date_of_birth,
+    phone_number,
     reffering_org_id,
     care_type,
     registration_date,
@@ -13,8 +14,8 @@ INSERT INTO registration_forms (
     additional_notes,
     attachment_ids
 ) VALUES (
-    $1, $2, $3, $4, $5, $6,
-    $7, $8, $9, $10, $11, $12
+    $1, $2, $3, $4, $5, $6, $7,
+    $8, $9, $10, $11, $12, $13
 );
 
 
@@ -103,6 +104,7 @@ UPDATE registration_forms SET
     bsn = COALESCE(sqlc.narg('bsn'), bsn),
     gender = COALESCE(sqlc.narg('gender'), gender),
     date_of_birth = COALESCE(sqlc.narg('date_of_birth'), date_of_birth),
+    phone_number = COALESCE(sqlc.narg('phone_number'), phone_number),
     reffering_org_id = COALESCE(sqlc.narg('reffering_org_id'), reffering_org_id),
     care_type = COALESCE(sqlc.narg('care_type'), care_type),
     registration_date = COALESCE(sqlc.narg('registration_date'), registration_date),

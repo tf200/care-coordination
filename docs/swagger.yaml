@@ -568,16 +568,22 @@ definitions:
         type: string
       createdAt:
         type: string
+      dischargedCount:
+        type: integer
       email:
         type: string
       id:
         type: string
+      inCareCount:
+        type: integer
       name:
         type: string
       phoneNumber:
         type: string
       updatedAt:
         type: string
+      waitingListCount:
+        type: integer
     type: object
   registration.CreateRegistrationFormRequest:
     properties:
@@ -609,6 +615,8 @@ definitions:
         type: string
       lastName:
         type: string
+      phoneNumber:
+        type: string
       refferingOrgId:
         type: string
       registrationDate:
@@ -632,6 +640,54 @@ definitions:
       id:
         type: string
     type: object
+  registration.DeleteRegistrationFormResponse:
+    properties:
+      id:
+        type: string
+    type: object
+  registration.GetRegistrationFormResponse:
+    properties:
+      additionalNotes:
+        type: string
+      attachmentIds:
+        items:
+          type: string
+        type: array
+      bsn:
+        type: string
+      careType:
+        type: string
+      dateOfBirth:
+        type: string
+      firstName:
+        type: string
+      gender:
+        type: string
+      hasClient:
+        type: boolean
+      id:
+        type: string
+      intakeCompleted:
+        type: boolean
+      lastName:
+        type: string
+      orgContactPerson:
+        type: string
+      orgEmail:
+        type: string
+      orgName:
+        type: string
+      orgPhoneNumber:
+        type: string
+      refferingOrgId:
+        type: string
+      registrationDate:
+        type: string
+      registrationReason:
+        type: string
+      status:
+        type: string
+    type: object
   registration.ListRegistrationFormsResponse:
     properties:
       additionalNotes:
@@ -646,6 +702,8 @@ definitions:
         type: string
       id:
         type: string
+      intakeCompleted:
+        type: boolean
       lastName:
         type: string
       numberOfAttachments:
@@ -665,6 +723,58 @@ definitions:
       registrationReason:
         type: string
       status:
+        type: string
+    type: object
+  registration.UpdateRegistrationFormRequest:
+    properties:
+      additionalNotes:
+        type: string
+      attachmentIds:
+        items:
+          type: string
+        type: array
+      bsn:
+        type: string
+      careType:
+        enum:
+        - protected_living
+        - semi_independent_living
+        - independent_assisted_living
+        - ambulatory_care
+        type: string
+      dateOfBirth:
+        format: "2006-01-02"
+        type: string
+      firstName:
+        type: string
+      gender:
+        enum:
+        - male
+        - female
+        - other
+        type: string
+      lastName:
+        type: string
+      phoneNumber:
+        type: string
+      refferingOrgId:
+        type: string
+      registrationDate:
+        format: "2006-01-02"
+        type: string
+      registrationReason:
+        type: string
+      status:
+        enum:
+        - pending
+        - approved
+        - rejected
+        - in_review
+        type: string
+    type: object
+  registration.UpdateRegistrationFormResponse:
+    properties:
+      id:
         type: string
     type: object
   resp.ErrorResponse:
@@ -1784,6 +1894,109 @@ paths:
           schema:
             $ref: '#/definitions/resp.ErrorResponse'
       summary: Create a registration form
+      tags:
+      - Registration
+  /registrations/{id}:
+    delete:
+      description: Soft delete a registration form by ID
+      parameters:
+      - description: Registration Form ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/registration.DeleteRegistrationFormResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Delete a registration form
+      tags:
+      - Registration
+    get:
+      description: Get a registration form by ID with details
+      parameters:
+      - description: Registration Form ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/registration.GetRegistrationFormResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get a registration form
+      tags:
+      - Registration
+    put:
+      consumes:
+      - application/json
+      description: Update an existing registration form
+      parameters:
+      - description: Registration Form ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Registration Form Update
+        in: body
+        name: registration
+        required: true
+        schema:
+          $ref: '#/definitions/registration.UpdateRegistrationFormRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/registration.UpdateRegistrationFormResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Update a registration form
       tags:
       - Registration
 security:

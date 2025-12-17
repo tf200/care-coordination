@@ -16,6 +16,36 @@ CREATE TABLE users (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE roles (
+    id TEXT PRIMARY KEY,
+    name TEXT UNIQUE NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE permissions (
+    id TEXT PRIMARY KEY,
+    resource TEXT NOT NULL,
+    action TEXT NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(resource, action)
+);
+
+CREATE TABLE user_roles (
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    role_id TEXT NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
+    assigned_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, role_id)
+);
+
+CREATE TABLE role_permissions (
+    role_id TEXT NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
+    permission_id TEXT NOT NULL REFERENCES permissions(id) ON DELETE CASCADE,
+    assigned_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (role_id, permission_id)
+);
+
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_id ON users(id);
 
@@ -70,7 +100,6 @@ CREATE TABLE  employees (
     date_of_birth DATE NOT NULL,
     phone_number TEXT NOT NULL,
     gender gender_enum NOT NULL,
-    role TEXT NOT NULL,
     created_at TIMESTAMP  DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP  DEFAULT CURRENT_TIMESTAMP
 );
@@ -86,6 +115,7 @@ CREATE TYPE registration_status_enum AS ENUM ('pending', 'approved', 'rejected',
     last_name TEXT NOT NULL,
     bsn TEXT UNIQUE NOT NULL,
     date_of_birth DATE NOT NULL,
+    phone_number TEXT,
     gender gender_enum NOT NULL,
 
 -- organization information
@@ -271,3 +301,118 @@ CREATE TABLE incidents (
     created_at TIMESTAMP  DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP  DEFAULT CURRENT_TIMESTAMP
 );
+
+-- RLS Policies
+ALTER TABLE clients ENABLE ROW LEVEL SECURITY;
+
+-- Admin policy: can do everything
+CREATE POLICY admin_all ON clients
+    FOR ALL
+    TO PUBLIC
+    USING (
+        EXISTS (
+            SELECT 1 FROM user_roles ur
+            JOIN roles r ON ur.role_id = r.id
+            WHERE ur.user_id = current_setting('app.current_user_id', true)::text
+            AND r.name = 'admin'
+        )
+    );
+
+-- Coordinator policy: can see their own clients
+CREATE POLICY coordinator_own_clients ON clients
+    FOR ALL
+    TO PUBLIC
+    USING (
+        -- Check if user has coordinator role
+        EXISTS (
+            SELECT 1 FROM user_roles ur
+            JOIN roles r ON ur.role_id = r.id
+            WHERE ur.user_id = current_setting('app.current_user_id', true)::text
+            AND r.name = 'coordinator'
+        )
+        AND
+        -- Check if client is assigned to this coordinator (mapped via employee_id)
+        coordinator_id = (
+            SELECT id FROM employees 
+            WHERE user_id = current_setting('app.current_user_id', true)::text
+            LIMIT 1
+        )
+    );
+
+-- ============================================================
+-- System Preset: Roles
+-- ============================================================
+INSERT INTO roles (id, name, description) VALUES
+    ('role_admin', 'admin', 'Full system access'),
+    ('role_coordinator', 'coordinator', 'Manage assigned clients'),
+    ('role_viewer', 'viewer', 'Read-only access');
+
+-- ============================================================
+-- System Preset: Permissions
+-- ============================================================
+INSERT INTO permissions (id, resource, action, description) VALUES
+    -- Client permissions
+    ('perm_client_read', 'client', 'read', 'View clients'),
+    ('perm_client_write', 'client', 'write', 'Create and update clients'),
+    ('perm_client_delete', 'client', 'delete', 'Delete clients'),
+    -- Employee permissions
+    ('perm_employee_read', 'employee', 'read', 'View employees'),
+    ('perm_employee_write', 'employee', 'write', 'Create and update employees'),
+    ('perm_employee_delete', 'employee', 'delete', 'Delete employees'),
+    -- Location permissions
+    ('perm_location_read', 'location', 'read', 'View locations'),
+    ('perm_location_write', 'location', 'write', 'Create and update locations'),
+    -- Registration permissions
+    ('perm_registration_read', 'registration', 'read', 'View registrations'),
+    ('perm_registration_write', 'registration', 'write', 'Create and update registrations'),
+    -- Intake permissions
+    ('perm_intake_read', 'intake', 'read', 'View intakes'),
+    ('perm_intake_write', 'intake', 'write', 'Create and update intakes'),
+    -- Incident permissions
+    ('perm_incident_read', 'incident', 'read', 'View incidents'),
+    ('perm_incident_write', 'incident', 'write', 'Create and update incidents'),
+    -- Admin permissions
+    ('perm_admin_manage', 'admin', 'manage', 'Full admin access');
+
+-- ============================================================
+-- System Preset: Role-Permission Mappings
+-- ============================================================
+-- Admin: All permissions
+INSERT INTO role_permissions (role_id, permission_id) VALUES
+    ('role_admin', 'perm_client_read'),
+    ('role_admin', 'perm_client_write'),
+    ('role_admin', 'perm_client_delete'),
+    ('role_admin', 'perm_employee_read'),
+    ('role_admin', 'perm_employee_write'),
+    ('role_admin', 'perm_employee_delete'),
+    ('role_admin', 'perm_location_read'),
+    ('role_admin', 'perm_location_write'),
+    ('role_admin', 'perm_registration_read'),
+    ('role_admin', 'perm_registration_write'),
+    ('role_admin', 'perm_intake_read'),
+    ('role_admin', 'perm_intake_write'),
+    ('role_admin', 'perm_incident_read'),
+    ('role_admin', 'perm_incident_write'),
+    ('role_admin', 'perm_admin_manage');
+
+-- Coordinator: Read + write for assigned resources
+INSERT INTO role_permissions (role_id, permission_id) VALUES
+    ('role_coordinator', 'perm_client_read'),
+    ('role_coordinator', 'perm_client_write'),
+    ('role_coordinator', 'perm_employee_read'),
+    ('role_coordinator', 'perm_location_read'),
+    ('role_coordinator', 'perm_registration_read'),
+    ('role_coordinator', 'perm_registration_write'),
+    ('role_coordinator', 'perm_intake_read'),
+    ('role_coordinator', 'perm_intake_write'),
+    ('role_coordinator', 'perm_incident_read'),
+    ('role_coordinator', 'perm_incident_write');
+
+-- Viewer: Read-only
+INSERT INTO role_permissions (role_id, permission_id) VALUES
+    ('role_viewer', 'perm_client_read'),
+    ('role_viewer', 'perm_employee_read'),
+    ('role_viewer', 'perm_location_read'),
+    ('role_viewer', 'perm_registration_read'),
+    ('role_viewer', 'perm_intake_read'),
+    ('role_viewer', 'perm_incident_read');

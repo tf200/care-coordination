@@ -1,6 +1,7 @@
 package db
 
 import (
+	"care-cordination/lib/util"
 	"context"
 	"fmt"
 
@@ -24,6 +25,15 @@ func (store *Store) ExecTx(ctx context.Context, fn func(*Queries) error) error {
 	tx, err := store.ConnPool.Begin(ctx)
 	if err != nil {
 		return err
+	}
+
+	// Set RLS context if user is authenticated
+	userID := util.GetUserID(ctx)
+	if userID != "" {
+		if _, err := tx.Exec(ctx, "SET LOCAL app.current_user_id = $1", userID); err != nil {
+			tx.Rollback(ctx)
+			return fmt.Errorf("failed to set rls context: %w", err)
+		}
 	}
 
 	// 2. Create a new Queries instance using that specific transaction

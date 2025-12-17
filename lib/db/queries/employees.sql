@@ -7,10 +7,9 @@ INSERT INTO employees (
     bsn,
     date_of_birth,
     phone_number,
-    gender,
-    role
+    gender
 ) VALUES (
- $1, $2, $3, $4, $5, $6, $7, $8, $9
+ $1, $2, $3, $4, $5, $6, $7, $8
 );
 
 -- name: ListEmployees :many
@@ -23,7 +22,6 @@ SELECT
     e.date_of_birth,
     e.phone_number,
     e.gender,
-    e.role,
     COUNT(*) OVER() as total_count
 FROM employees e
 WHERE
@@ -35,3 +33,6 @@ WHERE
 )
 ORDER BY e.first_name, e.last_name
 LIMIT $1 OFFSET $2;
+
+-- name: GetEmployeeByUserID :one
+SELECT * FROM employees WHERE user_id = $1 LIMIT 1;

@@ -582,6 +582,105 @@ definitions:
       postalCode:
         type: string
     type: object
+  rbac.AssignPermissionRequest:
+    properties:
+      permissionId:
+        type: string
+    required:
+    - permissionId
+    type: object
+  rbac.AssignRoleToUserRequest:
+    properties:
+      roleId:
+        type: string
+      userId:
+        type: string
+    required:
+    - roleId
+    - userId
+    type: object
+  rbac.CreateRoleRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      permissionIds:
+        items:
+          type: string
+        type: array
+    required:
+    - name
+    type: object
+  rbac.CreateRoleResponse:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  rbac.PermissionResponse:
+    properties:
+      action:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      resource:
+        type: string
+    type: object
+  rbac.RemoveRoleFromUserRequest:
+    properties:
+      roleId:
+        type: string
+      userId:
+        type: string
+    required:
+    - roleId
+    - userId
+    type: object
+  rbac.RoleListItem:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      permissionCount:
+        type: integer
+      userCount:
+        type: integer
+    type: object
+  rbac.RoleResponse:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      permissions:
+        items:
+          $ref: '#/definitions/rbac.PermissionResponse'
+        type: array
+    type: object
+  rbac.UpdateRoleRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      permissionIds:
+        items:
+          type: string
+        type: array
+    required:
+    - name
+    type: object
   referring_orgs.CreateReferringOrgRequest:
     properties:
       contactPerson:
@@ -964,6 +1063,36 @@ definitions:
       totalPages:
         type: integer
     type: object
+  resp.PaginationResponse-rbac_PermissionResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/rbac.PermissionResponse'
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      totalCount:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  resp.PaginationResponse-rbac_RoleListItem:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/rbac.RoleListItem'
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      totalCount:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
   resp.PaginationResponse-referring_orgs_ListReferringOrgsResponse:
     properties:
       data:
@@ -1006,6 +1135,393 @@ info:
   title: Care-Cordination API
   version: "1.0"
 paths:
+  /admin/permissions:
+    get:
+      description: List all available permissions
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.PaginationResponse-rbac_PermissionResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: List permissions
+      tags:
+      - RBAC - Permissions
+  /admin/roles:
+    get:
+      description: List all roles with permission and user counts
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.PaginationResponse-rbac_RoleListItem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: List roles
+      tags:
+      - RBAC - Roles
+    post:
+      consumes:
+      - application/json
+      description: Create a new role with optional permissions
+      parameters:
+      - description: Role data
+        in: body
+        name: role
+        required: true
+        schema:
+          $ref: '#/definitions/rbac.CreateRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/rbac.CreateRoleResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Create a role
+      tags:
+      - RBAC - Roles
+  /admin/roles/{id}:
+    delete:
+      description: Delete a role by ID
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.MessageResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Delete a role
+      tags:
+      - RBAC - Roles
+    get:
+      description: Get a role by ID with its permissions
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/rbac.RoleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get a role
+      tags:
+      - RBAC - Roles
+    put:
+      consumes:
+      - application/json
+      description: Update an existing role
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Role update data
+        in: body
+        name: role
+        required: true
+        schema:
+          $ref: '#/definitions/rbac.UpdateRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/rbac.RoleResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Update a role
+      tags:
+      - RBAC - Roles
+  /admin/roles/{id}/permissions:
+    get:
+      description: Get all permissions assigned to a specific role
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/rbac.PermissionResponse'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: List permissions for a role
+      tags:
+      - RBAC - Role Permissions
+    post:
+      consumes:
+      - application/json
+      description: Assign a permission to a specific role
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Permission assignment
+        in: body
+        name: permission
+        required: true
+        schema:
+          $ref: '#/definitions/rbac.AssignPermissionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Assign permission to role
+      tags:
+      - RBAC - Role Permissions
+  /admin/roles/{id}/permissions/{permissionId}:
+    delete:
+      description: Remove a permission from a specific role
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Permission ID
+        in: path
+        name: permissionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.MessageResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Remove permission from role
+      tags:
+      - RBAC - Role Permissions
+  /admin/user-roles:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a role from a specific user
+      parameters:
+      - description: User-Role removal
+        in: body
+        name: assignment
+        required: true
+        schema:
+          $ref: '#/definitions/rbac.RemoveRoleFromUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Remove role from user
+      tags:
+      - RBAC - User Roles
+    post:
+      consumes:
+      - application/json
+      description: Assign a role to a specific user
+      parameters:
+      - description: User-Role assignment
+        in: body
+        name: assignment
+        required: true
+        schema:
+          $ref: '#/definitions/rbac.AssignRoleToUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Assign role to user
+      tags:
+      - RBAC - User Roles
+  /admin/user-roles/user/{userId}:
+    get:
+      description: Get all roles assigned to a specific user
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/rbac.RoleResponse'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: List roles for user
+      tags:
+      - RBAC - User Roles
   /attachments:
     post:
       consumes:

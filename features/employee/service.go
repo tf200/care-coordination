@@ -6,6 +6,7 @@ import (
 	"care-cordination/lib/logger"
 	"care-cordination/lib/nanoid"
 	"care-cordination/lib/resp"
+	"care-cordination/lib/util"
 	"context"
 
 	"github.com/jackc/pgx/v5/pgtype"
@@ -87,4 +88,60 @@ func (s *employeeService) ListEmployees(ctx context.Context, req *ListEmployeesR
 
 	result := resp.PagRespWithParams(listEmployeesResponse, totalCount, page, pageSize)
 	return &result, nil
+}
+
+func (s *employeeService) GetMyProfile(ctx context.Context) (*GetMyProfileResponse, error) {
+	userID := util.GetUserID(ctx)
+	if userID == "" {
+		return nil, ErrUnauthorized
+	}
+
+	employee, err := s.store.GetEmployeeByUserID(ctx, userID)
+	if err != nil {
+		s.logger.Error(ctx, "GetMyProfile", "Failed to get employee profile", zap.Error(err))
+		return nil, ErrInternal
+	}
+
+	// Role name comes from LEFT JOIN in the query
+	var roleName string
+	if employee.RoleName != nil {
+		roleName = *employee.RoleName
+	}
+
+	// Fetch permissions for the user's role
+	permissionsResponse := []PermissionResponse{}
+	if employee.RoleID != nil {
+		permissions, err := s.store.ListPermissionsForRole(ctx, *employee.RoleID)
+		if err != nil {
+			s.logger.Error(ctx, "GetMyProfile", "Failed to get role permissions", zap.Error(err))
+			return nil, ErrInternal
+		}
+
+		for _, perm := range permissions {
+			desc := ""
+			if perm.Description != nil {
+				desc = *perm.Description
+			}
+			permissionsResponse = append(permissionsResponse, PermissionResponse{
+				ID:          perm.ID,
+				Resource:    perm.Resource,
+				Action:      perm.Action,
+				Description: desc,
+			})
+		}
+	}
+
+	return &GetMyProfileResponse{
+		ID:          employee.ID,
+		UserID:      employee.UserID,
+		FirstName:   employee.FirstName,
+		LastName:    employee.LastName,
+		Email:       employee.Email,
+		BSN:         employee.Bsn,
+		DateOfBirth: employee.DateOfBirth.Time.Format("2006-01-02"),
+		PhoneNumber: employee.PhoneNumber,
+		Gender:      string(employee.Gender),
+		Role:        roleName,
+		Permissions: permissionsResponse,
+	}, nil
 }

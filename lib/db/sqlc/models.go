@@ -524,7 +524,7 @@ type Client struct {
 	FamilySituation        *string                 `json:"family_situation"`
 	Limitations            *string                 `json:"limitations"`
 	FocusAreas             *string                 `json:"focus_areas"`
-	Goals                  *string                 `json:"goals"`
+	Goals                  []string                `json:"goals"`
 	Notes                  *string                 `json:"notes"`
 	CreatedAt              pgtype.Timestamp        `json:"created_at"`
 	UpdatedAt              pgtype.Timestamp        `json:"updated_at"`
@@ -584,7 +584,7 @@ type IntakeForm struct {
 	MainProvider       *string          `json:"main_provider"`
 	Limitations        *string          `json:"limitations"`
 	FocusAreas         *string          `json:"focus_areas"`
-	Goals              *string          `json:"goals"`
+	Goals              []string         `json:"goals"`
 	Notes              *string          `json:"notes"`
 	Status             IntakeStatusEnum `json:"status"`
 	CreatedAt          pgtype.Timestamp `json:"created_at"`

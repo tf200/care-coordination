@@ -6,7 +6,9 @@ import (
 	"care-cordination/lib/nanoid"
 	"context"
 	"log"
+	"time"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -43,16 +45,45 @@ func main() {
 		log.Fatalf("cannot hash password: %v", err)
 	}
 
-	arg := db.CreateUserParams{
-		ID:           nanoid.Generate(),
+	userID := nanoid.Generate()
+	employeeID := nanoid.Generate()
+
+	// Create user
+	_, err = store.CreateUser(ctx, db.CreateUserParams{
+		ID:           userID,
 		Email:        cfg.AdminEmail,
 		PasswordHash: string(hashedPassword),
-	}
-
-	userID, err := store.CreateUser(ctx, arg)
+	})
 	if err != nil {
 		log.Fatalf("cannot create admin user: %v", err)
 	}
-
 	log.Printf("Admin user created with ID: %s", userID)
+
+	// Create employee record for admin
+	err = store.CreateEmployee(ctx, db.CreateEmployeeParams{
+		ID:          employeeID,
+		UserID:      userID,
+		FirstName:   "System",
+		LastName:    "Admin",
+		Bsn:         "000000000",
+		DateOfBirth: pgtype.Date{Time: time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC), Valid: true},
+		PhoneNumber: "0000000000",
+		Gender:      db.GenderEnumOther,
+	})
+	if err != nil {
+		log.Fatalf("cannot create admin employee: %v", err)
+	}
+	log.Printf("Admin employee created with ID: %s", employeeID)
+
+	// Assign admin role (role_admin is preset in the migration)
+	err = store.AssignRoleToUser(ctx, db.AssignRoleToUserParams{
+		UserID: userID,
+		RoleID: "role_admin",
+	})
+	if err != nil {
+		log.Fatalf("cannot assign admin role: %v", err)
+	}
+	log.Printf("Admin role assigned to user %s", cfg.AdminEmail)
+
+	log.Println("Admin setup complete!")
 }

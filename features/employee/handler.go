@@ -24,6 +24,7 @@ func NewEmployeeHandler(employeeService EmployeeService, mdw *middleware.Middlew
 func (h *EmployeeHandler) SetupEmployeeRoutes(router *gin.Engine) {
 	employee := router.Group("/employees")
 
+	employee.GET("/me", h.mdw.AuthMdw(), h.GetMyProfile)
 	employee.POST("", h.mdw.AuthMdw(), h.CreateEmployee)
 	employee.GET("", h.mdw.AuthMdw(), h.mdw.PaginationMdw(), h.ListEmployees)
 }
@@ -80,6 +81,28 @@ func (h *EmployeeHandler) ListEmployees(ctx *gin.Context) {
 		return
 	}
 	result, err := h.employeeService.ListEmployees(ctx, &req)
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrInternal):
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
+		default:
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
+		}
+		return
+	}
+	ctx.JSON(http.StatusOK, result)
+}
+
+// @Summary Get logged-in user's employee profile
+// @Description Get the employee profile of the currently authenticated user
+// @Tags Employee
+// @Produce json
+// @Success 200 {object} GetMyProfileResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /employees/me [get]
+func (h *EmployeeHandler) GetMyProfile(ctx *gin.Context) {
+	result, err := h.employeeService.GetMyProfile(ctx)
 	if err != nil {
 		switch {
 		case errors.Is(err, ErrInternal):

@@ -35,4 +35,11 @@ ORDER BY e.first_name, e.last_name
 LIMIT $1 OFFSET $2;
 
 -- name: GetEmployeeByUserID :one
-SELECT * FROM employees WHERE user_id = $1 LIMIT 1;
+SELECT e.*, u.email,
+       r.id as role_id,
+       r.name as role_name
+FROM employees e
+JOIN users u ON e.user_id = u.id
+LEFT JOIN user_roles ur ON e.user_id = ur.user_id
+LEFT JOIN roles r ON ur.role_id = r.id
+WHERE e.user_id = $1 LIMIT 1;

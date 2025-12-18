@@ -43,7 +43,7 @@ type Querier interface {
 	DeleteRole(ctx context.Context, id string) error
 	DeleteUserSession(ctx context.Context, tokenHash string) error
 	GetClientByID(ctx context.Context, id string) (Client, error)
-	GetEmployeeByUserID(ctx context.Context, userID string) (Employee, error)
+	GetEmployeeByUserID(ctx context.Context, userID string) (GetEmployeeByUserIDRow, error)
 	GetIntakeForm(ctx context.Context, id string) (IntakeForm, error)
 	GetPermissionByID(ctx context.Context, id string) (Permission, error)
 	GetReferringOrgByID(ctx context.Context, id string) (ReferringOrg, error)
@@ -51,6 +51,7 @@ type Querier interface {
 	GetRegistrationFormWithDetails(ctx context.Context, id string) (GetRegistrationFormWithDetailsRow, error)
 	GetRoleByID(ctx context.Context, id string) (Role, error)
 	GetRoleByName(ctx context.Context, name string) (Role, error)
+	GetRoleForUser(ctx context.Context, userID string) (Role, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserSession(ctx context.Context, tokenHash string) (Session, error)
 	HasPermission(ctx context.Context, arg HasPermissionParams) (bool, error)
@@ -67,11 +68,10 @@ type Querier interface {
 	ListReferringOrgsWithCounts(ctx context.Context, arg ListReferringOrgsWithCountsParams) ([]ListReferringOrgsWithCountsRow, error)
 	ListRegistrationForms(ctx context.Context, arg ListRegistrationFormsParams) ([]ListRegistrationFormsRow, error)
 	ListRoles(ctx context.Context, arg ListRolesParams) ([]ListRolesRow, error)
-	ListRolesForUser(ctx context.Context, userID string) ([]Role, error)
 	ListUsersWithRole(ctx context.Context, roleID string) ([]ListUsersWithRoleRow, error)
 	ListWaitingListClients(ctx context.Context, arg ListWaitingListClientsParams) ([]ListWaitingListClientsRow, error)
 	RemovePermissionFromRole(ctx context.Context, arg RemovePermissionFromRoleParams) error
-	RemoveRoleFromUser(ctx context.Context, arg RemoveRoleFromUserParams) error
+	RemoveRoleFromUser(ctx context.Context, userID string) error
 	SoftDeleteRegistrationForm(ctx context.Context, id string) error
 	UpdateClient(ctx context.Context, arg UpdateClientParams) (string, error)
 	UpdateClientByRegistrationFormID(ctx context.Context, arg UpdateClientByRegistrationFormIDParams) error

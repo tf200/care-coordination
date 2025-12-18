@@ -52,12 +52,35 @@ func (q *Queries) CreateEmployee(ctx context.Context, arg CreateEmployeeParams) 
 }
 
 const getEmployeeByUserID = `-- name: GetEmployeeByUserID :one
-SELECT id, user_id, first_name, last_name, bsn, date_of_birth, phone_number, gender, created_at, updated_at FROM employees WHERE user_id = $1 LIMIT 1
+SELECT e.id, e.user_id, e.first_name, e.last_name, e.bsn, e.date_of_birth, e.phone_number, e.gender, e.created_at, e.updated_at, u.email,
+       r.id as role_id,
+       r.name as role_name
+FROM employees e
+JOIN users u ON e.user_id = u.id
+LEFT JOIN user_roles ur ON e.user_id = ur.user_id
+LEFT JOIN roles r ON ur.role_id = r.id
+WHERE e.user_id = $1 LIMIT 1
 `
 
-func (q *Queries) GetEmployeeByUserID(ctx context.Context, userID string) (Employee, error) {
+type GetEmployeeByUserIDRow struct {
+	ID          string           `json:"id"`
+	UserID      string           `json:"user_id"`
+	FirstName   string           `json:"first_name"`
+	LastName    string           `json:"last_name"`
+	Bsn         string           `json:"bsn"`
+	DateOfBirth pgtype.Date      `json:"date_of_birth"`
+	PhoneNumber string           `json:"phone_number"`
+	Gender      GenderEnum       `json:"gender"`
+	CreatedAt   pgtype.Timestamp `json:"created_at"`
+	UpdatedAt   pgtype.Timestamp `json:"updated_at"`
+	Email       string           `json:"email"`
+	RoleID      *string          `json:"role_id"`
+	RoleName    *string          `json:"role_name"`
+}
+
+func (q *Queries) GetEmployeeByUserID(ctx context.Context, userID string) (GetEmployeeByUserIDRow, error) {
 	row := q.db.QueryRow(ctx, getEmployeeByUserID, userID)
-	var i Employee
+	var i GetEmployeeByUserIDRow
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
@@ -69,6 +92,9 @@ func (q *Queries) GetEmployeeByUserID(ctx context.Context, userID string) (Emplo
 		&i.Gender,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Email,
+		&i.RoleID,
+		&i.RoleName,
 	)
 	return i, err
 }

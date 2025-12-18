@@ -23,6 +23,6 @@ type RBACService interface {
 
 	// User-Role assignments
 	AssignRoleToUser(ctx context.Context, userID string, roleID string) error
-	RemoveRoleFromUser(ctx context.Context, userID string, roleID string) error
-	ListRolesForUser(ctx context.Context, userID string) ([]RoleResponse, error)
+	RemoveRoleFromUser(ctx context.Context, userID string) error
+	GetRoleForUser(ctx context.Context, userID string) (*RoleResponse, error)
 }

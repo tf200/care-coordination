@@ -44,8 +44,8 @@ func (h *RBACHandler) SetupRBACRoutes(router *gin.Engine) {
 	// User-Role assignments
 	userRoles := admin.Group("/user-roles")
 	userRoles.POST("", h.AssignRoleToUser)
-	userRoles.DELETE("", h.RemoveRoleFromUser)
-	userRoles.GET("/user/:userId", h.ListRolesForUser)
+	userRoles.DELETE("/user/:userId", h.RemoveRoleFromUser)
+	userRoles.GET("/user/:userId", h.GetRoleForUser)
 }
 
 // ============================================================
@@ -194,12 +194,8 @@ func (h *RBACHandler) AssignRoleToUser(ctx *gin.Context) {
 }
 
 func (h *RBACHandler) RemoveRoleFromUser(ctx *gin.Context) {
-	var req RemoveRoleFromUserRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
-		return
-	}
-	err := h.rbacService.RemoveRoleFromUser(ctx, req.UserID, req.RoleID)
+	userID := ctx.Param("userId")
+	err := h.rbacService.RemoveRoleFromUser(ctx, userID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, resp.Error(err))
 		return
@@ -207,9 +203,9 @@ func (h *RBACHandler) RemoveRoleFromUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp.MessageResonse("Role removed successfully"))
 }
 
-func (h *RBACHandler) ListRolesForUser(ctx *gin.Context) {
+func (h *RBACHandler) GetRoleForUser(ctx *gin.Context) {
 	userID := ctx.Param("userId")
-	result, err := h.rbacService.ListRolesForUser(ctx, userID)
+	result, err := h.rbacService.GetRoleForUser(ctx, userID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, resp.Error(err))
 		return

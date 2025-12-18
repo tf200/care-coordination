@@ -76,10 +76,7 @@ type AssignRoleToUserRequest struct {
 	RoleID string `json:"roleId" binding:"required"`
 }
 
-type RemoveRoleFromUserRequest struct {
-	UserID string `json:"userId" binding:"required"`
-	RoleID string `json:"roleId" binding:"required"`
-}
+// RemoveRoleFromUserRequest is not needed anymore since userId comes from path param
 
 type UserWithRoleResponse struct {
 	ID    string `json:"id"`

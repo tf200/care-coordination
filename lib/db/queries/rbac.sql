@@ -88,18 +88,17 @@ ORDER BY p.resource, p.action;
 -- name: AssignRoleToUser :exec
 INSERT INTO user_roles (user_id, role_id)
 VALUES ($1, $2)
-ON CONFLICT DO NOTHING;
+ON CONFLICT (user_id) DO UPDATE SET role_id = $2, assigned_at = CURRENT_TIMESTAMP;
 
 -- name: RemoveRoleFromUser :exec
 DELETE FROM user_roles
-WHERE user_id = $1 AND role_id = $2;
+WHERE user_id = $1;
 
--- name: ListRolesForUser :many
+-- name: GetRoleForUser :one
 SELECT r.*
 FROM roles r
 JOIN user_roles ur ON r.id = ur.role_id
-WHERE ur.user_id = $1
-ORDER BY r.name;
+WHERE ur.user_id = $1;
 
 -- name: ListUsersWithRole :many
 SELECT u.id, u.email

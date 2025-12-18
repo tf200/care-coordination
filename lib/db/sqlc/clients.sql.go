@@ -58,7 +58,7 @@ type CreateClientParams struct {
 	FamilySituation     *string                 `json:"family_situation"`
 	Limitations         *string                 `json:"limitations"`
 	FocusAreas          *string                 `json:"focus_areas"`
-	Goals               *string                 `json:"goals"`
+	Goals               []string                `json:"goals"`
 	Notes               *string                 `json:"notes"`
 }
 
@@ -80,7 +80,7 @@ type CreateClientRow struct {
 	FamilySituation    *string          `json:"family_situation"`
 	Limitations        *string          `json:"limitations"`
 	FocusAreas         *string          `json:"focus_areas"`
-	Goals              *string          `json:"goals"`
+	Goals              []string         `json:"goals"`
 	Notes              *string          `json:"notes"`
 	CreatedAt          pgtype.Timestamp `json:"created_at"`
 	UpdatedAt          pgtype.Timestamp `json:"updated_at"`
@@ -562,7 +562,7 @@ type UpdateClientParams struct {
 	FamilySituation        *string                     `json:"family_situation"`
 	Limitations            *string                     `json:"limitations"`
 	FocusAreas             *string                     `json:"focus_areas"`
-	Goals                  *string                     `json:"goals"`
+	Goals                  []string                    `json:"goals"`
 	Notes                  *string                     `json:"notes"`
 	AmbulatoryWeeklyHours  *int32                      `json:"ambulatory_weekly_hours"`
 	CareStartDate          pgtype.Date                 `json:"care_start_date"`

@@ -35,7 +35,7 @@ const assignRoleToUser = `-- name: AssignRoleToUser :exec
 
 INSERT INTO user_roles (user_id, role_id)
 VALUES ($1, $2)
-ON CONFLICT DO NOTHING
+ON CONFLICT (user_id) DO UPDATE SET role_id = $2, assigned_at = CURRENT_TIMESTAMP
 `
 
 type AssignRoleToUserParams struct {
@@ -206,6 +206,25 @@ func (q *Queries) GetRoleByName(ctx context.Context, name string) (Role, error) 
 	return i, err
 }
 
+const getRoleForUser = `-- name: GetRoleForUser :one
+SELECT r.id, r.name, r.description, r.created_at
+FROM roles r
+JOIN user_roles ur ON r.id = ur.role_id
+WHERE ur.user_id = $1
+`
+
+func (q *Queries) GetRoleForUser(ctx context.Context, userID string) (Role, error) {
+	row := q.db.QueryRow(ctx, getRoleForUser, userID)
+	var i Role
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Description,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const listPermissions = `-- name: ListPermissions :many
 SELECT id, resource, action, description, created_at, COUNT(*) OVER() as total_count
 FROM permissions
@@ -342,39 +361,6 @@ func (q *Queries) ListRoles(ctx context.Context, arg ListRolesParams) ([]ListRol
 	return items, nil
 }
 
-const listRolesForUser = `-- name: ListRolesForUser :many
-SELECT r.id, r.name, r.description, r.created_at
-FROM roles r
-JOIN user_roles ur ON r.id = ur.role_id
-WHERE ur.user_id = $1
-ORDER BY r.name
-`
-
-func (q *Queries) ListRolesForUser(ctx context.Context, userID string) ([]Role, error) {
-	rows, err := q.db.Query(ctx, listRolesForUser, userID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []Role{}
-	for rows.Next() {
-		var i Role
-		if err := rows.Scan(
-			&i.ID,
-			&i.Name,
-			&i.Description,
-			&i.CreatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const listUsersWithRole = `-- name: ListUsersWithRole :many
 SELECT u.id, u.email
 FROM users u
@@ -425,16 +411,11 @@ func (q *Queries) RemovePermissionFromRole(ctx context.Context, arg RemovePermis
 
 const removeRoleFromUser = `-- name: RemoveRoleFromUser :exec
 DELETE FROM user_roles
-WHERE user_id = $1 AND role_id = $2
+WHERE user_id = $1
 `
 
-type RemoveRoleFromUserParams struct {
-	UserID string `json:"user_id"`
-	RoleID string `json:"role_id"`
-}
-
-func (q *Queries) RemoveRoleFromUser(ctx context.Context, arg RemoveRoleFromUserParams) error {
-	_, err := q.db.Exec(ctx, removeRoleFromUser, arg.UserID, arg.RoleID)
+func (q *Queries) RemoveRoleFromUser(ctx context.Context, userID string) error {
+	_, err := q.db.Exec(ctx, removeRoleFromUser, userID)
 	return err
 }
 

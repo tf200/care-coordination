@@ -787,6 +787,38 @@ const docTemplate = `{
                 }
             }
         },
+        "/employees/me": {
+            "get": {
+                "description": "Get the employee profile of the currently authenticated user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Employee"
+                ],
+                "summary": "Get logged-in user's employee profile",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/employee.GetMyProfileResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/incidents": {
             "get": {
                 "description": "List all incidents with pagination and search by client name",
@@ -1999,6 +2031,47 @@ const docTemplate = `{
                 }
             }
         },
+        "employee.GetMyProfileResponse": {
+            "type": "object",
+            "properties": {
+                "bsn": {
+                    "type": "string"
+                },
+                "dateOfBirth": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/employee.PermissionResponse"
+                    }
+                },
+                "phoneNumber": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
         "employee.ListEmployeesResponse": {
             "type": "object",
             "properties": {
@@ -2009,6 +2082,23 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "lastName": {
+                    "type": "string"
+                }
+            }
+        },
+        "employee.PermissionResponse": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "resource": {
                     "type": "string"
                 }
             }
@@ -2166,7 +2256,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "goals": {
-                    "type": "string"
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "intakeDate": {
                     "type": "string"

@@ -904,7 +904,7 @@ type IntakeFormInfo struct {
 	FamilySituation    *string
 	Limitations        *string
 	FocusAreas         *string
-	Goals              *string
+	Goals              []string
 	Notes              *string
 }
 
@@ -931,7 +931,8 @@ func createRandomIntakeForm(ctx context.Context, store *db.Store, registrationFo
 	}
 
 	// Random optional fields
-	var familySituation, mainProvider, limitationsStr, focusAreasStr, goalsStr, notes *string
+	var familySituation, mainProvider, limitationsStr, focusAreasStr, notes *string
+	var goalsStr []string
 
 	if rand.Float32() < 0.9 {
 		fs := randomElement(familySituations)
@@ -951,7 +952,7 @@ func createRandomIntakeForm(ctx context.Context, store *db.Store, registrationFo
 	}
 	if rand.Float32() < 0.9 {
 		g := randomElement(goals)
-		goalsStr = &g
+		goalsStr = []string{g}
 	}
 	// Notes: include if not empty string
 	noteContent := randomElement(intakeNotes)

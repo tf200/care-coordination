@@ -262,11 +262,8 @@ func (s *rbacService) AssignRoleToUser(ctx context.Context, userID string, roleI
 	return nil
 }
 
-func (s *rbacService) RemoveRoleFromUser(ctx context.Context, userID string, roleID string) error {
-	err := s.store.RemoveRoleFromUser(ctx, db.RemoveRoleFromUserParams{
-		UserID: userID,
-		RoleID: roleID,
-	})
+func (s *rbacService) RemoveRoleFromUser(ctx context.Context, userID string) error {
+	err := s.store.RemoveRoleFromUser(ctx, userID)
 	if err != nil {
 		s.logger.Error(ctx, "RemoveRoleFromUser", "Failed to remove role", zap.Error(err))
 		return ErrInternal
@@ -274,20 +271,16 @@ func (s *rbacService) RemoveRoleFromUser(ctx context.Context, userID string, rol
 	return nil
 }
 
-func (s *rbacService) ListRolesForUser(ctx context.Context, userID string) ([]RoleResponse, error) {
-	roles, err := s.store.ListRolesForUser(ctx, userID)
+func (s *rbacService) GetRoleForUser(ctx context.Context, userID string) (*RoleResponse, error) {
+	role, err := s.store.GetRoleForUser(ctx, userID)
 	if err != nil {
-		s.logger.Error(ctx, "ListRolesForUser", "Failed to list roles", zap.Error(err))
+		s.logger.Error(ctx, "GetRoleForUser", "Failed to get role", zap.Error(err))
 		return nil, ErrInternal
 	}
 
-	result := []RoleResponse{}
-	for _, role := range roles {
-		result = append(result, RoleResponse{
-			ID:          role.ID,
-			Name:        role.Name,
-			Description: role.Description,
-		})
-	}
-	return result, nil
+	return &RoleResponse{
+		ID:          role.ID,
+		Name:        role.Name,
+		Description: role.Description,
+	}, nil
 }

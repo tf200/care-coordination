@@ -41,7 +41,7 @@ type CreateIntakeFormParams struct {
 	MainProvider       *string     `json:"main_provider"`
 	Limitations        *string     `json:"limitations"`
 	FocusAreas         *string     `json:"focus_areas"`
-	Goals              *string     `json:"goals"`
+	Goals              []string    `json:"goals"`
 	Notes              *string     `json:"notes"`
 }
 

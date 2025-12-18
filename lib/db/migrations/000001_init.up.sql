@@ -33,10 +33,9 @@ CREATE TABLE permissions (
 );
 
 CREATE TABLE user_roles (
-    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
     role_id TEXT NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
-    assigned_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (user_id, role_id)
+    assigned_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE role_permissions (
@@ -145,7 +144,7 @@ CREATE TABLE intake_forms (
     main_provider TEXT,
     limitations TEXT,
     focus_areas TEXT,
-    goals TEXT,
+    goals TEXT[],
     notes TEXT,
     status intake_status_enum NOT NULL DEFAULT 'pending',
     created_at TIMESTAMP  DEFAULT CURRENT_TIMESTAMP,
@@ -211,7 +210,7 @@ CREATE TABLE clients (
     family_situation TEXT,
     limitations TEXT,
     focus_areas TEXT,
-    goals TEXT,
+    goals TEXT[],
     notes TEXT,
     
     created_at TIMESTAMP  DEFAULT CURRENT_TIMESTAMP,

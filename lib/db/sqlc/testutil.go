@@ -477,7 +477,7 @@ func CreateTestIntakeForm(t *testing.T, q *Queries, opts CreateTestIntakeFormOpt
 		MainProvider:       opts.MainProvider,
 		Limitations:        opts.Limitations,
 		FocusAreas:         opts.FocusAreas,
-		Goals:              opts.Goals,
+		Goals:              []string{*opts.Goals},
 		Notes:              opts.Notes,
 	})
 	if err != nil {
@@ -512,7 +512,7 @@ type CreateTestClientOptions struct {
 	FamilySituation     *string
 	Limitations         *string
 	FocusAreas          *string
-	Goals               *string
+	Goals               []string
 	Notes               *string
 }
 

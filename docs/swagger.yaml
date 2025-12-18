@@ -273,6 +273,33 @@ definitions:
       id:
         type: string
     type: object
+  employee.GetMyProfileResponse:
+    properties:
+      bsn:
+        type: string
+      dateOfBirth:
+        type: string
+      email:
+        type: string
+      firstName:
+        type: string
+      gender:
+        type: string
+      id:
+        type: string
+      lastName:
+        type: string
+      permissions:
+        items:
+          $ref: '#/definitions/employee.PermissionResponse'
+        type: array
+      phoneNumber:
+        type: string
+      role:
+        type: string
+      userId:
+        type: string
+    type: object
   employee.ListEmployeesResponse:
     properties:
       firstName:
@@ -280,6 +307,17 @@ definitions:
       id:
         type: string
       lastName:
+        type: string
+    type: object
+  employee.PermissionResponse:
+    properties:
+      action:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      resource:
         type: string
     type: object
   incident.CreateIncidentRequest:
@@ -384,7 +422,10 @@ definitions:
       focusAreas:
         type: string
       goals:
-        type: string
+        items:
+          type: string
+        minItems: 1
+        type: array
       intakeDate:
         type: string
       intakeTime:
@@ -1470,6 +1511,27 @@ paths:
           schema:
             $ref: '#/definitions/resp.ErrorResponse'
       summary: Create an employee
+      tags:
+      - Employee
+  /employees/me:
+    get:
+      description: Get the employee profile of the currently authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/employee.GetMyProfileResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get logged-in user's employee profile
       tags:
       - Employee
   /incidents:

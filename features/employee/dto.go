@@ -27,3 +27,30 @@ type ListEmployeesResponse struct {
 type ListEmployeesRequest struct {
 	Search *string `form:"search"`
 }
+
+type RoleResponse struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
+type PermissionResponse struct {
+	ID          string `json:"id"`
+	Resource    string `json:"resource"`
+	Action      string `json:"action"`
+	Description string `json:"description"`
+}
+
+type GetMyProfileResponse struct {
+	ID          string               `json:"id"`
+	UserID      string               `json:"userId"`
+	FirstName   string               `json:"firstName"`
+	LastName    string               `json:"lastName"`
+	Email       string               `json:"email"`
+	BSN         string               `json:"bsn"`
+	DateOfBirth string               `json:"dateOfBirth"`
+	PhoneNumber string               `json:"phoneNumber"`
+	Gender      string               `json:"gender"`
+	Role        string               `json:"role"`
+	Permissions []PermissionResponse `json:"permissions"`
+}

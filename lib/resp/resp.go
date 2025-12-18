@@ -1,23 +1,33 @@
 package resp
 
-import "github.com/gin-gonic/gin"
-
 // ErrorResponse represents an error response
 type ErrorResponse struct {
-	Error string `json:"error" example:"error message"`
+	Error   string `json:"error" example:"error message"`
+	Success bool   `json:"success" example:"true"`
 }
 
 // MessageResponse represents a success message response
 type MessageResponse struct {
 	Message string `json:"message" example:"success message"`
+	Success bool   `json:"success" example:"true"`
 }
 
-func MessageResonse(message string) gin.H {
-	return gin.H{"message": message}
+type SuccessResponse[T any] struct {
+	Data    T      `json:"data"`
+	Message string `json:"message" example:"success message"`
+	Success bool   `json:"success" example:"true"`
 }
 
-func Error(err error) gin.H {
-	return gin.H{"error": err.Error()}
+func MessageResonse(message string) MessageResponse {
+	return MessageResponse{Message: message, Success: true}
+}
+
+func Error(err error) ErrorResponse {
+	return ErrorResponse{Error: err.Error(), Success: false}
+}
+
+func Success[T any](data T, message string) SuccessResponse[T] {
+	return SuccessResponse[T]{Data: data, Message: message, Success: true}
 }
 
 type PaginationResponse[T any] struct {

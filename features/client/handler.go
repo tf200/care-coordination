@@ -39,7 +39,7 @@ func (h *ClientHandler) SetupClientRoutes(router *gin.Engine) {
 // @Accept json
 // @Produce json
 // @Param request body MoveClientToWaitingListRequest true "Intake Form ID"
-// @Success 200 {object} MoveClientToWaitingListResponse
+// @Success 200 {object} resp.SuccessResponse[MoveClientToWaitingListResponse]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 404 {object} resp.ErrorResponse
@@ -71,7 +71,7 @@ func (h *ClientHandler) MoveClientToWaitingList(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, resp.Success(result, "Client moved to waiting list successfully"))
 }
 
 // @Summary Move client to in care
@@ -81,7 +81,7 @@ func (h *ClientHandler) MoveClientToWaitingList(ctx *gin.Context) {
 // @Produce json
 // @Param id path string true "Client ID"
 // @Param request body MoveClientInCareRequest true "Care start date and optional ambulatory hours"
-// @Success 200 {object} MoveClientInCareResponse
+// @Success 200 {object} resp.SuccessResponse[MoveClientInCareResponse]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 404 {object} resp.ErrorResponse
@@ -121,7 +121,7 @@ func (h *ClientHandler) MoveClientInCare(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, resp.Success(result, "Client moved to in care successfully"))
 }
 
 // @Summary Start client discharge
@@ -131,7 +131,7 @@ func (h *ClientHandler) MoveClientInCare(ctx *gin.Context) {
 // @Produce json
 // @Param id path string true "Client ID"
 // @Param request body StartDischargeRequest true "Discharge date and reason"
-// @Success 200 {object} StartDischargeResponse
+// @Success 200 {object} resp.SuccessResponse[StartDischargeResponse]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 404 {object} resp.ErrorResponse
@@ -169,7 +169,7 @@ func (h *ClientHandler) StartDischarge(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, resp.Success(result, "Client discharge started successfully"))
 }
 
 // @Summary Complete client discharge
@@ -179,7 +179,7 @@ func (h *ClientHandler) StartDischarge(ctx *gin.Context) {
 // @Produce json
 // @Param id path string true "Client ID"
 // @Param request body CompleteDischargeRequest true "Reports and optional attachments"
-// @Success 200 {object} CompleteDischargeResponse
+// @Success 200 {object} resp.SuccessResponse[CompleteDischargeResponse]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 404 {object} resp.ErrorResponse
@@ -217,7 +217,7 @@ func (h *ClientHandler) CompleteDischarge(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, resp.Success(result, "Client discharged successfully"))
 }
 
 // @Summary List waiting list clients
@@ -228,7 +228,7 @@ func (h *ClientHandler) CompleteDischarge(ctx *gin.Context) {
 // @Param page query int false "Page number (default: 1)"
 // @Param page_size query int false "Page size (default: 10, max: 100)"
 // @Param search query string false "Search by client first name or last name"
-// @Success 200 {object} resp.PaginationResponse[[]ListWaitingListClientsResponse]
+// @Success 200 {object} resp.SuccessResponse[resp.PaginationResponse[[]ListWaitingListClientsResponse]]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
@@ -251,7 +251,7 @@ func (h *ClientHandler) ListWaitingListClients(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, resp.Success(result, "Clients listed successfully"))
 }
 
 // @Summary List in-care clients
@@ -262,7 +262,7 @@ func (h *ClientHandler) ListWaitingListClients(ctx *gin.Context) {
 // @Param page query int false "Page number (default: 1)"
 // @Param page_size query int false "Page size (default: 10, max: 100)"
 // @Param search query string false "Search by client first name or last name"
-// @Success 200 {object} resp.PaginationResponse[[]ListInCareClientsResponse]
+// @Success 200 {object} resp.SuccessResponse[resp.PaginationResponse[[]ListInCareClientsResponse]]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
@@ -285,7 +285,7 @@ func (h *ClientHandler) ListInCareClients(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, resp.Success(result, "Clients listed successfully"))
 }
 
 // @Summary List discharged clients
@@ -297,7 +297,7 @@ func (h *ClientHandler) ListInCareClients(ctx *gin.Context) {
 // @Param page_size query int false "Page size (default: 10, max: 100)"
 // @Param search query string false "Search by client first name or last name"
 // @Param dischargeStatus query string false "Filter by discharge status (in_progress or completed)"
-// @Success 200 {object} resp.PaginationResponse[[]ListDischargedClientsResponse]
+// @Success 200 {object} resp.SuccessResponse[resp.PaginationResponse[[]ListDischargedClientsResponse]]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
@@ -320,5 +320,5 @@ func (h *ClientHandler) ListDischargedClients(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, resp.Success(result, "Clients listed successfully"))
 }

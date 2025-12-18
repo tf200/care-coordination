@@ -35,7 +35,7 @@ func (h *EmployeeHandler) SetupEmployeeRoutes(router *gin.Engine) {
 // @Accept json
 // @Produce json
 // @Param employee body CreateEmployeeRequest true "Employee"
-// @Success 200 {object} CreateEmployeeResponse
+// @Success 200 {object} resp.SuccessResponse[CreateEmployeeResponse]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
@@ -58,7 +58,7 @@ func (h *EmployeeHandler) CreateEmployee(ctx *gin.Context) {
 		}
 		return
 	}
-	ctx.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, resp.Success(result, "Employee created successfully"))
 }
 
 // @Summary List employees
@@ -69,7 +69,7 @@ func (h *EmployeeHandler) CreateEmployee(ctx *gin.Context) {
 // @Param page query int false "Page number (default: 1)"
 // @Param page_size query int false "Page size (default: 10, max: 100)"
 // @Param search query string false "Search by first name, last name, or full name"
-// @Success 200 {object} resp.PaginationResponse[[]ListEmployeesResponse]
+// @Success 200 {object} resp.SuccessResponse[resp.PaginationResponse[[]ListEmployeesResponse]]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
@@ -90,14 +90,14 @@ func (h *EmployeeHandler) ListEmployees(ctx *gin.Context) {
 		}
 		return
 	}
-	ctx.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, resp.Success(result, "Employees listed successfully"))
 }
 
 // @Summary Get logged-in user's employee profile
 // @Description Get the employee profile of the currently authenticated user
 // @Tags Employee
 // @Produce json
-// @Success 200 {object} GetMyProfileResponse
+// @Success 200 {object} resp.SuccessResponse[GetMyProfileResponse]
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
 // @Router /employees/me [get]
@@ -112,5 +112,5 @@ func (h *EmployeeHandler) GetMyProfile(ctx *gin.Context) {
 		}
 		return
 	}
-	ctx.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, resp.Success(result, "Employee profile retrieved successfully"))
 }

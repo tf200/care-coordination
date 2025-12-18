@@ -34,7 +34,7 @@ func (h *IncidentHandler) SetupIncidentRoutes(router *gin.Engine) {
 // @Accept json
 // @Produce json
 // @Param incident body CreateIncidentRequest true "Incident"
-// @Success 200 {object} CreateIncidentResponse
+// @Success 200 {object} resp.SuccessResponse[CreateIncidentResponse]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
@@ -57,7 +57,7 @@ func (h *IncidentHandler) CreateIncident(ctx *gin.Context) {
 		}
 		return
 	}
-	ctx.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, resp.Success(result, "Incident created successfully"))
 }
 
 // @Summary List incidents
@@ -68,7 +68,7 @@ func (h *IncidentHandler) CreateIncident(ctx *gin.Context) {
 // @Param page query int false "Page number (default: 1)"
 // @Param page_size query int false "Page size (default: 10, max: 100)"
 // @Param search query string false "Search by client first name, last name, or full name"
-// @Success 200 {object} resp.PaginationResponse[[]ListIncidentsResponse]
+// @Success 200 {object} resp.SuccessResponse[resp.PaginationResponse[[]ListIncidentsResponse]]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
@@ -89,5 +89,5 @@ func (h *IncidentHandler) ListIncidents(ctx *gin.Context) {
 		}
 		return
 	}
-	ctx.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, resp.Success(result, "Incidents listed successfully"))
 }

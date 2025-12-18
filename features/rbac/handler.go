@@ -303,7 +303,6 @@ func (h *RBACHandler) AssignRoleToUser(ctx *gin.Context) {
 // @Tags RBAC - User Roles
 // @Accept json
 // @Produce json
-// @Param assignment body RemoveRoleFromUserRequest true "User-Role removal"
 // @Success 200 {object} resp.MessageResponse
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
@@ -324,7 +323,7 @@ func (h *RBACHandler) RemoveRoleFromUser(ctx *gin.Context) {
 // @Tags RBAC - User Roles
 // @Produce json
 // @Param userId path string true "User ID"
-// @Success 200 {object} RoleResponse
+// @Success 200 {object} resp.SuccessResponse[RoleResponse]
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
 // @Router /admin/user-roles/user/{userId} [get]
@@ -335,5 +334,5 @@ func (h *RBACHandler) GetRoleForUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, resp.Error(err))
 		return
 	}
-	ctx.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, resp.Success(result, "Role retrieved successfully"))
 }

@@ -34,7 +34,7 @@ func (h *LocationHandler) SetupLocationRoutes(router *gin.Engine) {
 // @Accept json
 // @Produce json
 // @Param location body CreateLocationRequest true "Location"
-// @Success 200 {object} CreateLocationResponse
+// @Success 200 {object} resp.SuccessResponse[CreateLocationResponse]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
@@ -57,7 +57,7 @@ func (h *LocationHandler) CreateLocation(ctx *gin.Context) {
 		}
 		return
 	}
-	ctx.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, resp.Success(result, "Location created successfully"))
 }
 
 // @Summary List locations
@@ -68,7 +68,7 @@ func (h *LocationHandler) CreateLocation(ctx *gin.Context) {
 // @Param page query int false "Page number (default: 1)"
 // @Param page_size query int false "Page size (default: 10, max: 100)"
 // @Param search query string false "Search by name, postal code, or address"
-// @Success 200 {object} resp.PaginationResponse[[]ListLocationsResponse]
+// @Success 200 {object} resp.SuccessResponse[resp.PaginationResponse[[]ListLocationsResponse]]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
@@ -89,5 +89,5 @@ func (h *LocationHandler) ListLocations(ctx *gin.Context) {
 		}
 		return
 	}
-	ctx.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, resp.Success(result, "Locations listed successfully"))
 }

@@ -34,7 +34,7 @@ func (h *LocTransferHandler) SetupLocTransferRoutes(router *gin.Engine) {
 // @Accept json
 // @Produce json
 // @Param request body RegisterLocationTransferRequest true "Location Transfer Request"
-// @Success 200 {object} RegisterLocationTransferResponse
+// @Success 200 {object} resp.SuccessResponse[RegisterLocationTransferResponse]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 404 {object} resp.ErrorResponse
@@ -62,7 +62,7 @@ func (h *LocTransferHandler) RegisterLocationTransfer(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, resp.Success(result, "Location transfer registered successfully"))
 }
 
 // @Summary List location transfers
@@ -73,7 +73,7 @@ func (h *LocTransferHandler) RegisterLocationTransfer(ctx *gin.Context) {
 // @Param page query int false "Page number (default: 1)"
 // @Param page_size query int false "Page size (default: 10, max: 100)"
 // @Param search query string false "Search by client name"
-// @Success 200 {object} resp.PaginationResponse[[]ListLocationTransfersResponse]
+// @Success 200 {object} resp.SuccessResponse[resp.PaginationResponse[ListLocationTransfersResponse]]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
@@ -96,5 +96,5 @@ func (h *LocTransferHandler) ListLocationTransfers(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, resp.Success(result, "Location transfers listed successfully"))
 }

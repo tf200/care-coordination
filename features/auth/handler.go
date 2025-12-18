@@ -43,7 +43,7 @@ func (h *AuthHandler) SetupAuthRoutes(router *gin.Engine, rateLimiter ratelimit.
 // @Accept json
 // @Produce json
 // @Param loginRequest body LoginRequest true "Login Request"
-// @Success 200 {object} LoginResponse
+// @Success 200 {object} resp.SuccessResponse[LoginResponse]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
@@ -69,7 +69,7 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 		}
 		return
 	}
-	ctx.JSON(http.StatusOK, user)
+	ctx.JSON(http.StatusOK, resp.Success(user, "Login successful"))
 }
 
 // @Summary Refresh tokens
@@ -78,7 +78,7 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param refreshTokensRequest body RefreshTokensRequest true "Refresh Tokens Request"
-// @Success 200 {object} RefreshTokensResponse
+// @Success 200 {object} resp.SuccessResponse[RefreshTokensResponse]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
@@ -101,7 +101,7 @@ func (h *AuthHandler) RefreshTokens(ctx *gin.Context) {
 		}
 		return
 	}
-	ctx.JSON(http.StatusOK, tokens)
+	ctx.JSON(http.StatusOK, resp.Success(tokens, "Tokens refreshed successfully"))
 }
 
 // @Summary Logout a user

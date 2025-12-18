@@ -632,16 +632,6 @@ definitions:
       resource:
         type: string
     type: object
-  rbac.RemoveRoleFromUserRequest:
-    properties:
-      roleId:
-        type: string
-      userId:
-        type: string
-    required:
-    - roleId
-    - userId
-    type: object
   rbac.RoleListItem:
     properties:
       description:
@@ -922,12 +912,18 @@ definitions:
       error:
         example: error message
         type: string
+      success:
+        example: true
+        type: boolean
     type: object
   resp.MessageResponse:
     properties:
       message:
         example: success message
         type: string
+      success:
+        example: true
+        type: boolean
     type: object
   resp.PaginationResponse-array_client_ListDischargedClientsResponse:
     properties:
@@ -1014,23 +1010,6 @@ definitions:
       totalPages:
         type: integer
     type: object
-  resp.PaginationResponse-array_location_transfer_ListLocationTransfersResponse:
-    properties:
-      data:
-        items:
-          items:
-            $ref: '#/definitions/location_transfer.ListLocationTransfersResponse'
-          type: array
-        type: array
-      page:
-        type: integer
-      pageSize:
-        type: integer
-      totalCount:
-        type: integer
-      totalPages:
-        type: integer
-    type: object
   resp.PaginationResponse-array_locations_ListLocationsResponse:
     properties:
       data:
@@ -1053,6 +1032,21 @@ definitions:
       data:
         items:
           $ref: '#/definitions/intake.ListIntakeFormsResponse'
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      totalCount:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  resp.PaginationResponse-location_transfer_ListLocationTransfersResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/location_transfer.ListLocationTransfersResponse'
         type: array
       page:
         type: integer
@@ -1122,6 +1116,237 @@ definitions:
         type: integer
       totalPages:
         type: integer
+    type: object
+  resp.SuccessResponse-auth_LoginResponse:
+    properties:
+      data:
+        $ref: '#/definitions/auth.LoginResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-auth_RefreshTokensResponse:
+    properties:
+      data:
+        $ref: '#/definitions/auth.RefreshTokensResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-client_CompleteDischargeResponse:
+    properties:
+      data:
+        $ref: '#/definitions/client.CompleteDischargeResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-client_MoveClientInCareResponse:
+    properties:
+      data:
+        $ref: '#/definitions/client.MoveClientInCareResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-client_MoveClientToWaitingListResponse:
+    properties:
+      data:
+        $ref: '#/definitions/client.MoveClientToWaitingListResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-client_StartDischargeResponse:
+    properties:
+      data:
+        $ref: '#/definitions/client.StartDischargeResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-employee_CreateEmployeeResponse:
+    properties:
+      data:
+        $ref: '#/definitions/employee.CreateEmployeeResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-employee_GetMyProfileResponse:
+    properties:
+      data:
+        $ref: '#/definitions/employee.GetMyProfileResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-incident_CreateIncidentResponse:
+    properties:
+      data:
+        $ref: '#/definitions/incident.CreateIncidentResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-intake_CreateIntakeFormResponse:
+    properties:
+      data:
+        $ref: '#/definitions/intake.CreateIntakeFormResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-location_transfer_RegisterLocationTransferResponse:
+    properties:
+      data:
+        $ref: '#/definitions/location_transfer.RegisterLocationTransferResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-locations_CreateLocationResponse:
+    properties:
+      data:
+        $ref: '#/definitions/locations.CreateLocationResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-rbac_RoleResponse:
+    properties:
+      data:
+        $ref: '#/definitions/rbac.RoleResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-resp_PaginationResponse-array_client_ListDischargedClientsResponse:
+    properties:
+      data:
+        $ref: '#/definitions/resp.PaginationResponse-array_client_ListDischargedClientsResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-resp_PaginationResponse-array_client_ListInCareClientsResponse:
+    properties:
+      data:
+        $ref: '#/definitions/resp.PaginationResponse-array_client_ListInCareClientsResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-resp_PaginationResponse-array_client_ListWaitingListClientsResponse:
+    properties:
+      data:
+        $ref: '#/definitions/resp.PaginationResponse-array_client_ListWaitingListClientsResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-resp_PaginationResponse-array_employee_ListEmployeesResponse:
+    properties:
+      data:
+        $ref: '#/definitions/resp.PaginationResponse-array_employee_ListEmployeesResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-resp_PaginationResponse-array_incident_ListIncidentsResponse:
+    properties:
+      data:
+        $ref: '#/definitions/resp.PaginationResponse-array_incident_ListIncidentsResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-resp_PaginationResponse-array_locations_ListLocationsResponse:
+    properties:
+      data:
+        $ref: '#/definitions/resp.PaginationResponse-array_locations_ListLocationsResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-resp_PaginationResponse-intake_ListIntakeFormsResponse:
+    properties:
+      data:
+        $ref: '#/definitions/resp.PaginationResponse-intake_ListIntakeFormsResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-resp_PaginationResponse-location_transfer_ListLocationTransfersResponse:
+    properties:
+      data:
+        $ref: '#/definitions/resp.PaginationResponse-location_transfer_ListLocationTransfersResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
     type: object
 info:
   contact:
@@ -1431,13 +1656,6 @@ paths:
       consumes:
       - application/json
       description: Remove a role from a specific user
-      parameters:
-      - description: User-Role removal
-        in: body
-        name: assignment
-        required: true
-        schema:
-          $ref: '#/definitions/rbac.RemoveRoleFromUserRequest'
       produces:
       - application/json
       responses:
@@ -1495,7 +1713,7 @@ paths:
       - RBAC - User Roles
   /admin/user-roles/user/{userId}:
     get:
-      description: Get all roles assigned to a specific user
+      description: Get the role assigned to a specific user
       parameters:
       - description: User ID
         in: path
@@ -1508,9 +1726,7 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/rbac.RoleResponse'
-            type: array
+            $ref: '#/definitions/resp.SuccessResponse-rbac_RoleResponse'
         "401":
           description: Unauthorized
           schema:
@@ -1519,7 +1735,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/resp.ErrorResponse'
-      summary: List roles for user
+      summary: Get role for user
       tags:
       - RBAC - User Roles
   /attachments:
@@ -1573,7 +1789,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/auth.LoginResponse'
+            $ref: '#/definitions/resp.SuccessResponse-auth_LoginResponse'
         "400":
           description: Bad Request
           schema:
@@ -1643,7 +1859,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/auth.RefreshTokensResponse'
+            $ref: '#/definitions/resp.SuccessResponse-auth_RefreshTokensResponse'
         "400":
           description: Bad Request
           schema:
@@ -1683,7 +1899,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/client.CompleteDischargeResponse'
+            $ref: '#/definitions/resp.SuccessResponse-client_CompleteDischargeResponse'
         "400":
           description: Bad Request
           schema:
@@ -1726,7 +1942,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/client.MoveClientInCareResponse'
+            $ref: '#/definitions/resp.SuccessResponse-client_MoveClientInCareResponse'
         "400":
           description: Bad Request
           schema:
@@ -1770,7 +1986,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/client.StartDischargeResponse'
+            $ref: '#/definitions/resp.SuccessResponse-client_StartDischargeResponse'
         "400":
           description: Bad Request
           schema:
@@ -1819,7 +2035,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/resp.PaginationResponse-array_client_ListDischargedClientsResponse'
+            $ref: '#/definitions/resp.SuccessResponse-resp_PaginationResponse-array_client_ListDischargedClientsResponse'
         "400":
           description: Bad Request
           schema:
@@ -1861,7 +2077,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/resp.PaginationResponse-array_client_ListInCareClientsResponse'
+            $ref: '#/definitions/resp.SuccessResponse-resp_PaginationResponse-array_client_ListInCareClientsResponse'
         "400":
           description: Bad Request
           schema:
@@ -1896,7 +2112,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/client.MoveClientToWaitingListResponse'
+            $ref: '#/definitions/resp.SuccessResponse-client_MoveClientToWaitingListResponse'
         "400":
           description: Bad Request
           schema:
@@ -1940,7 +2156,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/resp.PaginationResponse-array_client_ListWaitingListClientsResponse'
+            $ref: '#/definitions/resp.SuccessResponse-resp_PaginationResponse-array_client_ListWaitingListClientsResponse'
         "400":
           description: Bad Request
           schema:
@@ -1980,7 +2196,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/resp.PaginationResponse-array_employee_ListEmployeesResponse'
+            $ref: '#/definitions/resp.SuccessResponse-resp_PaginationResponse-array_employee_ListEmployeesResponse'
         "400":
           description: Bad Request
           schema:
@@ -2013,7 +2229,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/employee.CreateEmployeeResponse'
+            $ref: '#/definitions/resp.SuccessResponse-employee_CreateEmployeeResponse'
         "400":
           description: Bad Request
           schema:
@@ -2038,7 +2254,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/employee.GetMyProfileResponse'
+            $ref: '#/definitions/resp.SuccessResponse-employee_GetMyProfileResponse'
         "401":
           description: Unauthorized
           schema:
@@ -2074,7 +2290,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/resp.PaginationResponse-array_incident_ListIncidentsResponse'
+            $ref: '#/definitions/resp.SuccessResponse-resp_PaginationResponse-array_incident_ListIncidentsResponse'
         "400":
           description: Bad Request
           schema:
@@ -2107,7 +2323,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/incident.CreateIncidentResponse'
+            $ref: '#/definitions/resp.SuccessResponse-incident_CreateIncidentResponse'
         "400":
           description: Bad Request
           schema:
@@ -2139,7 +2355,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/resp.PaginationResponse-intake_ListIntakeFormsResponse'
+            $ref: '#/definitions/resp.SuccessResponse-resp_PaginationResponse-intake_ListIntakeFormsResponse'
         "400":
           description: Bad Request
           schema:
@@ -2172,7 +2388,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/intake.CreateIntakeFormResponse'
+            $ref: '#/definitions/resp.SuccessResponse-intake_CreateIntakeFormResponse'
         "400":
           description: Bad Request
           schema:
@@ -2212,7 +2428,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/resp.PaginationResponse-array_location_transfer_ListLocationTransfersResponse'
+            $ref: '#/definitions/resp.SuccessResponse-resp_PaginationResponse-location_transfer_ListLocationTransfersResponse'
         "400":
           description: Bad Request
           schema:
@@ -2245,7 +2461,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/location_transfer.RegisterLocationTransferResponse'
+            $ref: '#/definitions/resp.SuccessResponse-location_transfer_RegisterLocationTransferResponse'
         "400":
           description: Bad Request
           schema:
@@ -2289,7 +2505,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/resp.PaginationResponse-array_locations_ListLocationsResponse'
+            $ref: '#/definitions/resp.SuccessResponse-resp_PaginationResponse-array_locations_ListLocationsResponse'
         "400":
           description: Bad Request
           schema:
@@ -2322,7 +2538,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/locations.CreateLocationResponse'
+            $ref: '#/definitions/resp.SuccessResponse-locations_CreateLocationResponse'
         "400":
           description: Bad Request
           schema:

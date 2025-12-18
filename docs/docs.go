@@ -526,17 +526,6 @@ const docTemplate = `{
                     "RBAC - User Roles"
                 ],
                 "summary": "Remove role from user",
-                "parameters": [
-                    {
-                        "description": "User-Role removal",
-                        "name": "assignment",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/rbac.RemoveRoleFromUserRequest"
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -567,14 +556,14 @@ const docTemplate = `{
         },
         "/admin/user-roles/user/{userId}": {
             "get": {
-                "description": "Get all roles assigned to a specific user",
+                "description": "Get the role assigned to a specific user",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "RBAC - User Roles"
                 ],
-                "summary": "List roles for user",
+                "summary": "Get role for user",
                 "parameters": [
                     {
                         "type": "string",
@@ -588,10 +577,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/rbac.RoleResponse"
-                            }
+                            "$ref": "#/definitions/resp.SuccessResponse-rbac_RoleResponse"
                         }
                     },
                     "401": {
@@ -692,7 +678,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/auth.LoginResponse"
+                            "$ref": "#/definitions/resp.SuccessResponse-auth_LoginResponse"
                         }
                     },
                     "400": {
@@ -796,7 +782,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/auth.RefreshTokensResponse"
+                            "$ref": "#/definitions/resp.SuccessResponse-auth_RefreshTokensResponse"
                         }
                     },
                     "400": {
@@ -863,7 +849,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.PaginationResponse-array_client_ListDischargedClientsResponse"
+                            "$ref": "#/definitions/resp.SuccessResponse-resp_PaginationResponse-array_client_ListDischargedClientsResponse"
                         }
                     },
                     "400": {
@@ -924,7 +910,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.PaginationResponse-array_client_ListInCareClientsResponse"
+                            "$ref": "#/definitions/resp.SuccessResponse-resp_PaginationResponse-array_client_ListInCareClientsResponse"
                         }
                     },
                     "400": {
@@ -976,7 +962,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/client.MoveClientToWaitingListResponse"
+                            "$ref": "#/definitions/resp.SuccessResponse-client_MoveClientToWaitingListResponse"
                         }
                     },
                     "400": {
@@ -1043,7 +1029,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.PaginationResponse-array_client_ListWaitingListClientsResponse"
+                            "$ref": "#/definitions/resp.SuccessResponse-resp_PaginationResponse-array_client_ListWaitingListClientsResponse"
                         }
                     },
                     "400": {
@@ -1102,7 +1088,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/client.CompleteDischargeResponse"
+                            "$ref": "#/definitions/resp.SuccessResponse-client_CompleteDischargeResponse"
                         }
                     },
                     "400": {
@@ -1167,7 +1153,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/client.MoveClientInCareResponse"
+                            "$ref": "#/definitions/resp.SuccessResponse-client_MoveClientInCareResponse"
                         }
                     },
                     "400": {
@@ -1232,7 +1218,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/client.StartDischargeResponse"
+                            "$ref": "#/definitions/resp.SuccessResponse-client_StartDischargeResponse"
                         }
                     },
                     "400": {
@@ -1299,7 +1285,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.PaginationResponse-array_employee_ListEmployeesResponse"
+                            "$ref": "#/definitions/resp.SuccessResponse-resp_PaginationResponse-array_employee_ListEmployeesResponse"
                         }
                     },
                     "400": {
@@ -1349,7 +1335,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/employee.CreateEmployeeResponse"
+                            "$ref": "#/definitions/resp.SuccessResponse-employee_CreateEmployeeResponse"
                         }
                     },
                     "400": {
@@ -1387,7 +1373,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/employee.GetMyProfileResponse"
+                            "$ref": "#/definitions/resp.SuccessResponse-employee_GetMyProfileResponse"
                         }
                     },
                     "401": {
@@ -1442,7 +1428,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.PaginationResponse-array_incident_ListIncidentsResponse"
+                            "$ref": "#/definitions/resp.SuccessResponse-resp_PaginationResponse-array_incident_ListIncidentsResponse"
                         }
                     },
                     "400": {
@@ -1492,7 +1478,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/incident.CreateIncidentResponse"
+                            "$ref": "#/definitions/resp.SuccessResponse-incident_CreateIncidentResponse"
                         }
                     },
                     "400": {
@@ -1541,7 +1527,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.PaginationResponse-intake_ListIntakeFormsResponse"
+                            "$ref": "#/definitions/resp.SuccessResponse-resp_PaginationResponse-intake_ListIntakeFormsResponse"
                         }
                     },
                     "400": {
@@ -1591,7 +1577,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/intake.CreateIntakeFormResponse"
+                            "$ref": "#/definitions/resp.SuccessResponse-intake_CreateIntakeFormResponse"
                         }
                     },
                     "400": {
@@ -1652,7 +1638,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.PaginationResponse-array_location_transfer_ListLocationTransfersResponse"
+                            "$ref": "#/definitions/resp.SuccessResponse-resp_PaginationResponse-location_transfer_ListLocationTransfersResponse"
                         }
                     },
                     "400": {
@@ -1702,7 +1688,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/location_transfer.RegisterLocationTransferResponse"
+                            "$ref": "#/definitions/resp.SuccessResponse-location_transfer_RegisterLocationTransferResponse"
                         }
                     },
                     "400": {
@@ -1769,7 +1755,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.PaginationResponse-array_locations_ListLocationsResponse"
+                            "$ref": "#/definitions/resp.SuccessResponse-resp_PaginationResponse-array_locations_ListLocationsResponse"
                         }
                     },
                     "400": {
@@ -1819,7 +1805,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/locations.CreateLocationResponse"
+                            "$ref": "#/definitions/resp.SuccessResponse-locations_CreateLocationResponse"
                         }
                     },
                     "400": {
@@ -3151,21 +3137,6 @@ const docTemplate = `{
                 }
             }
         },
-        "rbac.RemoveRoleFromUserRequest": {
-            "type": "object",
-            "required": [
-                "roleId",
-                "userId"
-            ],
-            "properties": {
-                "roleId": {
-                    "type": "string"
-                },
-                "userId": {
-                    "type": "string"
-                }
-            }
-        },
         "rbac.RoleListItem": {
             "type": "object",
             "properties": {
@@ -3577,6 +3548,10 @@ const docTemplate = `{
                 "error": {
                     "type": "string",
                     "example": "error message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
                 }
             }
         },
@@ -3586,6 +3561,10 @@ const docTemplate = `{
                 "message": {
                     "type": "string",
                     "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
                 }
             }
         },
@@ -3719,32 +3698,6 @@ const docTemplate = `{
                 }
             }
         },
-        "resp.PaginationResponse-array_location_transfer_ListLocationTransfersResponse": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/definitions/location_transfer.ListLocationTransfersResponse"
-                        }
-                    }
-                },
-                "page": {
-                    "type": "integer"
-                },
-                "pageSize": {
-                    "type": "integer"
-                },
-                "totalCount": {
-                    "type": "integer"
-                },
-                "totalPages": {
-                    "type": "integer"
-                }
-            }
-        },
         "resp.PaginationResponse-array_locations_ListLocationsResponse": {
             "type": "object",
             "properties": {
@@ -3778,6 +3731,29 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/intake.ListIntakeFormsResponse"
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "pageSize": {
+                    "type": "integer"
+                },
+                "totalCount": {
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "type": "integer"
+                }
+            }
+        },
+        "resp.PaginationResponse-location_transfer_ListLocationTransfersResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/location_transfer.ListLocationTransfersResponse"
                     }
                 },
                 "page": {
@@ -3883,6 +3859,342 @@ const docTemplate = `{
                 },
                 "totalPages": {
                     "type": "integer"
+                }
+            }
+        },
+        "resp.SuccessResponse-auth_LoginResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/auth.LoginResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-auth_RefreshTokensResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/auth.RefreshTokensResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-client_CompleteDischargeResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/client.CompleteDischargeResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-client_MoveClientInCareResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/client.MoveClientInCareResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-client_MoveClientToWaitingListResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/client.MoveClientToWaitingListResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-client_StartDischargeResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/client.StartDischargeResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-employee_CreateEmployeeResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/employee.CreateEmployeeResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-employee_GetMyProfileResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/employee.GetMyProfileResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-incident_CreateIncidentResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/incident.CreateIncidentResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-intake_CreateIntakeFormResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/intake.CreateIntakeFormResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-location_transfer_RegisterLocationTransferResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/location_transfer.RegisterLocationTransferResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-locations_CreateLocationResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/locations.CreateLocationResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-rbac_RoleResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/rbac.RoleResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-resp_PaginationResponse-array_client_ListDischargedClientsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/resp.PaginationResponse-array_client_ListDischargedClientsResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-resp_PaginationResponse-array_client_ListInCareClientsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/resp.PaginationResponse-array_client_ListInCareClientsResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-resp_PaginationResponse-array_client_ListWaitingListClientsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/resp.PaginationResponse-array_client_ListWaitingListClientsResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-resp_PaginationResponse-array_employee_ListEmployeesResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/resp.PaginationResponse-array_employee_ListEmployeesResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-resp_PaginationResponse-array_incident_ListIncidentsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/resp.PaginationResponse-array_incident_ListIncidentsResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-resp_PaginationResponse-array_locations_ListLocationsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/resp.PaginationResponse-array_locations_ListLocationsResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-resp_PaginationResponse-intake_ListIntakeFormsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/resp.PaginationResponse-intake_ListIntakeFormsResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-resp_PaginationResponse-location_transfer_ListLocationTransfersResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/resp.PaginationResponse-location_transfer_ListLocationTransfersResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
                 }
             }
         }

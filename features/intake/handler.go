@@ -35,7 +35,7 @@ func (h *IntakeHandler) SetupIntakeRoutes(router *gin.Engine) {
 // @Accept json
 // @Produce json
 // @Param intake body CreateIntakeFormRequest true "Intake Form"
-// @Success 200 {object} CreateIntakeFormResponse
+// @Success 200 {object} resp.SuccessResponse[CreateIntakeFormResponse]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
@@ -53,7 +53,7 @@ func (h *IntakeHandler) CreateIntakeForm(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, resp.Success(result, "Intake form created successfully"))
 }
 
 // @Summary List intake forms
@@ -62,7 +62,7 @@ func (h *IntakeHandler) CreateIntakeForm(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param search query string false "Search by client first name or last name"
-// @Success 200 {object} resp.PaginationResponse[ListIntakeFormsResponse]
+// @Success 200 {object} resp.SuccessResponse[resp.PaginationResponse[ListIntakeFormsResponse]]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
@@ -82,5 +82,5 @@ func (h *IntakeHandler) ListIntakeForms(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, resp.Error(ErrInternal))
 		return
 	}
-	ctx.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, resp.Success(result, "Intake forms listed successfully"))
 }

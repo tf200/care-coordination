@@ -5,15 +5,15 @@ import (
 )
 
 type CreateRegistrationFormRequest struct {
-	FirstName          string   `json:"firstName" binding:"required"`
-	LastName           string   `json:"lastName" binding:"required"`
-	BSN                string   `json:"bsn" binding:"required"`
-	DateOfBirth        string   `json:"dateOfBirth" binding:"required" format:"2006-01-02"`
+	FirstName          string   `json:"firstName"          binding:"required"`
+	LastName           string   `json:"lastName"           binding:"required"`
+	BSN                string   `json:"bsn"                binding:"required"`
+	DateOfBirth        string   `json:"dateOfBirth"        binding:"required"                                                                                            format:"2006-01-02"`
 	PhoneNumber        *string  `json:"phoneNumber"`
-	Gender             string   `json:"gender" binding:"required,oneof=male female other"`
-	RefferingOrgID     *string  `json:"refferingOrgId" binding:"required"`
-	CareType           string   `json:"careType" binding:"required,oneof=protected_living semi_independent_living independent_assisted_living ambulatory_care"`
-	RegistrationDate   string   `json:"registrationDate" binding:"required" format:"2006-01-02"`
+	Gender             string   `json:"gender"             binding:"required,oneof=male female other"`
+	RefferingOrgID     *string  `json:"refferingOrgId"     binding:"required"`
+	CareType           string   `json:"careType"           binding:"required,oneof=protected_living semi_independent_living independent_assisted_living ambulatory_care"`
+	RegistrationDate   string   `json:"registrationDate"   binding:"required"                                                                                            format:"2006-01-02"`
 	RegistrationReason string   `json:"registrationReason" binding:"required"`
 	AdditionalNotes    *string  `json:"additionalNotes"`
 	AttachmentIDs      []string `json:"attachmentIds"`
@@ -53,15 +53,15 @@ type UpdateRegistrationFormRequest struct {
 	FirstName          *string  `json:"firstName"`
 	LastName           *string  `json:"lastName"`
 	BSN                *string  `json:"bsn"`
-	DateOfBirth        *string  `json:"dateOfBirth" format:"2006-01-02"`
+	DateOfBirth        *string  `json:"dateOfBirth"        format:"2006-01-02"`
 	PhoneNumber        *string  `json:"phoneNumber"`
-	Gender             *string  `json:"gender" binding:"omitempty,oneof=male female other"`
+	Gender             *string  `json:"gender"                                 binding:"omitempty,oneof=male female other"`
 	RefferingOrgID     *string  `json:"refferingOrgId"`
-	CareType           *string  `json:"careType" binding:"omitempty,oneof=protected_living semi_independent_living independent_assisted_living ambulatory_care"`
-	RegistrationDate   *string  `json:"registrationDate" format:"2006-01-02"`
+	CareType           *string  `json:"careType"                               binding:"omitempty,oneof=protected_living semi_independent_living independent_assisted_living ambulatory_care"`
+	RegistrationDate   *string  `json:"registrationDate"   format:"2006-01-02"`
 	RegistrationReason *string  `json:"registrationReason"`
 	AdditionalNotes    *string  `json:"additionalNotes"`
-	Status             *string  `json:"status" binding:"omitempty,oneof=pending approved rejected in_review"`
+	Status             *string  `json:"status"                                 binding:"omitempty,oneof=pending approved rejected in_review"`
 	AttachmentIDs      []string `json:"attachmentIds"`
 }
 

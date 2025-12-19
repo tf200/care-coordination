@@ -5,7 +5,7 @@ package rbac
 // ============================================================
 
 type CreateRoleRequest struct {
-	Name          string   `json:"name" binding:"required"`
+	Name          string   `json:"name"          binding:"required"`
 	Description   *string  `json:"description"`
 	PermissionIDs []string `json:"permissionIds"`
 }
@@ -17,7 +17,7 @@ type CreateRoleResponse struct {
 }
 
 type UpdateRoleRequest struct {
-	Name          string   `json:"name" binding:"required"`
+	Name          string   `json:"name"          binding:"required"`
 	Description   *string  `json:"description"`
 	PermissionIDs []string `json:"permissionIds"`
 }

@@ -13,7 +13,10 @@ type RegistrationHandler struct {
 	mdw         *middleware.Middleware
 }
 
-func NewRegistrationHandler(rgstService RegistrationService, mdw *middleware.Middleware) *RegistrationHandler {
+func NewRegistrationHandler(
+	rgstService RegistrationService,
+	mdw *middleware.Middleware,
+) *RegistrationHandler {
 	return &RegistrationHandler{
 		rgstService: rgstService,
 		mdw:         mdw,

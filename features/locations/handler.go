@@ -14,7 +14,10 @@ type LocationHandler struct {
 	mdw             *middleware.Middleware
 }
 
-func NewLocationHandler(locationService LocationService, mdw *middleware.Middleware) *LocationHandler {
+func NewLocationHandler(
+	locationService LocationService,
+	mdw *middleware.Middleware,
+) *LocationHandler {
 	return &LocationHandler{
 		locationService: locationService,
 		mdw:             mdw,

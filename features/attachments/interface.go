@@ -6,5 +6,8 @@ import (
 )
 
 type AttachmentsService interface {
-	UploadAttachment(ctx context.Context, file *multipart.FileHeader) (*UploadAttachmentResponse, error)
+	UploadAttachment(
+		ctx context.Context,
+		file *multipart.FileHeader,
+	) (*UploadAttachmentResponse, error)
 }

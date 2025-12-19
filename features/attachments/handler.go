@@ -13,7 +13,10 @@ type AttachmentsHandler struct {
 	mdw                *middleware.Middleware
 }
 
-func NewAttachmentsHandler(attachmentsService AttachmentsService, mdw *middleware.Middleware) *AttachmentsHandler {
+func NewAttachmentsHandler(
+	attachmentsService AttachmentsService,
+	mdw *middleware.Middleware,
+) *AttachmentsHandler {
 	return &AttachmentsHandler{
 		attachmentsService: attachmentsService,
 		mdw:                mdw,

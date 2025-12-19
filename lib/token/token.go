@@ -30,7 +30,10 @@ type RefreshTokenClaims struct {
 	jwt.RegisteredClaims
 }
 
-func NewTokenManager(accessSecret, refreshSecret string, accessTTL, refreshTTL time.Duration) *TokenManager {
+func NewTokenManager(
+	accessSecret, refreshSecret string,
+	accessTTL, refreshTTL time.Duration,
+) *TokenManager {
 	return &TokenManager{
 		accessSecret:  []byte(accessSecret),
 		refreshSecret: []byte(refreshSecret),
@@ -41,7 +44,10 @@ func NewTokenManager(accessSecret, refreshSecret string, accessTTL, refreshTTL t
 	}
 }
 
-func (tm *TokenManager) GenerateAccessToken(userID, employeeID string, now time.Time) (string, error) {
+func (tm *TokenManager) GenerateAccessToken(
+	userID, employeeID string,
+	now time.Time,
+) (string, error) {
 
 	accessExpire := now.Add(tm.accessTTL)
 
@@ -60,7 +66,10 @@ func (tm *TokenManager) GenerateAccessToken(userID, employeeID string, now time.
 	return accessToken.SignedString(tm.accessSecret)
 }
 
-func (tm *TokenManager) GenerateRefreshToken(userID string, now time.Time) (string, *RefreshTokenClaims, error) {
+func (tm *TokenManager) GenerateRefreshToken(
+	userID string,
+	now time.Time,
+) (string, *RefreshTokenClaims, error) {
 	refreshExpire := now.Add(tm.refreshTTL)
 	tokenHash := nanoid.Generate()
 	tokenFamily := nanoid.Generate()
@@ -85,12 +94,16 @@ func (tm *TokenManager) GenerateRefreshToken(userID string, now time.Time) (stri
 }
 
 func (tm *TokenManager) ValidateAccessToken(tokenStr string) (*AccessTokenClaims, error) {
-	token, err := jwt.ParseWithClaims(tokenStr, &AccessTokenClaims{}, func(token *jwt.Token) (any, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return tm.accessSecret, nil
-	})
+	token, err := jwt.ParseWithClaims(
+		tokenStr,
+		&AccessTokenClaims{},
+		func(token *jwt.Token) (any, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			}
+			return tm.accessSecret, nil
+		},
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -101,12 +114,16 @@ func (tm *TokenManager) ValidateAccessToken(tokenStr string) (*AccessTokenClaims
 }
 
 func (tm *TokenManager) ValidateRefreshToken(tokenStr string) (*RefreshTokenClaims, error) {
-	token, err := jwt.ParseWithClaims(tokenStr, &RefreshTokenClaims{}, func(token *jwt.Token) (any, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return tm.refreshSecret, nil
-	})
+	token, err := jwt.ParseWithClaims(
+		tokenStr,
+		&RefreshTokenClaims{},
+		func(token *jwt.Token) (any, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			}
+			return tm.refreshSecret, nil
+		},
+	)
 	if err != nil {
 		return nil, err
 	}

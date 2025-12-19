@@ -20,7 +20,12 @@ type Middleware struct {
 	store       *db.Store
 }
 
-func NewMiddleware(tokenMaker *token.TokenManager, rateLimiter ratelimit.RateLimiter, logger *logger.Logger, store *db.Store) *Middleware {
+func NewMiddleware(
+	tokenMaker *token.TokenManager,
+	rateLimiter ratelimit.RateLimiter,
+	logger *logger.Logger,
+	store *db.Store,
+) *Middleware {
 	return &Middleware{
 		tokenMaker:  tokenMaker,
 		rateLimiter: rateLimiter,

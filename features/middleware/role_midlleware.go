@@ -24,7 +24,12 @@ func (m *Middleware) RequirePermission(resource, action string) gin.HandlerFunc 
 		})
 
 		if err != nil {
-			m.logger.Error(ctx, "Middleware.RequirePermission", "failed to check permission", zap.Error(err))
+			m.logger.Error(
+				ctx,
+				"Middleware.RequirePermission",
+				"failed to check permission",
+				zap.Error(err),
+			)
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, resp.Error(ErrInternal))
 			return
 		}

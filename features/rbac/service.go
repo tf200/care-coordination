@@ -27,7 +27,10 @@ func NewRBACService(store *db.Store, logger *logger.Logger) RBACService {
 // Roles
 // ============================================================
 
-func (s *rbacService) CreateRole(ctx context.Context, req *CreateRoleRequest) (*CreateRoleResponse, error) {
+func (s *rbacService) CreateRole(
+	ctx context.Context,
+	req *CreateRoleRequest,
+) (*CreateRoleResponse, error) {
 	id := nanoid.Generate()
 
 	result, err := s.store.CreateRoleWithPermissionsTx(ctx, db.CreateRoleWithPermissionsTxParams{
@@ -84,7 +87,10 @@ func (s *rbacService) GetRole(ctx context.Context, id string) (*RoleResponse, er
 	}, nil
 }
 
-func (s *rbacService) ListRoles(ctx context.Context, req *ListRolesRequest) (*resp.PaginationResponse[RoleListItem], error) {
+func (s *rbacService) ListRoles(
+	ctx context.Context,
+	req *ListRolesRequest,
+) (*resp.PaginationResponse[RoleListItem], error) {
 	limit, offset, page, pageSize := middleware.GetPaginationParams(ctx)
 
 	roles, err := s.store.ListRoles(ctx, db.ListRolesParams{
@@ -116,7 +122,11 @@ func (s *rbacService) ListRoles(ctx context.Context, req *ListRolesRequest) (*re
 	return &result, nil
 }
 
-func (s *rbacService) UpdateRole(ctx context.Context, id string, req *UpdateRoleRequest) (*RoleResponse, error) {
+func (s *rbacService) UpdateRole(
+	ctx context.Context,
+	id string,
+	req *UpdateRoleRequest,
+) (*RoleResponse, error) {
 	result, err := s.store.UpdateRoleWithPermissionsTx(ctx, db.UpdateRoleWithPermissionsTxParams{
 		Role: db.UpdateRoleParams{
 			ID:          id,
@@ -168,7 +178,10 @@ func (s *rbacService) DeleteRole(ctx context.Context, id string) error {
 // Permissions (read-only, system-defined)
 // ============================================================
 
-func (s *rbacService) ListPermissions(ctx context.Context, req *ListPermissionsRequest) (*resp.PaginationResponse[PermissionResponse], error) {
+func (s *rbacService) ListPermissions(
+	ctx context.Context,
+	req *ListPermissionsRequest,
+) (*resp.PaginationResponse[PermissionResponse], error) {
 	limit, offset, page, pageSize := middleware.GetPaginationParams(ctx)
 
 	permissions, err := s.store.ListPermissions(ctx, db.ListPermissionsParams{
@@ -203,7 +216,11 @@ func (s *rbacService) ListPermissions(ctx context.Context, req *ListPermissionsR
 // Role-Permission Assignments
 // ============================================================
 
-func (s *rbacService) AssignPermissionToRole(ctx context.Context, roleID string, permissionID string) error {
+func (s *rbacService) AssignPermissionToRole(
+	ctx context.Context,
+	roleID string,
+	permissionID string,
+) error {
 	err := s.store.AssignPermissionToRole(ctx, db.AssignPermissionToRoleParams{
 		RoleID:       roleID,
 		PermissionID: permissionID,
@@ -215,19 +232,31 @@ func (s *rbacService) AssignPermissionToRole(ctx context.Context, roleID string,
 	return nil
 }
 
-func (s *rbacService) RemovePermissionFromRole(ctx context.Context, roleID string, permissionID string) error {
+func (s *rbacService) RemovePermissionFromRole(
+	ctx context.Context,
+	roleID string,
+	permissionID string,
+) error {
 	err := s.store.RemovePermissionFromRole(ctx, db.RemovePermissionFromRoleParams{
 		RoleID:       roleID,
 		PermissionID: permissionID,
 	})
 	if err != nil {
-		s.logger.Error(ctx, "RemovePermissionFromRole", "Failed to remove permission", zap.Error(err))
+		s.logger.Error(
+			ctx,
+			"RemovePermissionFromRole",
+			"Failed to remove permission",
+			zap.Error(err),
+		)
 		return ErrInternal
 	}
 	return nil
 }
 
-func (s *rbacService) ListPermissionsForRole(ctx context.Context, roleID string) ([]PermissionResponse, error) {
+func (s *rbacService) ListPermissionsForRole(
+	ctx context.Context,
+	roleID string,
+) ([]PermissionResponse, error) {
 	permissions, err := s.store.ListPermissionsForRole(ctx, roleID)
 	if err != nil {
 		s.logger.Error(ctx, "ListPermissionsForRole", "Failed to list permissions", zap.Error(err))

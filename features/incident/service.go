@@ -25,7 +25,10 @@ func NewIncidentService(store *db.Store, logger *logger.Logger) IncidentService 
 	}
 }
 
-func (s *incidentService) CreateIncident(ctx context.Context, req *CreateIncidentRequest) (CreateIncidentResponse, error) {
+func (s *incidentService) CreateIncident(
+	ctx context.Context,
+	req *CreateIncidentRequest,
+) (CreateIncidentResponse, error) {
 	id := nanoid.Generate()
 
 	// Handle optional other_parties
@@ -57,7 +60,10 @@ func (s *incidentService) CreateIncident(ctx context.Context, req *CreateInciden
 	}, nil
 }
 
-func (s *incidentService) ListIncidents(ctx context.Context, req *ListIncidentsRequest) (*resp.PaginationResponse[ListIncidentsResponse], error) {
+func (s *incidentService) ListIncidents(
+	ctx context.Context,
+	req *ListIncidentsRequest,
+) (*resp.PaginationResponse[ListIncidentsResponse], error) {
 	limit, offset, page, pageSize := middleware.GetPaginationParams(ctx)
 
 	incidents, err := s.store.ListIncidents(ctx, db.ListIncidentsParams{

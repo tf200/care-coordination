@@ -452,6 +452,55 @@ definitions:
       id:
         type: string
     type: object
+  intake.GetIntakeFormResponse:
+    properties:
+      careType:
+        type: string
+      clientBsn:
+        type: string
+      clientFirstName:
+        type: string
+      clientLastName:
+        type: string
+      coordinatorFirstName:
+        type: string
+      coordinatorId:
+        type: string
+      coordinatorLastName:
+        type: string
+      familySituation:
+        type: string
+      focusAreas:
+        type: string
+      goals:
+        items:
+          type: string
+        type: array
+      hasClient:
+        type: boolean
+      id:
+        type: string
+      intakeDate:
+        type: string
+      intakeTime:
+        type: string
+      limitations:
+        type: string
+      locationId:
+        type: string
+      locationName:
+        type: string
+      mainProvider:
+        type: string
+      notes:
+        type: string
+      organizationName:
+        type: string
+      registrationFormId:
+        type: string
+      status:
+        type: string
+    type: object
   intake.ListIntakeFormsResponse:
     properties:
       careType:
@@ -487,6 +536,41 @@ definitions:
       status:
         type: string
       updatedAt:
+        type: string
+    type: object
+  intake.UpdateIntakeFormRequest:
+    properties:
+      coordinatorId:
+        type: string
+      familySituation:
+        type: string
+      focusAreas:
+        type: string
+      goals:
+        items:
+          type: string
+        type: array
+      intakeDate:
+        type: string
+      intakeTime:
+        type: string
+      limitations:
+        type: string
+      locationId:
+        type: string
+      mainProvider:
+        type: string
+      notes:
+        type: string
+      status:
+        enum:
+        - completed
+        - pending
+        type: string
+    type: object
+  intake.UpdateIntakeFormResponse:
+    properties:
+      id:
         type: string
     type: object
   location_transfer.ListLocationTransfersResponse:
@@ -714,6 +798,22 @@ definitions:
         type: string
       waitingListCount:
         type: integer
+    type: object
+  referring_orgs.UpdateReferringOrgRequest:
+    properties:
+      contactPerson:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      phoneNumber:
+        type: string
+    type: object
+  referring_orgs.UpdateReferringOrgResponse:
+    properties:
+      id:
+        type: string
     type: object
   registration.CreateRegistrationFormRequest:
     properties:
@@ -1220,6 +1320,28 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/intake.CreateIntakeFormResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-intake_GetIntakeFormResponse:
+    properties:
+      data:
+        $ref: '#/definitions/intake.GetIntakeFormResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-intake_UpdateIntakeFormResponse:
+    properties:
+      data:
+        $ref: '#/definitions/intake.UpdateIntakeFormResponse'
       message:
         example: success message
         type: string
@@ -2404,6 +2526,79 @@ paths:
       summary: Create an intake form
       tags:
       - Intake
+  /intakes/{id}:
+    get:
+      description: Get an intake form by ID with details
+      parameters:
+      - description: Intake Form ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-intake_GetIntakeFormResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get an intake form
+      tags:
+      - Intake
+    put:
+      consumes:
+      - application/json
+      description: Update an existing intake form
+      parameters:
+      - description: Intake Form ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Intake Form Update
+        in: body
+        name: intake
+        required: true
+        schema:
+          $ref: '#/definitions/intake.UpdateIntakeFormRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-intake_UpdateIntakeFormResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Update an intake form
+      tags:
+      - Intake
   /location-transfers:
     get:
       consumes:
@@ -2613,6 +2808,41 @@ paths:
           schema:
             $ref: '#/definitions/resp.ErrorResponse'
       summary: Create a new referring organization
+      tags:
+      - referring-orgs
+  /referring-orgs/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Update an existing referring organization with partial data
+      parameters:
+      - description: Referring Organization ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Referring Organization update data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/referring_orgs.UpdateReferringOrgRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/referring_orgs.UpdateReferringOrgResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Update a referring organization
       tags:
       - referring-orgs
   /registrations:

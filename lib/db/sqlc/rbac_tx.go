@@ -11,7 +11,10 @@ type CreateRoleWithPermissionsTxResult struct {
 	Role Role
 }
 
-func (s *Store) CreateRoleWithPermissionsTx(ctx context.Context, arg CreateRoleWithPermissionsTxParams) (CreateRoleWithPermissionsTxResult, error) {
+func (s *Store) CreateRoleWithPermissionsTx(
+	ctx context.Context,
+	arg CreateRoleWithPermissionsTxParams,
+) (CreateRoleWithPermissionsTxResult, error) {
 	var result CreateRoleWithPermissionsTxResult
 
 	err := s.ExecTx(ctx, func(q *Queries) error {
@@ -47,7 +50,10 @@ type UpdateRoleWithPermissionsTxResult struct {
 	Role Role
 }
 
-func (s *Store) UpdateRoleWithPermissionsTx(ctx context.Context, arg UpdateRoleWithPermissionsTxParams) (UpdateRoleWithPermissionsTxResult, error) {
+func (s *Store) UpdateRoleWithPermissionsTx(
+	ctx context.Context,
+	arg UpdateRoleWithPermissionsTxParams,
+) (UpdateRoleWithPermissionsTxResult, error) {
 	var result UpdateRoleWithPermissionsTxResult
 
 	err := s.ExecTx(ctx, func(q *Queries) error {

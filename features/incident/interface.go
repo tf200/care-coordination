@@ -7,5 +7,8 @@ import (
 
 type IncidentService interface {
 	CreateIncident(ctx context.Context, req *CreateIncidentRequest) (CreateIncidentResponse, error)
-	ListIncidents(ctx context.Context, req *ListIncidentsRequest) (*resp.PaginationResponse[ListIncidentsResponse], error)
+	ListIncidents(
+		ctx context.Context,
+		req *ListIncidentsRequest,
+	) (*resp.PaginationResponse[ListIncidentsResponse], error)
 }

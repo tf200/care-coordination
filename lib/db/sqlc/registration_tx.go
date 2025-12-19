@@ -8,7 +8,10 @@ type UpdateRegistrationFormTxParams struct {
 	UpdateClient bool
 }
 
-func (s *Store) UpdateRegistrationFormTx(ctx context.Context, arg UpdateRegistrationFormTxParams) error {
+func (s *Store) UpdateRegistrationFormTx(
+	ctx context.Context,
+	arg UpdateRegistrationFormTxParams,
+) error {
 	return s.ExecTx(ctx, func(q *Queries) error {
 		// 1. Update the registration form
 		if err := q.UpdateRegistrationForm(ctx, arg.RegistrationForm); err != nil {

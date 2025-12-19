@@ -11,6 +11,17 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const confirmLocationTransfer = `-- name: ConfirmLocationTransfer :exec
+UPDATE client_location_transfers
+SET status = 'approved', transfer_date = NOW(), updated_at = NOW()
+WHERE id = $1 AND status = 'pending'
+`
+
+func (q *Queries) ConfirmLocationTransfer(ctx context.Context, id string) error {
+	_, err := q.db.Exec(ctx, confirmLocationTransfer, id)
+	return err
+}
+
 const createLocationTransfer = `-- name: CreateLocationTransfer :one
 INSERT INTO client_location_transfers (
     id,
@@ -72,6 +83,82 @@ func (q *Queries) CreateLocationTransfer(ctx context.Context, arg CreateLocation
 	return i, err
 }
 
+const getLocationTransferByID = `-- name: GetLocationTransferByID :one
+SELECT
+    clt.id,
+    clt.client_id,
+    clt.from_location_id,
+    clt.to_location_id,
+    clt.current_coordinator_id,
+    clt.new_coordinator_id,
+    clt.transfer_date,
+    clt.reason,
+    clt.status,
+    clt.rejection_reason,
+    c.first_name AS client_first_name,
+    c.last_name AS client_last_name,
+    l_from.name AS from_location_name,
+    l_to.name AS to_location_name,
+    e_current.first_name AS current_coordinator_first_name,
+    e_current.last_name AS current_coordinator_last_name,
+    e_new.first_name AS new_coordinator_first_name,
+    e_new.last_name AS new_coordinator_last_name
+FROM client_location_transfers clt
+JOIN clients c ON clt.client_id = c.id
+LEFT JOIN locations l_from ON clt.from_location_id = l_from.id
+LEFT JOIN locations l_to ON clt.to_location_id = l_to.id
+LEFT JOIN employees e_current ON clt.current_coordinator_id = e_current.id
+LEFT JOIN employees e_new ON clt.new_coordinator_id = e_new.id
+WHERE clt.id = $1
+`
+
+type GetLocationTransferByIDRow struct {
+	ID                          string                     `json:"id"`
+	ClientID                    string                     `json:"client_id"`
+	FromLocationID              *string                    `json:"from_location_id"`
+	ToLocationID                string                     `json:"to_location_id"`
+	CurrentCoordinatorID        string                     `json:"current_coordinator_id"`
+	NewCoordinatorID            string                     `json:"new_coordinator_id"`
+	TransferDate                pgtype.Timestamp           `json:"transfer_date"`
+	Reason                      *string                    `json:"reason"`
+	Status                      LocationTransferStatusEnum `json:"status"`
+	RejectionReason             *string                    `json:"rejection_reason"`
+	ClientFirstName             string                     `json:"client_first_name"`
+	ClientLastName              string                     `json:"client_last_name"`
+	FromLocationName            *string                    `json:"from_location_name"`
+	ToLocationName              *string                    `json:"to_location_name"`
+	CurrentCoordinatorFirstName *string                    `json:"current_coordinator_first_name"`
+	CurrentCoordinatorLastName  *string                    `json:"current_coordinator_last_name"`
+	NewCoordinatorFirstName     *string                    `json:"new_coordinator_first_name"`
+	NewCoordinatorLastName      *string                    `json:"new_coordinator_last_name"`
+}
+
+func (q *Queries) GetLocationTransferByID(ctx context.Context, id string) (GetLocationTransferByIDRow, error) {
+	row := q.db.QueryRow(ctx, getLocationTransferByID, id)
+	var i GetLocationTransferByIDRow
+	err := row.Scan(
+		&i.ID,
+		&i.ClientID,
+		&i.FromLocationID,
+		&i.ToLocationID,
+		&i.CurrentCoordinatorID,
+		&i.NewCoordinatorID,
+		&i.TransferDate,
+		&i.Reason,
+		&i.Status,
+		&i.RejectionReason,
+		&i.ClientFirstName,
+		&i.ClientLastName,
+		&i.FromLocationName,
+		&i.ToLocationName,
+		&i.CurrentCoordinatorFirstName,
+		&i.CurrentCoordinatorLastName,
+		&i.NewCoordinatorFirstName,
+		&i.NewCoordinatorLastName,
+	)
+	return i, err
+}
+
 const listLocationTransfers = `-- name: ListLocationTransfers :many
 SELECT
     clt.id,
@@ -82,6 +169,8 @@ SELECT
     clt.new_coordinator_id,
     clt.transfer_date,
     clt.reason,
+    clt.status,
+    clt.rejection_reason,
     c.first_name AS client_first_name,
     c.last_name AS client_last_name,
     l_from.name AS from_location_name,
@@ -114,23 +203,25 @@ type ListLocationTransfersParams struct {
 }
 
 type ListLocationTransfersRow struct {
-	ID                          string           `json:"id"`
-	ClientID                    string           `json:"client_id"`
-	FromLocationID              *string          `json:"from_location_id"`
-	ToLocationID                string           `json:"to_location_id"`
-	CurrentCoordinatorID        string           `json:"current_coordinator_id"`
-	NewCoordinatorID            string           `json:"new_coordinator_id"`
-	TransferDate                pgtype.Timestamp `json:"transfer_date"`
-	Reason                      *string          `json:"reason"`
-	ClientFirstName             string           `json:"client_first_name"`
-	ClientLastName              string           `json:"client_last_name"`
-	FromLocationName            *string          `json:"from_location_name"`
-	ToLocationName              *string          `json:"to_location_name"`
-	CurrentCoordinatorFirstName *string          `json:"current_coordinator_first_name"`
-	CurrentCoordinatorLastName  *string          `json:"current_coordinator_last_name"`
-	NewCoordinatorFirstName     *string          `json:"new_coordinator_first_name"`
-	NewCoordinatorLastName      *string          `json:"new_coordinator_last_name"`
-	TotalCount                  int64            `json:"total_count"`
+	ID                          string                     `json:"id"`
+	ClientID                    string                     `json:"client_id"`
+	FromLocationID              *string                    `json:"from_location_id"`
+	ToLocationID                string                     `json:"to_location_id"`
+	CurrentCoordinatorID        string                     `json:"current_coordinator_id"`
+	NewCoordinatorID            string                     `json:"new_coordinator_id"`
+	TransferDate                pgtype.Timestamp           `json:"transfer_date"`
+	Reason                      *string                    `json:"reason"`
+	Status                      LocationTransferStatusEnum `json:"status"`
+	RejectionReason             *string                    `json:"rejection_reason"`
+	ClientFirstName             string                     `json:"client_first_name"`
+	ClientLastName              string                     `json:"client_last_name"`
+	FromLocationName            *string                    `json:"from_location_name"`
+	ToLocationName              *string                    `json:"to_location_name"`
+	CurrentCoordinatorFirstName *string                    `json:"current_coordinator_first_name"`
+	CurrentCoordinatorLastName  *string                    `json:"current_coordinator_last_name"`
+	NewCoordinatorFirstName     *string                    `json:"new_coordinator_first_name"`
+	NewCoordinatorLastName      *string                    `json:"new_coordinator_last_name"`
+	TotalCount                  int64                      `json:"total_count"`
 }
 
 func (q *Queries) ListLocationTransfers(ctx context.Context, arg ListLocationTransfersParams) ([]ListLocationTransfersRow, error) {
@@ -151,6 +242,8 @@ func (q *Queries) ListLocationTransfers(ctx context.Context, arg ListLocationTra
 			&i.NewCoordinatorID,
 			&i.TransferDate,
 			&i.Reason,
+			&i.Status,
+			&i.RejectionReason,
 			&i.ClientFirstName,
 			&i.ClientLastName,
 			&i.FromLocationName,
@@ -169,4 +262,47 @@ func (q *Queries) ListLocationTransfers(ctx context.Context, arg ListLocationTra
 		return nil, err
 	}
 	return items, nil
+}
+
+const refuseLocationTransfer = `-- name: RefuseLocationTransfer :exec
+UPDATE client_location_transfers
+SET status = 'rejected', rejection_reason = $2, updated_at = NOW()
+WHERE id = $1 AND status = 'pending'
+`
+
+type RefuseLocationTransferParams struct {
+	ID              string  `json:"id"`
+	RejectionReason *string `json:"rejection_reason"`
+}
+
+func (q *Queries) RefuseLocationTransfer(ctx context.Context, arg RefuseLocationTransferParams) error {
+	_, err := q.db.Exec(ctx, refuseLocationTransfer, arg.ID, arg.RejectionReason)
+	return err
+}
+
+const updateLocationTransfer = `-- name: UpdateLocationTransfer :exec
+UPDATE client_location_transfers
+SET
+    to_location_id = COALESCE($2, to_location_id),
+    new_coordinator_id = COALESCE($3, new_coordinator_id),
+    reason = COALESCE($4, reason),
+    updated_at = NOW()
+WHERE id = $1 AND status = 'pending'
+`
+
+type UpdateLocationTransferParams struct {
+	ID               string  `json:"id"`
+	ToLocationID     *string `json:"to_location_id"`
+	NewCoordinatorID *string `json:"new_coordinator_id"`
+	Reason           *string `json:"reason"`
+}
+
+func (q *Queries) UpdateLocationTransfer(ctx context.Context, arg UpdateLocationTransferParams) error {
+	_, err := q.db.Exec(ctx, updateLocationTransfer,
+		arg.ID,
+		arg.ToLocationID,
+		arg.NewCoordinatorID,
+		arg.Reason,
+	)
+	return err
 }

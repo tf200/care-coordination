@@ -145,7 +145,11 @@ func TestGetUserByEmail(t *testing.T) {
 			},
 			wantErr: true,
 			checkErr: func(t *testing.T, err error) {
-				assert.True(t, errors.Is(err, pgx.ErrNoRows), "expected ErrNoRows for case mismatch")
+				assert.True(
+					t,
+					errors.Is(err, pgx.ErrNoRows),
+					"expected ErrNoRows for case mismatch",
+				)
 			},
 		},
 	}

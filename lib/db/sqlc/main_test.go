@@ -130,7 +130,10 @@ func runTestWithTx(t *testing.T, fn func(t *testing.T, q *Queries)) {
 // runTestWithTxAndStore runs a test function with both a transactional Queries
 // instance and access to a Store-like transaction executor.
 // Use this when testing code that needs ExecTx functionality.
-func runTestWithTxAndStore(t *testing.T, fn func(t *testing.T, q *Queries, execTx func(fn func(*Queries) error) error)) {
+func runTestWithTxAndStore(
+	t *testing.T,
+	fn func(t *testing.T, q *Queries, execTx func(fn func(*Queries) error) error),
+) {
 	t.Helper()
 	ctx := context.Background()
 

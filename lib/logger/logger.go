@@ -40,7 +40,12 @@ func NewLogger(env string) *Logger {
 	}
 }
 
-func (l *Logger) getCommonFields(ctx context.Context, event string, operation string, fields ...zap.Field) []zap.Field {
+func (l *Logger) getCommonFields(
+	ctx context.Context,
+	event string,
+	operation string,
+	fields ...zap.Field,
+) []zap.Field {
 	requestID := "unknown"
 	if v, ok := ctx.Value("X-Request-Id").(string); ok {
 		requestID = v

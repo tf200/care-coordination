@@ -13,7 +13,10 @@ type ReferringOrgHandler struct {
 	mdw     *middleware.Middleware
 }
 
-func NewReferringOrgHandler(service ReferringOrgService, mdw *middleware.Middleware) *ReferringOrgHandler {
+func NewReferringOrgHandler(
+	service ReferringOrgService,
+	mdw *middleware.Middleware,
+) *ReferringOrgHandler {
 	return &ReferringOrgHandler{
 		service: service,
 		mdw:     mdw,
@@ -25,6 +28,7 @@ func (h *ReferringOrgHandler) SetupReferringOrgRoutes(router *gin.Engine) {
 
 	orgs.POST("", h.mdw.AuthMdw(), h.CreateReferringOrg)
 	orgs.GET("", h.mdw.AuthMdw(), h.ListReferringOrgs)
+	orgs.PUT("/:id", h.mdw.AuthMdw(), h.UpdateReferringOrg)
 }
 
 // @Summary Create a new referring organization
@@ -54,7 +58,7 @@ func (h *ReferringOrgHandler) CreateReferringOrg(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, result)
+	ctx.JSON(http.StatusCreated, resp.Success(result, "Referring organization created successfully"))
 }
 
 // @Summary List referring organizations
@@ -81,5 +85,42 @@ func (h *ReferringOrgHandler) ListReferringOrgs(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, resp.Success(result, "Referring organizations listed successfully"))
+}
+
+// @Summary Update a referring organization
+// @Description Update an existing referring organization with partial data
+// @Tags referring-orgs
+// @Accept json
+// @Produce json
+// @Param id path string true "Referring Organization ID"
+// @Param request body UpdateReferringOrgRequest true "Referring Organization update data"
+// @Success 200 {object} UpdateReferringOrgResponse
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /referring-orgs/{id} [put]
+func (h *ReferringOrgHandler) UpdateReferringOrg(ctx *gin.Context) {
+	id := ctx.Param("id")
+	if id == "" {
+		ctx.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
+		return
+	}
+
+	var req UpdateReferringOrgRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
+		return
+	}
+
+	result, err := h.service.UpdateReferringOrg(ctx.Request.Context(), id, &req)
+	if err != nil {
+		if err == ErrInternal {
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
+			return
+		}
+		ctx.JSON(http.StatusBadRequest, resp.Error(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, resp.Success(result, "Referring organization updated successfully"))
 }

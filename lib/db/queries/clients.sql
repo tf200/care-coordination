@@ -185,3 +185,15 @@ UPDATE clients SET
     referring_org_id = COALESCE(sqlc.narg('referring_org_id'), referring_org_id),
     updated_at = NOW()
 WHERE registration_form_id = $1;
+
+-- name: UpdateClientByIntakeFormID :exec
+UPDATE clients SET
+    coordinator_id = COALESCE(sqlc.narg('coordinator_id'), coordinator_id),
+    assigned_location_id = COALESCE(sqlc.narg('assigned_location_id'), assigned_location_id),
+    family_situation = COALESCE(sqlc.narg('family_situation'), family_situation),
+    limitations = COALESCE(sqlc.narg('limitations'), limitations),
+    focus_areas = COALESCE(sqlc.narg('focus_areas'), focus_areas),
+    goals = COALESCE(sqlc.narg('goals'), goals),
+    notes = COALESCE(sqlc.narg('notes'), notes),
+    updated_at = NOW()
+WHERE intake_form_id = $1;

@@ -12,7 +12,10 @@ type MoveClientToWaitingListTxResult struct {
 	ClientID string
 }
 
-func (s *Store) MoveClientToWaitingListTx(ctx context.Context, arg MoveClientToWaitingListTxParams) (MoveClientToWaitingListTxResult, error) {
+func (s *Store) MoveClientToWaitingListTx(
+	ctx context.Context,
+	arg MoveClientToWaitingListTxParams,
+) (MoveClientToWaitingListTxResult, error) {
 	var result MoveClientToWaitingListTxResult
 
 	err := s.ExecTx(ctx, func(q *Queries) error {

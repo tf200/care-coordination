@@ -73,7 +73,15 @@ func toPgTimestamp(t time.Time) pgtype.Timestamp {
 
 // toPgTime converts a time.Time to pgtype.Time (extracts only time portion).
 func toPgTime(t time.Time) pgtype.Time {
-	microseconds := int64(t.Hour())*3600*1e6 + int64(t.Minute())*60*1e6 + int64(t.Second())*1e6 + int64(t.Nanosecond()/1000)
+	microseconds := int64(
+		t.Hour(),
+	)*3600*1e6 + int64(
+		t.Minute(),
+	)*60*1e6 + int64(
+		t.Second(),
+	)*1e6 + int64(
+		t.Nanosecond()/1000,
+	)
 	return pgtype.Time{Microseconds: microseconds, Valid: true}
 }
 
@@ -350,7 +358,11 @@ type CreateTestRegistrationFormOptions struct {
 }
 
 // CreateTestRegistrationForm creates a registration form for testing.
-func CreateTestRegistrationForm(t *testing.T, q *Queries, opts CreateTestRegistrationFormOptions) string {
+func CreateTestRegistrationForm(
+	t *testing.T,
+	q *Queries,
+	opts CreateTestRegistrationFormOptions,
+) string {
 	t.Helper()
 	ctx := context.Background()
 

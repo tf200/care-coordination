@@ -59,7 +59,10 @@ func (m *Middleware) RateLimitMiddleware() gin.HandlerFunc {
 
 // LoginRateLimitMiddleware creates a middleware specifically for login endpoint
 // It checks both IP and email-based rate limits
-func (m *Middleware) LoginRateLimitMiddleware(limiter ratelimit.RateLimiter, logger *zap.Logger) gin.HandlerFunc {
+func (m *Middleware) LoginRateLimitMiddleware(
+	limiter ratelimit.RateLimiter,
+	logger *zap.Logger,
+) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// Skip rate limiting if limiter is nil
 		if limiter == nil {
@@ -104,7 +107,8 @@ func (m *Middleware) LoginRateLimitMiddleware(limiter ratelimit.RateLimiter, log
 		// Bind JSON but allow continuing even if it fails
 		// (the actual handler will do proper validation)
 		// Use ShouldBindBodyWith to cache the body so it can be re-read by the handler
-		if err := ctx.ShouldBindBodyWith(&loginReq, binding.JSON); err == nil && loginReq.Email != "" {
+		if err := ctx.ShouldBindBodyWith(&loginReq, binding.JSON); err == nil &&
+			loginReq.Email != "" {
 			// Check email-based rate limit
 			emailResult, err := limiter.CheckEmailLimit(ctx, loginReq.Email)
 			if err != nil {

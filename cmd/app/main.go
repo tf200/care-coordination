@@ -96,7 +96,12 @@ func main() {
 
 		rateLimiter, err = ratelimit.NewRateLimiter(rlConfig)
 		if err != nil {
-			l.Warn(ctx, "main", "failed to initialize rate limiter, continuing without rate limiting", zap.Error(err))
+			l.Warn(
+				ctx,
+				"main",
+				"failed to initialize rate limiter, continuing without rate limiting",
+				zap.Error(err),
+			)
 			rateLimiter = nil
 		} else {
 			l.Info(ctx, "main", "rate limiter initialized successfully")

@@ -73,7 +73,12 @@ func (r *RedisLimiter) Close() error {
 }
 
 // checkLimit performs the actual rate limit check
-func (r *RedisLimiter) checkLimit(ctx context.Context, key string, limit int, window time.Duration) (*LimitResult, error) {
+func (r *RedisLimiter) checkLimit(
+	ctx context.Context,
+	key string,
+	limit int,
+	window time.Duration,
+) (*LimitResult, error) {
 	// Use redis_rate sliding window algorithm
 	result, err := r.limiter.Allow(ctx, key, redis_rate.Limit{
 		Rate:   limit,

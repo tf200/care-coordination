@@ -3,17 +3,17 @@ package incident
 import "time"
 
 type CreateIncidentRequest struct {
-	ClientID            string    `json:"clientId" binding:"required"`
-	IncidentDate        time.Time `json:"incidentDate" binding:"required datetime=2006-01-02"`
-	IncidentTime        time.Time `json:"incidentTime" binding:"required,datetime=15:04"`
-	IncidentType        string    `json:"incidentType" binding:"required,oneof=aggression medical_emergency safety_concern unwanted_behavior other"`
-	IncidentSeverity    string    `json:"incidentSeverity" binding:"required,oneof=minor moderate severe"`
-	LocationID          string    `json:"locationId" binding:"required"`
-	CoordinatorID       string    `json:"coordinatorId" binding:"required"`
+	ClientID            string    `json:"clientId"            binding:"required"`
+	IncidentDate        time.Time `json:"incidentDate"        binding:"required datetime=2006-01-02"`
+	IncidentTime        time.Time `json:"incidentTime"        binding:"required,datetime=15:04"`
+	IncidentType        string    `json:"incidentType"        binding:"required,oneof=aggression medical_emergency safety_concern unwanted_behavior other"`
+	IncidentSeverity    string    `json:"incidentSeverity"    binding:"required,oneof=minor moderate severe"`
+	LocationID          string    `json:"locationId"          binding:"required"`
+	CoordinatorID       string    `json:"coordinatorId"       binding:"required"`
 	IncidentDescription string    `json:"incidentDescription" binding:"required"`
-	ActionTaken         string    `json:"actionTaken" binding:"required"`
+	ActionTaken         string    `json:"actionTaken"         binding:"required"`
 	OtherParties        string    `json:"otherParties"`
-	Status              string    `json:"status" binding:"required,oneof=pending under_investigation completed"`
+	Status              string    `json:"status"              binding:"required,oneof=pending under_investigation completed"`
 }
 
 type CreateIncidentResponse struct {

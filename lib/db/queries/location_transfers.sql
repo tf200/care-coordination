@@ -24,6 +24,8 @@ SELECT
     clt.new_coordinator_id,
     clt.transfer_date,
     clt.reason,
+    clt.status,
+    clt.rejection_reason,
     c.first_name AS client_first_name,
     c.last_name AS client_last_name,
     l_from.name AS from_location_name,
@@ -47,3 +49,50 @@ WHERE
     )   
 ORDER BY clt.transfer_date DESC
 LIMIT $1 OFFSET $2;
+
+-- name: GetLocationTransferByID :one
+SELECT
+    clt.id,
+    clt.client_id,
+    clt.from_location_id,
+    clt.to_location_id,
+    clt.current_coordinator_id,
+    clt.new_coordinator_id,
+    clt.transfer_date,
+    clt.reason,
+    clt.status,
+    clt.rejection_reason,
+    c.first_name AS client_first_name,
+    c.last_name AS client_last_name,
+    l_from.name AS from_location_name,
+    l_to.name AS to_location_name,
+    e_current.first_name AS current_coordinator_first_name,
+    e_current.last_name AS current_coordinator_last_name,
+    e_new.first_name AS new_coordinator_first_name,
+    e_new.last_name AS new_coordinator_last_name
+FROM client_location_transfers clt
+JOIN clients c ON clt.client_id = c.id
+LEFT JOIN locations l_from ON clt.from_location_id = l_from.id
+LEFT JOIN locations l_to ON clt.to_location_id = l_to.id
+LEFT JOIN employees e_current ON clt.current_coordinator_id = e_current.id
+LEFT JOIN employees e_new ON clt.new_coordinator_id = e_new.id
+WHERE clt.id = $1;
+
+-- name: ConfirmLocationTransfer :exec
+UPDATE client_location_transfers
+SET status = 'approved', transfer_date = NOW(), updated_at = NOW()
+WHERE id = $1 AND status = 'pending';
+
+-- name: RefuseLocationTransfer :exec
+UPDATE client_location_transfers
+SET status = 'rejected', rejection_reason = $2, updated_at = NOW()
+WHERE id = $1 AND status = 'pending';
+
+-- name: UpdateLocationTransfer :exec
+UPDATE client_location_transfers
+SET
+    to_location_id = COALESCE(sqlc.narg('to_location_id'), to_location_id),
+    new_coordinator_id = COALESCE(sqlc.narg('new_coordinator_id'), new_coordinator_id),
+    reason = COALESCE(sqlc.narg('reason'), reason),
+    updated_at = NOW()
+WHERE id = $1 AND status = 'pending';

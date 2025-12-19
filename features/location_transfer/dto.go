@@ -1,8 +1,8 @@
 package locTransfer
 
 type RegisterLocationTransferRequest struct {
-	ClientID         string `json:"clientId" binding:"required"`
-	NewLocationID    string `json:"newLocationId" binding:"required"`
+	ClientID         string `json:"clientId"         binding:"required"`
+	NewLocationID    string `json:"newLocationId"    binding:"required"`
 	NewCoordinatorID string `json:"newCoordinatorId" binding:"required"`
 }
 
@@ -23,6 +23,8 @@ type ListLocationTransfersResponse struct {
 	NewCoordinatorID            string  `json:"newCoordinatorId"`
 	TransferDate                string  `json:"transferDate"` // or time.Time, but for JSON, string
 	Reason                      *string `json:"reason"`
+	Status                      string  `json:"status"`
+	RejectionReason             *string `json:"rejectionReason"`
 	ClientFirstName             string  `json:"clientFirstName"`
 	ClientLastName              string  `json:"clientLastName"`
 	FromLocationName            *string `json:"fromLocationName"`
@@ -31,4 +33,14 @@ type ListLocationTransfersResponse struct {
 	CurrentCoordinatorLastName  *string `json:"currentCoordinatorLastName"`
 	NewCoordinatorFirstName     *string `json:"newCoordinatorFirstName"`
 	NewCoordinatorLastName      *string `json:"newCoordinatorLastName"`
+}
+
+type RefuseLocationTransferRequest struct {
+	Reason string `json:"reason" binding:"required"`
+}
+
+type UpdateLocationTransferRequest struct {
+	NewLocationID    *string `json:"newLocationId"`
+	NewCoordinatorID *string `json:"newCoordinatorId"`
+	Reason           *string `json:"reason"`
 }

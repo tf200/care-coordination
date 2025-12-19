@@ -402,6 +402,49 @@ func (ns NullIntakeStatusEnum) Value() (driver.Value, error) {
 	return string(ns.IntakeStatusEnum), nil
 }
 
+type LocationTransferStatusEnum string
+
+const (
+	LocationTransferStatusEnumPending  LocationTransferStatusEnum = "pending"
+	LocationTransferStatusEnumApproved LocationTransferStatusEnum = "approved"
+	LocationTransferStatusEnumRejected LocationTransferStatusEnum = "rejected"
+)
+
+func (e *LocationTransferStatusEnum) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = LocationTransferStatusEnum(s)
+	case string:
+		*e = LocationTransferStatusEnum(s)
+	default:
+		return fmt.Errorf("unsupported scan type for LocationTransferStatusEnum: %T", src)
+	}
+	return nil
+}
+
+type NullLocationTransferStatusEnum struct {
+	LocationTransferStatusEnum LocationTransferStatusEnum `json:"location_transfer_status_enum"`
+	Valid                      bool                       `json:"valid"` // Valid is true if LocationTransferStatusEnum is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullLocationTransferStatusEnum) Scan(value interface{}) error {
+	if value == nil {
+		ns.LocationTransferStatusEnum, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.LocationTransferStatusEnum.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullLocationTransferStatusEnum) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.LocationTransferStatusEnum), nil
+}
+
 type RegistrationStatusEnum string
 
 const (
@@ -531,16 +574,18 @@ type Client struct {
 }
 
 type ClientLocationTransfer struct {
-	ID                   string           `json:"id"`
-	ClientID             string           `json:"client_id"`
-	FromLocationID       *string          `json:"from_location_id"`
-	ToLocationID         string           `json:"to_location_id"`
-	CurrentCoordinatorID string           `json:"current_coordinator_id"`
-	NewCoordinatorID     string           `json:"new_coordinator_id"`
-	TransferDate         pgtype.Timestamp `json:"transfer_date"`
-	Reason               *string          `json:"reason"`
-	CreatedAt            pgtype.Timestamp `json:"created_at"`
-	UpdatedAt            pgtype.Timestamp `json:"updated_at"`
+	ID                   string                     `json:"id"`
+	ClientID             string                     `json:"client_id"`
+	FromLocationID       *string                    `json:"from_location_id"`
+	ToLocationID         string                     `json:"to_location_id"`
+	CurrentCoordinatorID string                     `json:"current_coordinator_id"`
+	NewCoordinatorID     string                     `json:"new_coordinator_id"`
+	TransferDate         pgtype.Timestamp           `json:"transfer_date"`
+	Reason               *string                    `json:"reason"`
+	Status               LocationTransferStatusEnum `json:"status"`
+	RejectionReason      *string                    `json:"rejection_reason"`
+	CreatedAt            pgtype.Timestamp           `json:"created_at"`
+	UpdatedAt            pgtype.Timestamp           `json:"updated_at"`
 }
 
 type Employee struct {

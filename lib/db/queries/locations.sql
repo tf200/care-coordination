@@ -26,3 +26,13 @@ WHERE
      LOWER(l.address) LIKE LOWER('%' || sqlc.narg('search')::text || '%'))
 ORDER BY l.name
 LIMIT $1 OFFSET $2;
+
+-- name: IncrementLocationOccupied :exec
+UPDATE locations
+SET occupied = occupied + 1, updated_at = NOW()
+WHERE id = $1;
+
+-- name: DecrementLocationOccupied :exec
+UPDATE locations
+SET occupied = occupied - 1, updated_at = NOW()
+WHERE id = $1 AND occupied > 0;

@@ -9,7 +9,12 @@ import (
 )
 
 type ObjectStorage interface {
-	UploadObject(ctx context.Context, fileKey string, file io.Reader, contentType string) (string, error)
+	UploadObject(
+		ctx context.Context,
+		fileKey string,
+		file io.Reader,
+		contentType string,
+	) (string, error)
 }
 
 type objectStorageClient struct {
@@ -17,7 +22,11 @@ type objectStorageClient struct {
 	name   string
 }
 
-func NewObjectStorageClient(endpoint, accessKeyID, secretAccessKey string, secure bool, name string) (*objectStorageClient, error) {
+func NewObjectStorageClient(
+	endpoint, accessKeyID, secretAccessKey string,
+	secure bool,
+	name string,
+) (*objectStorageClient, error) {
 	client, err := minio.New(endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKey, ""),
 		Secure: secure,
@@ -45,8 +54,20 @@ func (o *objectStorageClient) GetOrCreateBucket(ctx context.Context) error {
 	return nil
 }
 
-func (o *objectStorageClient) UploadObject(ctx context.Context, fileKey string, file io.Reader, contentType string) (string, error) {
-	uploadinfo, err := o.Client.PutObject(ctx, o.name, fileKey, file, -1, minio.PutObjectOptions{ContentType: contentType})
+func (o *objectStorageClient) UploadObject(
+	ctx context.Context,
+	fileKey string,
+	file io.Reader,
+	contentType string,
+) (string, error) {
+	uploadinfo, err := o.Client.PutObject(
+		ctx,
+		o.name,
+		fileKey,
+		file,
+		-1,
+		minio.PutObjectOptions{ContentType: contentType},
+	)
 	if err != nil {
 		return "", err
 	}

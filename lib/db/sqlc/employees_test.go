@@ -54,7 +54,7 @@ func TestCreateEmployee(t *testing.T) {
 					DateOfBirth: toPgDate(time.Date(1992, 2, 2, 0, 0, 0, 0, time.UTC)),
 					PhoneNumber: "+31687654321",
 					Gender:      GenderEnumFemale,
-					}
+				}
 			},
 			wantErr: true,
 			checkErr: func(t *testing.T, err error) {
@@ -176,9 +176,17 @@ func TestListEmployees(t *testing.T) {
 			name: "with_search_by_first_name",
 			setup: func(t *testing.T, q *Queries) {
 				userID1 := CreateTestUser(t, q, CreateTestUserOptions{})
-				CreateTestEmployee(t, q, CreateTestEmployeeOptions{UserID: userID1, FirstName: strPtr("Alice")})
+				CreateTestEmployee(
+					t,
+					q,
+					CreateTestEmployeeOptions{UserID: userID1, FirstName: strPtr("Alice")},
+				)
 				userID2 := CreateTestUser(t, q, CreateTestUserOptions{})
-				CreateTestEmployee(t, q, CreateTestEmployeeOptions{UserID: userID2, FirstName: strPtr("Bob")})
+				CreateTestEmployee(
+					t,
+					q,
+					CreateTestEmployeeOptions{UserID: userID2, FirstName: strPtr("Bob")},
+				)
 			},
 			params: ListEmployeesParams{Limit: 10, Offset: 0, Search: strPtr("Alice")},
 			validate: func(t *testing.T, results []ListEmployeesRow) {
@@ -190,9 +198,17 @@ func TestListEmployees(t *testing.T) {
 			name: "with_search_by_last_name",
 			setup: func(t *testing.T, q *Queries) {
 				userID1 := CreateTestUser(t, q, CreateTestUserOptions{})
-				CreateTestEmployee(t, q, CreateTestEmployeeOptions{UserID: userID1, LastName: strPtr("Smith")})
+				CreateTestEmployee(
+					t,
+					q,
+					CreateTestEmployeeOptions{UserID: userID1, LastName: strPtr("Smith")},
+				)
 				userID2 := CreateTestUser(t, q, CreateTestUserOptions{})
-				CreateTestEmployee(t, q, CreateTestEmployeeOptions{UserID: userID2, LastName: strPtr("Johnson")})
+				CreateTestEmployee(
+					t,
+					q,
+					CreateTestEmployeeOptions{UserID: userID2, LastName: strPtr("Johnson")},
+				)
 			},
 			params: ListEmployeesParams{Limit: 10, Offset: 0, Search: strPtr("Smith")},
 			validate: func(t *testing.T, results []ListEmployeesRow) {
@@ -204,9 +220,25 @@ func TestListEmployees(t *testing.T) {
 			name: "with_search_full_name",
 			setup: func(t *testing.T, q *Queries) {
 				userID1 := CreateTestUser(t, q, CreateTestUserOptions{})
-				CreateTestEmployee(t, q, CreateTestEmployeeOptions{UserID: userID1, FirstName: strPtr("John"), LastName: strPtr("Doe")})
+				CreateTestEmployee(
+					t,
+					q,
+					CreateTestEmployeeOptions{
+						UserID:    userID1,
+						FirstName: strPtr("John"),
+						LastName:  strPtr("Doe"),
+					},
+				)
 				userID2 := CreateTestUser(t, q, CreateTestUserOptions{})
-				CreateTestEmployee(t, q, CreateTestEmployeeOptions{UserID: userID2, FirstName: strPtr("Jane"), LastName: strPtr("Smith")})
+				CreateTestEmployee(
+					t,
+					q,
+					CreateTestEmployeeOptions{
+						UserID:    userID2,
+						FirstName: strPtr("Jane"),
+						LastName:  strPtr("Smith"),
+					},
+				)
 			},
 			params: ListEmployeesParams{Limit: 10, Offset: 0, Search: strPtr("John Doe")},
 			validate: func(t *testing.T, results []ListEmployeesRow) {

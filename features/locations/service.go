@@ -23,7 +23,10 @@ func NewLocationService(store *db.Store, logger *logger.Logger) LocationService 
 	}
 }
 
-func (s *locationService) CreateLocation(ctx context.Context, req *CreateLocationRequest) (CreateLocationResponse, error) {
+func (s *locationService) CreateLocation(
+	ctx context.Context,
+	req *CreateLocationRequest,
+) (CreateLocationResponse, error) {
 	id := nanoid.Generate()
 	err := s.store.CreateLocation(ctx, db.CreateLocationParams{
 		ID:         id,
@@ -42,7 +45,10 @@ func (s *locationService) CreateLocation(ctx context.Context, req *CreateLocatio
 	}, nil
 }
 
-func (s *locationService) ListLocations(ctx context.Context, req *ListLocationsRequest) (*resp.PaginationResponse[ListLocationsResponse], error) {
+func (s *locationService) ListLocations(
+	ctx context.Context,
+	req *ListLocationsRequest,
+) (*resp.PaginationResponse[ListLocationsResponse], error) {
 	limit, offset, page, pageSize := middleware.GetPaginationParams(ctx)
 
 	locations, err := s.store.ListLocations(ctx, db.ListLocationsParams{

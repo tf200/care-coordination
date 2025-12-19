@@ -7,6 +7,9 @@ import (
 
 type EmployeeService interface {
 	CreateEmployee(ctx context.Context, req *CreateEmployeeRequest) (CreateEmployeeResponse, error)
-	ListEmployees(ctx context.Context, req *ListEmployeesRequest) (*resp.PaginationResponse[ListEmployeesResponse], error)
+	ListEmployees(
+		ctx context.Context,
+		req *ListEmployeesRequest,
+	) (*resp.PaginationResponse[ListEmployeesResponse], error)
 	GetMyProfile(ctx context.Context) (*GetMyProfileResponse, error)
 }

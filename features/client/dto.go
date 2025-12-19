@@ -10,8 +10,8 @@ type MoveClientToWaitingListResponse struct {
 }
 
 type MoveClientInCareRequest struct {
-	CareStartDate         string `json:"careStartDate" binding:"required format=2006-01-02"`
-	CareEndDate           string `json:"careEndDate" binding:"required format=2006-01-02"`
+	CareStartDate         string `json:"careStartDate"         binding:"required format=2006-01-02"`
+	CareEndDate           string `json:"careEndDate"           binding:"required format=2006-01-02"`
 	AmbulatoryWeeklyHours *int32 `json:"ambulatoryWeeklyHours"`
 }
 
@@ -21,7 +21,7 @@ type MoveClientInCareResponse struct {
 
 // Phase 1: Start Discharge - initiates discharge process, client remains in_care
 type StartDischargeRequest struct {
-	DischargeDate      string `json:"dischargeDate" binding:"required,datetime=2006-01-02"`
+	DischargeDate      string `json:"dischargeDate"      binding:"required,datetime=2006-01-02"`
 	ReasonForDischarge string `json:"reasonForDischarge" binding:"required,oneof=treatment_completed terminated_by_mutual_agreement terminated_by_client terminated_by_provider terminated_due_to_external_factors other"`
 }
 
@@ -31,8 +31,8 @@ type StartDischargeResponse struct {
 
 // Phase 2: Complete Discharge - finalizes discharge, requires reports
 type CompleteDischargeRequest struct {
-	ClosingReport          string   `json:"closingReport" binding:"required"`
-	EvaluationReport       string   `json:"evaluationReport" binding:"required"`
+	ClosingReport          string   `json:"closingReport"          binding:"required"`
+	EvaluationReport       string   `json:"evaluationReport"       binding:"required"`
 	DischargeAttachmentIDs []string `json:"dischargeAttachmentIds"`
 }
 

@@ -27,6 +27,8 @@ func (h *IntakeHandler) SetupIntakeRoutes(router *gin.Engine) {
 
 	intake.POST("", h.CreateIntakeForm)
 	intake.GET("", h.ListIntakeForms)
+	intake.GET("/:id", h.GetIntakeForm)
+	intake.PUT("/:id", h.UpdateIntakeForm)
 }
 
 // @Summary Create an intake form
@@ -83,4 +85,65 @@ func (h *IntakeHandler) ListIntakeForms(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, resp.Success(result, "Intake forms listed successfully"))
+}
+
+// @Summary Get an intake form
+// @Description Get an intake form by ID with details
+// @Tags Intake
+// @Produce json
+// @Param id path string true "Intake Form ID"
+// @Success 200 {object} resp.SuccessResponse[GetIntakeFormResponse]
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 404 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /intakes/{id} [get]
+func (h *IntakeHandler) GetIntakeForm(ctx *gin.Context) {
+	id := ctx.Param("id")
+	if id == "" {
+		ctx.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
+		return
+	}
+
+	result, err := h.intakeService.GetIntakeForm(ctx, id)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, resp.Error(ErrInternal))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, resp.Success(result, "Intake form retrieved successfully"))
+}
+
+// @Summary Update an intake form
+// @Description Update an existing intake form
+// @Tags Intake
+// @Accept json
+// @Produce json
+// @Param id path string true "Intake Form ID"
+// @Param intake body UpdateIntakeFormRequest true "Intake Form Update"
+// @Success 200 {object} resp.SuccessResponse[UpdateIntakeFormResponse]
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /intakes/{id} [put]
+func (h *IntakeHandler) UpdateIntakeForm(ctx *gin.Context) {
+	id := ctx.Param("id")
+	if id == "" {
+		ctx.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
+		return
+	}
+
+	var req UpdateIntakeFormRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, resp.Error(err))
+		return
+	}
+
+	result, err := h.intakeService.UpdateIntakeForm(ctx, id, &req)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, resp.Error(ErrInternal))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, resp.Success(result, "Intake form updated successfully"))
 }

@@ -2,7 +2,7 @@ package resp
 
 // ErrorResponse represents an error response
 type ErrorResponse struct {
-	Error   string `json:"error" example:"error message"`
+	Error   string `json:"error"   example:"error message"`
 	Success bool   `json:"success" example:"true"`
 }
 
@@ -54,6 +54,11 @@ func PagResp[T any](data []T, totalCount int, page int, pageSize int) Pagination
 
 // PagRespWithParams builds a pagination response using the provided pagination parameters
 // This is a convenience function to ensure correct page/pageSize values are used
-func PagRespWithParams[T any](data []T, totalCount int, page int32, pageSize int32) PaginationResponse[T] {
+func PagRespWithParams[T any](
+	data []T,
+	totalCount int,
+	page int32,
+	pageSize int32,
+) PaginationResponse[T] {
 	return PagResp(data, totalCount, int(page), int(pageSize))
 }

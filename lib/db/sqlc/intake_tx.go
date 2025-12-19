@@ -12,7 +12,10 @@ type CreateIntakeFormTxResult struct {
 	IntakeFormID string
 }
 
-func (s *Store) CreateIntakeFormTx(ctx context.Context, arg CreateIntakeFormTxParams) (CreateIntakeFormTxResult, error) {
+func (s *Store) CreateIntakeFormTx(
+	ctx context.Context,
+	arg CreateIntakeFormTxParams,
+) (CreateIntakeFormTxResult, error) {
 	var result CreateIntakeFormTxResult
 
 	err := s.ExecTx(ctx, func(q *Queries) error {
@@ -34,4 +37,37 @@ func (s *Store) CreateIntakeFormTx(ctx context.Context, arg CreateIntakeFormTxPa
 	})
 
 	return result, err
+}
+
+type UpdateIntakeFormTxParams struct {
+	IntakeForm UpdateIntakeFormParams
+	// If true, also update the associated client with the relevant fields
+	UpdateClient bool
+}
+
+func (s *Store) UpdateIntakeFormTx(ctx context.Context, arg UpdateIntakeFormTxParams) error {
+	return s.ExecTx(ctx, func(q *Queries) error {
+		// 1. Update the intake form
+		if err := q.UpdateIntakeForm(ctx, arg.IntakeForm); err != nil {
+			return err
+		}
+
+		// 2. If requested, update the associated client with relevant fields
+		if arg.UpdateClient {
+			if err := q.UpdateClientByIntakeFormID(ctx, UpdateClientByIntakeFormIDParams{
+				IntakeFormID:       arg.IntakeForm.ID,
+				CoordinatorID:      arg.IntakeForm.CoordinatorID,
+				AssignedLocationID: arg.IntakeForm.LocationID,
+				FamilySituation:    arg.IntakeForm.FamilySituation,
+				Limitations:        arg.IntakeForm.Limitations,
+				FocusAreas:         arg.IntakeForm.FocusAreas,
+				Goals:              arg.IntakeForm.Goals,
+				Notes:              arg.IntakeForm.Notes,
+			}); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
 }

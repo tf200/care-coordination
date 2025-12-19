@@ -14,7 +14,10 @@ type EmployeeHandler struct {
 	mdw             *middleware.Middleware
 }
 
-func NewEmployeeHandler(employeeService EmployeeService, mdw *middleware.Middleware) *EmployeeHandler {
+func NewEmployeeHandler(
+	employeeService EmployeeService,
+	mdw *middleware.Middleware,
+) *EmployeeHandler {
 	return &EmployeeHandler{
 		employeeService: employeeService,
 		mdw:             mdw,

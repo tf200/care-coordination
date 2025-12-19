@@ -40,7 +40,10 @@ func main() {
 	}
 
 	// Create admin user
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(cfg.AdminPassword), bcrypt.DefaultCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword(
+		[]byte(cfg.AdminPassword),
+		bcrypt.DefaultCost,
+	)
 	if err != nil {
 		log.Fatalf("cannot hash password: %v", err)
 	}

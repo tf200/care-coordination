@@ -23,7 +23,11 @@ func NewAuthHandler(authService AuthService, mdw *middleware.Middleware) *AuthHa
 	}
 }
 
-func (h *AuthHandler) SetupAuthRoutes(router *gin.Engine, rateLimiter ratelimit.RateLimiter, logger *logger.Logger) {
+func (h *AuthHandler) SetupAuthRoutes(
+	router *gin.Engine,
+	rateLimiter ratelimit.RateLimiter,
+	logger *logger.Logger,
+) {
 	auth := router.Group("/auth")
 
 	// Apply rate limiting to login endpoint

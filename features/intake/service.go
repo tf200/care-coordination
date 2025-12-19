@@ -24,7 +24,10 @@ func NewIntakeService(db *db.Store, logger *logger.Logger) IntakeService {
 	}
 }
 
-func (s *intakeService) CreateIntakeForm(ctx context.Context, req *CreateIntakeFormRequest) (*CreateIntakeFormResponse, error) {
+func (s *intakeService) CreateIntakeForm(
+	ctx context.Context,
+	req *CreateIntakeFormRequest,
+) (*CreateIntakeFormResponse, error) {
 	id := nanoid.Generate()
 	_, err := s.db.CreateIntakeFormTx(ctx, db.CreateIntakeFormTxParams{
 		IntakeForm: db.CreateIntakeFormParams{
@@ -56,12 +59,21 @@ func (s *intakeService) CreateIntakeForm(ctx context.Context, req *CreateIntakeF
 	}, nil
 }
 
-func (s *intakeService) ListIntakeForms(ctx context.Context, req *ListIntakeFormsRequest) (*resp.PaginationResponse[ListIntakeFormsResponse], error) {
+func (s *intakeService) ListIntakeForms(
+	ctx context.Context,
+	req *ListIntakeFormsRequest,
+) (*resp.PaginationResponse[ListIntakeFormsResponse], error) {
 	limit, offset, page, pageSize := middleware.GetPaginationParams(ctx)
-	intakeForms, err := s.db.ListIntakeForms(ctx, db.ListIntakeFormsParams{
-		Limit:   limit,
-		Offset:  offset,
-		Column3: *req.Search,
+
+	var intakeForms []db.ListIntakeFormsRow
+	err := s.db.ExecTx(ctx, func(q *db.Queries) error {
+		var err error
+		intakeForms, err = q.ListIntakeForms(ctx, db.ListIntakeFormsParams{
+			Limit:   limit,
+			Offset:  offset,
+			Column3: *req.Search,
+		})
+		return err
 	})
 	if err != nil {
 		s.logger.Error(ctx, "ListIntakeForms", "Failed to list intake forms", zap.Error(err))
@@ -100,4 +112,102 @@ func (s *intakeService) ListIntakeForms(ctx context.Context, req *ListIntakeForm
 	// Use page and pageSize (not offset and limit) for correct pagination metadata
 	result := resp.PagRespWithParams(listIntakeFormsResponse, totalCount, page, pageSize)
 	return &result, nil
+}
+
+func (s *intakeService) GetIntakeForm(
+	ctx context.Context,
+	id string,
+) (*GetIntakeFormResponse, error) {
+	intakeForm, err := s.db.GetIntakeFormWithDetails(ctx, id)
+	if err != nil {
+		s.logger.Error(ctx, "GetIntakeForm", "Failed to get intake form", zap.Error(err))
+		return nil, ErrInternal
+	}
+
+	var careType *string
+	if intakeForm.CareType.Valid {
+		ct := string(intakeForm.CareType.CareTypeEnum)
+		careType = &ct
+	}
+
+	return &GetIntakeFormResponse{
+		ID:                   intakeForm.ID,
+		RegistrationFormID:   intakeForm.RegistrationFormID,
+		IntakeDate:           intakeForm.IntakeDate.Time,
+		IntakeTime:           util.PgtypeTimeToString(intakeForm.IntakeTime),
+		LocationID:           intakeForm.LocationID,
+		CoordinatorID:        intakeForm.CoordinatorID,
+		FamilySituation:      intakeForm.FamilySituation,
+		MainProvider:         intakeForm.MainProvider,
+		Limitations:          intakeForm.Limitations,
+		FocusAreas:           intakeForm.FocusAreas,
+		Goals:                intakeForm.Goals,
+		Notes:                intakeForm.Notes,
+		Status:               string(intakeForm.Status),
+		ClientFirstName:      intakeForm.ClientFirstName,
+		ClientLastName:       intakeForm.ClientLastName,
+		ClientBSN:            intakeForm.ClientBsn,
+		CareType:             careType,
+		OrganizationName:     intakeForm.OrgName,
+		LocationName:         intakeForm.LocationName,
+		CoordinatorFirstName: intakeForm.CoordinatorFirstName,
+		CoordinatorLastName:  intakeForm.CoordinatorLastName,
+		HasClient:            intakeForm.HasClient,
+	}, nil
+}
+
+func (s *intakeService) UpdateIntakeForm(
+	ctx context.Context,
+	id string,
+	req *UpdateIntakeFormRequest,
+) (*UpdateIntakeFormResponse, error) {
+	// Check if a client exists for this intake form
+	intakeFormDetails, err := s.db.GetIntakeFormWithDetails(ctx, id)
+	if err != nil {
+		s.logger.Error(ctx, "UpdateIntakeForm", "Failed to get intake form details", zap.Error(err))
+		return nil, ErrInternal
+	}
+
+	// Build the update params
+	params := db.UpdateIntakeFormParams{
+		ID:              id,
+		FamilySituation: req.FamilySituation,
+		MainProvider:    req.MainProvider,
+		Limitations:     req.Limitations,
+		FocusAreas:      req.FocusAreas,
+		Goals:           req.Goals,
+		Notes:           req.Notes,
+		LocationID:      req.LocationID,
+		CoordinatorID:   req.CoordinatorID,
+	}
+
+	// Handle date/time fields
+	if req.IntakeDate != nil {
+		params.IntakeDate = util.StrToPgtypeDate(*req.IntakeDate)
+	}
+	if req.IntakeTime != nil {
+		params.IntakeTime = util.StrToPgtypeTime(*req.IntakeTime)
+	}
+
+	// Handle status enum field
+	if req.Status != nil {
+		params.Status = db.NullIntakeStatusEnum{
+			IntakeStatusEnum: db.IntakeStatusEnum(*req.Status),
+			Valid:            true,
+		}
+	}
+
+	// Use transaction to update both intake form and client (if exists)
+	err = s.db.UpdateIntakeFormTx(ctx, db.UpdateIntakeFormTxParams{
+		IntakeForm:   params,
+		UpdateClient: intakeFormDetails.HasClient,
+	})
+	if err != nil {
+		s.logger.Error(ctx, "UpdateIntakeForm", "Failed to update intake form", zap.Error(err))
+		return nil, ErrInternal
+	}
+
+	return &UpdateIntakeFormResponse{
+		ID: id,
+	}, nil
 }

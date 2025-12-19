@@ -444,7 +444,13 @@ func main() {
 	}
 
 	// Seed intake forms for first 20 registration forms
-	intakeInfos, err := seedIntakeForms(ctx, store, registrationFormIDs[:20], locationIDs, employeeIDs)
+	intakeInfos, err := seedIntakeForms(
+		ctx,
+		store,
+		registrationFormIDs[:20],
+		locationIDs,
+		employeeIDs,
+	)
 	if err != nil {
 		log.Fatalf("Failed to seed intake forms: %v", err)
 	}
@@ -453,7 +459,15 @@ func main() {
 	// - 10 waiting_list clients (from registrations without intake)
 	// - 8 in_care clients (from intake forms)
 	// - 5 discharged clients (from intake forms)
-	inCareClients, err := seedClients(ctx, store, registrationFormIDs[20:], intakeInfos, locationIDs, employeeIDs, orgIDs)
+	inCareClients, err := seedClients(
+		ctx,
+		store,
+		registrationFormIDs[20:],
+		intakeInfos,
+		locationIDs,
+		employeeIDs,
+		orgIDs,
+	)
 	if err != nil {
 		log.Fatalf("Failed to seed clients: %v", err)
 	}
@@ -482,7 +496,12 @@ func seedEmployees(ctx context.Context, store *db.Store, count int) ([]string, e
 			return nil, fmt.Errorf("failed to create employee %d: %w", i+1, err)
 		}
 		employeeIDs = append(employeeIDs, employee.ID)
-		fmt.Printf("  ✓ Created employee: %s %s (%s)\n", employee.FirstName, employee.LastName, employee.Role)
+		fmt.Printf(
+			"  ✓ Created employee: %s %s (%s)\n",
+			employee.FirstName,
+			employee.LastName,
+			employee.Role,
+		)
 	}
 
 	fmt.Printf("✅ Successfully seeded %d employees\n", count)
@@ -639,7 +658,11 @@ type ReferringOrgInfo struct {
 	ContactPerson string
 }
 
-func createRandomReferringOrg(ctx context.Context, store *db.Store, index int) (*ReferringOrgInfo, error) {
+func createRandomReferringOrg(
+	ctx context.Context,
+	store *db.Store,
+	index int,
+) (*ReferringOrgInfo, error) {
 	// Generate ID
 	orgID, err := gonanoid.New()
 	if err != nil {
@@ -682,7 +705,12 @@ func createRandomReferringOrg(ctx context.Context, store *db.Store, index int) (
 // Registration Forms Seeding
 // ============================================================
 
-func seedRegistrationForms(ctx context.Context, store *db.Store, orgIDs []string, count int) ([]string, error) {
+func seedRegistrationForms(
+	ctx context.Context,
+	store *db.Store,
+	orgIDs []string,
+	count int,
+) ([]string, error) {
 	fmt.Printf("🌱 Seeding %d registration forms...\n", count)
 
 	formIDs := make([]string, 0, count)
@@ -708,7 +736,11 @@ type RegistrationFormInfo struct {
 	BSN       string
 }
 
-func createRandomRegistrationForm(ctx context.Context, store *db.Store, orgIDs []string) (*RegistrationFormInfo, error) {
+func createRandomRegistrationForm(
+	ctx context.Context,
+	store *db.Store,
+	orgIDs []string,
+) (*RegistrationFormInfo, error) {
 	// Generate ID
 	formID, err := gonanoid.New()
 	if err != nil {
@@ -877,7 +909,11 @@ func randomPostalLetters() string {
 // Intake Forms Seeding
 // ============================================================
 
-func seedIntakeForms(ctx context.Context, store *db.Store, registrationFormIDs, locationIDs, employeeIDs []string) ([]IntakeFormInfo, error) {
+func seedIntakeForms(
+	ctx context.Context,
+	store *db.Store,
+	registrationFormIDs, locationIDs, employeeIDs []string,
+) ([]IntakeFormInfo, error) {
 	count := len(registrationFormIDs)
 	fmt.Printf("🌱 Seeding %d intake forms...\n", count)
 
@@ -908,7 +944,12 @@ type IntakeFormInfo struct {
 	Notes              *string
 }
 
-func createRandomIntakeForm(ctx context.Context, store *db.Store, registrationFormID string, locationIDs, employeeIDs []string) (*IntakeFormInfo, error) {
+func createRandomIntakeForm(
+	ctx context.Context,
+	store *db.Store,
+	registrationFormID string,
+	locationIDs, employeeIDs []string,
+) (*IntakeFormInfo, error) {
 	// Generate ID
 	intakeID, err := gonanoid.New()
 	if err != nil {
@@ -1009,7 +1050,13 @@ type ClientInfo struct {
 	CoordinatorID string
 }
 
-func seedClients(ctx context.Context, store *db.Store, waitingListRegIDs []string, intakeInfos []IntakeFormInfo, locationIDs, employeeIDs, orgIDs []string) ([]ClientInfo, error) {
+func seedClients(
+	ctx context.Context,
+	store *db.Store,
+	waitingListRegIDs []string,
+	intakeInfos []IntakeFormInfo,
+	locationIDs, employeeIDs, orgIDs []string,
+) ([]ClientInfo, error) {
 	fmt.Println("🌱 Seeding clients...")
 
 	// Get registration forms data for waiting list clients
@@ -1064,7 +1111,12 @@ func seedClients(ctx context.Context, store *db.Store, waitingListRegIDs []strin
 	return inCareClients, nil
 }
 
-func createWaitingListClient(ctx context.Context, store *db.Store, registrationFormID string, locationIDs, employeeIDs, orgIDs []string) error {
+func createWaitingListClient(
+	ctx context.Context,
+	store *db.Store,
+	registrationFormID string,
+	locationIDs, employeeIDs, orgIDs []string,
+) error {
 	// Get registration form data
 	regForm, err := store.GetRegistrationForm(ctx, registrationFormID)
 	if err != nil {
@@ -1161,7 +1213,12 @@ func createWaitingListClient(ctx context.Context, store *db.Store, registrationF
 	})
 }
 
-func createInCareClient(ctx context.Context, store *db.Store, intakeInfo IntakeFormInfo, orgIDs []string) (*ClientInfo, error) {
+func createInCareClient(
+	ctx context.Context,
+	store *db.Store,
+	intakeInfo IntakeFormInfo,
+	orgIDs []string,
+) (*ClientInfo, error) {
 	// Get registration form data
 	regForm, err := store.GetRegistrationForm(ctx, intakeInfo.RegistrationFormID)
 	if err != nil {
@@ -1251,7 +1308,12 @@ func createInCareClient(ctx context.Context, store *db.Store, intakeInfo IntakeF
 	}, nil
 }
 
-func createDischargedClient(ctx context.Context, store *db.Store, intakeInfo IntakeFormInfo, orgIDs []string) error {
+func createDischargedClient(
+	ctx context.Context,
+	store *db.Store,
+	intakeInfo IntakeFormInfo,
+	orgIDs []string,
+) error {
 	// Get registration form data
 	regForm, err := store.GetRegistrationForm(ctx, intakeInfo.RegistrationFormID)
 	if err != nil {
@@ -1373,7 +1435,12 @@ func createDischargedClient(ctx context.Context, store *db.Store, intakeInfo Int
 // Location Transfers Seeding
 // ============================================================
 
-func seedLocationTransfers(ctx context.Context, store *db.Store, inCareClients []ClientInfo, locationIDs, employeeIDs []string) error {
+func seedLocationTransfers(
+	ctx context.Context,
+	store *db.Store,
+	inCareClients []ClientInfo,
+	locationIDs, employeeIDs []string,
+) error {
 	// Create transfers for about half of the in_care clients
 	transferCount := len(inCareClients) / 2
 	if transferCount < 1 && len(inCareClients) > 0 {
@@ -1420,7 +1487,12 @@ func seedLocationTransfers(ctx context.Context, store *db.Store, inCareClients [
 	return nil
 }
 
-func createLocationTransfer(ctx context.Context, store *db.Store, client ClientInfo, newLocationID, newCoordinatorID string) error {
+func createLocationTransfer(
+	ctx context.Context,
+	store *db.Store,
+	client ClientInfo,
+	newLocationID, newCoordinatorID string,
+) error {
 	transferID, err := gonanoid.New()
 	if err != nil {
 		return fmt.Errorf("failed to generate transfer ID: %w", err)
@@ -1454,7 +1526,12 @@ func createLocationTransfer(ctx context.Context, store *db.Store, client ClientI
 // Incidents Seeding
 // ============================================================
 
-func seedIncidents(ctx context.Context, store *db.Store, inCareClients []ClientInfo, locationIDs, employeeIDs []string) error {
+func seedIncidents(
+	ctx context.Context,
+	store *db.Store,
+	inCareClients []ClientInfo,
+	locationIDs, employeeIDs []string,
+) error {
 	// Create 2-4 incidents per in_care client
 	fmt.Println("🌱 Seeding incidents...")
 

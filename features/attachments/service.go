@@ -17,7 +17,11 @@ type attachmentsService struct {
 	logger *logger.Logger
 }
 
-func NewAttachmentsService(db *db.Store, bucket bucket.ObjectStorage, logger *logger.Logger) AttachmentsService {
+func NewAttachmentsService(
+	db *db.Store,
+	bucket bucket.ObjectStorage,
+	logger *logger.Logger,
+) AttachmentsService {
 	return &attachmentsService{
 		db:     db,
 		bucket: bucket,
@@ -25,7 +29,10 @@ func NewAttachmentsService(db *db.Store, bucket bucket.ObjectStorage, logger *lo
 	}
 }
 
-func (s *attachmentsService) UploadAttachment(ctx context.Context, file *multipart.FileHeader) (*UploadAttachmentResponse, error) {
+func (s *attachmentsService) UploadAttachment(
+	ctx context.Context,
+	file *multipart.FileHeader,
+) (*UploadAttachmentResponse, error) {
 	id := nanoid.Generate()
 
 	// Open the file
@@ -39,7 +46,12 @@ func (s *attachmentsService) UploadAttachment(ctx context.Context, file *multipa
 	// Upload to object storage
 	fileKey, err := s.bucket.UploadObject(ctx, id, src, file.Header.Get("Content-Type"))
 	if err != nil {
-		s.logger.Error(ctx, "UploadAttachment", "Failed to upload file to object storage", zap.Error(err))
+		s.logger.Error(
+			ctx,
+			"UploadAttachment",
+			"Failed to upload file to object storage",
+			zap.Error(err),
+		)
 		return nil, ErrInternal
 	}
 
@@ -50,7 +62,12 @@ func (s *attachmentsService) UploadAttachment(ctx context.Context, file *multipa
 		ContentType: file.Header.Get("Content-Type"),
 	})
 	if err != nil {
-		s.logger.Error(ctx, "UploadAttachment", "Failed to create attachment record", zap.Error(err))
+		s.logger.Error(
+			ctx,
+			"UploadAttachment",
+			"Failed to create attachment record",
+			zap.Error(err),
+		)
 		return nil, ErrInternal
 	}
 

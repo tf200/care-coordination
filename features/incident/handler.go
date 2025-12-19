@@ -14,7 +14,10 @@ type IncidentHandler struct {
 	mdw             *middleware.Middleware
 }
 
-func NewIncidentHandler(incidentService IncidentService, mdw *middleware.Middleware) *IncidentHandler {
+func NewIncidentHandler(
+	incidentService IncidentService,
+	mdw *middleware.Middleware,
+) *IncidentHandler {
 	return &IncidentHandler{
 		incidentService: incidentService,
 		mdw:             mdw,

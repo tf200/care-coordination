@@ -612,6 +612,44 @@ func (q *Queries) UpdateClient(ctx context.Context, arg UpdateClientParams) (str
 	return id, err
 }
 
+const updateClientByIntakeFormID = `-- name: UpdateClientByIntakeFormID :exec
+UPDATE clients SET
+    coordinator_id = COALESCE($2, coordinator_id),
+    assigned_location_id = COALESCE($3, assigned_location_id),
+    family_situation = COALESCE($4, family_situation),
+    limitations = COALESCE($5, limitations),
+    focus_areas = COALESCE($6, focus_areas),
+    goals = COALESCE($7, goals),
+    notes = COALESCE($8, notes),
+    updated_at = NOW()
+WHERE intake_form_id = $1
+`
+
+type UpdateClientByIntakeFormIDParams struct {
+	IntakeFormID       string   `json:"intake_form_id"`
+	CoordinatorID      *string  `json:"coordinator_id"`
+	AssignedLocationID *string  `json:"assigned_location_id"`
+	FamilySituation    *string  `json:"family_situation"`
+	Limitations        *string  `json:"limitations"`
+	FocusAreas         *string  `json:"focus_areas"`
+	Goals              []string `json:"goals"`
+	Notes              *string  `json:"notes"`
+}
+
+func (q *Queries) UpdateClientByIntakeFormID(ctx context.Context, arg UpdateClientByIntakeFormIDParams) error {
+	_, err := q.db.Exec(ctx, updateClientByIntakeFormID,
+		arg.IntakeFormID,
+		arg.CoordinatorID,
+		arg.AssignedLocationID,
+		arg.FamilySituation,
+		arg.Limitations,
+		arg.FocusAreas,
+		arg.Goals,
+		arg.Notes,
+	)
+	return err
+}
+
 const updateClientByRegistrationFormID = `-- name: UpdateClientByRegistrationFormID :exec
 UPDATE clients SET
     first_name = COALESCE($2, first_name),

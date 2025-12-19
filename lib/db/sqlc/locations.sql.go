@@ -42,6 +42,28 @@ func (q *Queries) CreateLocation(ctx context.Context, arg CreateLocationParams) 
 	return err
 }
 
+const decrementLocationOccupied = `-- name: DecrementLocationOccupied :exec
+UPDATE locations
+SET occupied = occupied - 1, updated_at = NOW()
+WHERE id = $1 AND occupied > 0
+`
+
+func (q *Queries) DecrementLocationOccupied(ctx context.Context, id string) error {
+	_, err := q.db.Exec(ctx, decrementLocationOccupied, id)
+	return err
+}
+
+const incrementLocationOccupied = `-- name: IncrementLocationOccupied :exec
+UPDATE locations
+SET occupied = occupied + 1, updated_at = NOW()
+WHERE id = $1
+`
+
+func (q *Queries) IncrementLocationOccupied(ctx context.Context, id string) error {
+	_, err := q.db.Exec(ctx, incrementLocationOccupied, id)
+	return err
+}
+
 const listLocations = `-- name: ListLocations :many
 SELECT
     l.id,

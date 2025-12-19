@@ -18,6 +18,7 @@ type Querier interface {
 	// ============================================================
 	AssignRoleToUser(ctx context.Context, arg AssignRoleToUserParams) error
 	BatchAssignPermissionsToRole(ctx context.Context, arg BatchAssignPermissionsToRoleParams) error
+	ConfirmLocationTransfer(ctx context.Context, id string) error
 	CreateAttachment(ctx context.Context, arg CreateAttachmentParams) error
 	CreateClient(ctx context.Context, arg CreateClientParams) (CreateClientRow, error)
 	CreateEmployee(ctx context.Context, arg CreateEmployeeParams) error
@@ -37,6 +38,7 @@ type Querier interface {
 	CreateRole(ctx context.Context, arg CreateRoleParams) (Role, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (string, error)
 	CreateUserSession(ctx context.Context, arg CreateUserSessionParams) error
+	DecrementLocationOccupied(ctx context.Context, id string) error
 	DeleteAllPermissionsFromRole(ctx context.Context, roleID string) error
 	DeletePermission(ctx context.Context, id string) error
 	DeleteReferringOrg(ctx context.Context, id string) error
@@ -45,6 +47,8 @@ type Querier interface {
 	GetClientByID(ctx context.Context, id string) (Client, error)
 	GetEmployeeByUserID(ctx context.Context, userID string) (GetEmployeeByUserIDRow, error)
 	GetIntakeForm(ctx context.Context, id string) (IntakeForm, error)
+	GetIntakeFormWithDetails(ctx context.Context, id string) (GetIntakeFormWithDetailsRow, error)
+	GetLocationTransferByID(ctx context.Context, id string) (GetLocationTransferByIDRow, error)
 	GetPermissionByID(ctx context.Context, id string) (Permission, error)
 	GetReferringOrgByID(ctx context.Context, id string) (ReferringOrg, error)
 	GetRegistrationForm(ctx context.Context, id string) (RegistrationForm, error)
@@ -55,6 +59,7 @@ type Querier interface {
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserSession(ctx context.Context, tokenHash string) (Session, error)
 	HasPermission(ctx context.Context, arg HasPermissionParams) (bool, error)
+	IncrementLocationOccupied(ctx context.Context, id string) error
 	ListDischargedClients(ctx context.Context, arg ListDischargedClientsParams) ([]ListDischargedClientsRow, error)
 	ListEmployees(ctx context.Context, arg ListEmployeesParams) ([]ListEmployeesRow, error)
 	ListInCareClients(ctx context.Context, arg ListInCareClientsParams) ([]ListInCareClientsRow, error)
@@ -70,12 +75,16 @@ type Querier interface {
 	ListRoles(ctx context.Context, arg ListRolesParams) ([]ListRolesRow, error)
 	ListUsersWithRole(ctx context.Context, roleID string) ([]ListUsersWithRoleRow, error)
 	ListWaitingListClients(ctx context.Context, arg ListWaitingListClientsParams) ([]ListWaitingListClientsRow, error)
+	RefuseLocationTransfer(ctx context.Context, arg RefuseLocationTransferParams) error
 	RemovePermissionFromRole(ctx context.Context, arg RemovePermissionFromRoleParams) error
 	RemoveRoleFromUser(ctx context.Context, userID string) error
 	SoftDeleteRegistrationForm(ctx context.Context, id string) error
 	UpdateClient(ctx context.Context, arg UpdateClientParams) (string, error)
+	UpdateClientByIntakeFormID(ctx context.Context, arg UpdateClientByIntakeFormIDParams) error
 	UpdateClientByRegistrationFormID(ctx context.Context, arg UpdateClientByRegistrationFormIDParams) error
+	UpdateIntakeForm(ctx context.Context, arg UpdateIntakeFormParams) error
 	UpdateIntakeFormStatus(ctx context.Context, arg UpdateIntakeFormStatusParams) error
+	UpdateLocationTransfer(ctx context.Context, arg UpdateLocationTransferParams) error
 	UpdateReferringOrg(ctx context.Context, arg UpdateReferringOrgParams) error
 	UpdateRegistrationForm(ctx context.Context, arg UpdateRegistrationFormParams) error
 	UpdateRegistrationFormStatus(ctx context.Context, arg UpdateRegistrationFormStatusParams) error

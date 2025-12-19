@@ -24,7 +24,10 @@ func NewRegistrationService(db *db.Store, logger *logger.Logger) RegistrationSer
 	}
 }
 
-func (s *registrationService) CreateRegistrationForm(ctx context.Context, req *CreateRegistrationFormRequest) (*CreateRegistrationFormResponse, error) {
+func (s *registrationService) CreateRegistrationForm(
+	ctx context.Context,
+	req *CreateRegistrationFormRequest,
+) (*CreateRegistrationFormResponse, error) {
 	id := nanoid.Generate()
 	err := s.db.CreateRegistrationForm(ctx, db.CreateRegistrationFormParams{
 		ID:                 id,
@@ -42,7 +45,12 @@ func (s *registrationService) CreateRegistrationForm(ctx context.Context, req *C
 		AttachmentIds:      req.AttachmentIDs,
 	})
 	if err != nil {
-		s.logger.Error(ctx, "CreateRegistrationForm", "Failed to create registration form", zap.Error(err))
+		s.logger.Error(
+			ctx,
+			"CreateRegistrationForm",
+			"Failed to create registration form",
+			zap.Error(err),
+		)
 		return nil, ErrInternal
 	}
 	return &CreateRegistrationFormResponse{
@@ -50,17 +58,31 @@ func (s *registrationService) CreateRegistrationForm(ctx context.Context, req *C
 	}, nil
 }
 
-func (s *registrationService) ListRegistrationForms(ctx context.Context, req *ListRegistrationFormsRequest) (*resp.PaginationResponse[ListRegistrationFormsResponse], error) {
+func (s *registrationService) ListRegistrationForms(
+	ctx context.Context,
+	req *ListRegistrationFormsRequest,
+) (*resp.PaginationResponse[ListRegistrationFormsResponse], error) {
 	limit, offset, page, pageSize := middleware.GetPaginationParams(ctx)
-	registrationForms, err := s.db.ListRegistrationForms(ctx, db.ListRegistrationFormsParams{
-		Limit:           limit,
-		Offset:          offset,
-		Search:          req.Search,
-		Status:          req.Status,
-		IntakeCompleted: req.IntakeCompleted,
+
+	var registrationForms []db.ListRegistrationFormsRow
+	err := s.db.ExecTx(ctx, func(q *db.Queries) error {
+		var err error
+		registrationForms, err = q.ListRegistrationForms(ctx, db.ListRegistrationFormsParams{
+			Limit:           limit,
+			Offset:          offset,
+			Search:          req.Search,
+			Status:          req.Status,
+			IntakeCompleted: req.IntakeCompleted,
+		})
+		return err
 	})
 	if err != nil {
-		s.logger.Error(ctx, "ListRegistrationForms", "Failed to list registration forms", zap.Error(err))
+		s.logger.Error(
+			ctx,
+			"ListRegistrationForms",
+			"Failed to list registration forms",
+			zap.Error(err),
+		)
 		return nil, ErrInternal
 	}
 	listRegistrationFormsResponse := []ListRegistrationFormsResponse{}
@@ -70,25 +92,28 @@ func (s *registrationService) ListRegistrationForms(ctx context.Context, req *Li
 			status = string(registrationForm.Status.RegistrationStatusEnum)
 		}
 
-		listRegistrationFormsResponse = append(listRegistrationFormsResponse, ListRegistrationFormsResponse{
-			ID:                  registrationForm.ID,
-			FirstName:           registrationForm.FirstName,
-			LastName:            registrationForm.LastName,
-			Bsn:                 registrationForm.Bsn,
-			DateOfBirth:         registrationForm.DateOfBirth.Time,
-			RefferingOrgID:      registrationForm.RefferingOrgID,
-			OrgName:             registrationForm.OrgName,
-			OrgContactPerson:    registrationForm.OrgContactPerson,
-			OrgPhoneNumber:      registrationForm.OrgPhoneNumber,
-			OrgEmail:            registrationForm.OrgEmail,
-			CareType:            string(registrationForm.CareType),
-			RegistrationDate:    registrationForm.RegistrationDate.Time,
-			RegistrationReason:  registrationForm.RegistrationReason,
-			AdditionalNotes:     registrationForm.AdditionalNotes,
-			NumberOfAttachments: len(registrationForm.AttachmentIds),
-			Status:              &status,
-			IntakeCompleted:     registrationForm.IntakeCompleted,
-		})
+		listRegistrationFormsResponse = append(
+			listRegistrationFormsResponse,
+			ListRegistrationFormsResponse{
+				ID:                  registrationForm.ID,
+				FirstName:           registrationForm.FirstName,
+				LastName:            registrationForm.LastName,
+				Bsn:                 registrationForm.Bsn,
+				DateOfBirth:         registrationForm.DateOfBirth.Time,
+				RefferingOrgID:      registrationForm.RefferingOrgID,
+				OrgName:             registrationForm.OrgName,
+				OrgContactPerson:    registrationForm.OrgContactPerson,
+				OrgPhoneNumber:      registrationForm.OrgPhoneNumber,
+				OrgEmail:            registrationForm.OrgEmail,
+				CareType:            string(registrationForm.CareType),
+				RegistrationDate:    registrationForm.RegistrationDate.Time,
+				RegistrationReason:  registrationForm.RegistrationReason,
+				AdditionalNotes:     registrationForm.AdditionalNotes,
+				NumberOfAttachments: len(registrationForm.AttachmentIds),
+				Status:              &status,
+				IntakeCompleted:     registrationForm.IntakeCompleted,
+			},
+		)
 	}
 	totalCount := 0
 	if len(registrationForms) > 0 {
@@ -99,11 +124,20 @@ func (s *registrationService) ListRegistrationForms(ctx context.Context, req *Li
 	return &result, nil
 }
 
-func (s *registrationService) UpdateRegistrationForm(ctx context.Context, id string, req *UpdateRegistrationFormRequest) (*UpdateRegistrationFormResponse, error) {
+func (s *registrationService) UpdateRegistrationForm(
+	ctx context.Context,
+	id string,
+	req *UpdateRegistrationFormRequest,
+) (*UpdateRegistrationFormResponse, error) {
 	// Check if a client exists for this registration form
 	regFormDetails, err := s.db.GetRegistrationFormWithDetails(ctx, id)
 	if err != nil {
-		s.logger.Error(ctx, "UpdateRegistrationForm", "Failed to get registration form details", zap.Error(err))
+		s.logger.Error(
+			ctx,
+			"UpdateRegistrationForm",
+			"Failed to get registration form details",
+			zap.Error(err),
+		)
 		return nil, ErrInternal
 	}
 
@@ -154,7 +188,12 @@ func (s *registrationService) UpdateRegistrationForm(ctx context.Context, id str
 		UpdateClient:     regFormDetails.HasClient,
 	})
 	if err != nil {
-		s.logger.Error(ctx, "UpdateRegistrationForm", "Failed to update registration form", zap.Error(err))
+		s.logger.Error(
+			ctx,
+			"UpdateRegistrationForm",
+			"Failed to update registration form",
+			zap.Error(err),
+		)
 		return nil, ErrInternal
 	}
 
@@ -163,10 +202,18 @@ func (s *registrationService) UpdateRegistrationForm(ctx context.Context, id str
 	}, nil
 }
 
-func (s *registrationService) GetRegistrationForm(ctx context.Context, id string) (*GetRegistrationFormResponse, error) {
+func (s *registrationService) GetRegistrationForm(
+	ctx context.Context,
+	id string,
+) (*GetRegistrationFormResponse, error) {
 	regForm, err := s.db.GetRegistrationFormWithDetails(ctx, id)
 	if err != nil {
-		s.logger.Error(ctx, "GetRegistrationForm", "Failed to get registration form", zap.Error(err))
+		s.logger.Error(
+			ctx,
+			"GetRegistrationForm",
+			"Failed to get registration form",
+			zap.Error(err),
+		)
 		return nil, ErrInternal
 	}
 
@@ -198,10 +245,18 @@ func (s *registrationService) GetRegistrationForm(ctx context.Context, id string
 	}, nil
 }
 
-func (s *registrationService) DeleteRegistrationForm(ctx context.Context, id string) (*DeleteRegistrationFormResponse, error) {
+func (s *registrationService) DeleteRegistrationForm(
+	ctx context.Context,
+	id string,
+) (*DeleteRegistrationFormResponse, error) {
 	err := s.db.SoftDeleteRegistrationForm(ctx, id)
 	if err != nil {
-		s.logger.Error(ctx, "DeleteRegistrationForm", "Failed to delete registration form", zap.Error(err))
+		s.logger.Error(
+			ctx,
+			"DeleteRegistrationForm",
+			"Failed to delete registration form",
+			zap.Error(err),
+		)
 		return nil, ErrInternal
 	}
 	return &DeleteRegistrationFormResponse{

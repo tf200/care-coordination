@@ -266,6 +266,8 @@ CREATE TABLE clients (
 
 
 
+CREATE TYPE location_transfer_status_enum AS ENUM ('pending', 'approved', 'rejected');
+
 CREATE TABLE client_location_transfers (
     id TEXT PRIMARY KEY,
     client_id TEXT NOT NULL REFERENCES clients(id),
@@ -275,6 +277,8 @@ CREATE TABLE client_location_transfers (
     new_coordinator_id TEXT NOT NULL REFERENCES employees(id),
     transfer_date TIMESTAMP NOT NULL,
     reason TEXT,
+    status location_transfer_status_enum NOT NULL DEFAULT 'pending',
+    rejection_reason TEXT,
     created_at TIMESTAMP  DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP  DEFAULT CURRENT_TIMESTAMP
 );

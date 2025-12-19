@@ -26,7 +26,10 @@ func NewEmployeeService(store *db.Store, logger *logger.Logger) EmployeeService 
 	}
 }
 
-func (s *employeeService) CreateEmployee(ctx context.Context, req *CreateEmployeeRequest) (CreateEmployeeResponse, error) {
+func (s *employeeService) CreateEmployee(
+	ctx context.Context,
+	req *CreateEmployeeRequest,
+) (CreateEmployeeResponse, error) {
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		s.logger.Error(ctx, "CreateEmployee", "Failed to generate password hash", zap.Error(err))
@@ -59,7 +62,10 @@ func (s *employeeService) CreateEmployee(ctx context.Context, req *CreateEmploye
 	}, nil
 }
 
-func (s *employeeService) ListEmployees(ctx context.Context, req *ListEmployeesRequest) (*resp.PaginationResponse[ListEmployeesResponse], error) {
+func (s *employeeService) ListEmployees(
+	ctx context.Context,
+	req *ListEmployeesRequest,
+) (*resp.PaginationResponse[ListEmployeesResponse], error) {
 	limit, offset, page, pageSize := middleware.GetPaginationParams(ctx)
 
 	employees, err := s.store.ListEmployees(ctx, db.ListEmployeesParams{

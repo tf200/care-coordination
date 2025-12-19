@@ -90,6 +90,99 @@ func (q *Queries) GetIntakeForm(ctx context.Context, id string) (IntakeForm, err
 	return i, err
 }
 
+const getIntakeFormWithDetails = `-- name: GetIntakeFormWithDetails :one
+SELECT
+    i.id,
+    i.registration_form_id,
+    i.intake_date,
+    i.intake_time,
+    i.location_id,
+    i.coordinator_id,
+    i.family_situation,
+    i.main_provider,
+    i.limitations,
+    i.focus_areas,
+    i.goals,
+    i.notes,
+    i.status,
+    i.created_at,
+    i.updated_at,
+    r.first_name as client_first_name,
+    r.last_name as client_last_name,
+    r.bsn as client_bsn,
+    r.care_type,
+    ro.name as org_name,
+    l.name as location_name,
+    e.first_name as coordinator_first_name,
+    e.last_name as coordinator_last_name,
+    EXISTS (SELECT 1 FROM clients c WHERE c.intake_form_id = i.id) AS has_client
+FROM intake_forms i
+LEFT JOIN registration_forms r ON i.registration_form_id = r.id
+LEFT JOIN referring_orgs ro ON r.reffering_org_id = ro.id
+LEFT JOIN locations l ON i.location_id = l.id
+LEFT JOIN employees e ON i.coordinator_id = e.id
+WHERE i.id = $1
+`
+
+type GetIntakeFormWithDetailsRow struct {
+	ID                   string           `json:"id"`
+	RegistrationFormID   string           `json:"registration_form_id"`
+	IntakeDate           pgtype.Date      `json:"intake_date"`
+	IntakeTime           pgtype.Time      `json:"intake_time"`
+	LocationID           string           `json:"location_id"`
+	CoordinatorID        string           `json:"coordinator_id"`
+	FamilySituation      *string          `json:"family_situation"`
+	MainProvider         *string          `json:"main_provider"`
+	Limitations          *string          `json:"limitations"`
+	FocusAreas           *string          `json:"focus_areas"`
+	Goals                []string         `json:"goals"`
+	Notes                *string          `json:"notes"`
+	Status               IntakeStatusEnum `json:"status"`
+	CreatedAt            pgtype.Timestamp `json:"created_at"`
+	UpdatedAt            pgtype.Timestamp `json:"updated_at"`
+	ClientFirstName      *string          `json:"client_first_name"`
+	ClientLastName       *string          `json:"client_last_name"`
+	ClientBsn            *string          `json:"client_bsn"`
+	CareType             NullCareTypeEnum `json:"care_type"`
+	OrgName              *string          `json:"org_name"`
+	LocationName         *string          `json:"location_name"`
+	CoordinatorFirstName *string          `json:"coordinator_first_name"`
+	CoordinatorLastName  *string          `json:"coordinator_last_name"`
+	HasClient            bool             `json:"has_client"`
+}
+
+func (q *Queries) GetIntakeFormWithDetails(ctx context.Context, id string) (GetIntakeFormWithDetailsRow, error) {
+	row := q.db.QueryRow(ctx, getIntakeFormWithDetails, id)
+	var i GetIntakeFormWithDetailsRow
+	err := row.Scan(
+		&i.ID,
+		&i.RegistrationFormID,
+		&i.IntakeDate,
+		&i.IntakeTime,
+		&i.LocationID,
+		&i.CoordinatorID,
+		&i.FamilySituation,
+		&i.MainProvider,
+		&i.Limitations,
+		&i.FocusAreas,
+		&i.Goals,
+		&i.Notes,
+		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.ClientFirstName,
+		&i.ClientLastName,
+		&i.ClientBsn,
+		&i.CareType,
+		&i.OrgName,
+		&i.LocationName,
+		&i.CoordinatorFirstName,
+		&i.CoordinatorLastName,
+		&i.HasClient,
+	)
+	return i, err
+}
+
 const listIntakeForms = `-- name: ListIntakeForms :many
 SELECT
     i.id,
@@ -191,6 +284,56 @@ func (q *Queries) ListIntakeForms(ctx context.Context, arg ListIntakeFormsParams
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateIntakeForm = `-- name: UpdateIntakeForm :exec
+UPDATE intake_forms SET
+    intake_date = COALESCE($2, intake_date),
+    intake_time = COALESCE($3, intake_time),
+    location_id = COALESCE($4, location_id),
+    coordinator_id = COALESCE($5, coordinator_id),
+    family_situation = COALESCE($6, family_situation),
+    main_provider = COALESCE($7, main_provider),
+    limitations = COALESCE($8, limitations),
+    focus_areas = COALESCE($9, focus_areas),
+    goals = COALESCE($10, goals),
+    notes = COALESCE($11, notes),
+    status = COALESCE($12, status),
+    updated_at = NOW()
+WHERE id = $1
+`
+
+type UpdateIntakeFormParams struct {
+	ID              string               `json:"id"`
+	IntakeDate      pgtype.Date          `json:"intake_date"`
+	IntakeTime      pgtype.Time          `json:"intake_time"`
+	LocationID      *string              `json:"location_id"`
+	CoordinatorID   *string              `json:"coordinator_id"`
+	FamilySituation *string              `json:"family_situation"`
+	MainProvider    *string              `json:"main_provider"`
+	Limitations     *string              `json:"limitations"`
+	FocusAreas      *string              `json:"focus_areas"`
+	Goals           []string             `json:"goals"`
+	Notes           *string              `json:"notes"`
+	Status          NullIntakeStatusEnum `json:"status"`
+}
+
+func (q *Queries) UpdateIntakeForm(ctx context.Context, arg UpdateIntakeFormParams) error {
+	_, err := q.db.Exec(ctx, updateIntakeForm,
+		arg.ID,
+		arg.IntakeDate,
+		arg.IntakeTime,
+		arg.LocationID,
+		arg.CoordinatorID,
+		arg.FamilySituation,
+		arg.MainProvider,
+		arg.Limitations,
+		arg.FocusAreas,
+		arg.Goals,
+		arg.Notes,
+		arg.Status,
+	)
+	return err
 }
 
 const updateIntakeFormStatus = `-- name: UpdateIntakeFormStatus :exec

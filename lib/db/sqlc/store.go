@@ -30,7 +30,7 @@ func (store *Store) ExecTx(ctx context.Context, fn func(*Queries) error) error {
 	// Set RLS context if user is authenticated
 	userID := util.GetUserID(ctx)
 	if userID != "" {
-		if _, err := tx.Exec(ctx, "SET LOCAL app.current_user_id = $1", userID); err != nil {
+		if _, err := tx.Exec(ctx, "SELECT set_config('app.current_user_id', $1, true)", userID); err != nil {
 			tx.Rollback(ctx)
 			return fmt.Errorf("failed to set rls context: %w", err)
 		}

@@ -51,7 +51,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.PaginationResponse-rbac_PermissionResponse"
+                            "$ref": "#/definitions/resp.SuccessResponse-resp_PaginationResponse-rbac_PermissionResponse"
                         }
                     },
                     "401": {
@@ -97,7 +97,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.PaginationResponse-rbac_RoleListItem"
+                            "$ref": "#/definitions/resp.SuccessResponse-resp_PaginationResponse-rbac_RoleListItem"
                         }
                     },
                     "401": {
@@ -141,7 +141,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/rbac.CreateRoleResponse"
+                            "$ref": "#/definitions/resp.SuccessResponse-rbac_CreateRoleResponse"
                         }
                     },
                     "400": {
@@ -194,7 +194,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/rbac.RoleResponse"
+                            "$ref": "#/definitions/resp.SuccessResponse-rbac_RoleResponse"
                         }
                     },
                     "401": {
@@ -337,10 +337,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/rbac.PermissionResponse"
-                            }
+                            "$ref": "#/definitions/resp.PaginationResponse-rbac_PermissionResponse"
                         }
                     },
                     "401": {
@@ -1457,7 +1454,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.SuccessResponse-array_evaluation_UpcomingEvaluationDTO"
+                            "$ref": "#/definitions/resp.SuccessResponse-resp_PaginationResponse-evaluation_UpcomingEvaluationDTO"
                         }
                     },
                     "401": {
@@ -1536,7 +1533,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.SuccessResponse-array_evaluation_GlobalRecentEvaluationDTO"
+                            "$ref": "#/definitions/resp.SuccessResponse-resp_PaginationResponse-evaluation_GlobalRecentEvaluationDTO"
                         }
                     },
                     "401": {
@@ -1568,7 +1565,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.SuccessResponse-array_evaluation_UpcomingEvaluationDTO"
+                            "$ref": "#/definitions/resp.SuccessResponse-resp_PaginationResponse-evaluation_UpcomingEvaluationDTO"
                         }
                     },
                     "401": {
@@ -4651,6 +4648,52 @@ const docTemplate = `{
                 }
             }
         },
+        "resp.PaginationResponse-evaluation_GlobalRecentEvaluationDTO": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/evaluation.GlobalRecentEvaluationDTO"
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "pageSize": {
+                    "type": "integer"
+                },
+                "totalCount": {
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "type": "integer"
+                }
+            }
+        },
+        "resp.PaginationResponse-evaluation_UpcomingEvaluationDTO": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/evaluation.UpcomingEvaluationDTO"
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "pageSize": {
+                    "type": "integer"
+                },
+                "totalCount": {
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "type": "integer"
+                }
+            }
+        },
         "resp.PaginationResponse-intake_ListIntakeFormsResponse": {
             "type": "object",
             "properties": {
@@ -4810,44 +4853,6 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/evaluation.EvaluationHistoryItem"
-                    }
-                },
-                "message": {
-                    "type": "string",
-                    "example": "success message"
-                },
-                "success": {
-                    "type": "boolean",
-                    "example": true
-                }
-            }
-        },
-        "resp.SuccessResponse-array_evaluation_GlobalRecentEvaluationDTO": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/evaluation.GlobalRecentEvaluationDTO"
-                    }
-                },
-                "message": {
-                    "type": "string",
-                    "example": "success message"
-                },
-                "success": {
-                    "type": "boolean",
-                    "example": true
-                }
-            }
-        },
-        "resp.SuccessResponse-array_evaluation_UpcomingEvaluationDTO": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/evaluation.UpcomingEvaluationDTO"
                     }
                 },
                 "message": {
@@ -5116,6 +5121,22 @@ const docTemplate = `{
                 }
             }
         },
+        "resp.SuccessResponse-rbac_CreateRoleResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/rbac.CreateRoleResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
         "resp.SuccessResponse-rbac_RoleResponse": {
             "type": "object",
             "properties": {
@@ -5228,6 +5249,38 @@ const docTemplate = `{
                 }
             }
         },
+        "resp.SuccessResponse-resp_PaginationResponse-evaluation_GlobalRecentEvaluationDTO": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/resp.PaginationResponse-evaluation_GlobalRecentEvaluationDTO"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-resp_PaginationResponse-evaluation_UpcomingEvaluationDTO": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/resp.PaginationResponse-evaluation_UpcomingEvaluationDTO"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
         "resp.SuccessResponse-resp_PaginationResponse-intake_ListIntakeFormsResponse": {
             "type": "object",
             "properties": {
@@ -5249,6 +5302,38 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/resp.PaginationResponse-location_transfer_ListLocationTransfersResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-resp_PaginationResponse-rbac_PermissionResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/resp.PaginationResponse-rbac_PermissionResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-resp_PaginationResponse-rbac_RoleListItem": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/resp.PaginationResponse-rbac_RoleListItem"
                 },
                 "message": {
                     "type": "string",

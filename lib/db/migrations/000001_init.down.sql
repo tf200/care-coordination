@@ -1,10 +1,3 @@
--- Drop RLS policies first (they depend on user_roles table)
-DROP POLICY IF EXISTS admin_all ON clients;
-DROP POLICY IF EXISTS coordinator_own_clients ON clients;
-
--- Disable RLS on tables
-ALTER TABLE clients DISABLE ROW LEVEL SECURITY;
-
 -- Drop tables in reverse order of creation (respecting foreign key dependencies)
 -- Most dependent tables first, then their dependencies
 
@@ -40,4 +33,5 @@ DROP TYPE IF EXISTS intake_status_enum;
 DROP TYPE IF EXISTS registration_status_enum;
 DROP TYPE IF EXISTS care_type_enum;
 DROP TYPE IF EXISTS gender_enum;
+DROP TYPE IF EXISTS location_transfer_status_enum;
 

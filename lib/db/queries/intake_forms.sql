@@ -10,8 +10,8 @@ INSERT INTO intake_forms (
     main_provider,
     limitations,
     focus_areas,
-    goals,
-    notes
+    notes,
+    evaluation_interval_weeks
 ) VALUES (
     $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
 );
@@ -71,8 +71,8 @@ SELECT
     i.main_provider,
     i.limitations,
     i.focus_areas,
-    i.goals,
     i.notes,
+    i.evaluation_interval_weeks,
     i.status,
     i.created_at,
     i.updated_at,
@@ -105,8 +105,8 @@ UPDATE intake_forms SET
     main_provider = COALESCE(sqlc.narg('main_provider'), main_provider),
     limitations = COALESCE(sqlc.narg('limitations'), limitations),
     focus_areas = COALESCE(sqlc.narg('focus_areas'), focus_areas),
-    goals = COALESCE(sqlc.narg('goals'), goals),
     notes = COALESCE(sqlc.narg('notes'), notes),
+    evaluation_interval_weeks = COALESCE(sqlc.narg('evaluation_interval_weeks'), evaluation_interval_weeks),
     status = COALESCE(sqlc.narg('status'), status),
     updated_at = NOW()
 WHERE id = $1;

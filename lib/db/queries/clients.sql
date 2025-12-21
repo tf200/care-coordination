@@ -18,12 +18,12 @@ INSERT INTO clients (
     family_situation,
     limitations,
     focus_areas,
-    goals,
-    notes
+    notes,
+    evaluation_interval_weeks
 ) VALUES (
     $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20
 )
-RETURNING id, first_name, last_name, bsn, date_of_birth, phone_number, gender, registration_form_id, intake_form_id, care_type, referring_org_id, status, assigned_location_id, coordinator_id, family_situation, limitations, focus_areas, goals, notes, created_at, updated_at;
+RETURNING id, first_name, last_name, bsn, date_of_birth, phone_number, gender, registration_form_id, intake_form_id, care_type, referring_org_id, status, assigned_location_id, coordinator_id, family_situation, limitations, focus_areas, notes, evaluation_interval_weeks, next_evaluation_date, created_at, updated_at;
 
 
 
@@ -49,8 +49,9 @@ UPDATE clients SET
     family_situation = COALESCE(sqlc.narg('family_situation'), family_situation),
     limitations = COALESCE(sqlc.narg('limitations'), limitations),
     focus_areas = COALESCE(sqlc.narg('focus_areas'), focus_areas),
-    goals = COALESCE(sqlc.narg('goals'), goals),
     notes = COALESCE(sqlc.narg('notes'), notes),
+    evaluation_interval_weeks = COALESCE(sqlc.narg('evaluation_interval_weeks'), evaluation_interval_weeks),
+    next_evaluation_date = COALESCE(sqlc.narg('next_evaluation_date'), next_evaluation_date),
     ambulatory_weekly_hours = COALESCE(sqlc.narg('ambulatory_weekly_hours'), ambulatory_weekly_hours),
     care_start_date = COALESCE(sqlc.narg('care_start_date'), care_start_date),
     care_end_date = COALESCE(sqlc.narg('care_end_date'), care_end_date),
@@ -193,7 +194,7 @@ UPDATE clients SET
     family_situation = COALESCE(sqlc.narg('family_situation'), family_situation),
     limitations = COALESCE(sqlc.narg('limitations'), limitations),
     focus_areas = COALESCE(sqlc.narg('focus_areas'), focus_areas),
-    goals = COALESCE(sqlc.narg('goals'), goals),
     notes = COALESCE(sqlc.narg('notes'), notes),
+    evaluation_interval_weeks = COALESCE(sqlc.narg('evaluation_interval_weeks'), evaluation_interval_weeks),
     updated_at = NOW()
 WHERE intake_form_id = $1;

@@ -54,26 +54,26 @@ func (s *clientService) MoveClientToWaitingList(
 
 	// Prepare client creation parameters
 	createClientParams := db.CreateClientParams{
-		ID:                  clientID,
-		FirstName:           registrationForm.FirstName,
-		LastName:            registrationForm.LastName,
-		Bsn:                 registrationForm.Bsn,
-		DateOfBirth:         registrationForm.DateOfBirth,
-		PhoneNumber:         registrationForm.PhoneNumber,
-		WaitingListPriority: db.WaitingListPriorityEnum(req.WaitingListPriority),
-		Gender:              registrationForm.Gender,
-		RegistrationFormID:  registrationForm.ID,
-		IntakeFormID:        intakeForm.ID,
-		CareType:            registrationForm.CareType,
-		ReferringOrgID:      registrationForm.RefferingOrgID,
-		Status:              db.ClientStatusEnumWaitingList,
-		AssignedLocationID:  intakeForm.LocationID,
-		CoordinatorID:       intakeForm.CoordinatorID,
-		FamilySituation:     intakeForm.FamilySituation,
-		Limitations:         intakeForm.Limitations,
-		FocusAreas:          intakeForm.FocusAreas,
-		Goals:               intakeForm.Goals,
-		Notes:               intakeForm.Notes,
+		ID:                      clientID,
+		FirstName:               registrationForm.FirstName,
+		LastName:                registrationForm.LastName,
+		Bsn:                     registrationForm.Bsn,
+		DateOfBirth:             registrationForm.DateOfBirth,
+		PhoneNumber:             registrationForm.PhoneNumber,
+		WaitingListPriority:     db.WaitingListPriorityEnum(req.WaitingListPriority),
+		Gender:                  registrationForm.Gender,
+		RegistrationFormID:      registrationForm.ID,
+		IntakeFormID:            intakeForm.ID,
+		CareType:                registrationForm.CareType,
+		ReferringOrgID:          registrationForm.RefferingOrgID,
+		Status:                  db.ClientStatusEnumWaitingList,
+		AssignedLocationID:      intakeForm.LocationID,
+		CoordinatorID:           intakeForm.CoordinatorID,
+		FamilySituation:         intakeForm.FamilySituation,
+		Limitations:             intakeForm.Limitations,
+		FocusAreas:              intakeForm.FocusAreas,
+		Notes:                   intakeForm.Notes,
+		EvaluationIntervalWeeks: intakeForm.EvaluationIntervalWeeks,
 	}
 
 	// Create the client and update intake form status in a transaction
@@ -157,6 +157,15 @@ func (s *clientService) MoveClientInCare(
 		AmbulatoryWeeklyHours: req.AmbulatoryWeeklyHours,
 		CareStartDate:         util.StrToPgtypeDate(req.CareStartDate),
 		CareEndDate:           util.StrToPgtypeDate(req.CareEndDate),
+	}
+
+	// Calculate and set next_evaluation_date if interval exists
+	if client.EvaluationIntervalWeeks != nil && *client.EvaluationIntervalWeeks > 0 {
+		startDate, err := time.Parse(time.DateOnly, req.CareStartDate)
+		if err == nil {
+			nextDate := startDate.AddDate(0, 0, int(*client.EvaluationIntervalWeeks)*7)
+			updateParams.NextEvaluationDate = util.TimeToPgtypeDate(nextDate)
+		}
 	}
 
 	updatedClient, err := s.db.UpdateClient(ctx, updateParams)

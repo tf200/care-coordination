@@ -489,7 +489,6 @@ func CreateTestIntakeForm(t *testing.T, q *Queries, opts CreateTestIntakeFormOpt
 		MainProvider:       opts.MainProvider,
 		Limitations:        opts.Limitations,
 		FocusAreas:         opts.FocusAreas,
-		Goals:              []string{*opts.Goals},
 		Notes:              opts.Notes,
 	})
 	if err != nil {
@@ -526,6 +525,11 @@ type CreateTestClientOptions struct {
 	FocusAreas          *string
 	Goals               []string
 	Notes               *string
+	CareStartDate       *time.Time
+	CareEndDate         *time.Time
+	DischargeDate       *time.Time
+	ReasonForDischarge  *DischargeReasonEnum
+	DischargeStatus     *DischargeStatusEnum
 }
 
 // CreateTestClient creates a client for testing.
@@ -588,11 +592,6 @@ func CreateTestClient(t *testing.T, q *Queries, opts CreateTestClientOptions) st
 		priority = *opts.WaitingListPriority
 	}
 
-	status := ClientStatusEnumWaitingList
-	if opts.Status != nil {
-		status = *opts.Status
-	}
-
 	_, err := q.CreateClient(ctx, CreateClientParams{
 		ID:                  id,
 		FirstName:           firstName,
@@ -606,17 +605,56 @@ func CreateTestClient(t *testing.T, q *Queries, opts CreateTestClientOptions) st
 		CareType:            careType,
 		ReferringOrgID:      opts.ReferringOrgID,
 		WaitingListPriority: priority,
-		Status:              status,
+		Status:              ClientStatusEnumWaitingList, // Always start as waiting_list to satisfy constraints
 		AssignedLocationID:  opts.AssignedLocationID,
 		CoordinatorID:       opts.CoordinatorID,
 		FamilySituation:     opts.FamilySituation,
 		Limitations:         opts.Limitations,
 		FocusAreas:          opts.FocusAreas,
-		Goals:               opts.Goals,
 		Notes:               opts.Notes,
 	})
 	if err != nil {
 		t.Fatalf("CreateTestClient failed: %v", err)
+	}
+
+	// Update with extra fields or different status if provided
+	if (opts.Status != nil && *opts.Status != ClientStatusEnumWaitingList) ||
+		opts.CareStartDate != nil || opts.CareEndDate != nil || opts.DischargeDate != nil ||
+		opts.ReasonForDischarge != nil || opts.DischargeStatus != nil {
+		updateParams := UpdateClientParams{
+			ID: id,
+		}
+		if opts.Status != nil {
+			updateParams.Status = NullClientStatusEnum{
+				ClientStatusEnum: *opts.Status,
+				Valid:            true,
+			}
+		}
+		if opts.CareStartDate != nil {
+			updateParams.CareStartDate = toPgDate(*opts.CareStartDate)
+		}
+		if opts.CareEndDate != nil {
+			updateParams.CareEndDate = toPgDate(*opts.CareEndDate)
+		}
+		if opts.DischargeDate != nil {
+			updateParams.DischargeDate = toPgDate(*opts.DischargeDate)
+		}
+		if opts.ReasonForDischarge != nil {
+			updateParams.ReasonForDischarge = NullDischargeReasonEnum{
+				DischargeReasonEnum: *opts.ReasonForDischarge,
+				Valid:               true,
+			}
+		}
+		if opts.DischargeStatus != nil {
+			updateParams.DischargeStatus = NullDischargeStatusEnum{
+				DischargeStatusEnum: *opts.DischargeStatus,
+				Valid:               true,
+			}
+		}
+		_, err = q.UpdateClient(ctx, updateParams)
+		if err != nil {
+			t.Fatalf("UpdateClient in CreateTestClient failed: %v", err)
+		}
 	}
 
 	return id

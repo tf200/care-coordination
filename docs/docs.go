@@ -1391,6 +1391,201 @@ const docTemplate = `{
                 }
             }
         },
+        "/evaluations": {
+            "post": {
+                "description": "Record progress logs for all current client goals and schedule the next evaluation.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Evaluation"
+                ],
+                "summary": "Create a client evaluation",
+                "parameters": [
+                    {
+                        "description": "Evaluation Details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/evaluation.CreateEvaluationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-evaluation_CreateEvaluationResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/evaluations/critical": {
+            "get": {
+                "description": "List evaluations due within the next 7 days or overdue.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Evaluation"
+                ],
+                "summary": "Get critical evaluations (Dashboard)",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-array_evaluation_UpcomingEvaluationDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/evaluations/history/{clientId}": {
+            "get": {
+                "description": "Retrieve all past evaluations and goal progress logs for a specific client.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Evaluation"
+                ],
+                "summary": "Get evaluation history for a client",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Client ID",
+                        "name": "clientId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-array_evaluation_EvaluationHistoryItem"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/evaluations/recent": {
+            "get": {
+                "description": "List the last 20 evaluations submitted across all clients.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Evaluation"
+                ],
+                "summary": "Get recent evaluations (Dashboard)",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-array_evaluation_GlobalRecentEvaluationDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/evaluations/scheduled": {
+            "get": {
+                "description": "List evaluations scheduled between 8 and 30 days from now.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Evaluation"
+                ],
+                "summary": "Get scheduled evaluations (Dashboard)",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-array_evaluation_UpcomingEvaluationDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/incidents": {
             "get": {
                 "description": "List all incidents with pagination and search by client name",
@@ -1809,6 +2004,210 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/location-transfers/{id}": {
+            "get": {
+                "description": "Get a single location transfer with all details",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "LocationTransfer"
+                ],
+                "summary": "Get a location transfer by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Transfer ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-location_transfer_ListLocationTransfersResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update a pending location transfer (new location, coordinator, or reason)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "LocationTransfer"
+                ],
+                "summary": "Update a location transfer",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Transfer ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update fields",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/location_transfer.UpdateLocationTransferRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-any"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/location-transfers/{id}/confirm": {
+            "post": {
+                "description": "Confirm a pending location transfer, updating the client's location and coordinator",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "LocationTransfer"
+                ],
+                "summary": "Confirm a location transfer",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Transfer ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-any"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/location-transfers/{id}/refuse": {
+            "post": {
+                "description": "Refuse a pending location transfer with a reason",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "LocationTransfer"
+                ],
+                "summary": "Refuse a location transfer",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Transfer ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Refusal reason",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/location_transfer.RefuseLocationTransferRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-any"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/resp.ErrorResponse"
                         }
@@ -2838,6 +3237,160 @@ const docTemplate = `{
                 }
             }
         },
+        "evaluation.CreateEvaluationRequest": {
+            "type": "object",
+            "required": [
+                "clientId",
+                "coordinatorId",
+                "evaluationDate"
+            ],
+            "properties": {
+                "clientId": {
+                    "type": "string"
+                },
+                "coordinatorId": {
+                    "type": "string"
+                },
+                "evaluationDate": {
+                    "type": "string"
+                },
+                "overallNotes": {
+                    "type": "string"
+                },
+                "progressLogs": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "$ref": "#/definitions/evaluation.GoalProgressDTO"
+                    }
+                }
+            }
+        },
+        "evaluation.CreateEvaluationResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "nextEvaluationDate": {
+                    "type": "string"
+                }
+            }
+        },
+        "evaluation.EvaluationHistoryItem": {
+            "type": "object",
+            "properties": {
+                "coordinatorFirstName": {
+                    "type": "string"
+                },
+                "coordinatorLastName": {
+                    "type": "string"
+                },
+                "evaluationDate": {
+                    "type": "string"
+                },
+                "evaluationId": {
+                    "type": "string"
+                },
+                "goalId": {
+                    "type": "string"
+                },
+                "goalTitle": {
+                    "type": "string"
+                },
+                "overallNotes": {
+                    "type": "string"
+                },
+                "progressNotes": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "evaluation.GlobalRecentEvaluationDTO": {
+            "type": "object",
+            "properties": {
+                "clientFirstName": {
+                    "type": "string"
+                },
+                "clientLastName": {
+                    "type": "string"
+                },
+                "coordinatorFirstName": {
+                    "type": "string"
+                },
+                "coordinatorLastName": {
+                    "type": "string"
+                },
+                "evaluationDate": {
+                    "type": "string"
+                },
+                "evaluationId": {
+                    "type": "string"
+                },
+                "goalsAchieved": {
+                    "type": "integer"
+                },
+                "totalGoals": {
+                    "type": "integer"
+                }
+            }
+        },
+        "evaluation.GoalProgressDTO": {
+            "type": "object",
+            "required": [
+                "goalId",
+                "status"
+            ],
+            "properties": {
+                "goalId": {
+                    "type": "string"
+                },
+                "progressNotes": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "starting",
+                        "on_track",
+                        "delayed",
+                        "achieved"
+                    ]
+                }
+            }
+        },
+        "evaluation.UpcomingEvaluationDTO": {
+            "type": "object",
+            "properties": {
+                "coordinatorFirstName": {
+                    "type": "string"
+                },
+                "coordinatorLastName": {
+                    "type": "string"
+                },
+                "evaluationIntervalWeeks": {
+                    "type": "integer"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "locationName": {
+                    "type": "string"
+                },
+                "nextEvaluationDate": {
+                    "type": "string"
+                }
+            }
+        },
         "incident.CreateIncidentRequest": {
             "type": "object",
             "required": [
@@ -2984,6 +3537,10 @@ const docTemplate = `{
                 "coordinatorId": {
                     "type": "string"
                 },
+                "evaluationIntervalWeeks": {
+                    "type": "integer",
+                    "minimum": 1
+                },
                 "familySituation": {
                     "type": "string"
                 },
@@ -2994,7 +3551,7 @@ const docTemplate = `{
                     "type": "array",
                     "minItems": 1,
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/intake.GoalDTO"
                     }
                 },
                 "intakeDate": {
@@ -3052,6 +3609,9 @@ const docTemplate = `{
                 "coordinatorLastName": {
                     "type": "string"
                 },
+                "evaluationIntervalWeeks": {
+                    "type": "integer"
+                },
                 "familySituation": {
                     "type": "string"
                 },
@@ -3061,7 +3621,7 @@ const docTemplate = `{
                 "goals": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/intake.GoalDTO"
                     }
                 },
                 "hasClient": {
@@ -3098,6 +3658,23 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "intake.GoalDTO": {
+            "type": "object",
+            "required": [
+                "title"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "title": {
                     "type": "string"
                 }
             }
@@ -3164,6 +3741,10 @@ const docTemplate = `{
                 "coordinatorId": {
                     "type": "string"
                 },
+                "evaluationIntervalWeeks": {
+                    "type": "integer",
+                    "minimum": 1
+                },
                 "familySituation": {
                     "type": "string"
                 },
@@ -3173,7 +3754,7 @@ const docTemplate = `{
                 "goals": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/intake.GoalDTO"
                     }
                 },
                 "intakeDate": {
@@ -3253,6 +3834,12 @@ const docTemplate = `{
                 "reason": {
                     "type": "string"
                 },
+                "rejectionReason": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
                 "toLocationId": {
                     "type": "string"
                 },
@@ -3261,6 +3848,17 @@ const docTemplate = `{
                 },
                 "transferDate": {
                     "description": "or time.Time, but for JSON, string",
+                    "type": "string"
+                }
+            }
+        },
+        "location_transfer.RefuseLocationTransferRequest": {
+            "type": "object",
+            "required": [
+                "reason"
+            ],
+            "properties": {
+                "reason": {
                     "type": "string"
                 }
             }
@@ -3288,6 +3886,20 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "transferId": {
+                    "type": "string"
+                }
+            }
+        },
+        "location_transfer.UpdateLocationTransferRequest": {
+            "type": "object",
+            "properties": {
+                "newCoordinatorId": {
+                    "type": "string"
+                },
+                "newLocationId": {
+                    "type": "string"
+                },
+                "reason": {
                     "type": "string"
                 }
             }
@@ -4177,6 +4789,77 @@ const docTemplate = `{
                 }
             }
         },
+        "resp.SuccessResponse-any": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-array_evaluation_EvaluationHistoryItem": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/evaluation.EvaluationHistoryItem"
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-array_evaluation_GlobalRecentEvaluationDTO": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/evaluation.GlobalRecentEvaluationDTO"
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-array_evaluation_UpcomingEvaluationDTO": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/evaluation.UpcomingEvaluationDTO"
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
         "resp.SuccessResponse-auth_LoginResponse": {
             "type": "object",
             "properties": {
@@ -4305,6 +4988,22 @@ const docTemplate = `{
                 }
             }
         },
+        "resp.SuccessResponse-evaluation_CreateEvaluationResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/evaluation.CreateEvaluationResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
         "resp.SuccessResponse-incident_CreateIncidentResponse": {
             "type": "object",
             "properties": {
@@ -4358,6 +5057,22 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/intake.UpdateIntakeFormResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-location_transfer_ListLocationTransfersResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/location_transfer.ListLocationTransfersResponse"
                 },
                 "message": {
                     "type": "string",

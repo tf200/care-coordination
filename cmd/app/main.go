@@ -6,6 +6,7 @@ import (
 	"care-cordination/features/auth"
 	"care-cordination/features/client"
 	"care-cordination/features/employee"
+	"care-cordination/features/evaluation"
 	"care-cordination/features/incident"
 	"care-cordination/features/intake"
 	locTransfer "care-cordination/features/location_transfer"
@@ -145,6 +146,9 @@ func main() {
 	incidentService := incident.NewIncidentService(store, l)
 	incidentHandler := incident.NewIncidentHandler(incidentService, mdw)
 
+	evaluationService := evaluation.NewEvaluationService(store, l)
+	evaluationHandler := evaluation.NewEvaluationHandler(evaluationService, mdw)
+
 	clientService := client.NewClientService(store, l)
 	clientHandler := client.NewClientHandler(clientService, mdw)
 
@@ -166,6 +170,7 @@ func main() {
 		referringOrgHandler,
 		locTransferHandler,
 		rbacHandler,
+		evaluationHandler,
 		rateLimiter,
 		cfg.ServerAddress,
 		cfg.Url,

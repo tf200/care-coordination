@@ -320,6 +320,109 @@ definitions:
       resource:
         type: string
     type: object
+  evaluation.CreateEvaluationRequest:
+    properties:
+      clientId:
+        type: string
+      coordinatorId:
+        type: string
+      evaluationDate:
+        type: string
+      overallNotes:
+        type: string
+      progressLogs:
+        items:
+          $ref: '#/definitions/evaluation.GoalProgressDTO'
+        minItems: 1
+        type: array
+    required:
+    - clientId
+    - coordinatorId
+    - evaluationDate
+    type: object
+  evaluation.CreateEvaluationResponse:
+    properties:
+      id:
+        type: string
+      nextEvaluationDate:
+        type: string
+    type: object
+  evaluation.EvaluationHistoryItem:
+    properties:
+      coordinatorFirstName:
+        type: string
+      coordinatorLastName:
+        type: string
+      evaluationDate:
+        type: string
+      evaluationId:
+        type: string
+      goalId:
+        type: string
+      goalTitle:
+        type: string
+      overallNotes:
+        type: string
+      progressNotes:
+        type: string
+      status:
+        type: string
+    type: object
+  evaluation.GlobalRecentEvaluationDTO:
+    properties:
+      clientFirstName:
+        type: string
+      clientLastName:
+        type: string
+      coordinatorFirstName:
+        type: string
+      coordinatorLastName:
+        type: string
+      evaluationDate:
+        type: string
+      evaluationId:
+        type: string
+      goalsAchieved:
+        type: integer
+      totalGoals:
+        type: integer
+    type: object
+  evaluation.GoalProgressDTO:
+    properties:
+      goalId:
+        type: string
+      progressNotes:
+        type: string
+      status:
+        enum:
+        - starting
+        - on_track
+        - delayed
+        - achieved
+        type: string
+    required:
+    - goalId
+    - status
+    type: object
+  evaluation.UpcomingEvaluationDTO:
+    properties:
+      coordinatorFirstName:
+        type: string
+      coordinatorLastName:
+        type: string
+      evaluationIntervalWeeks:
+        type: integer
+      firstName:
+        type: string
+      id:
+        type: string
+      lastName:
+        type: string
+      locationName:
+        type: string
+      nextEvaluationDate:
+        type: string
+    type: object
   incident.CreateIncidentRequest:
     properties:
       actionTaken:
@@ -417,13 +520,16 @@ definitions:
     properties:
       coordinatorId:
         type: string
+      evaluationIntervalWeeks:
+        minimum: 1
+        type: integer
       familySituation:
         type: string
       focusAreas:
         type: string
       goals:
         items:
-          type: string
+          $ref: '#/definitions/intake.GoalDTO'
         minItems: 1
         type: array
       intakeDate:
@@ -468,13 +574,15 @@ definitions:
         type: string
       coordinatorLastName:
         type: string
+      evaluationIntervalWeeks:
+        type: integer
       familySituation:
         type: string
       focusAreas:
         type: string
       goals:
         items:
-          type: string
+          $ref: '#/definitions/intake.GoalDTO'
         type: array
       hasClient:
         type: boolean
@@ -500,6 +608,17 @@ definitions:
         type: string
       status:
         type: string
+    type: object
+  intake.GoalDTO:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      title:
+        type: string
+    required:
+    - title
     type: object
   intake.ListIntakeFormsResponse:
     properties:
@@ -542,13 +661,16 @@ definitions:
     properties:
       coordinatorId:
         type: string
+      evaluationIntervalWeeks:
+        minimum: 1
+        type: integer
       familySituation:
         type: string
       focusAreas:
         type: string
       goals:
         items:
-          type: string
+          $ref: '#/definitions/intake.GoalDTO'
         type: array
       intakeDate:
         type: string
@@ -601,6 +723,10 @@ definitions:
         type: string
       reason:
         type: string
+      rejectionReason:
+        type: string
+      status:
+        type: string
       toLocationId:
         type: string
       toLocationName:
@@ -608,6 +734,13 @@ definitions:
       transferDate:
         description: or time.Time, but for JSON, string
         type: string
+    type: object
+  location_transfer.RefuseLocationTransferRequest:
+    properties:
+      reason:
+        type: string
+    required:
+    - reason
     type: object
   location_transfer.RegisterLocationTransferRequest:
     properties:
@@ -625,6 +758,15 @@ definitions:
   location_transfer.RegisterLocationTransferResponse:
     properties:
       transferId:
+        type: string
+    type: object
+  location_transfer.UpdateLocationTransferRequest:
+    properties:
+      newCoordinatorId:
+        type: string
+      newLocationId:
+        type: string
+      reason:
         type: string
     type: object
   locations.CreateLocationRequest:
@@ -1217,6 +1359,55 @@ definitions:
       totalPages:
         type: integer
     type: object
+  resp.SuccessResponse-any:
+    properties:
+      data: {}
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-array_evaluation_EvaluationHistoryItem:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/evaluation.EvaluationHistoryItem'
+        type: array
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-array_evaluation_GlobalRecentEvaluationDTO:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/evaluation.GlobalRecentEvaluationDTO'
+        type: array
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-array_evaluation_UpcomingEvaluationDTO:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/evaluation.UpcomingEvaluationDTO'
+        type: array
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
   resp.SuccessResponse-auth_LoginResponse:
     properties:
       data:
@@ -1305,6 +1496,17 @@ definitions:
         example: true
         type: boolean
     type: object
+  resp.SuccessResponse-evaluation_CreateEvaluationResponse:
+    properties:
+      data:
+        $ref: '#/definitions/evaluation.CreateEvaluationResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
   resp.SuccessResponse-incident_CreateIncidentResponse:
     properties:
       data:
@@ -1342,6 +1544,17 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/intake.UpdateIntakeFormResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-location_transfer_ListLocationTransfersResponse:
+    properties:
+      data:
+        $ref: '#/definitions/location_transfer.ListLocationTransfersResponse'
       message:
         example: success message
         type: string
@@ -2388,6 +2601,136 @@ paths:
       summary: Get logged-in user's employee profile
       tags:
       - Employee
+  /evaluations:
+    post:
+      consumes:
+      - application/json
+      description: Record progress logs for all current client goals and schedule
+        the next evaluation.
+      parameters:
+      - description: Evaluation Details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/evaluation.CreateEvaluationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-evaluation_CreateEvaluationResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Create a client evaluation
+      tags:
+      - Evaluation
+  /evaluations/critical:
+    get:
+      description: List evaluations due within the next 7 days or overdue.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-array_evaluation_UpcomingEvaluationDTO'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get critical evaluations (Dashboard)
+      tags:
+      - Evaluation
+  /evaluations/history/{clientId}:
+    get:
+      description: Retrieve all past evaluations and goal progress logs for a specific
+        client.
+      parameters:
+      - description: Client ID
+        in: path
+        name: clientId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-array_evaluation_EvaluationHistoryItem'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get evaluation history for a client
+      tags:
+      - Evaluation
+  /evaluations/recent:
+    get:
+      description: List the last 20 evaluations submitted across all clients.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-array_evaluation_GlobalRecentEvaluationDTO'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get recent evaluations (Dashboard)
+      tags:
+      - Evaluation
+  /evaluations/scheduled:
+    get:
+      description: List evaluations scheduled between 8 and 30 days from now.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-array_evaluation_UpcomingEvaluationDTO'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get scheduled evaluations (Dashboard)
+      tags:
+      - Evaluation
   /incidents:
     get:
       consumes:
@@ -2674,6 +3017,143 @@ paths:
           schema:
             $ref: '#/definitions/resp.ErrorResponse'
       summary: Register a location transfer
+      tags:
+      - LocationTransfer
+  /location-transfers/{id}:
+    get:
+      description: Get a single location transfer with all details
+      parameters:
+      - description: Transfer ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-location_transfer_ListLocationTransfersResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get a location transfer by ID
+      tags:
+      - LocationTransfer
+    put:
+      consumes:
+      - application/json
+      description: Update a pending location transfer (new location, coordinator,
+        or reason)
+      parameters:
+      - description: Transfer ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update fields
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/location_transfer.UpdateLocationTransferRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-any'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Update a location transfer
+      tags:
+      - LocationTransfer
+  /location-transfers/{id}/confirm:
+    post:
+      description: Confirm a pending location transfer, updating the client's location
+        and coordinator
+      parameters:
+      - description: Transfer ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-any'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Confirm a location transfer
+      tags:
+      - LocationTransfer
+  /location-transfers/{id}/refuse:
+    post:
+      consumes:
+      - application/json
+      description: Refuse a pending location transfer with a reason
+      parameters:
+      - description: Transfer ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Refusal reason
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/location_transfer.RefuseLocationTransferRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-any'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Refuse a location transfer
       tags:
       - LocationTransfer
   /locations:

@@ -995,32 +995,47 @@ func createRandomIntakeForm(
 		g := randomElement(goals)
 		goalsStr = []string{g}
 	}
+	// Goals: convert strings to params
+	seededGoals := make([]db.CreateClientGoalParams, len(goalsStr))
+	for i, g := range goalsStr {
+		gid, _ := gonanoid.New()
+		seededGoals[i] = db.CreateClientGoalParams{
+			ID:           gid,
+			IntakeFormID: intakeID,
+			Title:        g,
+		}
+	}
+
 	// Notes: include if not empty string
 	noteContent := randomElement(intakeNotes)
 	if noteContent != "" {
 		notes = &noteContent
 	}
 
+	// Evaluation Interval (4-12 weeks)
+	interval := int32(4 + rand.Intn(9))
+
 	_, err = store.CreateIntakeFormTx(ctx, db.CreateIntakeFormTxParams{
 		IntakeForm: db.CreateIntakeFormParams{
-			ID:                 intakeID,
-			RegistrationFormID: registrationFormID,
-			IntakeDate:         intakeDate,
-			IntakeTime:         intakeTime,
-			LocationID:         locationID,
-			CoordinatorID:      coordinatorID,
-			FamilySituation:    familySituation,
-			MainProvider:       mainProvider,
-			Limitations:        limitationsStr,
-			FocusAreas:         focusAreasStr,
-			Goals:              goalsStr,
-			Notes:              notes,
+			ID:                      intakeID,
+			RegistrationFormID:      registrationFormID,
+			IntakeDate:              intakeDate,
+			IntakeTime:              intakeTime,
+			LocationID:              locationID,
+			CoordinatorID:           coordinatorID,
+			FamilySituation:         familySituation,
+			MainProvider:            mainProvider,
+			Limitations:             limitationsStr,
+			FocusAreas:              focusAreasStr,
+			Notes:                   notes,
+			EvaluationIntervalWeeks: &interval,
 		},
 		RegistrationFormID: registrationFormID,
 		RegistrationFormStatus: db.NullRegistrationStatusEnum{
 			RegistrationStatusEnum: db.RegistrationStatusEnumApproved,
 			Valid:                  true,
 		},
+		Goals: seededGoals,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create intake form: %w", err)
@@ -1272,7 +1287,6 @@ func createInCareClient(
 		FamilySituation:     intakeInfo.FamilySituation,
 		Limitations:         intakeInfo.Limitations,
 		FocusAreas:          intakeInfo.FocusAreas,
-		Goals:               intakeInfo.Goals,
 		Notes:               notesStr,
 	})
 	if err != nil {
@@ -1377,7 +1391,6 @@ func createDischargedClient(
 		FamilySituation:     intakeInfo.FamilySituation,
 		Limitations:         intakeInfo.Limitations,
 		FocusAreas:          intakeInfo.FocusAreas,
-		Goals:               intakeInfo.Goals,
 	})
 	if err != nil {
 		return fmt.Errorf("step 1 (create waiting_list) failed: %w", err)

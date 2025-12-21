@@ -229,6 +229,50 @@ func (ns NullGenderEnum) Value() (driver.Value, error) {
 	return string(ns.GenderEnum), nil
 }
 
+type GoalProgressStatus string
+
+const (
+	GoalProgressStatusStarting GoalProgressStatus = "starting"
+	GoalProgressStatusOnTrack  GoalProgressStatus = "on_track"
+	GoalProgressStatusDelayed  GoalProgressStatus = "delayed"
+	GoalProgressStatusAchieved GoalProgressStatus = "achieved"
+)
+
+func (e *GoalProgressStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = GoalProgressStatus(s)
+	case string:
+		*e = GoalProgressStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for GoalProgressStatus: %T", src)
+	}
+	return nil
+}
+
+type NullGoalProgressStatus struct {
+	GoalProgressStatus GoalProgressStatus `json:"goal_progress_status"`
+	Valid              bool               `json:"valid"` // Valid is true if GoalProgressStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullGoalProgressStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.GoalProgressStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.GoalProgressStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullGoalProgressStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.GoalProgressStatus), nil
+}
+
 type IncidentSeverityEnum string
 
 const (
@@ -540,37 +584,58 @@ type Attachment struct {
 }
 
 type Client struct {
-	ID                     string                  `json:"id"`
-	FirstName              string                  `json:"first_name"`
-	LastName               string                  `json:"last_name"`
-	Bsn                    string                  `json:"bsn"`
-	DateOfBirth            pgtype.Date             `json:"date_of_birth"`
-	PhoneNumber            *string                 `json:"phone_number"`
-	Gender                 GenderEnum              `json:"gender"`
-	RegistrationFormID     string                  `json:"registration_form_id"`
-	IntakeFormID           string                  `json:"intake_form_id"`
-	CareType               CareTypeEnum            `json:"care_type"`
-	AmbulatoryWeeklyHours  *int32                  `json:"ambulatory_weekly_hours"`
-	ReferringOrgID         *string                 `json:"referring_org_id"`
-	Status                 ClientStatusEnum        `json:"status"`
-	WaitingListPriority    WaitingListPriorityEnum `json:"waiting_list_priority"`
-	CareStartDate          pgtype.Date             `json:"care_start_date"`
-	CareEndDate            pgtype.Date             `json:"care_end_date"`
-	DischargeDate          pgtype.Date             `json:"discharge_date"`
-	ClosingReport          *string                 `json:"closing_report"`
-	EvaluationReport       *string                 `json:"evaluation_report"`
-	ReasonForDischarge     NullDischargeReasonEnum `json:"reason_for_discharge"`
-	DischargeAttachmentIds []string                `json:"discharge_attachment_ids"`
-	DischargeStatus        NullDischargeStatusEnum `json:"discharge_status"`
-	AssignedLocationID     string                  `json:"assigned_location_id"`
-	CoordinatorID          string                  `json:"coordinator_id"`
-	FamilySituation        *string                 `json:"family_situation"`
-	Limitations            *string                 `json:"limitations"`
-	FocusAreas             *string                 `json:"focus_areas"`
-	Goals                  []string                `json:"goals"`
-	Notes                  *string                 `json:"notes"`
-	CreatedAt              pgtype.Timestamp        `json:"created_at"`
-	UpdatedAt              pgtype.Timestamp        `json:"updated_at"`
+	ID                      string                  `json:"id"`
+	FirstName               string                  `json:"first_name"`
+	LastName                string                  `json:"last_name"`
+	Bsn                     string                  `json:"bsn"`
+	DateOfBirth             pgtype.Date             `json:"date_of_birth"`
+	PhoneNumber             *string                 `json:"phone_number"`
+	Gender                  GenderEnum              `json:"gender"`
+	RegistrationFormID      string                  `json:"registration_form_id"`
+	IntakeFormID            string                  `json:"intake_form_id"`
+	CareType                CareTypeEnum            `json:"care_type"`
+	AmbulatoryWeeklyHours   *int32                  `json:"ambulatory_weekly_hours"`
+	ReferringOrgID          *string                 `json:"referring_org_id"`
+	Status                  ClientStatusEnum        `json:"status"`
+	WaitingListPriority     WaitingListPriorityEnum `json:"waiting_list_priority"`
+	CareStartDate           pgtype.Date             `json:"care_start_date"`
+	CareEndDate             pgtype.Date             `json:"care_end_date"`
+	DischargeDate           pgtype.Date             `json:"discharge_date"`
+	ClosingReport           *string                 `json:"closing_report"`
+	EvaluationReport        *string                 `json:"evaluation_report"`
+	ReasonForDischarge      NullDischargeReasonEnum `json:"reason_for_discharge"`
+	DischargeAttachmentIds  []string                `json:"discharge_attachment_ids"`
+	DischargeStatus         NullDischargeStatusEnum `json:"discharge_status"`
+	AssignedLocationID      string                  `json:"assigned_location_id"`
+	CoordinatorID           string                  `json:"coordinator_id"`
+	FamilySituation         *string                 `json:"family_situation"`
+	Limitations             *string                 `json:"limitations"`
+	FocusAreas              *string                 `json:"focus_areas"`
+	Notes                   *string                 `json:"notes"`
+	EvaluationIntervalWeeks *int32                  `json:"evaluation_interval_weeks"`
+	NextEvaluationDate      pgtype.Date             `json:"next_evaluation_date"`
+	CreatedAt               pgtype.Timestamp        `json:"created_at"`
+	UpdatedAt               pgtype.Timestamp        `json:"updated_at"`
+}
+
+type ClientEvaluation struct {
+	ID             string             `json:"id"`
+	ClientID       string             `json:"client_id"`
+	CoordinatorID  string             `json:"coordinator_id"`
+	EvaluationDate pgtype.Date        `json:"evaluation_date"`
+	OverallNotes   *string            `json:"overall_notes"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
+}
+
+type ClientGoal struct {
+	ID           string             `json:"id"`
+	IntakeFormID string             `json:"intake_form_id"`
+	ClientID     *string            `json:"client_id"`
+	Title        string             `json:"title"`
+	Description  *string            `json:"description"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
 }
 
 type ClientLocationTransfer struct {
@@ -601,6 +666,16 @@ type Employee struct {
 	UpdatedAt   pgtype.Timestamp `json:"updated_at"`
 }
 
+type GoalProgressLog struct {
+	ID            string             `json:"id"`
+	EvaluationID  string             `json:"evaluation_id"`
+	GoalID        string             `json:"goal_id"`
+	Status        GoalProgressStatus `json:"status"`
+	ProgressNotes *string            `json:"progress_notes"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt     pgtype.Timestamptz `json:"updated_at"`
+}
+
 type Incident struct {
 	ID                  string               `json:"id"`
 	ClientID            string               `json:"client_id"`
@@ -619,21 +694,21 @@ type Incident struct {
 }
 
 type IntakeForm struct {
-	ID                 string           `json:"id"`
-	RegistrationFormID string           `json:"registration_form_id"`
-	IntakeDate         pgtype.Date      `json:"intake_date"`
-	IntakeTime         pgtype.Time      `json:"intake_time"`
-	LocationID         string           `json:"location_id"`
-	CoordinatorID      string           `json:"coordinator_id"`
-	FamilySituation    *string          `json:"family_situation"`
-	MainProvider       *string          `json:"main_provider"`
-	Limitations        *string          `json:"limitations"`
-	FocusAreas         *string          `json:"focus_areas"`
-	Goals              []string         `json:"goals"`
-	Notes              *string          `json:"notes"`
-	Status             IntakeStatusEnum `json:"status"`
-	CreatedAt          pgtype.Timestamp `json:"created_at"`
-	UpdatedAt          pgtype.Timestamp `json:"updated_at"`
+	ID                      string           `json:"id"`
+	RegistrationFormID      string           `json:"registration_form_id"`
+	IntakeDate              pgtype.Date      `json:"intake_date"`
+	IntakeTime              pgtype.Time      `json:"intake_time"`
+	LocationID              string           `json:"location_id"`
+	CoordinatorID           string           `json:"coordinator_id"`
+	FamilySituation         *string          `json:"family_situation"`
+	MainProvider            *string          `json:"main_provider"`
+	Limitations             *string          `json:"limitations"`
+	FocusAreas              *string          `json:"focus_areas"`
+	Notes                   *string          `json:"notes"`
+	EvaluationIntervalWeeks *int32           `json:"evaluation_interval_weeks"`
+	Status                  IntakeStatusEnum `json:"status"`
+	CreatedAt               pgtype.Timestamp `json:"created_at"`
+	UpdatedAt               pgtype.Timestamp `json:"updated_at"`
 }
 
 type Location struct {

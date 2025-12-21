@@ -58,7 +58,7 @@ func (h *RBACHandler) SetupRBACRoutes(router *gin.Engine) {
 // @Accept json
 // @Produce json
 // @Param role body CreateRoleRequest true "Role data"
-// @Success 201 {object} CreateRoleResponse
+// @Success 201 {object} resp.SuccessResponse[CreateRoleResponse]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 409 {object} resp.ErrorResponse
@@ -80,7 +80,7 @@ func (h *RBACHandler) CreateRole(ctx *gin.Context) {
 		}
 		return
 	}
-	ctx.JSON(http.StatusCreated, result)
+	ctx.JSON(http.StatusCreated, resp.Success(result, "Role created successfully"))
 }
 
 // @Summary Get a role
@@ -88,7 +88,7 @@ func (h *RBACHandler) CreateRole(ctx *gin.Context) {
 // @Tags RBAC - Roles
 // @Produce json
 // @Param id path string true "Role ID"
-// @Success 200 {object} RoleResponse
+// @Success 200 {object} resp.SuccessResponse[RoleResponse]
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 404 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
@@ -105,7 +105,7 @@ func (h *RBACHandler) GetRole(ctx *gin.Context) {
 		}
 		return
 	}
-	ctx.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, resp.Success(result, "Role retrieved successfully"))
 }
 
 // @Summary List roles
@@ -114,7 +114,7 @@ func (h *RBACHandler) GetRole(ctx *gin.Context) {
 // @Produce json
 // @Param page query int false "Page number"
 // @Param page_size query int false "Page size"
-// @Success 200 {object} resp.PaginationResponse[RoleListItem]
+// @Success 200 {object} resp.SuccessResponse[resp.PaginationResponse[RoleListItem]]
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
 // @Router /admin/roles [get]
@@ -152,7 +152,7 @@ func (h *RBACHandler) UpdateRole(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, resp.Error(err))
 		return
 	}
-	ctx.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, resp.Success(result, "Role updated successfully"))
 }
 
 // @Summary Delete a role
@@ -184,7 +184,7 @@ func (h *RBACHandler) DeleteRole(ctx *gin.Context) {
 // @Produce json
 // @Param page query int false "Page number"
 // @Param page_size query int false "Page size"
-// @Success 200 {object} resp.PaginationResponse[PermissionResponse]
+// @Success 200 {object} resp.SuccessResponse[resp.PaginationResponse[PermissionResponse]]
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
 // @Router /admin/permissions [get]
@@ -195,7 +195,7 @@ func (h *RBACHandler) ListPermissions(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, resp.Error(err))
 		return
 	}
-	ctx.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, resp.Success(result, "Permissions retrieved successfully"))
 }
 
 // ============================================================
@@ -207,7 +207,7 @@ func (h *RBACHandler) ListPermissions(ctx *gin.Context) {
 // @Tags RBAC - Role Permissions
 // @Produce json
 // @Param id path string true "Role ID"
-// @Success 200 {array} PermissionResponse
+// @Success 200 {object} resp.PaginationResponse[PermissionResponse]
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
 // @Router /admin/roles/{id}/permissions [get]
@@ -218,7 +218,7 @@ func (h *RBACHandler) ListPermissionsForRole(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, resp.Error(err))
 		return
 	}
-	ctx.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, resp.Success(result, "Permissions retrieved successfully"))
 }
 
 // @Summary Assign permission to role

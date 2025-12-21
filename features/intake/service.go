@@ -31,24 +31,32 @@ func (s *intakeService) CreateIntakeForm(
 	id := nanoid.Generate()
 	_, err := s.db.CreateIntakeFormTx(ctx, db.CreateIntakeFormTxParams{
 		IntakeForm: db.CreateIntakeFormParams{
-			ID:                 id,
-			RegistrationFormID: req.RegistrationFormID,
-			IntakeDate:         util.StrToPgtypeDate(req.IntakeDate),
-			IntakeTime:         util.StrToPgtypeTime(req.IntakeTime),
-			LocationID:         req.LocationID,
-			CoordinatorID:      req.CoordinatorID,
-			FamilySituation:    req.FamilySituation,
-			MainProvider:       req.MainProvider,
-			Limitations:        req.Limitations,
-			FocusAreas:         req.FocusAreas,
-			Goals:              req.Goals,
-			Notes:              req.Notes,
+			ID:                      id,
+			RegistrationFormID:      req.RegistrationFormID,
+			IntakeDate:              util.StrToPgtypeDate(req.IntakeDate),
+			IntakeTime:              util.StrToPgtypeTime(req.IntakeTime),
+			LocationID:              req.LocationID,
+			CoordinatorID:           req.CoordinatorID,
+			FamilySituation:         req.FamilySituation,
+			MainProvider:            req.MainProvider,
+			Limitations:             req.Limitations,
+			FocusAreas:              req.FocusAreas,
+			Notes:                   req.Notes,
+			EvaluationIntervalWeeks: util.IntToPointerInt32(req.EvaluationInterval),
 		},
 		RegistrationFormID: req.RegistrationFormID,
 		RegistrationFormStatus: db.NullRegistrationStatusEnum{
 			RegistrationStatusEnum: db.RegistrationStatusEnumApproved,
 			Valid:                  true,
 		},
+		Goals: util.Map(req.Goals, func(g GoalDTO) db.CreateClientGoalParams {
+			return db.CreateClientGoalParams{
+				ID:           nanoid.Generate(),
+				IntakeFormID: id,
+				Title:        g.Title,
+				Description:  g.Description,
+			}
+		}),
 	})
 	if err != nil {
 		s.logger.Error(ctx, "CreateIntakeForm", "Failed to create intake form", zap.Error(err))
@@ -124,6 +132,12 @@ func (s *intakeService) GetIntakeForm(
 		return nil, ErrInternal
 	}
 
+	intakeGoals, err := s.db.ListGoalsByIntakeID(ctx, id)
+	if err != nil {
+		s.logger.Error(ctx, "GetIntakeForm", "Failed to list goals", zap.Error(err))
+		return nil, ErrInternal
+	}
+
 	var careType *string
 	if intakeForm.CareType.Valid {
 		ct := string(intakeForm.CareType.CareTypeEnum)
@@ -141,8 +155,8 @@ func (s *intakeService) GetIntakeForm(
 		MainProvider:         intakeForm.MainProvider,
 		Limitations:          intakeForm.Limitations,
 		FocusAreas:           intakeForm.FocusAreas,
-		Goals:                intakeForm.Goals,
 		Notes:                intakeForm.Notes,
+		EvaluationInterval:   util.PointerInt32ToIntValue(intakeForm.EvaluationIntervalWeeks),
 		Status:               string(intakeForm.Status),
 		ClientFirstName:      intakeForm.ClientFirstName,
 		ClientLastName:       intakeForm.ClientLastName,
@@ -153,6 +167,13 @@ func (s *intakeService) GetIntakeForm(
 		CoordinatorFirstName: intakeForm.CoordinatorFirstName,
 		CoordinatorLastName:  intakeForm.CoordinatorLastName,
 		HasClient:            intakeForm.HasClient,
+		Goals: util.Map(intakeGoals, func(g db.ClientGoal) GoalDTO {
+			return GoalDTO{
+				ID:          &g.ID,
+				Title:       g.Title,
+				Description: g.Description,
+			}
+		}),
 	}, nil
 }
 
@@ -170,15 +191,15 @@ func (s *intakeService) UpdateIntakeForm(
 
 	// Build the update params
 	params := db.UpdateIntakeFormParams{
-		ID:              id,
-		FamilySituation: req.FamilySituation,
-		MainProvider:    req.MainProvider,
-		Limitations:     req.Limitations,
-		FocusAreas:      req.FocusAreas,
-		Goals:           req.Goals,
-		Notes:           req.Notes,
-		LocationID:      req.LocationID,
-		CoordinatorID:   req.CoordinatorID,
+		ID:                      id,
+		FamilySituation:         req.FamilySituation,
+		MainProvider:            req.MainProvider,
+		Limitations:             req.Limitations,
+		FocusAreas:              req.FocusAreas,
+		Notes:                   req.Notes,
+		EvaluationIntervalWeeks: util.IntToPointerInt32(req.EvaluationInterval),
+		LocationID:              req.LocationID,
+		CoordinatorID:           req.CoordinatorID,
 	}
 
 	// Handle date/time fields
@@ -205,6 +226,40 @@ func (s *intakeService) UpdateIntakeForm(
 	if err != nil {
 		s.logger.Error(ctx, "UpdateIntakeForm", "Failed to update intake form", zap.Error(err))
 		return nil, ErrInternal
+	}
+
+	// Update goals (simple replacement logic: delete and recreate for now, or sophisticated diff)
+	// For simplicity in early dev:
+	if req.Goals != nil {
+		err = s.db.ExecTx(ctx, func(q *db.Queries) error {
+			// Delete existing goals
+			existingGoals, err := q.ListGoalsByIntakeID(ctx, id)
+			if err != nil {
+				return err
+			}
+			for _, g := range existingGoals {
+				if err := q.DeleteGoal(ctx, g.ID); err != nil {
+					return err
+				}
+			}
+			// Create new goals
+			for _, g := range req.Goals {
+				if err := q.CreateClientGoal(ctx, db.CreateClientGoalParams{
+					ID:           nanoid.Generate(),
+					IntakeFormID: id,
+					Title:        g.Title,
+					Description:  g.Description,
+					ClientID:     nil, // Client will be linked later via LinkGoalsToClient if exists
+				}); err != nil {
+					return err
+				}
+			}
+			return nil
+		})
+		if err != nil {
+			s.logger.Error(ctx, "UpdateIntakeForm", "Failed to update goals", zap.Error(err))
+			return nil, ErrInternal
+		}
 	}
 
 	return &UpdateIntakeFormResponse{

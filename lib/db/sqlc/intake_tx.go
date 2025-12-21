@@ -6,6 +6,7 @@ type CreateIntakeFormTxParams struct {
 	IntakeForm             CreateIntakeFormParams
 	RegistrationFormID     string
 	RegistrationFormStatus NullRegistrationStatusEnum
+	Goals                  []CreateClientGoalParams
 }
 
 type CreateIntakeFormTxResult struct {
@@ -33,6 +34,13 @@ func (s *Store) CreateIntakeFormTx(
 			return err
 		}
 
+		// 3. Create the goals
+		for _, goal := range arg.Goals {
+			if err := q.CreateClientGoal(ctx, goal); err != nil {
+				return err
+			}
+		}
+
 		return nil
 	})
 
@@ -55,14 +63,14 @@ func (s *Store) UpdateIntakeFormTx(ctx context.Context, arg UpdateIntakeFormTxPa
 		// 2. If requested, update the associated client with relevant fields
 		if arg.UpdateClient {
 			if err := q.UpdateClientByIntakeFormID(ctx, UpdateClientByIntakeFormIDParams{
-				IntakeFormID:       arg.IntakeForm.ID,
-				CoordinatorID:      arg.IntakeForm.CoordinatorID,
-				AssignedLocationID: arg.IntakeForm.LocationID,
-				FamilySituation:    arg.IntakeForm.FamilySituation,
-				Limitations:        arg.IntakeForm.Limitations,
-				FocusAreas:         arg.IntakeForm.FocusAreas,
-				Goals:              arg.IntakeForm.Goals,
-				Notes:              arg.IntakeForm.Notes,
+				IntakeFormID:            arg.IntakeForm.ID,
+				CoordinatorID:           arg.IntakeForm.CoordinatorID,
+				AssignedLocationID:      arg.IntakeForm.LocationID,
+				FamilySituation:         arg.IntakeForm.FamilySituation,
+				Limitations:             arg.IntakeForm.Limitations,
+				FocusAreas:              arg.IntakeForm.FocusAreas,
+				Notes:                   arg.IntakeForm.Notes,
+				EvaluationIntervalWeeks: arg.IntakeForm.EvaluationIntervalWeeks,
 			}); err != nil {
 				return err
 			}

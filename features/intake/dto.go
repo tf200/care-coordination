@@ -4,18 +4,25 @@ import (
 	"time"
 )
 
+type GoalDTO struct {
+	ID          *string `json:"id"`
+	Title       string  `json:"title"       binding:"required"`
+	Description *string `json:"description"`
+}
+
 type CreateIntakeFormRequest struct {
-	RegistrationFormID string   `json:"registrationFormId" binding:"required"`
-	IntakeDate         string   `json:"intakeDate"         binding:"required,datetime=2006-01-02"`
-	IntakeTime         string   `json:"intakeTime"         binding:"required,datetime=15:04"`
-	LocationID         string   `json:"locationId"         binding:"required"`
-	CoordinatorID      string   `json:"coordinatorId"      binding:"required"`
-	FamilySituation    *string  `json:"familySituation"`
-	MainProvider       *string  `json:"mainProvider"`
-	Limitations        *string  `json:"limitations"`
-	FocusAreas         *string  `json:"focusAreas"`
-	Goals              []string `json:"goals"              binding:"min=1"`
-	Notes              *string  `json:"notes"`
+	RegistrationFormID string    `json:"registrationFormId" binding:"required"`
+	IntakeDate         string    `json:"intakeDate"         binding:"required,datetime=2006-01-02"`
+	IntakeTime         string    `json:"intakeTime"         binding:"required,datetime=15:04"`
+	LocationID         string    `json:"locationId"         binding:"required"`
+	CoordinatorID      string    `json:"coordinatorId"      binding:"required"`
+	FamilySituation    *string   `json:"familySituation"`
+	MainProvider       *string   `json:"mainProvider"`
+	Limitations        *string   `json:"limitations"`
+	FocusAreas         *string   `json:"focusAreas"`
+	Goals              []GoalDTO `json:"goals"              binding:"min=1"`
+	Notes              *string   `json:"notes"`
+	EvaluationInterval *int      `json:"evaluationIntervalWeeks" binding:"omitempty,min=1"`
 }
 
 type CreateIntakeFormResponse struct {
@@ -57,8 +64,9 @@ type GetIntakeFormResponse struct {
 	MainProvider         *string   `json:"mainProvider"`
 	Limitations          *string   `json:"limitations"`
 	FocusAreas           *string   `json:"focusAreas"`
-	Goals                []string  `json:"goals"`
+	Goals                []GoalDTO `json:"goals"`
 	Notes                *string   `json:"notes"`
+	EvaluationInterval   int       `json:"evaluationIntervalWeeks"`
 	Status               string    `json:"status"`
 	ClientFirstName      *string   `json:"clientFirstName"`
 	ClientLastName       *string   `json:"clientLastName"`
@@ -72,17 +80,18 @@ type GetIntakeFormResponse struct {
 }
 
 type UpdateIntakeFormRequest struct {
-	IntakeDate      *string  `json:"intakeDate"      binding:"omitempty,datetime=2006-01-02"`
-	IntakeTime      *string  `json:"intakeTime"      binding:"omitempty,datetime=15:04"`
-	LocationID      *string  `json:"locationId"`
-	CoordinatorID   *string  `json:"coordinatorId"`
-	FamilySituation *string  `json:"familySituation"`
-	MainProvider    *string  `json:"mainProvider"`
-	Limitations     *string  `json:"limitations"`
-	FocusAreas      *string  `json:"focusAreas"`
-	Goals           []string `json:"goals"`
-	Notes           *string  `json:"notes"`
-	Status          *string  `json:"status"          binding:"omitempty,oneof=completed pending"`
+	IntakeDate         *string   `json:"intakeDate"      binding:"omitempty,datetime=2006-01-02"`
+	IntakeTime         *string   `json:"intakeTime"      binding:"omitempty,datetime=15:04"`
+	LocationID         *string   `json:"locationId"`
+	CoordinatorID      *string   `json:"coordinatorId"`
+	FamilySituation    *string   `json:"familySituation"`
+	MainProvider       *string   `json:"mainProvider"`
+	Limitations        *string   `json:"limitations"`
+	FocusAreas         *string   `json:"focusAreas"`
+	Goals              []GoalDTO `json:"goals"`
+	Notes              *string   `json:"notes"`
+	EvaluationInterval *int      `json:"evaluationIntervalWeeks" binding:"omitempty,min=1"`
+	Status             *string   `json:"status"          binding:"omitempty,oneof=completed pending"`
 }
 
 type UpdateIntakeFormResponse struct {

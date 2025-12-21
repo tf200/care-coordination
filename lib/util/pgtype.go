@@ -58,6 +58,10 @@ func StrToPgtypeDate(s string) pgtype.Date {
 	return pgtype.Date{Time: t, Valid: true}
 }
 
+func TimeToPgtypeDate(t time.Time) pgtype.Date {
+	return pgtype.Date{Time: t, Valid: true}
+}
+
 func PgtypeDateToStr(d pgtype.Date) string {
 	if !d.Valid {
 		return ""
@@ -70,4 +74,35 @@ func PgtypeTimestampToStr(t pgtype.Timestamp) string {
 		return ""
 	}
 	return t.Time.Format(time.RFC3339)
+}
+
+func Map[T any, R any](items []T, f func(T) R) []R {
+	result := make([]R, len(items))
+	for i, item := range items {
+		result[i] = f(item)
+	}
+	return result
+}
+
+func IntToPointerInt32(v *int) *int32 {
+	if v == nil {
+		return nil
+	}
+	v32 := int32(*v)
+	return &v32
+}
+
+func PointerInt32ToInt(v *int32) *int {
+	if v == nil {
+		return nil
+	}
+	vInt := int(*v)
+	return &vInt
+}
+
+func PointerInt32ToIntValue(v *int32) int {
+	if v == nil {
+		return 0
+	}
+	return int(*v)
 }

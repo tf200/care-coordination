@@ -31,59 +31,60 @@ INSERT INTO clients (
     family_situation,
     limitations,
     focus_areas,
-    goals,
-    notes
+    notes,
+    evaluation_interval_weeks
 ) VALUES (
     $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20
 )
-RETURNING id, first_name, last_name, bsn, date_of_birth, phone_number, gender, registration_form_id, intake_form_id, care_type, referring_org_id, status, assigned_location_id, coordinator_id, family_situation, limitations, focus_areas, goals, notes, created_at, updated_at
+RETURNING id, first_name, last_name, bsn, date_of_birth, phone_number, gender, registration_form_id, intake_form_id, care_type, referring_org_id, status, assigned_location_id, coordinator_id, family_situation, limitations, focus_areas, notes, evaluation_interval_weeks, next_evaluation_date, created_at, updated_at
 `
 
 type CreateClientParams struct {
-	ID                  string                  `json:"id"`
-	FirstName           string                  `json:"first_name"`
-	LastName            string                  `json:"last_name"`
-	Bsn                 string                  `json:"bsn"`
-	DateOfBirth         pgtype.Date             `json:"date_of_birth"`
-	PhoneNumber         *string                 `json:"phone_number"`
-	Gender              GenderEnum              `json:"gender"`
-	RegistrationFormID  string                  `json:"registration_form_id"`
-	IntakeFormID        string                  `json:"intake_form_id"`
-	CareType            CareTypeEnum            `json:"care_type"`
-	ReferringOrgID      *string                 `json:"referring_org_id"`
-	WaitingListPriority WaitingListPriorityEnum `json:"waiting_list_priority"`
-	Status              ClientStatusEnum        `json:"status"`
-	AssignedLocationID  string                  `json:"assigned_location_id"`
-	CoordinatorID       string                  `json:"coordinator_id"`
-	FamilySituation     *string                 `json:"family_situation"`
-	Limitations         *string                 `json:"limitations"`
-	FocusAreas          *string                 `json:"focus_areas"`
-	Goals               []string                `json:"goals"`
-	Notes               *string                 `json:"notes"`
+	ID                      string                  `json:"id"`
+	FirstName               string                  `json:"first_name"`
+	LastName                string                  `json:"last_name"`
+	Bsn                     string                  `json:"bsn"`
+	DateOfBirth             pgtype.Date             `json:"date_of_birth"`
+	PhoneNumber             *string                 `json:"phone_number"`
+	Gender                  GenderEnum              `json:"gender"`
+	RegistrationFormID      string                  `json:"registration_form_id"`
+	IntakeFormID            string                  `json:"intake_form_id"`
+	CareType                CareTypeEnum            `json:"care_type"`
+	ReferringOrgID          *string                 `json:"referring_org_id"`
+	WaitingListPriority     WaitingListPriorityEnum `json:"waiting_list_priority"`
+	Status                  ClientStatusEnum        `json:"status"`
+	AssignedLocationID      string                  `json:"assigned_location_id"`
+	CoordinatorID           string                  `json:"coordinator_id"`
+	FamilySituation         *string                 `json:"family_situation"`
+	Limitations             *string                 `json:"limitations"`
+	FocusAreas              *string                 `json:"focus_areas"`
+	Notes                   *string                 `json:"notes"`
+	EvaluationIntervalWeeks *int32                  `json:"evaluation_interval_weeks"`
 }
 
 type CreateClientRow struct {
-	ID                 string           `json:"id"`
-	FirstName          string           `json:"first_name"`
-	LastName           string           `json:"last_name"`
-	Bsn                string           `json:"bsn"`
-	DateOfBirth        pgtype.Date      `json:"date_of_birth"`
-	PhoneNumber        *string          `json:"phone_number"`
-	Gender             GenderEnum       `json:"gender"`
-	RegistrationFormID string           `json:"registration_form_id"`
-	IntakeFormID       string           `json:"intake_form_id"`
-	CareType           CareTypeEnum     `json:"care_type"`
-	ReferringOrgID     *string          `json:"referring_org_id"`
-	Status             ClientStatusEnum `json:"status"`
-	AssignedLocationID string           `json:"assigned_location_id"`
-	CoordinatorID      string           `json:"coordinator_id"`
-	FamilySituation    *string          `json:"family_situation"`
-	Limitations        *string          `json:"limitations"`
-	FocusAreas         *string          `json:"focus_areas"`
-	Goals              []string         `json:"goals"`
-	Notes              *string          `json:"notes"`
-	CreatedAt          pgtype.Timestamp `json:"created_at"`
-	UpdatedAt          pgtype.Timestamp `json:"updated_at"`
+	ID                      string           `json:"id"`
+	FirstName               string           `json:"first_name"`
+	LastName                string           `json:"last_name"`
+	Bsn                     string           `json:"bsn"`
+	DateOfBirth             pgtype.Date      `json:"date_of_birth"`
+	PhoneNumber             *string          `json:"phone_number"`
+	Gender                  GenderEnum       `json:"gender"`
+	RegistrationFormID      string           `json:"registration_form_id"`
+	IntakeFormID            string           `json:"intake_form_id"`
+	CareType                CareTypeEnum     `json:"care_type"`
+	ReferringOrgID          *string          `json:"referring_org_id"`
+	Status                  ClientStatusEnum `json:"status"`
+	AssignedLocationID      string           `json:"assigned_location_id"`
+	CoordinatorID           string           `json:"coordinator_id"`
+	FamilySituation         *string          `json:"family_situation"`
+	Limitations             *string          `json:"limitations"`
+	FocusAreas              *string          `json:"focus_areas"`
+	Notes                   *string          `json:"notes"`
+	EvaluationIntervalWeeks *int32           `json:"evaluation_interval_weeks"`
+	NextEvaluationDate      pgtype.Date      `json:"next_evaluation_date"`
+	CreatedAt               pgtype.Timestamp `json:"created_at"`
+	UpdatedAt               pgtype.Timestamp `json:"updated_at"`
 }
 
 func (q *Queries) CreateClient(ctx context.Context, arg CreateClientParams) (CreateClientRow, error) {
@@ -106,8 +107,8 @@ func (q *Queries) CreateClient(ctx context.Context, arg CreateClientParams) (Cre
 		arg.FamilySituation,
 		arg.Limitations,
 		arg.FocusAreas,
-		arg.Goals,
 		arg.Notes,
+		arg.EvaluationIntervalWeeks,
 	)
 	var i CreateClientRow
 	err := row.Scan(
@@ -128,8 +129,9 @@ func (q *Queries) CreateClient(ctx context.Context, arg CreateClientParams) (Cre
 		&i.FamilySituation,
 		&i.Limitations,
 		&i.FocusAreas,
-		&i.Goals,
 		&i.Notes,
+		&i.EvaluationIntervalWeeks,
+		&i.NextEvaluationDate,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -137,7 +139,7 @@ func (q *Queries) CreateClient(ctx context.Context, arg CreateClientParams) (Cre
 }
 
 const getClientByID = `-- name: GetClientByID :one
-SELECT id, first_name, last_name, bsn, date_of_birth, phone_number, gender, registration_form_id, intake_form_id, care_type, ambulatory_weekly_hours, referring_org_id, status, waiting_list_priority, care_start_date, care_end_date, discharge_date, closing_report, evaluation_report, reason_for_discharge, discharge_attachment_ids, discharge_status, assigned_location_id, coordinator_id, family_situation, limitations, focus_areas, goals, notes, created_at, updated_at FROM clients WHERE id = $1
+SELECT id, first_name, last_name, bsn, date_of_birth, phone_number, gender, registration_form_id, intake_form_id, care_type, ambulatory_weekly_hours, referring_org_id, status, waiting_list_priority, care_start_date, care_end_date, discharge_date, closing_report, evaluation_report, reason_for_discharge, discharge_attachment_ids, discharge_status, assigned_location_id, coordinator_id, family_situation, limitations, focus_areas, notes, evaluation_interval_weeks, next_evaluation_date, created_at, updated_at FROM clients WHERE id = $1
 `
 
 func (q *Queries) GetClientByID(ctx context.Context, id string) (Client, error) {
@@ -171,8 +173,9 @@ func (q *Queries) GetClientByID(ctx context.Context, id string) (Client, error) 
 		&i.FamilySituation,
 		&i.Limitations,
 		&i.FocusAreas,
-		&i.Goals,
 		&i.Notes,
+		&i.EvaluationIntervalWeeks,
+		&i.NextEvaluationDate,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -527,52 +530,54 @@ UPDATE clients SET
     family_situation = COALESCE($16, family_situation),
     limitations = COALESCE($17, limitations),
     focus_areas = COALESCE($18, focus_areas),
-    goals = COALESCE($19, goals),
-    notes = COALESCE($20, notes),
-    ambulatory_weekly_hours = COALESCE($21, ambulatory_weekly_hours),
-    care_start_date = COALESCE($22, care_start_date),
-    care_end_date = COALESCE($23, care_end_date),
-    discharge_date = COALESCE($24, discharge_date),
-    closing_report = COALESCE($25, closing_report),
-    evaluation_report = COALESCE($26, evaluation_report),
-    reason_for_discharge = COALESCE($27::discharge_reason_enum, reason_for_discharge),
-    discharge_attachment_ids = COALESCE($28, discharge_attachment_ids),
-    discharge_status = COALESCE($29::discharge_status_enum, discharge_status),
+    notes = COALESCE($19, notes),
+    evaluation_interval_weeks = COALESCE($20, evaluation_interval_weeks),
+    next_evaluation_date = COALESCE($21, next_evaluation_date),
+    ambulatory_weekly_hours = COALESCE($22, ambulatory_weekly_hours),
+    care_start_date = COALESCE($23, care_start_date),
+    care_end_date = COALESCE($24, care_end_date),
+    discharge_date = COALESCE($25, discharge_date),
+    closing_report = COALESCE($26, closing_report),
+    evaluation_report = COALESCE($27, evaluation_report),
+    reason_for_discharge = COALESCE($28::discharge_reason_enum, reason_for_discharge),
+    discharge_attachment_ids = COALESCE($29, discharge_attachment_ids),
+    discharge_status = COALESCE($30::discharge_status_enum, discharge_status),
     updated_at = NOW()
 WHERE id = $1
 RETURNING id
 `
 
 type UpdateClientParams struct {
-	ID                     string                      `json:"id"`
-	FirstName              *string                     `json:"first_name"`
-	LastName               *string                     `json:"last_name"`
-	Bsn                    *string                     `json:"bsn"`
-	DateOfBirth            pgtype.Date                 `json:"date_of_birth"`
-	PhoneNumber            *string                     `json:"phone_number"`
-	Gender                 NullGenderEnum              `json:"gender"`
-	RegistrationFormID     *string                     `json:"registration_form_id"`
-	IntakeFormID           *string                     `json:"intake_form_id"`
-	CareType               NullCareTypeEnum            `json:"care_type"`
-	ReferringOrgID         *string                     `json:"referring_org_id"`
-	WaitingListPriority    NullWaitingListPriorityEnum `json:"waiting_list_priority"`
-	Status                 NullClientStatusEnum        `json:"status"`
-	AssignedLocationID     *string                     `json:"assigned_location_id"`
-	CoordinatorID          *string                     `json:"coordinator_id"`
-	FamilySituation        *string                     `json:"family_situation"`
-	Limitations            *string                     `json:"limitations"`
-	FocusAreas             *string                     `json:"focus_areas"`
-	Goals                  []string                    `json:"goals"`
-	Notes                  *string                     `json:"notes"`
-	AmbulatoryWeeklyHours  *int32                      `json:"ambulatory_weekly_hours"`
-	CareStartDate          pgtype.Date                 `json:"care_start_date"`
-	CareEndDate            pgtype.Date                 `json:"care_end_date"`
-	DischargeDate          pgtype.Date                 `json:"discharge_date"`
-	ClosingReport          *string                     `json:"closing_report"`
-	EvaluationReport       *string                     `json:"evaluation_report"`
-	ReasonForDischarge     NullDischargeReasonEnum     `json:"reason_for_discharge"`
-	DischargeAttachmentIds []string                    `json:"discharge_attachment_ids"`
-	DischargeStatus        NullDischargeStatusEnum     `json:"discharge_status"`
+	ID                      string                      `json:"id"`
+	FirstName               *string                     `json:"first_name"`
+	LastName                *string                     `json:"last_name"`
+	Bsn                     *string                     `json:"bsn"`
+	DateOfBirth             pgtype.Date                 `json:"date_of_birth"`
+	PhoneNumber             *string                     `json:"phone_number"`
+	Gender                  NullGenderEnum              `json:"gender"`
+	RegistrationFormID      *string                     `json:"registration_form_id"`
+	IntakeFormID            *string                     `json:"intake_form_id"`
+	CareType                NullCareTypeEnum            `json:"care_type"`
+	ReferringOrgID          *string                     `json:"referring_org_id"`
+	WaitingListPriority     NullWaitingListPriorityEnum `json:"waiting_list_priority"`
+	Status                  NullClientStatusEnum        `json:"status"`
+	AssignedLocationID      *string                     `json:"assigned_location_id"`
+	CoordinatorID           *string                     `json:"coordinator_id"`
+	FamilySituation         *string                     `json:"family_situation"`
+	Limitations             *string                     `json:"limitations"`
+	FocusAreas              *string                     `json:"focus_areas"`
+	Notes                   *string                     `json:"notes"`
+	EvaluationIntervalWeeks *int32                      `json:"evaluation_interval_weeks"`
+	NextEvaluationDate      pgtype.Date                 `json:"next_evaluation_date"`
+	AmbulatoryWeeklyHours   *int32                      `json:"ambulatory_weekly_hours"`
+	CareStartDate           pgtype.Date                 `json:"care_start_date"`
+	CareEndDate             pgtype.Date                 `json:"care_end_date"`
+	DischargeDate           pgtype.Date                 `json:"discharge_date"`
+	ClosingReport           *string                     `json:"closing_report"`
+	EvaluationReport        *string                     `json:"evaluation_report"`
+	ReasonForDischarge      NullDischargeReasonEnum     `json:"reason_for_discharge"`
+	DischargeAttachmentIds  []string                    `json:"discharge_attachment_ids"`
+	DischargeStatus         NullDischargeStatusEnum     `json:"discharge_status"`
 }
 
 func (q *Queries) UpdateClient(ctx context.Context, arg UpdateClientParams) (string, error) {
@@ -595,8 +600,9 @@ func (q *Queries) UpdateClient(ctx context.Context, arg UpdateClientParams) (str
 		arg.FamilySituation,
 		arg.Limitations,
 		arg.FocusAreas,
-		arg.Goals,
 		arg.Notes,
+		arg.EvaluationIntervalWeeks,
+		arg.NextEvaluationDate,
 		arg.AmbulatoryWeeklyHours,
 		arg.CareStartDate,
 		arg.CareEndDate,
@@ -619,21 +625,21 @@ UPDATE clients SET
     family_situation = COALESCE($4, family_situation),
     limitations = COALESCE($5, limitations),
     focus_areas = COALESCE($6, focus_areas),
-    goals = COALESCE($7, goals),
-    notes = COALESCE($8, notes),
+    notes = COALESCE($7, notes),
+    evaluation_interval_weeks = COALESCE($8, evaluation_interval_weeks),
     updated_at = NOW()
 WHERE intake_form_id = $1
 `
 
 type UpdateClientByIntakeFormIDParams struct {
-	IntakeFormID       string   `json:"intake_form_id"`
-	CoordinatorID      *string  `json:"coordinator_id"`
-	AssignedLocationID *string  `json:"assigned_location_id"`
-	FamilySituation    *string  `json:"family_situation"`
-	Limitations        *string  `json:"limitations"`
-	FocusAreas         *string  `json:"focus_areas"`
-	Goals              []string `json:"goals"`
-	Notes              *string  `json:"notes"`
+	IntakeFormID            string  `json:"intake_form_id"`
+	CoordinatorID           *string `json:"coordinator_id"`
+	AssignedLocationID      *string `json:"assigned_location_id"`
+	FamilySituation         *string `json:"family_situation"`
+	Limitations             *string `json:"limitations"`
+	FocusAreas              *string `json:"focus_areas"`
+	Notes                   *string `json:"notes"`
+	EvaluationIntervalWeeks *int32  `json:"evaluation_interval_weeks"`
 }
 
 func (q *Queries) UpdateClientByIntakeFormID(ctx context.Context, arg UpdateClientByIntakeFormIDParams) error {
@@ -644,8 +650,8 @@ func (q *Queries) UpdateClientByIntakeFormID(ctx context.Context, arg UpdateClie
 		arg.FamilySituation,
 		arg.Limitations,
 		arg.FocusAreas,
-		arg.Goals,
 		arg.Notes,
+		arg.EvaluationIntervalWeeks,
 	)
 	return err
 }

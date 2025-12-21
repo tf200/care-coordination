@@ -106,6 +106,7 @@ CREATE TABLE  employees (
 
 CREATE TYPE care_type_enum AS ENUM ('protected_living', 'semi_independent_living', 'independent_assisted_living', 'ambulatory_care');
 CREATE TYPE registration_status_enum AS ENUM ('pending', 'approved', 'rejected', 'in_review');
+CREATE TYPE goal_progress_status AS ENUM ('starting', 'on_track', 'delayed', 'achieved');
 
  CREATE TABLE registration_forms (
  -- client information
@@ -144,8 +145,8 @@ CREATE TABLE intake_forms (
     main_provider TEXT,
     limitations TEXT,
     focus_areas TEXT,
-    goals TEXT[],
     notes TEXT,
+    evaluation_interval_weeks INTEGER DEFAULT 5,
     status intake_status_enum NOT NULL DEFAULT 'pending',
     created_at TIMESTAMP  DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP  DEFAULT CURRENT_TIMESTAMP
@@ -210,8 +211,9 @@ CREATE TABLE clients (
     family_situation TEXT,
     limitations TEXT,
     focus_areas TEXT,
-    goals TEXT[],
     notes TEXT,
+    evaluation_interval_weeks INTEGER DEFAULT 5,
+    next_evaluation_date DATE,
     
     created_at TIMESTAMP  DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP  DEFAULT CURRENT_TIMESTAMP,
@@ -304,6 +306,145 @@ CREATE TABLE incidents (
     created_at TIMESTAMP  DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP  DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE client_goals (
+    id TEXT PRIMARY KEY,
+    intake_form_id TEXT NOT NULL REFERENCES intake_forms(id) ON DELETE CASCADE,
+    client_id TEXT REFERENCES clients(id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- RLS Policies
+ALTER TABLE client_goals ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY admin_all_goals ON client_goals
+    FOR ALL
+    TO PUBLIC
+    USING (
+        EXISTS (
+            SELECT 1 FROM user_roles ur
+            JOIN roles r ON ur.role_id = r.id
+            WHERE ur.user_id = current_setting('app.current_user_id', true)::text
+            AND r.name = 'admin'
+        )
+    );
+
+CREATE POLICY coordinator_goals ON client_goals
+    FOR ALL
+    TO PUBLIC
+    USING (
+        EXISTS (
+            SELECT 1 FROM user_roles ur
+            JOIN roles r ON ur.role_id = r.id
+            WHERE ur.user_id = current_setting('app.current_user_id', true)::text
+            AND r.name = 'coordinator'
+        )
+        AND (
+            -- If goal is linked to a client, check client's coordinator
+            (client_id IS NOT NULL AND EXISTS (
+                SELECT 1 FROM clients c
+                WHERE c.id = client_id
+                AND c.coordinator_id = (
+                    SELECT id FROM employees 
+                    WHERE user_id = current_setting('app.current_user_id', true)::text
+                    LIMIT 1
+                )
+            ))
+            OR
+            -- If goal only linked to intake_form, check intake_form's coordinator
+            (client_id IS NULL AND EXISTS (
+                SELECT 1 FROM intake_forms i
+                WHERE i.id = intake_form_id
+                AND i.coordinator_id = (
+                    SELECT id FROM employees 
+                    WHERE user_id = current_setting('app.current_user_id', true)::text
+                    LIMIT 1
+                )
+            ))
+        )
+    );
+
+-- Client Evaluations table
+CREATE TABLE client_evaluations (
+    id TEXT PRIMARY KEY,
+    client_id TEXT NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+    coordinator_id TEXT NOT NULL REFERENCES employees(id),
+    evaluation_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    overall_notes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Goal Progress Logs table
+CREATE TABLE goal_progress_logs (
+    id TEXT PRIMARY KEY,
+    evaluation_id TEXT NOT NULL REFERENCES client_evaluations(id) ON DELETE CASCADE,
+    goal_id TEXT NOT NULL REFERENCES client_goals(id) ON DELETE CASCADE,
+    status goal_progress_status NOT NULL DEFAULT 'on_track',
+    progress_notes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- RLS for Client Evaluations
+ALTER TABLE client_evaluations ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY admin_all_evaluations ON client_evaluations
+    FOR ALL TO PUBLIC
+    USING (
+        EXISTS (
+            SELECT 1 FROM user_roles ur
+            JOIN roles r ON ur.role_id = r.id
+            WHERE ur.user_id = current_setting('app.current_user_id', true)::text
+            AND r.name = 'admin'
+        )
+    );
+
+CREATE POLICY coordinator_evaluations ON client_evaluations
+    FOR ALL TO PUBLIC
+    USING (
+        EXISTS (
+            SELECT 1 FROM user_roles ur
+            JOIN roles r ON ur.role_id = r.id
+            WHERE ur.user_id = current_setting('app.current_user_id', true)::text
+            AND r.name = 'coordinator'
+        )
+        AND EXISTS (
+            SELECT 1 FROM clients c
+            WHERE c.id = client_id
+            AND c.coordinator_id = (
+                SELECT id FROM employees 
+                WHERE user_id = current_setting('app.current_user_id', true)::text
+                LIMIT 1
+            )
+        )
+    );
+
+-- RLS for Goal Progress Logs
+ALTER TABLE goal_progress_logs ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY admin_all_progress_logs ON goal_progress_logs
+    FOR ALL TO PUBLIC
+    USING (
+        EXISTS (
+            SELECT 1 FROM user_roles ur
+            JOIN roles r ON ur.role_id = r.id
+            WHERE ur.user_id = current_setting('app.current_user_id', true)::text
+            AND r.name = 'admin'
+        )
+    );
+
+CREATE POLICY coordinator_progress_logs ON goal_progress_logs
+    FOR ALL TO PUBLIC
+    USING (
+        EXISTS (
+            SELECT 1 FROM client_evaluations e
+            WHERE e.id = evaluation_id
+        )
+    );
 
 -- RLS Policies
 ALTER TABLE clients ENABLE ROW LEVEL SECURITY;

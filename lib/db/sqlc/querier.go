@@ -21,7 +21,10 @@ type Querier interface {
 	ConfirmLocationTransfer(ctx context.Context, id string) error
 	CreateAttachment(ctx context.Context, arg CreateAttachmentParams) error
 	CreateClient(ctx context.Context, arg CreateClientParams) (CreateClientRow, error)
+	CreateClientEvaluation(ctx context.Context, arg CreateClientEvaluationParams) (ClientEvaluation, error)
+	CreateClientGoal(ctx context.Context, arg CreateClientGoalParams) error
 	CreateEmployee(ctx context.Context, arg CreateEmployeeParams) error
+	CreateGoalProgressLog(ctx context.Context, arg CreateGoalProgressLogParams) error
 	CreateIncident(ctx context.Context, arg CreateIncidentParams) error
 	CreateIntakeForm(ctx context.Context, arg CreateIntakeFormParams) error
 	CreateLocation(ctx context.Context, arg CreateLocationParams) error
@@ -40,28 +43,36 @@ type Querier interface {
 	CreateUserSession(ctx context.Context, arg CreateUserSessionParams) error
 	DecrementLocationOccupied(ctx context.Context, id string) error
 	DeleteAllPermissionsFromRole(ctx context.Context, roleID string) error
+	DeleteGoal(ctx context.Context, id string) error
 	DeletePermission(ctx context.Context, id string) error
 	DeleteReferringOrg(ctx context.Context, id string) error
 	DeleteRole(ctx context.Context, id string) error
 	DeleteUserSession(ctx context.Context, tokenHash string) error
 	GetClientByID(ctx context.Context, id string) (Client, error)
+	GetClientEvaluationHistory(ctx context.Context, clientID string) ([]GetClientEvaluationHistoryRow, error)
+	GetCriticalEvaluations(ctx context.Context, arg GetCriticalEvaluationsParams) ([]GetCriticalEvaluationsRow, error)
 	GetEmployeeByUserID(ctx context.Context, userID string) (GetEmployeeByUserIDRow, error)
 	GetIntakeForm(ctx context.Context, id string) (IntakeForm, error)
 	GetIntakeFormWithDetails(ctx context.Context, id string) (GetIntakeFormWithDetailsRow, error)
 	GetLocationTransferByID(ctx context.Context, id string) (GetLocationTransferByIDRow, error)
 	GetPermissionByID(ctx context.Context, id string) (Permission, error)
+	GetRecentEvaluationsGlobal(ctx context.Context, arg GetRecentEvaluationsGlobalParams) ([]GetRecentEvaluationsGlobalRow, error)
 	GetReferringOrgByID(ctx context.Context, id string) (ReferringOrg, error)
 	GetRegistrationForm(ctx context.Context, id string) (RegistrationForm, error)
 	GetRegistrationFormWithDetails(ctx context.Context, id string) (GetRegistrationFormWithDetailsRow, error)
 	GetRoleByID(ctx context.Context, id string) (Role, error)
 	GetRoleByName(ctx context.Context, name string) (Role, error)
 	GetRoleForUser(ctx context.Context, userID string) (Role, error)
+	GetScheduledEvaluations(ctx context.Context, arg GetScheduledEvaluationsParams) ([]GetScheduledEvaluationsRow, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserSession(ctx context.Context, tokenHash string) (Session, error)
 	HasPermission(ctx context.Context, arg HasPermissionParams) (bool, error)
 	IncrementLocationOccupied(ctx context.Context, id string) error
+	LinkGoalsToClient(ctx context.Context, arg LinkGoalsToClientParams) error
 	ListDischargedClients(ctx context.Context, arg ListDischargedClientsParams) ([]ListDischargedClientsRow, error)
 	ListEmployees(ctx context.Context, arg ListEmployeesParams) ([]ListEmployeesRow, error)
+	ListGoalsByClientID(ctx context.Context, clientID *string) ([]ClientGoal, error)
+	ListGoalsByIntakeID(ctx context.Context, intakeFormID string) ([]ClientGoal, error)
 	ListInCareClients(ctx context.Context, arg ListInCareClientsParams) ([]ListInCareClientsRow, error)
 	ListIncidents(ctx context.Context, arg ListIncidentsParams) ([]ListIncidentsRow, error)
 	ListIntakeForms(ctx context.Context, arg ListIntakeFormsParams) ([]ListIntakeFormsRow, error)
@@ -82,6 +93,8 @@ type Querier interface {
 	UpdateClient(ctx context.Context, arg UpdateClientParams) (string, error)
 	UpdateClientByIntakeFormID(ctx context.Context, arg UpdateClientByIntakeFormIDParams) error
 	UpdateClientByRegistrationFormID(ctx context.Context, arg UpdateClientByRegistrationFormIDParams) error
+	UpdateClientGoal(ctx context.Context, arg UpdateClientGoalParams) error
+	UpdateClientNextEvaluationDate(ctx context.Context, arg UpdateClientNextEvaluationDateParams) error
 	UpdateIntakeForm(ctx context.Context, arg UpdateIntakeFormParams) error
 	UpdateIntakeFormStatus(ctx context.Context, arg UpdateIntakeFormStatusParams) error
 	UpdateLocationTransfer(ctx context.Context, arg UpdateLocationTransferParams) error

@@ -1,0 +1,56 @@
+package evaluation
+
+import "time"
+
+type GoalProgressDTO struct {
+	GoalID        string  `json:"goalId"        binding:"required"`
+	Status        string  `json:"status"        binding:"required,oneof=starting on_track delayed achieved"`
+	ProgressNotes *string `json:"progressNotes"`
+}
+
+type CreateEvaluationRequest struct {
+	ClientID       string            `json:"clientId"      binding:"required"`
+	CoordinatorID  string            `json:"coordinatorId" binding:"required"`
+	EvaluationDate string            `json:"evaluationDate" binding:"required,datetime=2006-01-02"`
+	OverallNotes   *string           `json:"overallNotes"`
+	ProgressLogs   []GoalProgressDTO `json:"progressLogs"   binding:"min=1"`
+}
+
+type CreateEvaluationResponse struct {
+	ID                 string    `json:"id"`
+	NextEvaluationDate time.Time `json:"nextEvaluationDate"`
+}
+
+type EvaluationHistoryItem struct {
+	EvaluationID         string    `json:"evaluationId"`
+	EvaluationDate       time.Time `json:"evaluationDate"`
+	OverallNotes         *string   `json:"overallNotes"`
+	GoalID               string    `json:"goalId"`
+	GoalTitle            string    `json:"goalTitle"`
+	Status               string    `json:"status"`
+	ProgressNotes        *string   `json:"progressNotes"`
+	CoordinatorFirstName string    `json:"coordinatorFirstName"`
+	CoordinatorLastName  string    `json:"coordinatorLastName"`
+}
+
+type UpcomingEvaluationDTO struct {
+	ID                      string    `json:"id"`
+	FirstName               string    `json:"firstName"`
+	LastName                string    `json:"lastName"`
+	NextEvaluationDate      time.Time `json:"nextEvaluationDate"`
+	EvaluationIntervalWeeks int       `json:"evaluationIntervalWeeks"`
+	LocationName            string    `json:"locationName"`
+	CoordinatorFirstName    string    `json:"coordinatorFirstName"`
+	CoordinatorLastName     string    `json:"coordinatorLastName"`
+}
+
+type GlobalRecentEvaluationDTO struct {
+	EvaluationID         string    `json:"evaluationId"`
+	EvaluationDate       time.Time `json:"evaluationDate"`
+	ClientFirstName      string    `json:"clientFirstName"`
+	ClientLastName       string    `json:"clientLastName"`
+	CoordinatorFirstName string    `json:"coordinatorFirstName"`
+	CoordinatorLastName  string    `json:"coordinatorLastName"`
+	TotalGoals           int       `json:"totalGoals"`
+	GoalsAchieved        int       `json:"goalsAchieved"`
+}

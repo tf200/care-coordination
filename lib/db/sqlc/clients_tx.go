@@ -34,6 +34,14 @@ func (s *Store) MoveClientToWaitingListTx(
 			return err
 		}
 
+		// 3. Link goals to the new client
+		if err := q.LinkGoalsToClient(ctx, LinkGoalsToClientParams{
+			ClientID:     &client.ID,
+			IntakeFormID: arg.IntakeFormID,
+		}); err != nil {
+			return err
+		}
+
 		return nil
 	})
 

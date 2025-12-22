@@ -155,7 +155,7 @@ func (h *RegistrationHandler) UpdateRegistrationForm(ctx *gin.Context) {
 // @Tags Registration
 // @Produce json
 // @Param id path string true "Registration Form ID"
-// @Success 200 {object} resp.SuccessResponse[DeleteRegistrationFormResponse
+// @Success 200 {object} resp.SuccessResponse[DeleteRegistrationFormResponse]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse

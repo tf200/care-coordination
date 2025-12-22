@@ -2521,7 +2521,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.PaginationResponse-registration_ListRegistrationFormsResponse"
+                            "$ref": "#/definitions/resp.SuccessResponse-resp_PaginationResponse-registration_ListRegistrationFormsResponse"
                         }
                     },
                     "400": {
@@ -2571,7 +2571,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/registration.CreateRegistrationFormResponse"
+                            "$ref": "#/definitions/resp.SuccessResponse-registration_CreateRegistrationFormResponse"
                         }
                     },
                     "400": {
@@ -2618,7 +2618,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/registration.GetRegistrationFormResponse"
+                            "$ref": "#/definitions/resp.SuccessResponse-registration_GetRegistrationFormResponse"
                         }
                     },
                     "400": {
@@ -2681,7 +2681,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/registration.UpdateRegistrationFormResponse"
+                            "$ref": "#/definitions/resp.SuccessResponse-registration_UpdateRegistrationFormResponse"
                         }
                     },
                     "400": {
@@ -2726,7 +2726,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/registration.DeleteRegistrationFormResponse"
+                            "$ref": "#/definitions/resp.SuccessResponse-registration_DeleteRegistrationFormResponse"
                         }
                     },
                     "400": {
@@ -5153,6 +5153,70 @@ const docTemplate = `{
                 }
             }
         },
+        "resp.SuccessResponse-registration_CreateRegistrationFormResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/registration.CreateRegistrationFormResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-registration_DeleteRegistrationFormResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/registration.DeleteRegistrationFormResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-registration_GetRegistrationFormResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/registration.GetRegistrationFormResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-registration_UpdateRegistrationFormResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/registration.UpdateRegistrationFormResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
         "resp.SuccessResponse-resp_PaginationResponse-array_client_ListDischargedClientsResponse": {
             "type": "object",
             "properties": {
@@ -5334,6 +5398,22 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/resp.PaginationResponse-rbac_RoleListItem"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-resp_PaginationResponse-registration_ListRegistrationFormsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/resp.PaginationResponse-registration_ListRegistrationFormsResponse"
                 },
                 "message": {
                     "type": "string",

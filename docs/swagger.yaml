@@ -1610,6 +1610,50 @@ definitions:
         example: true
         type: boolean
     type: object
+  resp.SuccessResponse-registration_CreateRegistrationFormResponse:
+    properties:
+      data:
+        $ref: '#/definitions/registration.CreateRegistrationFormResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-registration_DeleteRegistrationFormResponse:
+    properties:
+      data:
+        $ref: '#/definitions/registration.DeleteRegistrationFormResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-registration_GetRegistrationFormResponse:
+    properties:
+      data:
+        $ref: '#/definitions/registration.GetRegistrationFormResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-registration_UpdateRegistrationFormResponse:
+    properties:
+      data:
+        $ref: '#/definitions/registration.UpdateRegistrationFormResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
   resp.SuccessResponse-resp_PaginationResponse-array_client_ListDischargedClientsResponse:
     properties:
       data:
@@ -1735,6 +1779,17 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/resp.PaginationResponse-rbac_RoleListItem'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-resp_PaginationResponse-registration_ListRegistrationFormsResponse:
+    properties:
+      data:
+        $ref: '#/definitions/resp.PaginationResponse-registration_ListRegistrationFormsResponse'
       message:
         example: success message
         type: string
@@ -3408,7 +3463,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/resp.PaginationResponse-registration_ListRegistrationFormsResponse'
+            $ref: '#/definitions/resp.SuccessResponse-resp_PaginationResponse-registration_ListRegistrationFormsResponse'
         "400":
           description: Bad Request
           schema:
@@ -3441,7 +3496,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/registration.CreateRegistrationFormResponse'
+            $ref: '#/definitions/resp.SuccessResponse-registration_CreateRegistrationFormResponse'
         "400":
           description: Bad Request
           schema:
@@ -3472,7 +3527,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/registration.DeleteRegistrationFormResponse'
+            $ref: '#/definitions/resp.SuccessResponse-registration_DeleteRegistrationFormResponse'
         "400":
           description: Bad Request
           schema:
@@ -3502,7 +3557,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/registration.GetRegistrationFormResponse'
+            $ref: '#/definitions/resp.SuccessResponse-registration_GetRegistrationFormResponse'
         "400":
           description: Bad Request
           schema:
@@ -3544,7 +3599,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/registration.UpdateRegistrationFormResponse'
+            $ref: '#/definitions/resp.SuccessResponse-registration_UpdateRegistrationFormResponse'
         "400":
           description: Bad Request
           schema:

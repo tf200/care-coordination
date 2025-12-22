@@ -36,3 +36,16 @@ WHERE id = $1;
 UPDATE locations
 SET occupied = occupied - 1, updated_at = NOW()
 WHERE id = $1 AND occupied > 0;
+
+-- name: UpdateLocation :exec
+UPDATE locations SET
+    name = COALESCE(sqlc.narg('name'), name),
+    postal_code = COALESCE(sqlc.narg('postal_code'), postal_code),
+    address = COALESCE(sqlc.narg('address'), address),
+    capacity = COALESCE(sqlc.narg('capacity'), capacity),
+    occupied = COALESCE(sqlc.narg('occupied'), occupied),
+    updated_at = NOW()
+WHERE id = $1;
+
+-- name: SoftDeleteLocation :exec
+UPDATE locations SET is_deleted = TRUE, updated_at = NOW() WHERE id = $1;

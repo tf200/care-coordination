@@ -1,6 +1,17 @@
 -- Drop tables in reverse order of creation (respecting foreign key dependencies)
 -- Most dependent tables first, then their dependencies
 
+-- First, drop all RLS policies that depend on user_roles
+DROP POLICY IF EXISTS coordinator_progress_logs ON goal_progress_logs;
+DROP POLICY IF EXISTS admin_all_progress_logs ON goal_progress_logs;
+DROP POLICY IF EXISTS coordinator_evaluations ON client_evaluations;
+DROP POLICY IF EXISTS admin_all_evaluations ON client_evaluations;
+DROP POLICY IF EXISTS coordinator_goals ON client_goals;
+DROP POLICY IF EXISTS admin_all_goals ON client_goals;
+DROP POLICY IF EXISTS coordinator_own_clients ON clients;
+DROP POLICY IF EXISTS admin_all ON clients;
+
+-- Then drop the tables
 DROP TABLE IF EXISTS role_permissions;
 DROP TABLE IF EXISTS user_roles;
 DROP TABLE IF EXISTS permissions;
@@ -21,17 +32,17 @@ DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS attachments;
 
 -- Drop enums
-DROP TYPE IF EXISTS incident_severity_enum;
-DROP TYPE IF EXISTS incident_type_enum;
-DROP TYPE IF EXISTS incident_status_enum;
-DROP TYPE IF EXISTS goal_progress_status;
-DROP TYPE IF EXISTS discharge_status_enum;
-DROP TYPE IF EXISTS discharge_reason_enum;
-DROP TYPE IF EXISTS waiting_list_priority_enum;
-DROP TYPE IF EXISTS client_status_enum;
-DROP TYPE IF EXISTS intake_status_enum;
-DROP TYPE IF EXISTS registration_status_enum;
-DROP TYPE IF EXISTS care_type_enum;
-DROP TYPE IF EXISTS gender_enum;
-DROP TYPE IF EXISTS location_transfer_status_enum;
-
+DROP TYPE IF EXISTS incident_severity_enum CASCADE;
+DROP TYPE IF EXISTS incident_type_enum CASCADE;
+DROP TYPE IF EXISTS incident_status_enum CASCADE;
+DROP TYPE IF EXISTS goal_progress_status CASCADE;
+DROP TYPE IF EXISTS discharge_status_enum CASCADE;
+DROP TYPE IF EXISTS discharge_reason_enum CASCADE;
+DROP TYPE IF EXISTS waiting_list_priority_enum CASCADE;
+DROP TYPE IF EXISTS client_status_enum CASCADE;
+DROP TYPE IF EXISTS intake_status_enum CASCADE;
+DROP TYPE IF EXISTS registration_status_enum CASCADE;
+DROP TYPE IF EXISTS care_type_enum CASCADE;
+DROP TYPE IF EXISTS gender_enum CASCADE;
+DROP TYPE IF EXISTS location_transfer_status_enum CASCADE;
+DROP TYPE IF EXISTS contract_type_enum CASCADE;

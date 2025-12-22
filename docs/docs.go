@@ -1388,6 +1388,59 @@ const docTemplate = `{
                 }
             }
         },
+        "/employees/{id}": {
+            "get": {
+                "description": "Get a single employee by their ID with all details",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Employee"
+                ],
+                "summary": "Get employee by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Employee ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-employee_GetEmployeeByIDResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/evaluations": {
             "post": {
                 "description": "Record progress logs for all current client goals and schedule the next evaluation.",
@@ -3120,12 +3173,19 @@ const docTemplate = `{
                 "dateOfBirth",
                 "firstName",
                 "lastName",
+                "locationId",
                 "password",
                 "phoneNumber",
                 "role"
             ],
             "properties": {
                 "bsn": {
+                    "type": "string"
+                },
+                "contractHours": {
+                    "type": "integer"
+                },
+                "contractType": {
                     "type": "string"
                 },
                 "dateOfBirth": {
@@ -3143,6 +3203,9 @@ const docTemplate = `{
                 "lastName": {
                     "type": "string"
                 },
+                "locationId": {
+                    "type": "string"
+                },
                 "password": {
                     "type": "string"
                 },
@@ -3158,6 +3221,59 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "employee.GetEmployeeByIDResponse": {
+            "type": "object",
+            "properties": {
+                "bsn": {
+                    "type": "string"
+                },
+                "clientCount": {
+                    "type": "integer"
+                },
+                "contractHours": {
+                    "type": "integer"
+                },
+                "contractType": {
+                    "type": "string"
+                },
+                "dateOfBirth": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "locationId": {
+                    "type": "string"
+                },
+                "locationName": {
+                    "type": "string"
+                },
+                "phoneNumber": {
+                    "type": "string"
+                },
+                "roleId": {
+                    "type": "string"
+                },
+                "roleName": {
+                    "type": "string"
+                },
+                "userId": {
                     "type": "string"
                 }
             }
@@ -3206,13 +3322,46 @@ const docTemplate = `{
         "employee.ListEmployeesResponse": {
             "type": "object",
             "properties": {
+                "bsn": {
+                    "type": "string"
+                },
+                "clientCount": {
+                    "type": "integer"
+                },
+                "contractHours": {
+                    "type": "integer"
+                },
+                "contractType": {
+                    "type": "string"
+                },
+                "dateOfBirth": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
                 "firstName": {
+                    "type": "string"
+                },
+                "gender": {
                     "type": "string"
                 },
                 "id": {
                     "type": "string"
                 },
                 "lastName": {
+                    "type": "string"
+                },
+                "locationId": {
+                    "type": "string"
+                },
+                "locationName": {
+                    "type": "string"
+                },
+                "phoneNumber": {
+                    "type": "string"
+                },
+                "userId": {
                     "type": "string"
                 }
             }
@@ -4966,6 +5115,22 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/employee.CreateEmployeeResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-employee_GetEmployeeByIDResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/employee.GetEmployeeByIDResponse"
                 },
                 "message": {
                     "type": "string",

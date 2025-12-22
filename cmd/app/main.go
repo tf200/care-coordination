@@ -56,9 +56,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Disable statement caching to prevent stale data issues
-	// When statement_cache_mode is "describe", pgx will not cache prepared statements
-	// This ensures queries always see the latest data after inserts/updates
 	poolConfig.ConnConfig.DefaultQueryExecMode = pgx.QueryExecModeDescribeExec
 
 	connPool, err := pgxpool.NewWithConfig(ctx, poolConfig)

@@ -81,3 +81,39 @@ func (s *locationService) ListLocations(
 	result := resp.PagRespWithParams(listLocationsResponse, totalCount, page, pageSize)
 	return &result, nil
 }
+
+func (s *locationService) UpdateLocation(
+	ctx context.Context,
+	id string,
+	req *UpdateLocationRequest,
+) (UpdateLocationResponse, error) {
+	err := s.store.UpdateLocation(ctx, db.UpdateLocationParams{
+		ID:         id,
+		Name:       req.Name,
+		PostalCode: req.PostalCode,
+		Address:    req.Address,
+		Capacity:   req.Capacity,
+		Occupied:   req.Occupied,
+	})
+	if err != nil {
+		s.logger.Error(ctx, "UpdateLocation", "Failed to update location", zap.Error(err))
+		return UpdateLocationResponse{}, ErrInternal
+	}
+	return UpdateLocationResponse{
+		Success: true,
+	}, nil
+}
+
+func (s *locationService) DeleteLocation(
+	ctx context.Context,
+	id string,
+) (DeleteLocationResponse, error) {
+	err := s.store.SoftDeleteLocation(ctx, id)
+	if err != nil {
+		s.logger.Error(ctx, "DeleteLocation", "Failed to delete location", zap.Error(err))
+		return DeleteLocationResponse{}, ErrInternal
+	}
+	return DeleteLocationResponse{
+		Success: true,
+	}, nil
+}

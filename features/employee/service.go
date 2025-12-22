@@ -38,14 +38,26 @@ func (s *employeeService) CreateEmployee(
 	id := nanoid.Generate()
 	err = s.store.CreateEmployeeTx(ctx, db.CreateEmployeeTxParams{
 		Emp: db.CreateEmployeeParams{
-			ID:          id,
-			UserID:      req.Email,
-			FirstName:   req.FirstName,
-			LastName:    req.LastName,
-			Bsn:         req.BSN,
-			DateOfBirth: pgtype.Date{Time: req.DateOfBirth, Valid: true},
-			PhoneNumber: req.PhoneNumber,
-			Gender:      db.GenderEnum(req.Gender),
+			ID:            id,
+			LocationID:    req.LocationID,
+			FirstName:     req.FirstName,
+			LastName:      req.LastName,
+			Bsn:           req.BSN,
+			DateOfBirth:   pgtype.Date{Time: req.DateOfBirth, Valid: true},
+			PhoneNumber:   req.PhoneNumber,
+			Gender:        db.GenderEnum(req.Gender),
+			ContractHours: req.ContractHours,
+			ContractType: func() db.NullContractTypeEnum {
+				if req.ContractType != nil {
+					return db.NullContractTypeEnum{
+						Valid:            true,
+						ContractTypeEnum: db.ContractTypeEnum(*req.ContractType),
+					}
+				}
+				return db.NullContractTypeEnum{
+					Valid: false,
+				}
+			}(),
 		},
 		User: db.CreateUserParams{
 			ID:           nanoid.Generate(),
@@ -83,9 +95,26 @@ func (s *employeeService) ListEmployees(
 
 	for _, employee := range employees {
 		listEmployeesResponse = append(listEmployeesResponse, ListEmployeesResponse{
-			ID:        employee.ID,
-			FirstName: employee.FirstName,
-			LastName:  employee.LastName,
+			ID:            employee.ID,
+			UserID:        employee.UserID,
+			FirstName:     employee.FirstName,
+			LastName:      employee.LastName,
+			Email:         employee.Email,
+			BSN:           employee.Bsn,
+			DateOfBirth:   employee.DateOfBirth.Time.Format("2006-01-02"),
+			PhoneNumber:   employee.PhoneNumber,
+			Gender:        string(employee.Gender),
+			LocationID:    employee.LocationID,
+			LocationName:  employee.LocationName,
+			ContractHours: employee.ContractHours,
+			ContractType: func() *string {
+				if employee.ContractType.Valid {
+					ct := string(employee.ContractType.ContractTypeEnum)
+					return &ct
+				}
+				return nil
+			}(),
+			ClientCount: employee.ClientCount.(int64),
 		})
 		if totalCount == 0 {
 			totalCount = int(employee.TotalCount)
@@ -94,6 +123,39 @@ func (s *employeeService) ListEmployees(
 
 	result := resp.PagRespWithParams(listEmployeesResponse, totalCount, page, pageSize)
 	return &result, nil
+}
+
+func (s *employeeService) GetEmployeeByID(ctx context.Context, id string) (*GetEmployeeByIDResponse, error) {
+	employee, err := s.store.GetEmployeeByID(ctx, id)
+	if err != nil {
+		s.logger.Error(ctx, "GetEmployeeByID", "Failed to get employee", zap.Error(err))
+		return nil, ErrInternal
+	}
+
+	return &GetEmployeeByIDResponse{
+		ID:            employee.ID,
+		UserID:        employee.UserID,
+		FirstName:     employee.FirstName,
+		LastName:      employee.LastName,
+		Email:         employee.Email,
+		BSN:           employee.Bsn,
+		DateOfBirth:   employee.DateOfBirth.Time.Format("2006-01-02"),
+		PhoneNumber:   employee.PhoneNumber,
+		Gender:        string(employee.Gender),
+		LocationID:    employee.LocationID,
+		LocationName:  employee.LocationName,
+		ContractHours: employee.ContractHours,
+		ContractType: func() *string {
+			if employee.ContractType.Valid {
+				ct := string(employee.ContractType.ContractTypeEnum)
+				return &ct
+			}
+			return nil
+		}(),
+		RoleID:      employee.RoleID,
+		RoleName:    employee.RoleName,
+		ClientCount: employee.ClientCount.(int64),
+	}, nil
 }
 
 func (s *employeeService) GetMyProfile(ctx context.Context) (*GetMyProfileResponse, error) {

@@ -214,7 +214,7 @@ WHERE
         -- Filter by intake completion status
         EXISTS (SELECT 1 FROM intake_forms inf WHERE inf.registration_form_id = r.id) = $5::boolean
     )
-ORDER BY r.registration_date DESC
+ORDER BY r.created_at DESC
 LIMIT $1 OFFSET $2
 `
 

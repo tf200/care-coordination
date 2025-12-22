@@ -30,6 +30,7 @@ func (h *EmployeeHandler) SetupEmployeeRoutes(router *gin.Engine) {
 	employee.GET("/me", h.mdw.AuthMdw(), h.GetMyProfile)
 	employee.POST("", h.mdw.AuthMdw(), h.CreateEmployee)
 	employee.GET("", h.mdw.AuthMdw(), h.mdw.PaginationMdw(), h.ListEmployees)
+	employee.GET("/:id", h.mdw.AuthMdw(), h.GetEmployeeByID)
 }
 
 // @Summary Create an employee
@@ -94,6 +95,37 @@ func (h *EmployeeHandler) ListEmployees(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, resp.Success(result, "Employees listed successfully"))
+}
+
+// @Summary Get employee by ID
+// @Description Get a single employee by their ID with all details
+// @Tags Employee
+// @Produce json
+// @Param id path string true "Employee ID"
+// @Success 200 {object} resp.SuccessResponse[GetEmployeeByIDResponse]
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 404 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /employees/{id} [get]
+func (h *EmployeeHandler) GetEmployeeByID(ctx *gin.Context) {
+	id := ctx.Param("id")
+	if id == "" {
+		ctx.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
+		return
+	}
+
+	result, err := h.employeeService.GetEmployeeByID(ctx, id)
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrInternal):
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
+		default:
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
+		}
+		return
+	}
+	ctx.JSON(http.StatusOK, resp.Success(result, "Employee retrieved successfully"))
 }
 
 // @Summary Get logged-in user's employee profile

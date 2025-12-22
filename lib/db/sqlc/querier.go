@@ -51,6 +51,7 @@ type Querier interface {
 	GetClientByID(ctx context.Context, id string) (Client, error)
 	GetClientEvaluationHistory(ctx context.Context, clientID string) ([]GetClientEvaluationHistoryRow, error)
 	GetCriticalEvaluations(ctx context.Context, arg GetCriticalEvaluationsParams) ([]GetCriticalEvaluationsRow, error)
+	GetEmployeeByID(ctx context.Context, id string) (GetEmployeeByIDRow, error)
 	GetEmployeeByUserID(ctx context.Context, userID string) (GetEmployeeByUserIDRow, error)
 	GetIntakeForm(ctx context.Context, id string) (IntakeForm, error)
 	GetIntakeFormWithDetails(ctx context.Context, id string) (GetIntakeFormWithDetailsRow, error)
@@ -89,6 +90,7 @@ type Querier interface {
 	RefuseLocationTransfer(ctx context.Context, arg RefuseLocationTransferParams) error
 	RemovePermissionFromRole(ctx context.Context, arg RemovePermissionFromRoleParams) error
 	RemoveRoleFromUser(ctx context.Context, userID string) error
+	SoftDeleteLocation(ctx context.Context, id string) error
 	SoftDeleteRegistrationForm(ctx context.Context, id string) error
 	UpdateClient(ctx context.Context, arg UpdateClientParams) (string, error)
 	UpdateClientByIntakeFormID(ctx context.Context, arg UpdateClientByIntakeFormIDParams) error
@@ -97,6 +99,7 @@ type Querier interface {
 	UpdateClientNextEvaluationDate(ctx context.Context, arg UpdateClientNextEvaluationDateParams) error
 	UpdateIntakeForm(ctx context.Context, arg UpdateIntakeFormParams) error
 	UpdateIntakeFormStatus(ctx context.Context, arg UpdateIntakeFormStatusParams) error
+	UpdateLocation(ctx context.Context, arg UpdateLocationParams) error
 	UpdateLocationTransfer(ctx context.Context, arg UpdateLocationTransferParams) error
 	UpdateReferringOrg(ctx context.Context, arg UpdateReferringOrgParams) error
 	UpdateRegistrationForm(ctx context.Context, arg UpdateRegistrationFormParams) error

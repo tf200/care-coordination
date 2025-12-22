@@ -20,21 +20,27 @@ INSERT INTO employees (
     bsn,
     date_of_birth,
     phone_number,
-    gender
+    gender,
+    contract_hours,
+    contract_type,
+    location_id
 ) VALUES (
- $1, $2, $3, $4, $5, $6, $7, $8
+ $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
 )
 `
 
 type CreateEmployeeParams struct {
-	ID          string      `json:"id"`
-	UserID      string      `json:"user_id"`
-	FirstName   string      `json:"first_name"`
-	LastName    string      `json:"last_name"`
-	Bsn         string      `json:"bsn"`
-	DateOfBirth pgtype.Date `json:"date_of_birth"`
-	PhoneNumber string      `json:"phone_number"`
-	Gender      GenderEnum  `json:"gender"`
+	ID            string               `json:"id"`
+	UserID        string               `json:"user_id"`
+	FirstName     string               `json:"first_name"`
+	LastName      string               `json:"last_name"`
+	Bsn           string               `json:"bsn"`
+	DateOfBirth   pgtype.Date          `json:"date_of_birth"`
+	PhoneNumber   string               `json:"phone_number"`
+	Gender        GenderEnum           `json:"gender"`
+	ContractHours *int32               `json:"contract_hours"`
+	ContractType  NullContractTypeEnum `json:"contract_type"`
+	LocationID    string               `json:"location_id"`
 }
 
 func (q *Queries) CreateEmployee(ctx context.Context, arg CreateEmployeeParams) error {
@@ -47,35 +53,118 @@ func (q *Queries) CreateEmployee(ctx context.Context, arg CreateEmployeeParams) 
 		arg.DateOfBirth,
 		arg.PhoneNumber,
 		arg.Gender,
+		arg.ContractHours,
+		arg.ContractType,
+		arg.LocationID,
 	)
 	return err
 }
 
+const getEmployeeByID = `-- name: GetEmployeeByID :one
+SELECT
+    e.id,
+    e.user_id,
+    e.first_name,
+    e.last_name,
+    e.bsn,
+    e.date_of_birth,
+    e.phone_number,
+    e.gender,
+    e.contract_hours,
+    e.contract_type,
+    e.location_id,
+    l.name as location_name,
+    u.email,
+    r.id as role_id,
+    r.name as role_name,
+    COALESCE(COUNT(DISTINCT c.id), 0) as client_count
+FROM employees e
+JOIN locations l ON e.location_id = l.id
+JOIN users u ON e.user_id = u.id
+LEFT JOIN user_roles ur ON e.user_id = ur.user_id
+LEFT JOIN roles r ON ur.role_id = r.id
+LEFT JOIN clients c ON c.coordinator_id = e.id
+WHERE e.id = $1
+GROUP BY e.id, e.user_id, e.first_name, e.last_name, e.bsn, e.date_of_birth, 
+         e.phone_number, e.gender, e.contract_hours, e.contract_type, e.location_id,
+         l.name, u.email, r.id, r.name
+LIMIT 1
+`
+
+type GetEmployeeByIDRow struct {
+	ID            string               `json:"id"`
+	UserID        string               `json:"user_id"`
+	FirstName     string               `json:"first_name"`
+	LastName      string               `json:"last_name"`
+	Bsn           string               `json:"bsn"`
+	DateOfBirth   pgtype.Date          `json:"date_of_birth"`
+	PhoneNumber   string               `json:"phone_number"`
+	Gender        GenderEnum           `json:"gender"`
+	ContractHours *int32               `json:"contract_hours"`
+	ContractType  NullContractTypeEnum `json:"contract_type"`
+	LocationID    string               `json:"location_id"`
+	LocationName  string               `json:"location_name"`
+	Email         string               `json:"email"`
+	RoleID        *string              `json:"role_id"`
+	RoleName      *string              `json:"role_name"`
+	ClientCount   interface{}          `json:"client_count"`
+}
+
+func (q *Queries) GetEmployeeByID(ctx context.Context, id string) (GetEmployeeByIDRow, error) {
+	row := q.db.QueryRow(ctx, getEmployeeByID, id)
+	var i GetEmployeeByIDRow
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Bsn,
+		&i.DateOfBirth,
+		&i.PhoneNumber,
+		&i.Gender,
+		&i.ContractHours,
+		&i.ContractType,
+		&i.LocationID,
+		&i.LocationName,
+		&i.Email,
+		&i.RoleID,
+		&i.RoleName,
+		&i.ClientCount,
+	)
+	return i, err
+}
+
 const getEmployeeByUserID = `-- name: GetEmployeeByUserID :one
-SELECT e.id, e.user_id, e.first_name, e.last_name, e.bsn, e.date_of_birth, e.phone_number, e.gender, e.created_at, e.updated_at, u.email,
+SELECT e.id, e.user_id, e.first_name, e.last_name, e.bsn, e.date_of_birth, e.phone_number, e.gender, e.contract_hours, e.contract_type, e.location_id, e.created_at, e.updated_at, u.email,
        r.id as role_id,
-       r.name as role_name
+       r.name as role_name,
+       l.name as location_name
 FROM employees e
 JOIN users u ON e.user_id = u.id
 LEFT JOIN user_roles ur ON e.user_id = ur.user_id
 LEFT JOIN roles r ON ur.role_id = r.id
+LEFT JOIN locations l ON e.location_id = l.id
 WHERE e.user_id = $1 LIMIT 1
 `
 
 type GetEmployeeByUserIDRow struct {
-	ID          string           `json:"id"`
-	UserID      string           `json:"user_id"`
-	FirstName   string           `json:"first_name"`
-	LastName    string           `json:"last_name"`
-	Bsn         string           `json:"bsn"`
-	DateOfBirth pgtype.Date      `json:"date_of_birth"`
-	PhoneNumber string           `json:"phone_number"`
-	Gender      GenderEnum       `json:"gender"`
-	CreatedAt   pgtype.Timestamp `json:"created_at"`
-	UpdatedAt   pgtype.Timestamp `json:"updated_at"`
-	Email       string           `json:"email"`
-	RoleID      *string          `json:"role_id"`
-	RoleName    *string          `json:"role_name"`
+	ID            string               `json:"id"`
+	UserID        string               `json:"user_id"`
+	FirstName     string               `json:"first_name"`
+	LastName      string               `json:"last_name"`
+	Bsn           string               `json:"bsn"`
+	DateOfBirth   pgtype.Date          `json:"date_of_birth"`
+	PhoneNumber   string               `json:"phone_number"`
+	Gender        GenderEnum           `json:"gender"`
+	ContractHours *int32               `json:"contract_hours"`
+	ContractType  NullContractTypeEnum `json:"contract_type"`
+	LocationID    string               `json:"location_id"`
+	CreatedAt     pgtype.Timestamp     `json:"created_at"`
+	UpdatedAt     pgtype.Timestamp     `json:"updated_at"`
+	Email         string               `json:"email"`
+	RoleID        *string              `json:"role_id"`
+	RoleName      *string              `json:"role_name"`
+	LocationName  *string              `json:"location_name"`
 }
 
 func (q *Queries) GetEmployeeByUserID(ctx context.Context, userID string) (GetEmployeeByUserIDRow, error) {
@@ -90,11 +179,15 @@ func (q *Queries) GetEmployeeByUserID(ctx context.Context, userID string) (GetEm
 		&i.DateOfBirth,
 		&i.PhoneNumber,
 		&i.Gender,
+		&i.ContractHours,
+		&i.ContractType,
+		&i.LocationID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Email,
 		&i.RoleID,
 		&i.RoleName,
+		&i.LocationName,
 	)
 	return i, err
 }
@@ -109,8 +202,17 @@ SELECT
     e.date_of_birth,
     e.phone_number,
     e.gender,
+    e.contract_hours,
+    e.contract_type,
+    e.location_id,
+    l.name as location_name,
+    u.email,
+    COALESCE(COUNT(DISTINCT c.id), 0) as client_count,
     COUNT(*) OVER() as total_count
 FROM employees e
+JOIN locations l ON e.location_id = l.id
+JOIN users u ON e.user_id = u.id
+LEFT JOIN clients c ON c.coordinator_id = e.id
 WHERE
 (
   $3::text IS NULL OR
@@ -118,6 +220,9 @@ WHERE
   e.last_name ILIKE '%' || $3::text || '%' OR
   CONCAT(e.first_name, ' ', e.last_name) ILIKE '%' || $3::text || '%'
 )
+GROUP BY e.id, e.user_id, e.first_name, e.last_name, e.bsn, e.date_of_birth, 
+         e.phone_number, e.gender, e.contract_hours, e.contract_type, e.location_id,
+         l.name, u.email
 ORDER BY e.first_name, e.last_name
 LIMIT $1 OFFSET $2
 `
@@ -129,15 +234,21 @@ type ListEmployeesParams struct {
 }
 
 type ListEmployeesRow struct {
-	ID          string      `json:"id"`
-	UserID      string      `json:"user_id"`
-	FirstName   string      `json:"first_name"`
-	LastName    string      `json:"last_name"`
-	Bsn         string      `json:"bsn"`
-	DateOfBirth pgtype.Date `json:"date_of_birth"`
-	PhoneNumber string      `json:"phone_number"`
-	Gender      GenderEnum  `json:"gender"`
-	TotalCount  int64       `json:"total_count"`
+	ID            string               `json:"id"`
+	UserID        string               `json:"user_id"`
+	FirstName     string               `json:"first_name"`
+	LastName      string               `json:"last_name"`
+	Bsn           string               `json:"bsn"`
+	DateOfBirth   pgtype.Date          `json:"date_of_birth"`
+	PhoneNumber   string               `json:"phone_number"`
+	Gender        GenderEnum           `json:"gender"`
+	ContractHours *int32               `json:"contract_hours"`
+	ContractType  NullContractTypeEnum `json:"contract_type"`
+	LocationID    string               `json:"location_id"`
+	LocationName  string               `json:"location_name"`
+	Email         string               `json:"email"`
+	ClientCount   interface{}          `json:"client_count"`
+	TotalCount    int64                `json:"total_count"`
 }
 
 func (q *Queries) ListEmployees(ctx context.Context, arg ListEmployeesParams) ([]ListEmployeesRow, error) {
@@ -158,6 +269,12 @@ func (q *Queries) ListEmployees(ctx context.Context, arg ListEmployeesParams) ([
 			&i.DateOfBirth,
 			&i.PhoneNumber,
 			&i.Gender,
+			&i.ContractHours,
+			&i.ContractType,
+			&i.LocationID,
+			&i.LocationName,
+			&i.Email,
+			&i.ClientCount,
 			&i.TotalCount,
 		); err != nil {
 			return nil, err

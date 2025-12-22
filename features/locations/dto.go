@@ -24,3 +24,19 @@ type ListLocationsResponse struct {
 type ListLocationsRequest struct {
 	Search *string `form:"search"`
 }
+
+type UpdateLocationRequest struct {
+	Name       *string `json:"name"`
+	PostalCode *string `json:"postalCode"`
+	Address    *string `json:"address"`
+	Capacity   *int32  `json:"capacity" binding:"omitempty,min=1"`
+	Occupied   *int32  `json:"occupied" binding:"omitempty,min=0"`
+}
+
+type UpdateLocationResponse struct {
+	Success bool `json:"success"`
+}
+
+type DeleteLocationResponse struct {
+	Success bool `json:"success"`
+}

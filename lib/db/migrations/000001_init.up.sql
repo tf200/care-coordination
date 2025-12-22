@@ -6,6 +6,7 @@ CREATE TABLE attachments (
 );
 
 CREATE TYPE gender_enum AS ENUM ('male', 'female', 'other');
+CREATE TYPE contract_type_enum AS ENUM ('self_employed', 'payroll_service');
 
 
 CREATE TABLE users (
@@ -74,7 +75,8 @@ CREATE TABLE locations (
     capacity INTEGER NOT NULL,
     occupied INTEGER NOT NULL DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    is_deleted BOOLEAN DEFAULT FALSE
 );
 
 
@@ -99,6 +101,9 @@ CREATE TABLE  employees (
     date_of_birth DATE NOT NULL,
     phone_number TEXT NOT NULL,
     gender gender_enum NOT NULL,
+    contract_hours INT,
+    contract_type contract_type_enum,
+    location_id TEXT NOT NULL REFERENCES locations(id),
     created_at TIMESTAMP  DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP  DEFAULT CURRENT_TIMESTAMP
 );

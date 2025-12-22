@@ -243,6 +243,10 @@ definitions:
     properties:
       bsn:
         type: string
+      contractHours:
+        type: integer
+      contractType:
+        type: string
       dateOfBirth:
         type: string
       email:
@@ -252,6 +256,8 @@ definitions:
       gender:
         type: string
       lastName:
+        type: string
+      locationId:
         type: string
       password:
         type: string
@@ -264,6 +270,7 @@ definitions:
     - dateOfBirth
     - firstName
     - lastName
+    - locationId
     - password
     - phoneNumber
     - role
@@ -271,6 +278,41 @@ definitions:
   employee.CreateEmployeeResponse:
     properties:
       id:
+        type: string
+    type: object
+  employee.GetEmployeeByIDResponse:
+    properties:
+      bsn:
+        type: string
+      clientCount:
+        type: integer
+      contractHours:
+        type: integer
+      contractType:
+        type: string
+      dateOfBirth:
+        type: string
+      email:
+        type: string
+      firstName:
+        type: string
+      gender:
+        type: string
+      id:
+        type: string
+      lastName:
+        type: string
+      locationId:
+        type: string
+      locationName:
+        type: string
+      phoneNumber:
+        type: string
+      roleId:
+        type: string
+      roleName:
+        type: string
+      userId:
         type: string
     type: object
   employee.GetMyProfileResponse:
@@ -302,11 +344,33 @@ definitions:
     type: object
   employee.ListEmployeesResponse:
     properties:
+      bsn:
+        type: string
+      clientCount:
+        type: integer
+      contractHours:
+        type: integer
+      contractType:
+        type: string
+      dateOfBirth:
+        type: string
+      email:
+        type: string
       firstName:
+        type: string
+      gender:
         type: string
       id:
         type: string
       lastName:
+        type: string
+      locationId:
+        type: string
+      locationName:
+        type: string
+      phoneNumber:
+        type: string
+      userId:
         type: string
     type: object
   employee.PermissionResponse:
@@ -1482,6 +1546,17 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/employee.CreateEmployeeResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-employee_GetEmployeeByIDResponse:
+    properties:
+      data:
+        $ref: '#/definitions/employee.GetEmployeeByIDResponse'
       message:
         example: success message
         type: string
@@ -2690,6 +2765,41 @@ paths:
           schema:
             $ref: '#/definitions/resp.ErrorResponse'
       summary: Create an employee
+      tags:
+      - Employee
+  /employees/{id}:
+    get:
+      description: Get a single employee by their ID with all details
+      parameters:
+      - description: Employee ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-employee_GetEmployeeByIDResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get employee by ID
       tags:
       - Employee
   /employees/me:

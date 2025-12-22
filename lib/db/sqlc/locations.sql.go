@@ -126,3 +126,44 @@ func (q *Queries) ListLocations(ctx context.Context, arg ListLocationsParams) ([
 	}
 	return items, nil
 }
+
+const softDeleteLocation = `-- name: SoftDeleteLocation :exec
+UPDATE locations SET is_deleted = TRUE, updated_at = NOW() WHERE id = $1
+`
+
+func (q *Queries) SoftDeleteLocation(ctx context.Context, id string) error {
+	_, err := q.db.Exec(ctx, softDeleteLocation, id)
+	return err
+}
+
+const updateLocation = `-- name: UpdateLocation :exec
+UPDATE locations SET
+    name = COALESCE($2, name),
+    postal_code = COALESCE($3, postal_code),
+    address = COALESCE($4, address),
+    capacity = COALESCE($5, capacity),
+    occupied = COALESCE($6, occupied),
+    updated_at = NOW()
+WHERE id = $1
+`
+
+type UpdateLocationParams struct {
+	ID         string  `json:"id"`
+	Name       *string `json:"name"`
+	PostalCode *string `json:"postal_code"`
+	Address    *string `json:"address"`
+	Capacity   *int32  `json:"capacity"`
+	Occupied   *int32  `json:"occupied"`
+}
+
+func (q *Queries) UpdateLocation(ctx context.Context, arg UpdateLocationParams) error {
+	_, err := q.db.Exec(ctx, updateLocation,
+		arg.ID,
+		arg.Name,
+		arg.PostalCode,
+		arg.Address,
+		arg.Capacity,
+		arg.Occupied,
+	)
+	return err
+}

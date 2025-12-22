@@ -11,5 +11,6 @@ type EmployeeService interface {
 		ctx context.Context,
 		req *ListEmployeesRequest,
 	) (*resp.PaginationResponse[ListEmployeesResponse], error)
+	GetEmployeeByID(ctx context.Context, id string) (*GetEmployeeByIDResponse, error)
 	GetMyProfile(ctx context.Context) (*GetMyProfileResponse, error)
 }

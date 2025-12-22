@@ -98,6 +98,48 @@ func (ns NullClientStatusEnum) Value() (driver.Value, error) {
 	return string(ns.ClientStatusEnum), nil
 }
 
+type ContractTypeEnum string
+
+const (
+	ContractTypeEnumSelfEmployed   ContractTypeEnum = "self_employed"
+	ContractTypeEnumPayrollService ContractTypeEnum = "payroll_service"
+)
+
+func (e *ContractTypeEnum) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = ContractTypeEnum(s)
+	case string:
+		*e = ContractTypeEnum(s)
+	default:
+		return fmt.Errorf("unsupported scan type for ContractTypeEnum: %T", src)
+	}
+	return nil
+}
+
+type NullContractTypeEnum struct {
+	ContractTypeEnum ContractTypeEnum `json:"contract_type_enum"`
+	Valid            bool             `json:"valid"` // Valid is true if ContractTypeEnum is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullContractTypeEnum) Scan(value interface{}) error {
+	if value == nil {
+		ns.ContractTypeEnum, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.ContractTypeEnum.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullContractTypeEnum) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.ContractTypeEnum), nil
+}
+
 type DischargeReasonEnum string
 
 const (
@@ -654,16 +696,19 @@ type ClientLocationTransfer struct {
 }
 
 type Employee struct {
-	ID          string           `json:"id"`
-	UserID      string           `json:"user_id"`
-	FirstName   string           `json:"first_name"`
-	LastName    string           `json:"last_name"`
-	Bsn         string           `json:"bsn"`
-	DateOfBirth pgtype.Date      `json:"date_of_birth"`
-	PhoneNumber string           `json:"phone_number"`
-	Gender      GenderEnum       `json:"gender"`
-	CreatedAt   pgtype.Timestamp `json:"created_at"`
-	UpdatedAt   pgtype.Timestamp `json:"updated_at"`
+	ID            string               `json:"id"`
+	UserID        string               `json:"user_id"`
+	FirstName     string               `json:"first_name"`
+	LastName      string               `json:"last_name"`
+	Bsn           string               `json:"bsn"`
+	DateOfBirth   pgtype.Date          `json:"date_of_birth"`
+	PhoneNumber   string               `json:"phone_number"`
+	Gender        GenderEnum           `json:"gender"`
+	ContractHours *int32               `json:"contract_hours"`
+	ContractType  NullContractTypeEnum `json:"contract_type"`
+	LocationID    string               `json:"location_id"`
+	CreatedAt     pgtype.Timestamp     `json:"created_at"`
+	UpdatedAt     pgtype.Timestamp     `json:"updated_at"`
 }
 
 type GoalProgressLog struct {
@@ -720,6 +765,7 @@ type Location struct {
 	Occupied   int32              `json:"occupied"`
 	CreatedAt  pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
+	IsDeleted  *bool              `json:"is_deleted"`
 }
 
 type Permission struct {

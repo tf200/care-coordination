@@ -11,4 +11,6 @@ type LocationService interface {
 		ctx context.Context,
 		req *ListLocationsRequest,
 	) (*resp.PaginationResponse[ListLocationsResponse], error)
+	UpdateLocation(ctx context.Context, id string, req *UpdateLocationRequest) (UpdateLocationResponse, error)
+	DeleteLocation(ctx context.Context, id string) (DeleteLocationResponse, error)
 }

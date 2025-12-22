@@ -62,6 +62,21 @@ func main() {
 	}
 	log.Printf("Admin user created with ID: %s", userID)
 
+	// Create a default system location for admin
+	locationID := nanoid.Generate()
+	err = store.CreateLocation(ctx, db.CreateLocationParams{
+		ID:         locationID,
+		Name:       "System Location",
+		PostalCode: "0000AA",
+		Address:    "System",
+		Capacity:   0,
+		Occupied:   0,
+	})
+	if err != nil {
+		log.Fatalf("cannot create system location: %v", err)
+	}
+	log.Printf("System location created with ID: %s", locationID)
+
 	// Create employee record for admin
 	err = store.CreateEmployee(ctx, db.CreateEmployeeParams{
 		ID:          employeeID,
@@ -72,6 +87,7 @@ func main() {
 		DateOfBirth: pgtype.Date{Time: time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC), Valid: true},
 		PhoneNumber: "0000000000",
 		Gender:      db.GenderEnumOther,
+		LocationID:  locationID,
 	})
 	if err != nil {
 		log.Fatalf("cannot create admin employee: %v", err)

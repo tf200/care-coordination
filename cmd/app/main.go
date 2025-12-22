@@ -29,6 +29,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
 )
@@ -48,7 +49,19 @@ func main() {
 	defer stop()
 
 	// 3. Initialize Database Connection
-	connPool, err := pgxpool.New(ctx, cfg.DBSource)
+	// Parse the connection config first so we can customize it
+	poolConfig, err := pgxpool.ParseConfig(cfg.DBSource)
+	if err != nil {
+		l.Error(ctx, "main", "cannot parse db config", zap.Error(err))
+		os.Exit(1)
+	}
+
+	// Disable statement caching to prevent stale data issues
+	// When statement_cache_mode is "describe", pgx will not cache prepared statements
+	// This ensures queries always see the latest data after inserts/updates
+	poolConfig.ConnConfig.DefaultQueryExecMode = pgx.QueryExecModeDescribeExec
+
+	connPool, err := pgxpool.NewWithConfig(ctx, poolConfig)
 	if err != nil {
 		l.Error(ctx, "main", "cannot connect to db", zap.Error(err))
 		os.Exit(1)

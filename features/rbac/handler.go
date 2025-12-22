@@ -125,7 +125,7 @@ func (h *RBACHandler) ListRoles(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, resp.Error(err))
 		return
 	}
-	ctx.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, resp.Success(result, "Roles retrieved successfully"))
 }
 
 // @Summary Update a role

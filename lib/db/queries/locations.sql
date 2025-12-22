@@ -20,7 +20,8 @@ SELECT
     COUNT(*) OVER() as total_count
 FROM locations l
 WHERE
-    (sqlc.narg('search')::text IS NULL OR
+    l.is_deleted = FALSE
+    AND (sqlc.narg('search')::text IS NULL OR
      LOWER(l.name) LIKE LOWER('%' || sqlc.narg('search')::text || '%') OR
      LOWER(l.postal_code) LIKE LOWER('%' || sqlc.narg('search')::text || '%') OR
      LOWER(l.address) LIKE LOWER('%' || sqlc.narg('search')::text || '%'))

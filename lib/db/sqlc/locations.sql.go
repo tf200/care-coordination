@@ -75,7 +75,8 @@ SELECT
     COUNT(*) OVER() as total_count
 FROM locations l
 WHERE
-    ($3::text IS NULL OR
+    l.is_deleted = FALSE
+    AND ($3::text IS NULL OR
      LOWER(l.name) LIKE LOWER('%' || $3::text || '%') OR
      LOWER(l.postal_code) LIKE LOWER('%' || $3::text || '%') OR
      LOWER(l.address) LIKE LOWER('%' || $3::text || '%'))

@@ -857,6 +857,11 @@ definitions:
       id:
         type: string
     type: object
+  locations.DeleteLocationResponse:
+    properties:
+      success:
+        type: boolean
+    type: object
   locations.ListLocationsResponse:
     properties:
       address:
@@ -871,6 +876,26 @@ definitions:
         type: integer
       postalCode:
         type: string
+    type: object
+  locations.UpdateLocationRequest:
+    properties:
+      address:
+        type: string
+      capacity:
+        minimum: 1
+        type: integer
+      name:
+        type: string
+      occupied:
+        minimum: 0
+        type: integer
+      postalCode:
+        type: string
+    type: object
+  locations.UpdateLocationResponse:
+    properties:
+      success:
+        type: boolean
     type: object
   rbac.AssignPermissionRequest:
     properties:
@@ -1656,6 +1681,28 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/locations.CreateLocationResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-locations_DeleteLocationResponse:
+    properties:
+      data:
+        $ref: '#/definitions/locations.DeleteLocationResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-locations_UpdateLocationResponse:
+    properties:
+      data:
+        $ref: '#/definitions/locations.UpdateLocationResponse'
       message:
         example: success message
         type: string
@@ -3449,6 +3496,85 @@ paths:
           schema:
             $ref: '#/definitions/resp.ErrorResponse'
       summary: Create a location
+      tags:
+      - Location
+  /locations/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Soft delete a location by ID
+      parameters:
+      - description: Location ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-locations_DeleteLocationResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Delete a location (soft delete)
+      tags:
+      - Location
+    patch:
+      consumes:
+      - application/json
+      description: Update an existing location by ID
+      parameters:
+      - description: Location ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Location update data
+        in: body
+        name: location
+        required: true
+        schema:
+          $ref: '#/definitions/locations.UpdateLocationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-locations_UpdateLocationResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Update a location
       tags:
       - Location
   /referring-orgs:

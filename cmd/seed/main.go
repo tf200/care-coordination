@@ -418,8 +418,14 @@ func main() {
 	// Create store
 	store := db.NewStore(connPool)
 
+	// Seed locations first (needed for employees, intake forms, and clients)
+	locationIDs, err := seedLocations(ctx, store, 8)
+	if err != nil {
+		log.Fatalf("Failed to seed locations: %v", err)
+	}
+
 	// Seed employees (returns employee IDs for coordinator assignment)
-	employeeIDs, err := seedEmployees(ctx, store, 20)
+	employeeIDs, err := seedEmployees(ctx, store, 20, locationIDs)
 	if err != nil {
 		log.Fatalf("Failed to seed employees: %v", err)
 	}
@@ -428,12 +434,6 @@ func main() {
 	orgIDs, err := seedReferringOrganizations(ctx, store, 10)
 	if err != nil {
 		log.Fatalf("Failed to seed referring organizations: %v", err)
-	}
-
-	// Seed locations (needed for intake forms and clients)
-	locationIDs, err := seedLocations(ctx, store, 8)
-	if err != nil {
-		log.Fatalf("Failed to seed locations: %v", err)
 	}
 
 	// Seed registration forms (returns form IDs for intake forms)
@@ -485,13 +485,13 @@ func main() {
 	fmt.Println("✅ Successfully seeded database!")
 }
 
-func seedEmployees(ctx context.Context, store *db.Store, count int) ([]string, error) {
+func seedEmployees(ctx context.Context, store *db.Store, count int, locationIDs []string) ([]string, error) {
 	fmt.Printf("🌱 Seeding %d employees...\n", count)
 
 	employeeIDs := make([]string, 0, count)
 
 	for i := 0; i < count; i++ {
-		employee, err := createRandomEmployee(ctx, store)
+		employee, err := createRandomEmployee(ctx, store, locationIDs)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create employee %d: %w", i+1, err)
 		}
@@ -515,12 +515,13 @@ type EmployeeInfo struct {
 	Role      string
 }
 
-func createRandomEmployee(ctx context.Context, store *db.Store) (*EmployeeInfo, error) {
+func createRandomEmployee(ctx context.Context, store *db.Store, locationIDs []string) (*EmployeeInfo, error) {
 	// Generate random data
 	firstName := randomElement(firstNames)
 	lastName := randomElement(lastNames)
 	email := generateEmail(firstName, lastName)
 	role := randomElement(roles)
+	locationID := randomElement(locationIDs)
 
 	// Generate IDs
 	userID, err := gonanoid.New()
@@ -554,6 +555,7 @@ func createRandomEmployee(ctx context.Context, store *db.Store) (*EmployeeInfo, 
 			DateOfBirth: generateRandomDateOfBirth(),
 			PhoneNumber: generatePhoneNumber(),
 			Gender:      randomGender(),
+			LocationID:  locationID,
 		},
 	})
 	if err != nil {

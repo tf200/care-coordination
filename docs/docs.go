@@ -2388,6 +2388,125 @@ const docTemplate = `{
                 }
             }
         },
+        "/locations/{id}": {
+            "delete": {
+                "description": "Soft delete a location by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Location"
+                ],
+                "summary": "Delete a location (soft delete)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Location ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-locations_DeleteLocationResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Update an existing location by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Location"
+                ],
+                "summary": "Update a location",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Location ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Location update data",
+                        "name": "location",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/locations.UpdateLocationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-locations_UpdateLocationResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/referring-orgs": {
             "get": {
                 "description": "Get a paginated list of referring organizations with optional search",
@@ -4085,6 +4204,14 @@ const docTemplate = `{
                 }
             }
         },
+        "locations.DeleteLocationResponse": {
+            "type": "object",
+            "properties": {
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
         "locations.ListLocationsResponse": {
             "type": "object",
             "properties": {
@@ -4105,6 +4232,36 @@ const docTemplate = `{
                 },
                 "postalCode": {
                     "type": "string"
+                }
+            }
+        },
+        "locations.UpdateLocationRequest": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "capacity": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "name": {
+                    "type": "string"
+                },
+                "occupied": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "postalCode": {
+                    "type": "string"
+                }
+            }
+        },
+        "locations.UpdateLocationResponse": {
+            "type": "object",
+            "properties": {
+                "success": {
+                    "type": "boolean"
                 }
             }
         },
@@ -5275,6 +5432,38 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/locations.CreateLocationResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-locations_DeleteLocationResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/locations.DeleteLocationResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-locations_UpdateLocationResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/locations.UpdateLocationResponse"
                 },
                 "message": {
                     "type": "string",

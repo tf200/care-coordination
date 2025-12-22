@@ -29,7 +29,7 @@ func (h *LocationHandler) SetupLocationRoutes(router *gin.Engine) {
 
 	location.POST("", h.mdw.AuthMdw(), h.CreateLocation)
 	location.GET("", h.mdw.AuthMdw(), h.mdw.PaginationMdw(), h.ListLocations)
-	location.PATCH("/:id", h.mdw.AuthMdw(), h.UpdateLocation)
+	location.PUT("/:id", h.mdw.AuthMdw(), h.UpdateLocation)
 	location.DELETE("/:id", h.mdw.AuthMdw(), h.DeleteLocation)
 }
 

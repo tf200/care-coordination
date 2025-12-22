@@ -41,7 +41,7 @@ func (h *RegistrationHandler) SetupRegistrationRoutes(router *gin.Engine) {
 // @Accept json
 // @Produce json
 // @Param registration body CreateRegistrationFormRequest true "Registration Form"
-// @Success 200 {object} CreateRegistrationFormResponse
+// @Success 200 {object} resp.SuccessResponse[CreateRegistrationFormResponse]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
@@ -59,7 +59,7 @@ func (h *RegistrationHandler) CreateRegistrationForm(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, resp.Success(result, "Registration form created successfully"))
 }
 
 // @Summary List registration forms
@@ -70,7 +70,7 @@ func (h *RegistrationHandler) CreateRegistrationForm(ctx *gin.Context) {
 // @Param search query string false "Search"
 // @Param status query string false "Filter by status (pending, approved, rejected, in_review)"
 // @Produce json
-// @Success 200 {object} resp.PaginationResponse[ListRegistrationFormsResponse]
+// @Success 200 {object} resp.SuccessResponse[resp.PaginationResponse[ListRegistrationFormsResponse]]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
@@ -86,7 +86,7 @@ func (h *RegistrationHandler) ListRegistrationForms(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, resp.Error(ErrInternal))
 		return
 	}
-	ctx.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, resp.Success(result, "Registration forms fetched successfully"))
 }
 
 // @Summary Get a registration form
@@ -94,7 +94,7 @@ func (h *RegistrationHandler) ListRegistrationForms(ctx *gin.Context) {
 // @Tags Registration
 // @Produce json
 // @Param id path string true "Registration Form ID"
-// @Success 200 {object} GetRegistrationFormResponse
+// @Success 200 {object} resp.SuccessResponse[GetRegistrationFormResponse]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 404 {object} resp.ErrorResponse
@@ -113,7 +113,7 @@ func (h *RegistrationHandler) GetRegistrationForm(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, resp.Success(result, "Registration form fetched successfully"))
 }
 
 // @Summary Update a registration form
@@ -123,7 +123,7 @@ func (h *RegistrationHandler) GetRegistrationForm(ctx *gin.Context) {
 // @Produce json
 // @Param id path string true "Registration Form ID"
 // @Param registration body UpdateRegistrationFormRequest true "Registration Form Update"
-// @Success 200 {object} UpdateRegistrationFormResponse
+// @Success 200 {object} resp.SuccessResponse[UpdateRegistrationFormResponse]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
@@ -147,7 +147,7 @@ func (h *RegistrationHandler) UpdateRegistrationForm(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, resp.Success(result, "Registration form updated successfully"))
 }
 
 // @Summary Delete a registration form
@@ -155,7 +155,7 @@ func (h *RegistrationHandler) UpdateRegistrationForm(ctx *gin.Context) {
 // @Tags Registration
 // @Produce json
 // @Param id path string true "Registration Form ID"
-// @Success 200 {object} DeleteRegistrationFormResponse
+// @Success 200 {object} resp.SuccessResponse[DeleteRegistrationFormResponse
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
@@ -173,5 +173,5 @@ func (h *RegistrationHandler) DeleteRegistrationForm(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, resp.Success(result, "Registration form deleted successfully"))
 }

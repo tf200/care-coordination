@@ -46,7 +46,7 @@ func (s *intakeService) CreateIntakeForm(
 		},
 		RegistrationFormID: req.RegistrationFormID,
 		RegistrationFormStatus: db.NullRegistrationStatusEnum{
-			RegistrationStatusEnum: db.RegistrationStatusEnumApproved,
+			RegistrationStatusEnum: db.RegistrationStatusEnumInReview,
 			Valid:                  true,
 		},
 		Goals: util.Map(req.Goals, func(g GoalDTO) db.CreateClientGoalParams {
@@ -264,5 +264,24 @@ func (s *intakeService) UpdateIntakeForm(
 
 	return &UpdateIntakeFormResponse{
 		ID: id,
+	}, nil
+}
+
+func (s *intakeService) GetIntakeStats(
+	ctx context.Context,
+) (*GetIntakeStatsResponse, error) {
+	stats, err := s.db.GetIntakeStats(ctx)
+	if err != nil {
+		s.logger.Error(ctx, "GetIntakeStats", "Failed to get intake statistics", zap.Error(err))
+		return nil, ErrInternal
+	}
+
+	// Type assert numeric type from interface{}
+	conversionPct := float64(stats.ConversionPercentage)
+
+	return &GetIntakeStatsResponse{
+		TotalCount:           int(stats.TotalCount),
+		PendingCount:         int(stats.PendingCount),
+		ConversionPercentage: conversionPct,
 	}, nil
 }

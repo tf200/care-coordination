@@ -19,4 +19,6 @@ type ReferringOrgService interface {
 		id string,
 		req *UpdateReferringOrgRequest,
 	) (*UpdateReferringOrgResponse, error)
+
+	GetReferringOrgStats(ctx context.Context) (*GetReferringOrgStatsResponse, error)
 }

@@ -212,6 +212,70 @@ func (q *Queries) GetCriticalEvaluations(ctx context.Context, arg GetCriticalEva
 	return items, nil
 }
 
+const getLastClientEvaluation = `-- name: GetLastClientEvaluation :many
+SELECT 
+    e.id as evaluation_id,
+    e.evaluation_date,
+    e.overall_notes,
+    emp.first_name as coordinator_first_name,
+    emp.last_name as coordinator_last_name,
+    g.id as goal_id,
+    g.title as goal_title,
+    l.status,
+    l.progress_notes
+FROM client_evaluations e
+JOIN goal_progress_logs l ON e.id = l.evaluation_id
+JOIN client_goals g ON l.goal_id = g.id
+JOIN employees emp ON e.coordinator_id = emp.id
+WHERE e.client_id = $1
+ORDER BY e.evaluation_date DESC, g.title ASC
+LIMIT (SELECT COUNT(*) FROM goal_progress_logs WHERE evaluation_id = (
+    SELECT id FROM client_evaluations WHERE client_id = $1 ORDER BY evaluation_date DESC LIMIT 1
+))
+`
+
+type GetLastClientEvaluationRow struct {
+	EvaluationID         string             `json:"evaluation_id"`
+	EvaluationDate       pgtype.Date        `json:"evaluation_date"`
+	OverallNotes         *string            `json:"overall_notes"`
+	CoordinatorFirstName string             `json:"coordinator_first_name"`
+	CoordinatorLastName  string             `json:"coordinator_last_name"`
+	GoalID               string             `json:"goal_id"`
+	GoalTitle            string             `json:"goal_title"`
+	Status               GoalProgressStatus `json:"status"`
+	ProgressNotes        *string            `json:"progress_notes"`
+}
+
+func (q *Queries) GetLastClientEvaluation(ctx context.Context, clientID string) ([]GetLastClientEvaluationRow, error) {
+	rows, err := q.db.Query(ctx, getLastClientEvaluation, clientID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetLastClientEvaluationRow{}
+	for rows.Next() {
+		var i GetLastClientEvaluationRow
+		if err := rows.Scan(
+			&i.EvaluationID,
+			&i.EvaluationDate,
+			&i.OverallNotes,
+			&i.CoordinatorFirstName,
+			&i.CoordinatorLastName,
+			&i.GoalID,
+			&i.GoalTitle,
+			&i.Status,
+			&i.ProgressNotes,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getRecentEvaluationsGlobal = `-- name: GetRecentEvaluationsGlobal :many
 SELECT 
     e.id as evaluation_id,

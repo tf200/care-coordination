@@ -89,3 +89,12 @@ WHERE id = $1;
 -- name: DeleteReferringOrg :exec
 DELETE FROM referring_orgs
 WHERE id = $1;
+
+-- name: GetReferringOrgStats :one
+SELECT 
+    COUNT(DISTINCT ro.id) as total_orgs,
+    COUNT(DISTINCT CASE WHEN c.status = 'in_care' THEN ro.id END) as orgs_with_in_care_clients,
+    COUNT(DISTINCT CASE WHEN c.status = 'waiting_list' THEN ro.id END) as orgs_with_waitlist_clients,
+    COUNT(c.id) as total_clients_referred
+FROM referring_orgs ro
+LEFT JOIN clients c ON c.referring_org_id = ro.id;

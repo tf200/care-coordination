@@ -28,6 +28,7 @@ func (h *LocTransferHandler) SetupLocTransferRoutes(router *gin.Engine) {
 	locTransfers := router.Group("/location-transfers")
 
 	locTransfers.POST("", h.mdw.AuthMdw(), h.RegisterLocationTransfer)
+	locTransfers.GET("/stats", h.mdw.AuthMdw(), h.GetLocationTransferStats)
 	locTransfers.GET("", h.mdw.AuthMdw(), h.mdw.PaginationMdw(), h.ListLocationTransfers)
 	locTransfers.GET("/:id", h.mdw.AuthMdw(), h.GetLocationTransferByID)
 	locTransfers.POST("/:id/confirm", h.mdw.AuthMdw(), h.ConfirmLocationTransfer)
@@ -233,4 +234,21 @@ func (h *LocTransferHandler) UpdateLocationTransfer(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, resp.MessageResonse("Location transfer updated successfully"))
+}
+
+// @Summary Get location transfer statistics
+// @Description Get comprehensive statistics for location transfers including total count, pending count, approval rate, and status breakdowns
+// @Tags LocationTransfer
+// @Produce json
+// @Success 200 {object} resp.SuccessResponse[GetLocationTransferStatsResponse]
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /location-transfers/stats [get]
+func (h *LocTransferHandler) GetLocationTransferStats(ctx *gin.Context) {
+	result, err := h.locTransferService.GetLocationTransferStats(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, resp.Error(ErrInternal))
+		return
+	}
+	ctx.JSON(http.StatusOK, resp.Success(result, "Location transfer statistics retrieved successfully"))
 }

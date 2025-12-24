@@ -23,4 +23,6 @@ type IntakeService interface {
 		id string,
 		req *UpdateIntakeFormRequest,
 	) (*UpdateIntakeFormResponse, error)
+
+	GetIntakeStats(ctx context.Context) (*GetIntakeStatsResponse, error)
 }

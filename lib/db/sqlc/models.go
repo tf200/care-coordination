@@ -451,6 +451,7 @@ type IntakeStatusEnum string
 const (
 	IntakeStatusEnumCompleted IntakeStatusEnum = "completed"
 	IntakeStatusEnumPending   IntakeStatusEnum = "pending"
+	IntakeStatusEnumRejected  IntakeStatusEnum = "rejected"
 )
 
 func (e *IntakeStatusEnum) Scan(src interface{}) error {

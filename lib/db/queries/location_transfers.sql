@@ -96,3 +96,16 @@ SET
     reason = COALESCE(sqlc.narg('reason'), reason),
     updated_at = NOW()
 WHERE id = $1 AND status = 'pending';
+
+-- name: GetLocationTransferStats :one
+SELECT 
+    COUNT(*) as total_count,
+    COUNT(*) FILTER (WHERE status = 'pending') as pending_count,
+    COUNT(*) FILTER (WHERE status = 'approved') as approved_count,
+    COUNT(*) FILTER (WHERE status = 'rejected') as rejected_count,
+    CASE 
+        WHEN COUNT(*) FILTER (WHERE status IN ('approved', 'rejected')) > 0 THEN 
+            ROUND((COUNT(*) FILTER (WHERE status = 'approved')::DECIMAL / COUNT(*) FILTER (WHERE status IN ('approved', 'rejected'))::DECIMAL) * 100, 2)
+        ELSE 0
+    END as approval_rate
+FROM client_location_transfers;

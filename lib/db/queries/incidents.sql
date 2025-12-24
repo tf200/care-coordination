@@ -38,3 +38,22 @@ WHERE
 )
 ORDER BY i.incident_date DESC
 LIMIT $1 OFFSET $2;
+
+-- name: GetIncidentStats :one
+SELECT 
+    COUNT(*) as total_count,
+    -- Counts by severity
+    COUNT(*) FILTER (WHERE incident_severity = 'minor') as minor_count,
+    COUNT(*) FILTER (WHERE incident_severity = 'moderate') as moderate_count,
+    COUNT(*) FILTER (WHERE incident_severity = 'severe') as severe_count,
+    -- Counts by status
+    COUNT(*) FILTER (WHERE status = 'pending') as pending_count,
+    COUNT(*) FILTER (WHERE status = 'under_investigation') as under_investigation_count,
+    COUNT(*) FILTER (WHERE status = 'completed') as completed_count,
+    -- Counts by type
+    COUNT(*) FILTER (WHERE incident_type = 'aggression') as aggression_count,
+    COUNT(*) FILTER (WHERE incident_type = 'medical_emergency') as medical_emergency_count,
+    COUNT(*) FILTER (WHERE incident_type = 'safety_concern') as safety_concern_count,
+    COUNT(*) FILTER (WHERE incident_type = 'unwanted_behavior') as unwanted_behavior_count,
+    COUNT(*) FILTER (WHERE incident_type = 'other') as other_type_count
+FROM incidents;

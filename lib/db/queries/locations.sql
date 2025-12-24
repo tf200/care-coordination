@@ -50,3 +50,12 @@ WHERE id = $1;
 
 -- name: SoftDeleteLocation :exec
 UPDATE locations SET is_deleted = TRUE, updated_at = NOW() WHERE id = $1;
+
+-- name: GetLocationCapacityStats :one
+SELECT 
+    COALESCE(SUM(l.capacity), 0) as total_capacity,
+    COALESCE(COUNT(c.id) FILTER (WHERE c.status = 'in_care'), 0) as capacity_used,
+    COALESCE(SUM(l.capacity), 0) - COALESCE(COUNT(c.id) FILTER (WHERE c.status = 'in_care'), 0) as free_capacity
+FROM locations l
+LEFT JOIN clients c ON c.assigned_location_id = l.id
+WHERE l.is_deleted = FALSE;

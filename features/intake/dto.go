@@ -97,3 +97,9 @@ type UpdateIntakeFormRequest struct {
 type UpdateIntakeFormResponse struct {
 	ID string `json:"id"`
 }
+
+type GetIntakeStatsResponse struct {
+	TotalCount           int     `json:"totalCount"`
+	PendingCount         int     `json:"pendingCount"`
+	ConversionPercentage float64 `json:"conversionPercentage"`
+}

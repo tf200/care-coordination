@@ -51,7 +51,7 @@ WHERE
         -- Search by org name
         ro.name ILIKE '%' || $3 || '%'
     )
-ORDER BY i.intake_date DESC, i.intake_time DESC
+ORDER BY i.created_at DESC  
 LIMIT $1 OFFSET $2;
 
 
@@ -110,3 +110,14 @@ UPDATE intake_forms SET
     status = COALESCE(sqlc.narg('status'), status),
     updated_at = NOW()
 WHERE id = $1;
+
+-- name: GetIntakeStats :one
+SELECT 
+    COUNT(*) as total_count,
+    COUNT(*) FILTER (WHERE status = 'pending') as pending_count,
+    CASE 
+        WHEN COUNT(*) > 0 THEN 
+            ROUND((COUNT(*) FILTER (WHERE status = 'completed')::DECIMAL / COUNT(*)::DECIMAL) * 100, 2)
+        ELSE 0
+    END as conversion_percentage
+FROM intake_forms;

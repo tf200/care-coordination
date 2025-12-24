@@ -3,9 +3,11 @@ package db
 import "context"
 
 type MoveClientToWaitingListTxParams struct {
-	Client              CreateClientParams
-	IntakeFormID        string
-	IntakeFormNewStatus IntakeStatusEnum
+	Client                    CreateClientParams
+	IntakeFormID              string
+	IntakeFormNewStatus       IntakeStatusEnum
+	RegistrationFormID        string
+	RegistrationFormNewStatus RegistrationStatusEnum
 }
 
 type MoveClientToWaitingListTxResult struct {
@@ -34,7 +36,18 @@ func (s *Store) MoveClientToWaitingListTx(
 			return err
 		}
 
-		// 3. Link goals to the new client
+		// 3. Update the registration form status to approved
+		if err := q.UpdateRegistrationFormStatus(ctx, UpdateRegistrationFormStatusParams{
+			ID: arg.RegistrationFormID,
+			Status: NullRegistrationStatusEnum{
+				RegistrationStatusEnum: arg.RegistrationFormNewStatus,
+				Valid:                  true,
+			},
+		}); err != nil {
+			return err
+		}
+
+		// 4. Link goals to the new client
 		if err := q.LinkGoalsToClient(ctx, LinkGoalsToClientParams{
 			ClientID:     &client.ID,
 			IntakeFormID: arg.IntakeFormID,

@@ -170,6 +170,28 @@ func (q *Queries) GetRegistrationFormWithDetails(ctx context.Context, id string)
 	return i, err
 }
 
+const getRegistrationStats = `-- name: GetRegistrationStats :one
+SELECT 
+    COUNT(*) as total_count,
+    COUNT(*) FILTER (WHERE status = 'approved') as approved_count,
+    COUNT(*) FILTER (WHERE status = 'in_review') as in_review_count
+FROM registration_forms
+WHERE is_deleted = FALSE
+`
+
+type GetRegistrationStatsRow struct {
+	TotalCount    int64 `json:"total_count"`
+	ApprovedCount int64 `json:"approved_count"`
+	InReviewCount int64 `json:"in_review_count"`
+}
+
+func (q *Queries) GetRegistrationStats(ctx context.Context) (GetRegistrationStatsRow, error) {
+	row := q.db.QueryRow(ctx, getRegistrationStats)
+	var i GetRegistrationStatsRow
+	err := row.Scan(&i.TotalCount, &i.ApprovedCount, &i.InReviewCount)
+	return i, err
+}
+
 const listRegistrationForms = `-- name: ListRegistrationForms :many
 SELECT r.id,
         r.first_name,

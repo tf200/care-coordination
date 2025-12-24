@@ -28,6 +28,7 @@ func (h *IncidentHandler) SetupIncidentRoutes(router *gin.Engine) {
 	incident := router.Group("/incidents")
 
 	incident.POST("", h.mdw.AuthMdw(), h.CreateIncident)
+	incident.GET("/stats", h.mdw.AuthMdw(), h.GetIncidentStats)
 	incident.GET("", h.mdw.AuthMdw(), h.mdw.PaginationMdw(), h.ListIncidents)
 }
 
@@ -93,4 +94,21 @@ func (h *IncidentHandler) ListIncidents(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, resp.Success(result, "Incidents listed successfully"))
+}
+
+// @Summary Get incident statistics
+// @Description Get comprehensive statistics for incidents including counts by severity, status, and type
+// @Tags Incident
+// @Produce json
+// @Success 200 {object} resp.SuccessResponse[GetIncidentStatsResponse]
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /incidents/stats [get]
+func (h *IncidentHandler) GetIncidentStats(ctx *gin.Context) {
+	result, err := h.incidentService.GetIncidentStats(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, resp.Error(ErrInternal))
+		return
+	}
+	ctx.JSON(http.StatusOK, resp.Success(result, "Incident statistics retrieved successfully"))
 }

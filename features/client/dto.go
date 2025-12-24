@@ -119,3 +119,37 @@ type ListDischargedClientsResponse struct {
 	CoordinatorLastName  string  `json:"coordinatorLastName"`
 	ReferringOrgName     *string `json:"referringOrgName"`
 }
+
+type PriorityCountsDTO struct {
+	Low    int `json:"low"`
+	Normal int `json:"normal"`
+	High   int `json:"high"`
+}
+
+type GetWaitlistStatsResponse struct {
+	TotalCount         int               `json:"totalCount"`
+	AverageDaysWaiting float64           `json:"averageDaysWaiting"`
+	HighPriorityCount  int               `json:"highPriorityCount"`
+	CountsByPriority   PriorityCountsDTO `json:"countsByPriority"`
+}
+
+type CareTypeCountsDTO struct {
+	ProtectedLiving           int `json:"protectedLiving"`
+	SemiIndependentLiving     int `json:"semiIndependentLiving"`
+	IndependentAssistedLiving int `json:"independentAssistedLiving"`
+	AmbulatoryCare            int `json:"ambulatoryCare"`
+}
+
+type GetInCareStatsResponse struct {
+	TotalCount        int               `json:"totalCount"`
+	AverageDaysInCare float64           `json:"averageDaysInCare"`
+	CountsByCareType  CareTypeCountsDTO `json:"countsByCareType"`
+}
+
+type GetDischargeStatsResponse struct {
+	TotalCount              int     `json:"totalCount"`
+	CompletedDischarges     int     `json:"completedDischarges"`
+	PrematureDischarges     int     `json:"prematureDischarges"`
+	DischargeCompletionRate float64 `json:"dischargeCompletionRate"`
+	AverageDaysInCare       float64 `json:"averageDaysInCare"`
+}

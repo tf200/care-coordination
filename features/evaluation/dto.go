@@ -54,3 +54,23 @@ type GlobalRecentEvaluationDTO struct {
 	TotalGoals           int       `json:"totalGoals"`
 	GoalsAchieved        int       `json:"goalsAchieved"`
 }
+
+type GoalProgressItemDTO struct {
+	GoalID        string  `json:"goalId"`
+	GoalTitle     string  `json:"goalTitle"`
+	Status        string  `json:"status"`
+	ProgressNotes *string `json:"progressNotes"`
+}
+
+type CoordinatorInfoDTO struct {
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+}
+
+type LastEvaluationDTO struct {
+	EvaluationID   string                `json:"evaluationId"`
+	EvaluationDate time.Time             `json:"evaluationDate"`
+	OverallNotes   *string               `json:"overallNotes"`
+	Coordinator    CoordinatorInfoDTO    `json:"coordinator"`
+	GoalProgress   []GoalProgressItemDTO `json:"goalProgress"`
+}

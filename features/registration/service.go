@@ -263,3 +263,24 @@ func (s *registrationService) DeleteRegistrationForm(
 		ID: id,
 	}, nil
 }
+
+func (s *registrationService) GetRegistrationStats(
+	ctx context.Context,
+) (*GetRegistrationStatsResponse, error) {
+	stats, err := s.db.GetRegistrationStats(ctx)
+	if err != nil {
+		s.logger.Error(
+			ctx,
+			"GetRegistrationStats",
+			"Failed to get registration statistics",
+			zap.Error(err),
+		)
+		return nil, ErrInternal
+	}
+
+	return &GetRegistrationStatsResponse{
+		TotalCount:    int(stats.TotalCount),
+		ApprovedCount: int(stats.ApprovedCount),
+		InReviewCount: int(stats.InReviewCount),
+	}, nil
+}

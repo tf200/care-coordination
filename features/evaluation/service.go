@@ -18,6 +18,7 @@ type EvaluationService interface {
 	GetCriticalEvaluations(ctx context.Context) (*resp.PaginationResponse[UpcomingEvaluationDTO], error)
 	GetScheduledEvaluations(ctx context.Context) (*resp.PaginationResponse[UpcomingEvaluationDTO], error)
 	GetRecentEvaluations(ctx context.Context) (*resp.PaginationResponse[GlobalRecentEvaluationDTO], error)
+	GetLastEvaluation(ctx context.Context, clientID string) (*LastEvaluationDTO, error)
 }
 
 type evaluationService struct {
@@ -198,4 +199,40 @@ func (s *evaluationService) GetRecentEvaluations(ctx context.Context) (*resp.Pag
 
 	pag := resp.PagResp(result, int(totalCount), int(page), int(pageSize))
 	return &pag, nil
+}
+
+func (s *evaluationService) GetLastEvaluation(ctx context.Context, clientID string) (*LastEvaluationDTO, error) {
+	rows, err := s.db.GetLastClientEvaluation(ctx, clientID)
+	if err != nil {
+		s.logger.Error(ctx, "GetLastEvaluation", "Failed to get last evaluation", zap.Error(err))
+		return nil, err
+	}
+
+	if len(rows) == 0 {
+		return nil, nil // No evaluation found for this client
+	}
+
+	// All rows have the same evaluation metadata, use the first row
+	firstRow := rows[0]
+
+	// Transform all rows into goal progress items
+	goalProgress := util.Map(rows, func(row db.GetLastClientEvaluationRow) GoalProgressItemDTO {
+		return GoalProgressItemDTO{
+			GoalID:        row.GoalID,
+			GoalTitle:     row.GoalTitle,
+			Status:        string(row.Status),
+			ProgressNotes: row.ProgressNotes,
+		}
+	})
+
+	return &LastEvaluationDTO{
+		EvaluationID:   firstRow.EvaluationID,
+		EvaluationDate: firstRow.EvaluationDate.Time,
+		OverallNotes:   firstRow.OverallNotes,
+		Coordinator: CoordinatorInfoDTO{
+			FirstName: firstRow.CoordinatorFirstName,
+			LastName:  firstRow.CoordinatorLastName,
+		},
+		GoalProgress: goalProgress,
+	}, nil
 }

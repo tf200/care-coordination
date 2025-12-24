@@ -63,6 +63,61 @@ func (q *Queries) CreateIncident(ctx context.Context, arg CreateIncidentParams) 
 	return err
 }
 
+const getIncidentStats = `-- name: GetIncidentStats :one
+SELECT 
+    COUNT(*) as total_count,
+    -- Counts by severity
+    COUNT(*) FILTER (WHERE incident_severity = 'minor') as minor_count,
+    COUNT(*) FILTER (WHERE incident_severity = 'moderate') as moderate_count,
+    COUNT(*) FILTER (WHERE incident_severity = 'severe') as severe_count,
+    -- Counts by status
+    COUNT(*) FILTER (WHERE status = 'pending') as pending_count,
+    COUNT(*) FILTER (WHERE status = 'under_investigation') as under_investigation_count,
+    COUNT(*) FILTER (WHERE status = 'completed') as completed_count,
+    -- Counts by type
+    COUNT(*) FILTER (WHERE incident_type = 'aggression') as aggression_count,
+    COUNT(*) FILTER (WHERE incident_type = 'medical_emergency') as medical_emergency_count,
+    COUNT(*) FILTER (WHERE incident_type = 'safety_concern') as safety_concern_count,
+    COUNT(*) FILTER (WHERE incident_type = 'unwanted_behavior') as unwanted_behavior_count,
+    COUNT(*) FILTER (WHERE incident_type = 'other') as other_type_count
+FROM incidents
+`
+
+type GetIncidentStatsRow struct {
+	TotalCount              int64 `json:"total_count"`
+	MinorCount              int64 `json:"minor_count"`
+	ModerateCount           int64 `json:"moderate_count"`
+	SevereCount             int64 `json:"severe_count"`
+	PendingCount            int64 `json:"pending_count"`
+	UnderInvestigationCount int64 `json:"under_investigation_count"`
+	CompletedCount          int64 `json:"completed_count"`
+	AggressionCount         int64 `json:"aggression_count"`
+	MedicalEmergencyCount   int64 `json:"medical_emergency_count"`
+	SafetyConcernCount      int64 `json:"safety_concern_count"`
+	UnwantedBehaviorCount   int64 `json:"unwanted_behavior_count"`
+	OtherTypeCount          int64 `json:"other_type_count"`
+}
+
+func (q *Queries) GetIncidentStats(ctx context.Context) (GetIncidentStatsRow, error) {
+	row := q.db.QueryRow(ctx, getIncidentStats)
+	var i GetIncidentStatsRow
+	err := row.Scan(
+		&i.TotalCount,
+		&i.MinorCount,
+		&i.ModerateCount,
+		&i.SevereCount,
+		&i.PendingCount,
+		&i.UnderInvestigationCount,
+		&i.CompletedCount,
+		&i.AggressionCount,
+		&i.MedicalEmergencyCount,
+		&i.SafetyConcernCount,
+		&i.UnwantedBehaviorCount,
+		&i.OtherTypeCount,
+	)
+	return i, err
+}
+
 const listIncidents = `-- name: ListIncidents :many
 SELECT i.id, i.client_id, i.incident_date, i.incident_time, i.incident_type, i.incident_severity, i.location_id, i.coordinator_id, i.incident_description, i.action_taken, i.other_parties, i.status, i.created_at, i.updated_at,
        c.first_name AS client_first_name,

@@ -94,3 +94,9 @@ type GetRegistrationFormResponse struct {
 type DeleteRegistrationFormResponse struct {
 	ID string `json:"id"`
 }
+
+type GetRegistrationStatsResponse struct {
+	TotalCount    int `json:"totalCount"`
+	ApprovedCount int `json:"approvedCount"`
+	InReviewCount int `json:"inReviewCount"`
+}

@@ -183,6 +183,31 @@ func (q *Queries) GetIntakeFormWithDetails(ctx context.Context, id string) (GetI
 	return i, err
 }
 
+const getIntakeStats = `-- name: GetIntakeStats :one
+SELECT 
+    COUNT(*) as total_count,
+    COUNT(*) FILTER (WHERE status = 'pending') as pending_count,
+    CASE 
+        WHEN COUNT(*) > 0 THEN 
+            ROUND((COUNT(*) FILTER (WHERE status = 'completed')::DECIMAL / COUNT(*)::DECIMAL) * 100, 2)
+        ELSE 0
+    END as conversion_percentage
+FROM intake_forms
+`
+
+type GetIntakeStatsRow struct {
+	TotalCount           int64 `json:"total_count"`
+	PendingCount         int64 `json:"pending_count"`
+	ConversionPercentage int32 `json:"conversion_percentage"`
+}
+
+func (q *Queries) GetIntakeStats(ctx context.Context) (GetIntakeStatsRow, error) {
+	row := q.db.QueryRow(ctx, getIntakeStats)
+	var i GetIntakeStatsRow
+	err := row.Scan(&i.TotalCount, &i.PendingCount, &i.ConversionPercentage)
+	return i, err
+}
+
 const listIntakeForms = `-- name: ListIntakeForms :many
 SELECT
     i.id,
@@ -218,7 +243,7 @@ WHERE
         -- Search by org name
         ro.name ILIKE '%' || $3 || '%'
     )
-ORDER BY i.intake_date DESC, i.intake_time DESC
+ORDER BY i.created_at DESC  
 LIMIT $1 OFFSET $2
 `
 

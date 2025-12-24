@@ -28,8 +28,11 @@ func (h *ClientHandler) SetupClientRoutes(router *gin.Engine) {
 	clients.POST("/:id/move-to-care", h.mdw.AuthMdw(), h.MoveClientInCare)
 	clients.POST("/:id/start-discharge", h.mdw.AuthMdw(), h.StartDischarge)
 	clients.POST("/:id/complete-discharge", h.mdw.AuthMdw(), h.CompleteDischarge)
+	clients.GET("/waiting-list/stats", h.mdw.AuthMdw(), h.GetWaitlistStats)
 	clients.GET("/waiting-list", h.mdw.AuthMdw(), h.mdw.PaginationMdw(), h.ListWaitingListClients)
+	clients.GET("/in-care/stats", h.mdw.AuthMdw(), h.GetInCareStats)
 	clients.GET("/in-care", h.mdw.AuthMdw(), h.mdw.PaginationMdw(), h.ListInCareClients)
+	clients.GET("/discharged/stats", h.mdw.AuthMdw(), h.GetDischargeStats)
 	clients.GET("/discharged", h.mdw.AuthMdw(), h.mdw.PaginationMdw(), h.ListDischargedClients)
 }
 
@@ -321,4 +324,55 @@ func (h *ClientHandler) ListDischargedClients(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, resp.Success(result, "Clients listed successfully"))
+}
+
+// @Summary Get waitlist statistics
+// @Description Get comprehensive statistics for clients on the waiting list including total count, average wait time, and priority breakdowns
+// @Tags Client
+// @Produce json
+// @Success 200 {object} resp.SuccessResponse[GetWaitlistStatsResponse]
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /clients/waiting-list/stats [get]
+func (h *ClientHandler) GetWaitlistStats(ctx *gin.Context) {
+	result, err := h.clientService.GetWaitlistStats(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, resp.Error(ErrInternal))
+		return
+	}
+	ctx.JSON(http.StatusOK, resp.Success(result, "Waitlist statistics retrieved successfully"))
+}
+
+// @Summary Get in-care statistics
+// @Description Get comprehensive statistics for clients currently in care including total count, average days in care, and care type breakdowns
+// @Tags Client
+// @Produce json
+// @Success 200 {object} resp.SuccessResponse[GetInCareStatsResponse]
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /clients/in-care/stats [get]
+func (h *ClientHandler) GetInCareStats(ctx *gin.Context) {
+	result, err := h.clientService.GetInCareStats(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, resp.Error(ErrInternal))
+		return
+	}
+	ctx.JSON(http.StatusOK, resp.Success(result, "In-care statistics retrieved successfully"))
+}
+
+// @Summary Get discharge statistics
+// @Description Get comprehensive statistics for discharged clients including completed/premature breakdown, completion rate, and average days in care
+// @Tags Client
+// @Produce json
+// @Success 200 {object} resp.SuccessResponse[GetDischargeStatsResponse]
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /clients/discharged/stats [get]
+func (h *ClientHandler) GetDischargeStats(ctx *gin.Context) {
+	result, err := h.clientService.GetDischargeStats(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, resp.Error(ErrInternal))
+		return
+	}
+	ctx.JSON(http.StatusOK, resp.Success(result, "Discharge statistics retrieved successfully"))
 }

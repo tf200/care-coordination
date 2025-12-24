@@ -150,3 +150,20 @@ func (s *referringOrgService) UpdateReferringOrg(
 		ID: id,
 	}, nil
 }
+
+func (s *referringOrgService) GetReferringOrgStats(
+	ctx context.Context,
+) (*GetReferringOrgStatsResponse, error) {
+	stats, err := s.db.GetReferringOrgStats(ctx)
+	if err != nil {
+		s.logger.Error(ctx, "GetReferringOrgStats", "Failed to get referring org statistics", zap.Error(err))
+		return nil, ErrInternal
+	}
+
+	return &GetReferringOrgStatsResponse{
+		TotalOrgs:               int(stats.TotalOrgs),
+		OrgsWithInCareClients:   int(stats.OrgsWithInCareClients),
+		OrgsWithWaitlistClients: int(stats.OrgsWithWaitlistClients),
+		TotalClientsReferred:    int(stats.TotalClientsReferred),
+	}, nil
+}

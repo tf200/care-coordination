@@ -159,6 +159,41 @@ func (q *Queries) GetLocationTransferByID(ctx context.Context, id string) (GetLo
 	return i, err
 }
 
+const getLocationTransferStats = `-- name: GetLocationTransferStats :one
+SELECT 
+    COUNT(*) as total_count,
+    COUNT(*) FILTER (WHERE status = 'pending') as pending_count,
+    COUNT(*) FILTER (WHERE status = 'approved') as approved_count,
+    COUNT(*) FILTER (WHERE status = 'rejected') as rejected_count,
+    CASE 
+        WHEN COUNT(*) FILTER (WHERE status IN ('approved', 'rejected')) > 0 THEN 
+            ROUND((COUNT(*) FILTER (WHERE status = 'approved')::DECIMAL / COUNT(*) FILTER (WHERE status IN ('approved', 'rejected'))::DECIMAL) * 100, 2)
+        ELSE 0
+    END as approval_rate
+FROM client_location_transfers
+`
+
+type GetLocationTransferStatsRow struct {
+	TotalCount    int64 `json:"total_count"`
+	PendingCount  int64 `json:"pending_count"`
+	ApprovedCount int64 `json:"approved_count"`
+	RejectedCount int64 `json:"rejected_count"`
+	ApprovalRate  int32 `json:"approval_rate"`
+}
+
+func (q *Queries) GetLocationTransferStats(ctx context.Context) (GetLocationTransferStatsRow, error) {
+	row := q.db.QueryRow(ctx, getLocationTransferStats)
+	var i GetLocationTransferStatsRow
+	err := row.Scan(
+		&i.TotalCount,
+		&i.PendingCount,
+		&i.ApprovedCount,
+		&i.RejectedCount,
+		&i.ApprovalRate,
+	)
+	return i, err
+}
+
 const listLocationTransfers = `-- name: ListLocationTransfers :many
 SELECT
     clt.id,

@@ -21,4 +21,5 @@ type RegistrationService interface {
 	) (*UpdateRegistrationFormResponse, error)
 	GetRegistrationForm(ctx context.Context, id string) (*GetRegistrationFormResponse, error)
 	DeleteRegistrationForm(ctx context.Context, id string) (*DeleteRegistrationFormResponse, error)
+	GetRegistrationStats(ctx context.Context) (*GetRegistrationStatsResponse, error)
 }

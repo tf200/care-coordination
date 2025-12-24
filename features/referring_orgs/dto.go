@@ -43,3 +43,10 @@ type UpdateReferringOrgRequest struct {
 type UpdateReferringOrgResponse struct {
 	ID string `json:"id"`
 }
+
+type GetReferringOrgStatsResponse struct {
+	TotalOrgs               int `json:"totalOrgs"`
+	OrgsWithInCareClients   int `json:"orgsWithInCareClients"`
+	OrgsWithWaitlistClients int `json:"orgsWithWaitlistClients"`
+	TotalClientsReferred    int `json:"totalClientsReferred"`
+}

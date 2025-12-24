@@ -78,9 +78,11 @@ func (s *clientService) MoveClientToWaitingList(
 
 	// Create the client and update intake form status in a transaction
 	result, err := s.db.MoveClientToWaitingListTx(ctx, db.MoveClientToWaitingListTxParams{
-		Client:              createClientParams,
-		IntakeFormID:        intakeForm.ID,
-		IntakeFormNewStatus: db.IntakeStatusEnumCompleted,
+		Client:                    createClientParams,
+		IntakeFormID:              intakeForm.ID,
+		IntakeFormNewStatus:       db.IntakeStatusEnumCompleted,
+		RegistrationFormID:        registrationForm.ID,
+		RegistrationFormNewStatus: db.RegistrationStatusEnumApproved,
 	})
 	if err != nil {
 		s.logger.Error(
@@ -502,4 +504,74 @@ func (s *clientService) ListDischargedClients(
 
 	result := resp.PagRespWithParams(listClientsResponse, totalCount, page, pageSize)
 	return &result, nil
+}
+
+func (s *clientService) GetWaitlistStats(
+	ctx context.Context,
+) (*GetWaitlistStatsResponse, error) {
+	stats, err := s.db.GetWaitlistStats(ctx)
+	if err != nil {
+		s.logger.Error(ctx, "GetWaitlistStats", "Failed to get waitlist statistics", zap.Error(err))
+		return nil, ErrInternal
+	}
+
+	// Type assert avg_days_waiting from numeric/interface{}
+	avgDays, _ := stats.AvgDaysWaiting.(float64)
+
+	return &GetWaitlistStatsResponse{
+		TotalCount:         int(stats.TotalCount),
+		AverageDaysWaiting: avgDays,
+		HighPriorityCount:  int(stats.HighPriorityCount),
+		CountsByPriority: PriorityCountsDTO{
+			Low:    int(stats.LowPriorityCount),
+			Normal: int(stats.NormalPriorityCount),
+			High:   int(stats.HighPriorityCount),
+		},
+	}, nil
+}
+
+func (s *clientService) GetInCareStats(
+	ctx context.Context,
+) (*GetInCareStatsResponse, error) {
+	stats, err := s.db.GetInCareStats(ctx)
+	if err != nil {
+		s.logger.Error(ctx, "GetInCareStats", "Failed to get in-care statistics", zap.Error(err))
+		return nil, ErrInternal
+	}
+
+	// Type assert avg_days_in_care from numeric/interface{}
+	avgDays, _ := stats.AvgDaysInCare.(float64)
+
+	return &GetInCareStatsResponse{
+		TotalCount:        int(stats.TotalCount),
+		AverageDaysInCare: avgDays,
+		CountsByCareType: CareTypeCountsDTO{
+			ProtectedLiving:           int(stats.ProtectedLivingCount),
+			SemiIndependentLiving:     int(stats.SemiIndependentLivingCount),
+			IndependentAssistedLiving: int(stats.IndependentAssistedLivingCount),
+			AmbulatoryCare:            int(stats.AmbulatoryCareCount),
+		},
+	}, nil
+}
+
+func (s *clientService) GetDischargeStats(
+	ctx context.Context,
+) (*GetDischargeStatsResponse, error) {
+	stats, err := s.db.GetDischargeStats(ctx)
+	if err != nil {
+		s.logger.Error(ctx, "GetDischargeStats", "Failed to get discharge statistics", zap.Error(err))
+		return nil, ErrInternal
+	}
+
+	// Type assert numeric values from interface{}
+	completionRate := float64(stats.DischargeCompletionRate)
+	avgDays, _ := stats.AvgDaysInCare.(float64)
+
+	return &GetDischargeStatsResponse{
+		TotalCount:              int(stats.TotalCount),
+		CompletedDischarges:     int(stats.CompletedDischarges),
+		PrematureDischarges:     int(stats.PrematureDischarges),
+		DischargeCompletionRate: completionRate,
+		AverageDaysInCare:       avgDays,
+	}, nil
 }

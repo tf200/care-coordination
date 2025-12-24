@@ -11,4 +11,6 @@ type IncidentService interface {
 		ctx context.Context,
 		req *ListIncidentsRequest,
 	) (*resp.PaginationResponse[ListIncidentsResponse], error)
+
+	GetIncidentStats(ctx context.Context) (*GetIncidentStatsResponse, error)
 }

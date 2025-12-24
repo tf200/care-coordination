@@ -40,3 +40,9 @@ type UpdateLocationResponse struct {
 type DeleteLocationResponse struct {
 	Success bool `json:"success"`
 }
+
+type GetLocationCapacityStatsResponse struct {
+	TotalCapacity int `json:"totalCapacity"`
+	CapacityUsed  int `json:"capacityUsed"`
+	FreeCapacity  int `json:"freeCapacity"`
+}

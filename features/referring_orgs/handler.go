@@ -27,6 +27,7 @@ func (h *ReferringOrgHandler) SetupReferringOrgRoutes(router *gin.Engine) {
 	orgs := router.Group("/referring-orgs")
 
 	orgs.POST("", h.mdw.AuthMdw(), h.CreateReferringOrg)
+	orgs.GET("/stats", h.mdw.AuthMdw(), h.GetReferringOrgStats)
 	orgs.GET("", h.mdw.AuthMdw(), h.ListReferringOrgs)
 	orgs.PUT("/:id", h.mdw.AuthMdw(), h.UpdateReferringOrg)
 }
@@ -123,4 +124,21 @@ func (h *ReferringOrgHandler) UpdateReferringOrg(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, resp.Success(result, "Referring organization updated successfully"))
+}
+
+// @Summary Get referring organization statistics
+// @Description Get comprehensive statistics for referring organizations including total orgs, orgs with in-care/waitlist clients, and total clients referred
+// @Tags referring-orgs
+// @Produce json
+// @Success 200 {object} resp.SuccessResponse[GetReferringOrgStatsResponse]
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /referring-orgs/stats [get]
+func (h *ReferringOrgHandler) GetReferringOrgStats(ctx *gin.Context) {
+	result, err := h.service.GetReferringOrgStats(ctx.Request.Context())
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, resp.Error(ErrInternal))
+		return
+	}
+	ctx.JSON(http.StatusOK, resp.Success(result, "Referring organization statistics retrieved successfully"))
 }

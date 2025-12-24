@@ -138,7 +138,7 @@ CREATE TYPE goal_progress_status AS ENUM ('starting', 'on_track', 'delayed', 'ac
 );
 
 
-CREATE TYPE intake_status_enum AS ENUM ('completed', 'pending');
+CREATE TYPE intake_status_enum AS ENUM ('completed', 'pending', 'rejected');
 CREATE TABLE intake_forms (
     id TEXT PRIMARY KEY,
     registration_form_id TEXT NOT NULL UNIQUE REFERENCES registration_forms(id),

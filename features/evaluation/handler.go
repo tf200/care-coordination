@@ -30,6 +30,7 @@ func (h *EvaluationHandler) SetupEvaluationRoutes(router *gin.Engine) {
 	ev.GET("/scheduled", h.GetScheduled)
 	ev.GET("/recent", h.GetRecent)
 	ev.GET("/history/:clientId", h.GetEvaluationHistory)
+	ev.GET("/last/:clientId", h.GetLastEvaluation)
 }
 
 // @Summary Create a client evaluation
@@ -137,4 +138,36 @@ func (h *EvaluationHandler) GetRecent(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, resp.Success(result, "Recent evaluations retrieved successfully"))
+}
+
+// @Summary Get last evaluation for a client
+// @Description Retrieve the most recent evaluation with all goal progress logs for a specific client.
+// @Tags Evaluation
+// @Produce json
+// @Param clientId path string true "Client ID"
+// @Success 200 {object} resp.SuccessResponse[LastEvaluationDTO]
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 404 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /evaluations/last/{clientId} [get]
+func (h *EvaluationHandler) GetLastEvaluation(c *gin.Context) {
+	clientID := c.Param("clientId")
+	if clientID == "" {
+		c.JSON(http.StatusBadRequest, resp.Error(nil))
+		return
+	}
+
+	result, err := h.service.GetLastEvaluation(c.Request.Context(), clientID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, resp.Error(err))
+		return
+	}
+
+	if result == nil {
+		c.JSON(http.StatusNotFound, resp.Error(nil))
+		return
+	}
+
+	c.JSON(http.StatusOK, resp.Success(result, "Last evaluation retrieved successfully"))
 }

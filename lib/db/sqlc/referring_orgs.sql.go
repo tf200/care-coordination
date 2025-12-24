@@ -80,6 +80,35 @@ func (q *Queries) GetReferringOrgByID(ctx context.Context, id string) (Referring
 	return i, err
 }
 
+const getReferringOrgStats = `-- name: GetReferringOrgStats :one
+SELECT 
+    COUNT(DISTINCT ro.id) as total_orgs,
+    COUNT(DISTINCT CASE WHEN c.status = 'in_care' THEN ro.id END) as orgs_with_in_care_clients,
+    COUNT(DISTINCT CASE WHEN c.status = 'waiting_list' THEN ro.id END) as orgs_with_waitlist_clients,
+    COUNT(c.id) as total_clients_referred
+FROM referring_orgs ro
+LEFT JOIN clients c ON c.referring_org_id = ro.id
+`
+
+type GetReferringOrgStatsRow struct {
+	TotalOrgs               int64 `json:"total_orgs"`
+	OrgsWithInCareClients   int64 `json:"orgs_with_in_care_clients"`
+	OrgsWithWaitlistClients int64 `json:"orgs_with_waitlist_clients"`
+	TotalClientsReferred    int64 `json:"total_clients_referred"`
+}
+
+func (q *Queries) GetReferringOrgStats(ctx context.Context) (GetReferringOrgStatsRow, error) {
+	row := q.db.QueryRow(ctx, getReferringOrgStats)
+	var i GetReferringOrgStatsRow
+	err := row.Scan(
+		&i.TotalOrgs,
+		&i.OrgsWithInCareClients,
+		&i.OrgsWithWaitlistClients,
+		&i.TotalClientsReferred,
+	)
+	return i, err
+}
+
 const listReferringOrgs = `-- name: ListReferringOrgs :many
 SELECT
     id,

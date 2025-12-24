@@ -30,6 +30,7 @@ func (h *RegistrationHandler) SetupRegistrationRoutes(router *gin.Engine) {
 
 	registration.POST("", h.CreateRegistrationForm)
 	registration.GET("", h.mdw.PaginationMdw(), h.ListRegistrationForms)
+	registration.GET("/stats", h.GetRegistrationStats)
 	registration.GET("/:id", h.GetRegistrationForm)
 	registration.PUT("/:id", h.UpdateRegistrationForm)
 	registration.DELETE("/:id", h.DeleteRegistrationForm)
@@ -174,4 +175,22 @@ func (h *RegistrationHandler) DeleteRegistrationForm(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, resp.Success(result, "Registration form deleted successfully"))
+}
+
+// @Summary Get registration statistics
+// @Description Get counts of total, approved, and in-review registration forms
+// @Tags Registration
+// @Produce json
+// @Success 200 {object} resp.SuccessResponse[GetRegistrationStatsResponse]
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /registrations/stats [get]
+func (h *RegistrationHandler) GetRegistrationStats(ctx *gin.Context) {
+	result, err := h.rgstService.GetRegistrationStats(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, resp.Error(ErrInternal))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, resp.Success(result, "Registration statistics retrieved successfully"))
 }

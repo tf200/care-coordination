@@ -182,6 +182,109 @@ func (q *Queries) GetClientByID(ctx context.Context, id string) (Client, error) 
 	return i, err
 }
 
+const getDischargeStats = `-- name: GetDischargeStats :one
+SELECT 
+    COUNT(*) as total_count,
+    COUNT(*) FILTER (WHERE reason_for_discharge = 'treatment_completed') as completed_discharges,
+    COUNT(*) FILTER (WHERE reason_for_discharge != 'treatment_completed') as premature_discharges,
+    CASE 
+        WHEN COUNT(*) > 0 THEN 
+            ROUND((COUNT(*) FILTER (WHERE discharge_status = 'completed')::DECIMAL / COUNT(*)::DECIMAL) * 100, 2)
+        ELSE 0
+    END as discharge_completion_rate,
+    COALESCE(AVG(EXTRACT(EPOCH FROM (discharge_date - care_start_date)) / 86400), 0) as avg_days_in_care
+FROM clients
+WHERE discharge_status IS NOT NULL
+`
+
+type GetDischargeStatsRow struct {
+	TotalCount              int64       `json:"total_count"`
+	CompletedDischarges     int64       `json:"completed_discharges"`
+	PrematureDischarges     int64       `json:"premature_discharges"`
+	DischargeCompletionRate int32       `json:"discharge_completion_rate"`
+	AvgDaysInCare           interface{} `json:"avg_days_in_care"`
+}
+
+func (q *Queries) GetDischargeStats(ctx context.Context) (GetDischargeStatsRow, error) {
+	row := q.db.QueryRow(ctx, getDischargeStats)
+	var i GetDischargeStatsRow
+	err := row.Scan(
+		&i.TotalCount,
+		&i.CompletedDischarges,
+		&i.PrematureDischarges,
+		&i.DischargeCompletionRate,
+		&i.AvgDaysInCare,
+	)
+	return i, err
+}
+
+const getInCareStats = `-- name: GetInCareStats :one
+SELECT 
+    COUNT(*) as total_count,
+    COALESCE(AVG(EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - care_start_date)) / 86400), 0) as avg_days_in_care,
+    COUNT(*) FILTER (WHERE care_type = 'protected_living') as protected_living_count,
+    COUNT(*) FILTER (WHERE care_type = 'semi_independent_living') as semi_independent_living_count,
+    COUNT(*) FILTER (WHERE care_type = 'independent_assisted_living') as independent_assisted_living_count,
+    COUNT(*) FILTER (WHERE care_type = 'ambulatory_care') as ambulatory_care_count
+FROM clients
+WHERE status = 'in_care'
+`
+
+type GetInCareStatsRow struct {
+	TotalCount                     int64       `json:"total_count"`
+	AvgDaysInCare                  interface{} `json:"avg_days_in_care"`
+	ProtectedLivingCount           int64       `json:"protected_living_count"`
+	SemiIndependentLivingCount     int64       `json:"semi_independent_living_count"`
+	IndependentAssistedLivingCount int64       `json:"independent_assisted_living_count"`
+	AmbulatoryCareCount            int64       `json:"ambulatory_care_count"`
+}
+
+func (q *Queries) GetInCareStats(ctx context.Context) (GetInCareStatsRow, error) {
+	row := q.db.QueryRow(ctx, getInCareStats)
+	var i GetInCareStatsRow
+	err := row.Scan(
+		&i.TotalCount,
+		&i.AvgDaysInCare,
+		&i.ProtectedLivingCount,
+		&i.SemiIndependentLivingCount,
+		&i.IndependentAssistedLivingCount,
+		&i.AmbulatoryCareCount,
+	)
+	return i, err
+}
+
+const getWaitlistStats = `-- name: GetWaitlistStats :one
+SELECT 
+    COUNT(*) as total_count,
+    COALESCE(AVG(EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - created_at)) / 86400), 0) as avg_days_waiting,
+    COUNT(*) FILTER (WHERE waiting_list_priority = 'high') as high_priority_count,
+    COUNT(*) FILTER (WHERE waiting_list_priority = 'low') as low_priority_count,
+    COUNT(*) FILTER (WHERE waiting_list_priority = 'normal') as normal_priority_count
+FROM clients
+WHERE status = 'waiting_list'
+`
+
+type GetWaitlistStatsRow struct {
+	TotalCount          int64       `json:"total_count"`
+	AvgDaysWaiting      interface{} `json:"avg_days_waiting"`
+	HighPriorityCount   int64       `json:"high_priority_count"`
+	LowPriorityCount    int64       `json:"low_priority_count"`
+	NormalPriorityCount int64       `json:"normal_priority_count"`
+}
+
+func (q *Queries) GetWaitlistStats(ctx context.Context) (GetWaitlistStatsRow, error) {
+	row := q.db.QueryRow(ctx, getWaitlistStats)
+	var i GetWaitlistStatsRow
+	err := row.Scan(
+		&i.TotalCount,
+		&i.AvgDaysWaiting,
+		&i.HighPriorityCount,
+		&i.LowPriorityCount,
+		&i.NormalPriorityCount,
+	)
+	return i, err
+}
+
 const listDischargedClients = `-- name: ListDischargedClients :many
 SELECT
     c.id,

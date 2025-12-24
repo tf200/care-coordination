@@ -108,3 +108,34 @@ func (s *incidentService) ListIncidents(
 	result := resp.PagRespWithParams(listIncidentsResponse, totalCount, page, pageSize)
 	return &result, nil
 }
+
+func (s *incidentService) GetIncidentStats(
+	ctx context.Context,
+) (*GetIncidentStatsResponse, error) {
+	stats, err := s.store.GetIncidentStats(ctx)
+	if err != nil {
+		s.logger.Error(ctx, "GetIncidentStats", "Failed to get incident statistics", zap.Error(err))
+		return nil, ErrInternal
+	}
+
+	return &GetIncidentStatsResponse{
+		TotalCount: int(stats.TotalCount),
+		CountsBySeverity: IncidentSeverityCountsDTO{
+			Minor:    int(stats.MinorCount),
+			Moderate: int(stats.ModerateCount),
+			Severe:   int(stats.SevereCount),
+		},
+		CountsByStatus: IncidentStatusCountsDTO{
+			Pending:            int(stats.PendingCount),
+			UnderInvestigation: int(stats.UnderInvestigationCount),
+			Completed:          int(stats.CompletedCount),
+		},
+		CountsByType: IncidentTypeCountsDTO{
+			Aggression:       int(stats.AggressionCount),
+			MedicalEmergency: int(stats.MedicalEmergencyCount),
+			SafetyConcern:    int(stats.SafetyConcernCount),
+			UnwantedBehavior: int(stats.UnwantedBehaviorCount),
+			Other:            int(stats.OtherTypeCount),
+		},
+	}, nil
+}

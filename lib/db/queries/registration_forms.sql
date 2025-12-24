@@ -117,3 +117,11 @@ WHERE id = $1;
 
 -- name: SoftDeleteRegistrationForm :exec
 UPDATE registration_forms SET is_deleted = TRUE, updated_at = NOW() WHERE id = $1;
+
+-- name: GetRegistrationStats :one
+SELECT 
+    COUNT(*) as total_count,
+    COUNT(*) FILTER (WHERE status = 'approved') as approved_count,
+    COUNT(*) FILTER (WHERE status = 'in_review') as in_review_count
+FROM registration_forms
+WHERE is_deleted = FALSE;

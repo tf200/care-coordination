@@ -198,3 +198,38 @@ UPDATE clients SET
     evaluation_interval_weeks = COALESCE(sqlc.narg('evaluation_interval_weeks'), evaluation_interval_weeks),
     updated_at = NOW()
 WHERE intake_form_id = $1;
+
+-- name: GetWaitlistStats :one
+SELECT 
+    COUNT(*) as total_count,
+    COALESCE(AVG(EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - created_at)) / 86400), 0) as avg_days_waiting,
+    COUNT(*) FILTER (WHERE waiting_list_priority = 'high') as high_priority_count,
+    COUNT(*) FILTER (WHERE waiting_list_priority = 'low') as low_priority_count,
+    COUNT(*) FILTER (WHERE waiting_list_priority = 'normal') as normal_priority_count
+FROM clients
+WHERE status = 'waiting_list';
+
+-- name: GetInCareStats :one
+SELECT 
+    COUNT(*) as total_count,
+    COALESCE(AVG(EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - care_start_date)) / 86400), 0) as avg_days_in_care,
+    COUNT(*) FILTER (WHERE care_type = 'protected_living') as protected_living_count,
+    COUNT(*) FILTER (WHERE care_type = 'semi_independent_living') as semi_independent_living_count,
+    COUNT(*) FILTER (WHERE care_type = 'independent_assisted_living') as independent_assisted_living_count,
+    COUNT(*) FILTER (WHERE care_type = 'ambulatory_care') as ambulatory_care_count
+FROM clients
+WHERE status = 'in_care';
+
+-- name: GetDischargeStats :one
+SELECT 
+    COUNT(*) as total_count,
+    COUNT(*) FILTER (WHERE reason_for_discharge = 'treatment_completed') as completed_discharges,
+    COUNT(*) FILTER (WHERE reason_for_discharge != 'treatment_completed') as premature_discharges,
+    CASE 
+        WHEN COUNT(*) > 0 THEN 
+            ROUND((COUNT(*) FILTER (WHERE discharge_status = 'completed')::DECIMAL / COUNT(*)::DECIMAL) * 100, 2)
+        ELSE 0
+    END as discharge_completion_rate,
+    COALESCE(AVG(EXTRACT(EPOCH FROM (discharge_date - care_start_date)) / 86400), 0) as avg_days_in_care
+FROM clients
+WHERE discharge_status IS NOT NULL;

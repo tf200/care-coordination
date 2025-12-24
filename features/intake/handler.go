@@ -27,6 +27,7 @@ func (h *IntakeHandler) SetupIntakeRoutes(router *gin.Engine) {
 
 	intake.POST("", h.CreateIntakeForm)
 	intake.GET("", h.ListIntakeForms)
+	intake.GET("/stats", h.GetIntakeStats)
 	intake.GET("/:id", h.GetIntakeForm)
 	intake.PUT("/:id", h.UpdateIntakeForm)
 }
@@ -146,4 +147,21 @@ func (h *IntakeHandler) UpdateIntakeForm(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, resp.Success(result, "Intake form updated successfully"))
+}
+
+// @Summary Get intake statistics
+// @Description Get total count, pending count, and conversion percentage of intake forms
+// @Tags Intake
+// @Produce json
+// @Success 200 {object} resp.SuccessResponse[GetIntakeStatsResponse]
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /intakes/stats [get]
+func (h *IntakeHandler) GetIntakeStats(ctx *gin.Context) {
+	result, err := h.intakeService.GetIntakeStats(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, resp.Error(ErrInternal))
+		return
+	}
+	ctx.JSON(http.StatusOK, resp.Success(result, "Intake statistics retrieved successfully"))
 }

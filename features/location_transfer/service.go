@@ -270,3 +270,27 @@ func (s *locTransferService) UpdateLocationTransfer(
 
 	return nil
 }
+
+func (s *locTransferService) GetLocationTransferStats(
+	ctx context.Context,
+) (*GetLocationTransferStatsResponse, error) {
+	stats, err := s.db.GetLocationTransferStats(ctx)
+	if err != nil {
+		s.logger.Error(ctx, "GetLocationTransferStats", "Failed to get transfer statistics", zap.Error(err))
+		return nil, ErrInternal
+	}
+
+	// Convert approval_rate from int32 to float64
+	approvalRate := float64(stats.ApprovalRate)
+
+	return &GetLocationTransferStatsResponse{
+		TotalCount:   int(stats.TotalCount),
+		PendingCount: int(stats.PendingCount),
+		ApprovalRate: approvalRate,
+		CountsByStatus: TransferStatusCountsDTO{
+			Pending:  int(stats.PendingCount),
+			Approved: int(stats.ApprovedCount),
+			Rejected: int(stats.RejectedCount),
+		},
+	}, nil
+}

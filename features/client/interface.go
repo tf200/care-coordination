@@ -37,4 +37,8 @@ type ClientService interface {
 		ctx context.Context,
 		req *ListDischargedClientsRequest,
 	) (*resp.PaginationResponse[ListDischargedClientsResponse], error)
+
+	GetWaitlistStats(ctx context.Context) (*GetWaitlistStatsResponse, error)
+	GetInCareStats(ctx context.Context) (*GetInCareStatsResponse, error)
+	GetDischargeStats(ctx context.Context) (*GetDischargeStatsResponse, error)
 }

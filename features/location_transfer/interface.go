@@ -32,4 +32,6 @@ type LocationTransferService interface {
 		transferID string,
 		req *UpdateLocationTransferRequest,
 	) error
+
+	GetLocationTransferStats(ctx context.Context) (*GetLocationTransferStatsResponse, error)
 }

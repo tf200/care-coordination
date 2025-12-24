@@ -29,6 +29,7 @@ func (h *LocationHandler) SetupLocationRoutes(router *gin.Engine) {
 
 	location.POST("", h.mdw.AuthMdw(), h.CreateLocation)
 	location.GET("", h.mdw.AuthMdw(), h.mdw.PaginationMdw(), h.ListLocations)
+	location.GET("/capacity-stats", h.mdw.AuthMdw(), h.GetLocationCapacityStats)
 	location.PUT("/:id", h.mdw.AuthMdw(), h.UpdateLocation)
 	location.DELETE("/:id", h.mdw.AuthMdw(), h.DeleteLocation)
 }
@@ -174,4 +175,21 @@ func (h *LocationHandler) DeleteLocation(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, resp.Success(result, "Location deleted successfully"))
+}
+
+// @Summary Get location capacity statistics
+// @Description Get total capacity, capacity used (clients in care), and free capacity across all locations
+// @Tags Location
+// @Produce json
+// @Success 200 {object} resp.SuccessResponse[GetLocationCapacityStatsResponse]
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /locations/capacity-stats [get]
+func (h *LocationHandler) GetLocationCapacityStats(ctx *gin.Context) {
+	result, err := h.locationService.GetLocationCapacityStats(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, resp.Error(ErrInternal))
+		return
+	}
+	ctx.JSON(http.StatusOK, resp.Success(result, "Location capacity statistics retrieved successfully"))
 }

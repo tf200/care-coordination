@@ -117,3 +117,23 @@ func (s *locationService) DeleteLocation(
 		Success: true,
 	}, nil
 }
+
+func (s *locationService) GetLocationCapacityStats(
+	ctx context.Context,
+) (GetLocationCapacityStatsResponse, error) {
+	stats, err := s.store.GetLocationCapacityStats(ctx)
+	if err != nil {
+		s.logger.Error(ctx, "GetLocationCapacityStats", "Failed to get capacity statistics", zap.Error(err))
+		return GetLocationCapacityStatsResponse{}, ErrInternal
+	}
+
+	// Type assert interface{} values to int64, then convert to int
+	totalCapacity, _ := stats.TotalCapacity.(int64)
+	capacityUsed, _ := stats.CapacityUsed.(int64)
+
+	return GetLocationCapacityStatsResponse{
+		TotalCapacity: int(totalCapacity),
+		CapacityUsed:  int(capacityUsed),
+		FreeCapacity:  int(stats.FreeCapacity),
+	}, nil
+}

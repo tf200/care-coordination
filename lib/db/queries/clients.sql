@@ -230,6 +230,6 @@ SELECT
             ROUND((COUNT(*) FILTER (WHERE discharge_status = 'completed')::DECIMAL / COUNT(*)::DECIMAL) * 100, 2)
         ELSE 0
     END as discharge_completion_rate,
-    COALESCE(AVG(EXTRACT(EPOCH FROM (discharge_date - care_start_date)) / 86400), 0) as avg_days_in_care
+    COALESCE(AVG(EXTRACT(EPOCH FROM (discharge_date - care_start_date)::INTERVAL) / 86400), 0) as avg_days_in_care
 FROM clients
 WHERE discharge_status IS NOT NULL;

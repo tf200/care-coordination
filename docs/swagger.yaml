@@ -43,6 +43,17 @@ definitions:
       refreshToken:
         type: string
     type: object
+  client.CareTypeCountsDTO:
+    properties:
+      ambulatoryCare:
+        type: integer
+      independentAssistedLiving:
+        type: integer
+      protectedLiving:
+        type: integer
+      semiIndependentLiving:
+        type: integer
+    type: object
   client.CompleteDischargeRequest:
     properties:
       closingReport:
@@ -60,6 +71,54 @@ definitions:
   client.CompleteDischargeResponse:
     properties:
       clientId:
+        type: string
+    type: object
+  client.GetDischargeStatsResponse:
+    properties:
+      averageDaysInCare:
+        type: number
+      completedDischarges:
+        type: integer
+      dischargeCompletionRate:
+        type: number
+      prematureDischarges:
+        type: integer
+      totalCount:
+        type: integer
+    type: object
+  client.GetInCareStatsResponse:
+    properties:
+      averageDaysInCare:
+        type: number
+      countsByCareType:
+        $ref: '#/definitions/client.CareTypeCountsDTO'
+      totalCount:
+        type: integer
+    type: object
+  client.GetWaitlistStatsResponse:
+    properties:
+      averageDaysWaiting:
+        type: number
+      countsByPriority:
+        $ref: '#/definitions/client.PriorityCountsDTO'
+      highPriorityCount:
+        type: integer
+      totalCount:
+        type: integer
+    type: object
+  client.ListClientGoalsResponse:
+    properties:
+      clientId:
+        type: string
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      title:
+        type: string
+      updatedAt:
         type: string
     type: object
   client.ListDischargedClientsResponse:
@@ -216,6 +275,15 @@ definitions:
     properties:
       clientId:
         type: string
+    type: object
+  client.PriorityCountsDTO:
+    properties:
+      high:
+        type: integer
+      low:
+        type: integer
+      normal:
+        type: integer
     type: object
   client.StartDischargeRequest:
     properties:
@@ -384,6 +452,13 @@ definitions:
       resource:
         type: string
     type: object
+  evaluation.CoordinatorInfoDTO:
+    properties:
+      firstName:
+        type: string
+      lastName:
+        type: string
+    type: object
   evaluation.CreateEvaluationRequest:
     properties:
       clientId:
@@ -468,6 +543,32 @@ definitions:
     - goalId
     - status
     type: object
+  evaluation.GoalProgressItemDTO:
+    properties:
+      goalId:
+        type: string
+      goalTitle:
+        type: string
+      progressNotes:
+        type: string
+      status:
+        type: string
+    type: object
+  evaluation.LastEvaluationDTO:
+    properties:
+      coordinator:
+        $ref: '#/definitions/evaluation.CoordinatorInfoDTO'
+      evaluationDate:
+        type: string
+      evaluationId:
+        type: string
+      goalProgress:
+        items:
+          $ref: '#/definitions/evaluation.GoalProgressItemDTO'
+        type: array
+      overallNotes:
+        type: string
+    type: object
   evaluation.UpcomingEvaluationDTO:
     properties:
       coordinatorFirstName:
@@ -540,6 +641,48 @@ definitions:
     properties:
       id:
         type: string
+    type: object
+  incident.GetIncidentStatsResponse:
+    properties:
+      countsBySeverity:
+        $ref: '#/definitions/incident.IncidentSeverityCountsDTO'
+      countsByStatus:
+        $ref: '#/definitions/incident.IncidentStatusCountsDTO'
+      countsByType:
+        $ref: '#/definitions/incident.IncidentTypeCountsDTO'
+      totalCount:
+        type: integer
+    type: object
+  incident.IncidentSeverityCountsDTO:
+    properties:
+      minor:
+        type: integer
+      moderate:
+        type: integer
+      severe:
+        type: integer
+    type: object
+  incident.IncidentStatusCountsDTO:
+    properties:
+      completed:
+        type: integer
+      pending:
+        type: integer
+      underInvestigation:
+        type: integer
+    type: object
+  incident.IncidentTypeCountsDTO:
+    properties:
+      aggression:
+        type: integer
+      medicalEmergency:
+        type: integer
+      other:
+        type: integer
+      safetyConcern:
+        type: integer
+      unwantedBehavior:
+        type: integer
     type: object
   incident.ListIncidentsResponse:
     properties:
@@ -673,6 +816,15 @@ definitions:
       status:
         type: string
     type: object
+  intake.GetIntakeStatsResponse:
+    properties:
+      conversionPercentage:
+        type: number
+      pendingCount:
+        type: integer
+      totalCount:
+        type: integer
+    type: object
   intake.GoalDTO:
     properties:
       description:
@@ -759,6 +911,17 @@ definitions:
       id:
         type: string
     type: object
+  location_transfer.GetLocationTransferStatsResponse:
+    properties:
+      approvalRate:
+        type: number
+      countsByStatus:
+        $ref: '#/definitions/location_transfer.TransferStatusCountsDTO'
+      pendingCount:
+        type: integer
+      totalCount:
+        type: integer
+    type: object
   location_transfer.ListLocationTransfersResponse:
     properties:
       clientFirstName:
@@ -824,6 +987,15 @@ definitions:
       transferId:
         type: string
     type: object
+  location_transfer.TransferStatusCountsDTO:
+    properties:
+      approved:
+        type: integer
+      pending:
+        type: integer
+      rejected:
+        type: integer
+    type: object
   location_transfer.UpdateLocationTransferRequest:
     properties:
       newCoordinatorId:
@@ -861,6 +1033,15 @@ definitions:
     properties:
       success:
         type: boolean
+    type: object
+  locations.GetLocationCapacityStatsResponse:
+    properties:
+      capacityUsed:
+        type: integer
+      freeCapacity:
+        type: integer
+      totalCapacity:
+        type: integer
     type: object
   locations.ListLocationsResponse:
     properties:
@@ -1007,6 +1188,17 @@ definitions:
       id:
         type: string
     type: object
+  referring_orgs.GetReferringOrgStatsResponse:
+    properties:
+      orgsWithInCareClients:
+        type: integer
+      orgsWithWaitlistClients:
+        type: integer
+      totalClientsReferred:
+        type: integer
+      totalOrgs:
+        type: integer
+    type: object
   referring_orgs.ListReferringOrgsResponse:
     properties:
       contactPerson:
@@ -1148,6 +1340,15 @@ definitions:
         type: string
       status:
         type: string
+    type: object
+  registration.GetRegistrationStatsResponse:
+    properties:
+      approvedCount:
+        type: integer
+      inReviewCount:
+        type: integer
+      totalCount:
+        type: integer
     type: object
   registration.ListRegistrationFormsResponse:
     properties:
@@ -1488,6 +1689,19 @@ definitions:
         example: true
         type: boolean
     type: object
+  resp.SuccessResponse-array_client_ListClientGoalsResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/client.ListClientGoalsResponse'
+        type: array
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
   resp.SuccessResponse-array_evaluation_EvaluationHistoryItem:
     properties:
       data:
@@ -1527,6 +1741,39 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/client.CompleteDischargeResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-client_GetDischargeStatsResponse:
+    properties:
+      data:
+        $ref: '#/definitions/client.GetDischargeStatsResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-client_GetInCareStatsResponse:
+    properties:
+      data:
+        $ref: '#/definitions/client.GetInCareStatsResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-client_GetWaitlistStatsResponse:
+    properties:
+      data:
+        $ref: '#/definitions/client.GetWaitlistStatsResponse'
       message:
         example: success message
         type: string
@@ -1611,10 +1858,32 @@ definitions:
         example: true
         type: boolean
     type: object
+  resp.SuccessResponse-evaluation_LastEvaluationDTO:
+    properties:
+      data:
+        $ref: '#/definitions/evaluation.LastEvaluationDTO'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
   resp.SuccessResponse-incident_CreateIncidentResponse:
     properties:
       data:
         $ref: '#/definitions/incident.CreateIncidentResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-incident_GetIncidentStatsResponse:
+    properties:
+      data:
+        $ref: '#/definitions/incident.GetIncidentStatsResponse'
       message:
         example: success message
         type: string
@@ -1644,10 +1913,32 @@ definitions:
         example: true
         type: boolean
     type: object
+  resp.SuccessResponse-intake_GetIntakeStatsResponse:
+    properties:
+      data:
+        $ref: '#/definitions/intake.GetIntakeStatsResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
   resp.SuccessResponse-intake_UpdateIntakeFormResponse:
     properties:
       data:
         $ref: '#/definitions/intake.UpdateIntakeFormResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-location_transfer_GetLocationTransferStatsResponse:
+    properties:
+      data:
+        $ref: '#/definitions/location_transfer.GetLocationTransferStatsResponse'
       message:
         example: success message
         type: string
@@ -1699,6 +1990,17 @@ definitions:
         example: true
         type: boolean
     type: object
+  resp.SuccessResponse-locations_GetLocationCapacityStatsResponse:
+    properties:
+      data:
+        $ref: '#/definitions/locations.GetLocationCapacityStatsResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
   resp.SuccessResponse-locations_UpdateLocationResponse:
     properties:
       data:
@@ -1732,6 +2034,17 @@ definitions:
         example: true
         type: boolean
     type: object
+  resp.SuccessResponse-referring_orgs_GetReferringOrgStatsResponse:
+    properties:
+      data:
+        $ref: '#/definitions/referring_orgs.GetReferringOrgStatsResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
   resp.SuccessResponse-registration_CreateRegistrationFormResponse:
     properties:
       data:
@@ -1758,6 +2071,17 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/registration.GetRegistrationFormResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-registration_GetRegistrationStatsResponse:
+    properties:
+      data:
+        $ref: '#/definitions/registration.GetRegistrationStatsResponse'
       message:
         example: success message
         type: string
@@ -2488,6 +2812,37 @@ paths:
       summary: Complete client discharge
       tags:
       - Client
+  /clients/{id}/goals:
+    get:
+      description: Get all goals for a specific client
+      parameters:
+      - description: Client ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-array_client_ListClientGoalsResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: List client goals
+      tags:
+      - Client
   /clients/{id}/move-to-care:
     post:
       consumes:
@@ -2620,6 +2975,28 @@ paths:
       summary: List discharged clients
       tags:
       - Client
+  /clients/discharged/stats:
+    get:
+      description: Get comprehensive statistics for discharged clients including completed/premature
+        breakdown, completion rate, and average days in care
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-client_GetDischargeStatsResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get discharge statistics
+      tags:
+      - Client
   /clients/in-care:
     get:
       consumes:
@@ -2660,6 +3037,28 @@ paths:
           schema:
             $ref: '#/definitions/resp.ErrorResponse'
       summary: List in-care clients
+      tags:
+      - Client
+  /clients/in-care/stats:
+    get:
+      description: Get comprehensive statistics for clients currently in care including
+        total count, average days in care, and care type breakdowns
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-client_GetInCareStatsResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get in-care statistics
       tags:
       - Client
   /clients/move-to-waiting-list:
@@ -2739,6 +3138,28 @@ paths:
           schema:
             $ref: '#/definitions/resp.ErrorResponse'
       summary: List waiting list clients
+      tags:
+      - Client
+  /clients/waiting-list/stats:
+    get:
+      description: Get comprehensive statistics for clients on the waiting list including
+        total count, average wait time, and priority breakdowns
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-client_GetWaitlistStatsResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get waitlist statistics
       tags:
       - Client
   /employees:
@@ -2958,6 +3379,42 @@ paths:
       summary: Get evaluation history for a client
       tags:
       - Evaluation
+  /evaluations/last/{clientId}:
+    get:
+      description: Retrieve the most recent evaluation with all goal progress logs
+        for a specific client.
+      parameters:
+      - description: Client ID
+        in: path
+        name: clientId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-evaluation_LastEvaluationDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get last evaluation for a client
+      tags:
+      - Evaluation
   /evaluations/recent:
     get:
       description: List the last 20 evaluations submitted across all clients.
@@ -3071,6 +3528,28 @@ paths:
           schema:
             $ref: '#/definitions/resp.ErrorResponse'
       summary: Create an incident
+      tags:
+      - Incident
+  /incidents/stats:
+    get:
+      description: Get comprehensive statistics for incidents including counts by
+        severity, status, and type
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-incident_GetIncidentStatsResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get incident statistics
       tags:
       - Incident
   /intakes:
@@ -3209,6 +3688,28 @@ paths:
           schema:
             $ref: '#/definitions/resp.ErrorResponse'
       summary: Update an intake form
+      tags:
+      - Intake
+  /intakes/stats:
+    get:
+      description: Get total count, pending count, and conversion percentage of intake
+        forms
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-intake_GetIntakeStatsResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get intake statistics
       tags:
       - Intake
   /location-transfers:
@@ -3425,6 +3926,28 @@ paths:
       summary: Refuse a location transfer
       tags:
       - LocationTransfer
+  /location-transfers/stats:
+    get:
+      description: Get comprehensive statistics for location transfers including total
+        count, pending count, approval rate, and status breakdowns
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-location_transfer_GetLocationTransferStatsResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get location transfer statistics
+      tags:
+      - LocationTransfer
   /locations:
     get:
       consumes:
@@ -3577,6 +4100,28 @@ paths:
       summary: Update a location
       tags:
       - Location
+  /locations/capacity-stats:
+    get:
+      description: Get total capacity, capacity used (clients in care), and free capacity
+        across all locations
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-locations_GetLocationCapacityStatsResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get location capacity statistics
+      tags:
+      - Location
   /referring-orgs:
     get:
       consumes:
@@ -3671,6 +4216,28 @@ paths:
           schema:
             $ref: '#/definitions/resp.ErrorResponse'
       summary: Update a referring organization
+      tags:
+      - referring-orgs
+  /referring-orgs/stats:
+    get:
+      description: Get comprehensive statistics for referring organizations including
+        total orgs, orgs with in-care/waitlist clients, and total clients referred
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-referring_orgs_GetReferringOrgStatsResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get referring organization statistics
       tags:
       - referring-orgs
   /registrations:
@@ -3849,6 +4416,27 @@ paths:
           schema:
             $ref: '#/definitions/resp.ErrorResponse'
       summary: Update a registration form
+      tags:
+      - Registration
+  /registrations/stats:
+    get:
+      description: Get counts of total, approved, and in-review registration forms
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-registration_GetRegistrationStatsResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get registration statistics
       tags:
       - Registration
 security:

@@ -41,4 +41,6 @@ type ClientService interface {
 	GetWaitlistStats(ctx context.Context) (*GetWaitlistStatsResponse, error)
 	GetInCareStats(ctx context.Context) (*GetInCareStatsResponse, error)
 	GetDischargeStats(ctx context.Context) (*GetDischargeStatsResponse, error)
+
+	ListClientGoals(ctx context.Context, clientID string) ([]ListClientGoalsResponse, error)
 }

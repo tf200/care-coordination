@@ -575,3 +575,33 @@ func (s *clientService) GetDischargeStats(
 		AverageDaysInCare:       avgDays,
 	}, nil
 }
+
+func (s *clientService) ListClientGoals(
+	ctx context.Context,
+	clientID string,
+) ([]ListClientGoalsResponse, error) {
+	goals, err := s.db.ListGoalsByClientID(ctx, &clientID)
+	if err != nil {
+		s.logger.Error(ctx, "ListClientGoals", "Failed to list client goals", zap.Error(err))
+		return nil, ErrInternal
+	}
+
+	goalsResponse := make([]ListClientGoalsResponse, 0, len(goals))
+	for _, goal := range goals {
+		var clientIDStr string
+		if goal.ClientID != nil {
+			clientIDStr = *goal.ClientID
+		}
+
+		goalsResponse = append(goalsResponse, ListClientGoalsResponse{
+			ID:          goal.ID,
+			ClientID:    clientIDStr,
+			Title:       goal.Title,
+			Description: goal.Description,
+			CreatedAt:   goal.CreatedAt.Time.Format("2006-01-02T15:04:05Z07:00"),
+			UpdatedAt:   goal.UpdatedAt.Time.Format("2006-01-02T15:04:05Z07:00"),
+		})
+	}
+
+	return goalsResponse, nil
+}

@@ -153,3 +153,12 @@ type GetDischargeStatsResponse struct {
 	DischargeCompletionRate float64 `json:"dischargeCompletionRate"`
 	AverageDaysInCare       float64 `json:"averageDaysInCare"`
 }
+
+type ListClientGoalsResponse struct {
+	ID          string  `json:"id"`
+	ClientID    string  `json:"clientId"`
+	Title       string  `json:"title"`
+	Description *string `json:"description"`
+	CreatedAt   string  `json:"createdAt"`
+	UpdatedAt   string  `json:"updatedAt"`
+}

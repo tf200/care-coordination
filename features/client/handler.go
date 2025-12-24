@@ -34,6 +34,7 @@ func (h *ClientHandler) SetupClientRoutes(router *gin.Engine) {
 	clients.GET("/in-care", h.mdw.AuthMdw(), h.mdw.PaginationMdw(), h.ListInCareClients)
 	clients.GET("/discharged/stats", h.mdw.AuthMdw(), h.GetDischargeStats)
 	clients.GET("/discharged", h.mdw.AuthMdw(), h.mdw.PaginationMdw(), h.ListDischargedClients)
+	clients.GET("/:id/goals", h.mdw.AuthMdw(), h.ListClientGoals)
 }
 
 // @Summary Move client to waiting list
@@ -375,4 +376,29 @@ func (h *ClientHandler) GetDischargeStats(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, resp.Success(result, "Discharge statistics retrieved successfully"))
+}
+
+// @Summary List client goals
+// @Description Get all goals for a specific client
+// @Tags Client
+// @Produce json
+// @Param id path string true "Client ID"
+// @Success 200 {object} resp.SuccessResponse[[]ListClientGoalsResponse]
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 404 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /clients/{id}/goals [get]
+func (h *ClientHandler) ListClientGoals(ctx *gin.Context) {
+	clientID := ctx.Param("id")
+	if clientID == "" {
+		ctx.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
+		return
+	}
+
+	result, err := h.clientService.ListClientGoals(ctx, clientID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, resp.Error(ErrInternal))
+		return
+	}
+	ctx.JSON(http.StatusOK, resp.Success(result, "Client goals retrieved successfully"))
 }

@@ -870,6 +870,38 @@ const docTemplate = `{
                 }
             }
         },
+        "/clients/discharged/stats": {
+            "get": {
+                "description": "Get comprehensive statistics for discharged clients including completed/premature breakdown, completion rate, and average days in care",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Client"
+                ],
+                "summary": "Get discharge statistics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-client_GetDischargeStatsResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/clients/in-care": {
             "get": {
                 "description": "List all clients currently in care with pagination and search. Returns weeks in accommodation for living care types or used ambulatory hours for ambulatory care.",
@@ -914,6 +946,38 @@ const docTemplate = `{
                         "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/clients/in-care/stats": {
+            "get": {
+                "description": "Get comprehensive statistics for clients currently in care including total count, average days in care, and care type breakdowns",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Client"
+                ],
+                "summary": "Get in-care statistics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-client_GetInCareStatsResponse"
                         }
                     },
                     "401": {
@@ -1050,6 +1114,38 @@ const docTemplate = `{
                 }
             }
         },
+        "/clients/waiting-list/stats": {
+            "get": {
+                "description": "Get comprehensive statistics for clients on the waiting list including total count, average wait time, and priority breakdowns",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Client"
+                ],
+                "summary": "Get waitlist statistics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-client_GetWaitlistStatsResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/clients/{id}/complete-discharge": {
             "post": {
                 "description": "Complete the discharge process for a client. Requires closing and evaluation reports. Client status changes to discharged.",
@@ -1092,6 +1188,53 @@ const docTemplate = `{
                         "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/clients/{id}/goals": {
+            "get": {
+                "description": "Get all goals for a specific client",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Client"
+                ],
+                "summary": "List client goals",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Client ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-array_client_ListClientGoalsResponse"
                         }
                     },
                     "401": {
@@ -1572,6 +1715,59 @@ const docTemplate = `{
                 }
             }
         },
+        "/evaluations/last/{clientId}": {
+            "get": {
+                "description": "Retrieve the most recent evaluation with all goal progress logs for a specific client.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Evaluation"
+                ],
+                "summary": "Get last evaluation for a client",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Client ID",
+                        "name": "clientId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-evaluation_LastEvaluationDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/evaluations/recent": {
             "get": {
                 "description": "List the last 20 evaluations submitted across all clients.",
@@ -1747,6 +1943,38 @@ const docTemplate = `{
                 }
             }
         },
+        "/incidents/stats": {
+            "get": {
+                "description": "Get comprehensive statistics for incidents including counts by severity, status, and type",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Incident"
+                ],
+                "summary": "Get incident statistics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-incident_GetIncidentStatsResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/intakes": {
             "get": {
                 "description": "List all intake forms",
@@ -1829,6 +2057,38 @@ const docTemplate = `{
                         "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/intakes/stats": {
+            "get": {
+                "description": "Get total count, pending count, and conversion percentage of intake forms",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Intake"
+                ],
+                "summary": "Get intake statistics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-intake_GetIntakeStatsResponse"
                         }
                     },
                     "401": {
@@ -2060,6 +2320,38 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/location-transfers/stats": {
+            "get": {
+                "description": "Get comprehensive statistics for location transfers including total count, pending count, approval rate, and status breakdowns",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "LocationTransfer"
+                ],
+                "summary": "Get location transfer statistics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-location_transfer_GetLocationTransferStatsResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/resp.ErrorResponse"
                         }
@@ -2388,6 +2680,38 @@ const docTemplate = `{
                 }
             }
         },
+        "/locations/capacity-stats": {
+            "get": {
+                "description": "Get total capacity, capacity used (clients in care), and free capacity across all locations",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Location"
+                ],
+                "summary": "Get location capacity statistics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-locations_GetLocationCapacityStatsResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/locations/{id}": {
             "delete": {
                 "description": "Soft delete a location by ID",
@@ -2600,6 +2924,38 @@ const docTemplate = `{
                 }
             }
         },
+        "/referring-orgs/stats": {
+            "get": {
+                "description": "Get comprehensive statistics for referring organizations including total orgs, orgs with in-care/waitlist clients, and total clients referred",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "referring-orgs"
+                ],
+                "summary": "Get referring organization statistics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-referring_orgs_GetReferringOrgStatsResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/referring-orgs/{id}": {
             "put": {
                 "description": "Update an existing referring organization with partial data",
@@ -2750,6 +3106,38 @@ const docTemplate = `{
                         "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/registrations/stats": {
+            "get": {
+                "description": "Get counts of total, approved, and in-review registration forms",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Registration"
+                ],
+                "summary": "Get registration statistics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-registration_GetRegistrationStatsResponse"
                         }
                     },
                     "401": {
@@ -2991,6 +3379,23 @@ const docTemplate = `{
                 }
             }
         },
+        "client.CareTypeCountsDTO": {
+            "type": "object",
+            "properties": {
+                "ambulatoryCare": {
+                    "type": "integer"
+                },
+                "independentAssistedLiving": {
+                    "type": "integer"
+                },
+                "protectedLiving": {
+                    "type": "integer"
+                },
+                "semiIndependentLiving": {
+                    "type": "integer"
+                }
+            }
+        },
         "client.CompleteDischargeRequest": {
             "type": "object",
             "required": [
@@ -3016,6 +3421,80 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "clientId": {
+                    "type": "string"
+                }
+            }
+        },
+        "client.GetDischargeStatsResponse": {
+            "type": "object",
+            "properties": {
+                "averageDaysInCare": {
+                    "type": "number"
+                },
+                "completedDischarges": {
+                    "type": "integer"
+                },
+                "dischargeCompletionRate": {
+                    "type": "number"
+                },
+                "prematureDischarges": {
+                    "type": "integer"
+                },
+                "totalCount": {
+                    "type": "integer"
+                }
+            }
+        },
+        "client.GetInCareStatsResponse": {
+            "type": "object",
+            "properties": {
+                "averageDaysInCare": {
+                    "type": "number"
+                },
+                "countsByCareType": {
+                    "$ref": "#/definitions/client.CareTypeCountsDTO"
+                },
+                "totalCount": {
+                    "type": "integer"
+                }
+            }
+        },
+        "client.GetWaitlistStatsResponse": {
+            "type": "object",
+            "properties": {
+                "averageDaysWaiting": {
+                    "type": "number"
+                },
+                "countsByPriority": {
+                    "$ref": "#/definitions/client.PriorityCountsDTO"
+                },
+                "highPriorityCount": {
+                    "type": "integer"
+                },
+                "totalCount": {
+                    "type": "integer"
+                }
+            }
+        },
+        "client.ListClientGoalsResponse": {
+            "type": "object",
+            "properties": {
+                "clientId": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updatedAt": {
                     "type": "string"
                 }
             }
@@ -3251,6 +3730,20 @@ const docTemplate = `{
             "properties": {
                 "clientId": {
                     "type": "string"
+                }
+            }
+        },
+        "client.PriorityCountsDTO": {
+            "type": "object",
+            "properties": {
+                "high": {
+                    "type": "integer"
+                },
+                "low": {
+                    "type": "integer"
+                },
+                "normal": {
+                    "type": "integer"
                 }
             }
         },
@@ -3502,6 +3995,17 @@ const docTemplate = `{
                 }
             }
         },
+        "evaluation.CoordinatorInfoDTO": {
+            "type": "object",
+            "properties": {
+                "firstName": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                }
+            }
+        },
         "evaluation.CreateEvaluationRequest": {
             "type": "object",
             "required": [
@@ -3627,6 +4131,46 @@ const docTemplate = `{
                 }
             }
         },
+        "evaluation.GoalProgressItemDTO": {
+            "type": "object",
+            "properties": {
+                "goalId": {
+                    "type": "string"
+                },
+                "goalTitle": {
+                    "type": "string"
+                },
+                "progressNotes": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "evaluation.LastEvaluationDTO": {
+            "type": "object",
+            "properties": {
+                "coordinator": {
+                    "$ref": "#/definitions/evaluation.CoordinatorInfoDTO"
+                },
+                "evaluationDate": {
+                    "type": "string"
+                },
+                "evaluationId": {
+                    "type": "string"
+                },
+                "goalProgress": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/evaluation.GoalProgressItemDTO"
+                    }
+                },
+                "overallNotes": {
+                    "type": "string"
+                }
+            }
+        },
         "evaluation.UpcomingEvaluationDTO": {
             "type": "object",
             "properties": {
@@ -3727,6 +4271,71 @@ const docTemplate = `{
             "properties": {
                 "id": {
                     "type": "string"
+                }
+            }
+        },
+        "incident.GetIncidentStatsResponse": {
+            "type": "object",
+            "properties": {
+                "countsBySeverity": {
+                    "$ref": "#/definitions/incident.IncidentSeverityCountsDTO"
+                },
+                "countsByStatus": {
+                    "$ref": "#/definitions/incident.IncidentStatusCountsDTO"
+                },
+                "countsByType": {
+                    "$ref": "#/definitions/incident.IncidentTypeCountsDTO"
+                },
+                "totalCount": {
+                    "type": "integer"
+                }
+            }
+        },
+        "incident.IncidentSeverityCountsDTO": {
+            "type": "object",
+            "properties": {
+                "minor": {
+                    "type": "integer"
+                },
+                "moderate": {
+                    "type": "integer"
+                },
+                "severe": {
+                    "type": "integer"
+                }
+            }
+        },
+        "incident.IncidentStatusCountsDTO": {
+            "type": "object",
+            "properties": {
+                "completed": {
+                    "type": "integer"
+                },
+                "pending": {
+                    "type": "integer"
+                },
+                "underInvestigation": {
+                    "type": "integer"
+                }
+            }
+        },
+        "incident.IncidentTypeCountsDTO": {
+            "type": "object",
+            "properties": {
+                "aggression": {
+                    "type": "integer"
+                },
+                "medicalEmergency": {
+                    "type": "integer"
+                },
+                "other": {
+                    "type": "integer"
+                },
+                "safetyConcern": {
+                    "type": "integer"
+                },
+                "unwantedBehavior": {
+                    "type": "integer"
                 }
             }
         },
@@ -3927,6 +4536,20 @@ const docTemplate = `{
                 }
             }
         },
+        "intake.GetIntakeStatsResponse": {
+            "type": "object",
+            "properties": {
+                "conversionPercentage": {
+                    "type": "number"
+                },
+                "pendingCount": {
+                    "type": "integer"
+                },
+                "totalCount": {
+                    "type": "integer"
+                }
+            }
+        },
         "intake.GoalDTO": {
             "type": "object",
             "required": [
@@ -4057,6 +4680,23 @@ const docTemplate = `{
                 }
             }
         },
+        "location_transfer.GetLocationTransferStatsResponse": {
+            "type": "object",
+            "properties": {
+                "approvalRate": {
+                    "type": "number"
+                },
+                "countsByStatus": {
+                    "$ref": "#/definitions/location_transfer.TransferStatusCountsDTO"
+                },
+                "pendingCount": {
+                    "type": "integer"
+                },
+                "totalCount": {
+                    "type": "integer"
+                }
+            }
+        },
         "location_transfer.ListLocationTransfersResponse": {
             "type": "object",
             "properties": {
@@ -4155,6 +4795,20 @@ const docTemplate = `{
                 }
             }
         },
+        "location_transfer.TransferStatusCountsDTO": {
+            "type": "object",
+            "properties": {
+                "approved": {
+                    "type": "integer"
+                },
+                "pending": {
+                    "type": "integer"
+                },
+                "rejected": {
+                    "type": "integer"
+                }
+            }
+        },
         "location_transfer.UpdateLocationTransferRequest": {
             "type": "object",
             "properties": {
@@ -4209,6 +4863,20 @@ const docTemplate = `{
             "properties": {
                 "success": {
                     "type": "boolean"
+                }
+            }
+        },
+        "locations.GetLocationCapacityStatsResponse": {
+            "type": "object",
+            "properties": {
+                "capacityUsed": {
+                    "type": "integer"
+                },
+                "freeCapacity": {
+                    "type": "integer"
+                },
+                "totalCapacity": {
+                    "type": "integer"
                 }
             }
         },
@@ -4433,6 +5101,23 @@ const docTemplate = `{
                 }
             }
         },
+        "referring_orgs.GetReferringOrgStatsResponse": {
+            "type": "object",
+            "properties": {
+                "orgsWithInCareClients": {
+                    "type": "integer"
+                },
+                "orgsWithWaitlistClients": {
+                    "type": "integer"
+                },
+                "totalClientsReferred": {
+                    "type": "integer"
+                },
+                "totalOrgs": {
+                    "type": "integer"
+                }
+            }
+        },
         "referring_orgs.ListReferringOrgsResponse": {
             "type": "object",
             "properties": {
@@ -4639,6 +5324,20 @@ const docTemplate = `{
                 },
                 "status": {
                     "type": "string"
+                }
+            }
+        },
+        "registration.GetRegistrationStatsResponse": {
+            "type": "object",
+            "properties": {
+                "approvedCount": {
+                    "type": "integer"
+                },
+                "inReviewCount": {
+                    "type": "integer"
+                },
+                "totalCount": {
+                    "type": "integer"
                 }
             }
         },
@@ -5152,6 +5851,25 @@ const docTemplate = `{
                 }
             }
         },
+        "resp.SuccessResponse-array_client_ListClientGoalsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/client.ListClientGoalsResponse"
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
         "resp.SuccessResponse-array_evaluation_EvaluationHistoryItem": {
             "type": "object",
             "properties": {
@@ -5208,6 +5926,54 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/client.CompleteDischargeResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-client_GetDischargeStatsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/client.GetDischargeStatsResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-client_GetInCareStatsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/client.GetInCareStatsResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-client_GetWaitlistStatsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/client.GetWaitlistStatsResponse"
                 },
                 "message": {
                     "type": "string",
@@ -5331,11 +6097,43 @@ const docTemplate = `{
                 }
             }
         },
+        "resp.SuccessResponse-evaluation_LastEvaluationDTO": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/evaluation.LastEvaluationDTO"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
         "resp.SuccessResponse-incident_CreateIncidentResponse": {
             "type": "object",
             "properties": {
                 "data": {
                     "$ref": "#/definitions/incident.CreateIncidentResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-incident_GetIncidentStatsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/incident.GetIncidentStatsResponse"
                 },
                 "message": {
                     "type": "string",
@@ -5379,11 +6177,43 @@ const docTemplate = `{
                 }
             }
         },
+        "resp.SuccessResponse-intake_GetIntakeStatsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/intake.GetIntakeStatsResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
         "resp.SuccessResponse-intake_UpdateIntakeFormResponse": {
             "type": "object",
             "properties": {
                 "data": {
                     "$ref": "#/definitions/intake.UpdateIntakeFormResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-location_transfer_GetLocationTransferStatsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/location_transfer.GetLocationTransferStatsResponse"
                 },
                 "message": {
                     "type": "string",
@@ -5459,6 +6289,22 @@ const docTemplate = `{
                 }
             }
         },
+        "resp.SuccessResponse-locations_GetLocationCapacityStatsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/locations.GetLocationCapacityStatsResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
         "resp.SuccessResponse-locations_UpdateLocationResponse": {
             "type": "object",
             "properties": {
@@ -5507,6 +6353,22 @@ const docTemplate = `{
                 }
             }
         },
+        "resp.SuccessResponse-referring_orgs_GetReferringOrgStatsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/referring_orgs.GetReferringOrgStatsResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
         "resp.SuccessResponse-registration_CreateRegistrationFormResponse": {
             "type": "object",
             "properties": {
@@ -5544,6 +6406,22 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/registration.GetRegistrationFormResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-registration_GetRegistrationStatsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/registration.GetRegistrationStatsResponse"
                 },
                 "message": {
                     "type": "string",

@@ -71,3 +71,45 @@ type GetIncidentStatsResponse struct {
 	CountsByStatus   IncidentStatusCountsDTO   `json:"countsByStatus"`
 	CountsByType     IncidentTypeCountsDTO     `json:"countsByType"`
 }
+
+type GetIncidentResponse struct {
+	ID                   string    `json:"id"`
+	ClientID             string    `json:"clientId"`
+	ClientFirstName      string    `json:"clientFirstName"`
+	ClientLastName       string    `json:"clientLastName"`
+	IncidentDate         time.Time `json:"incidentDate"`
+	IncidentTime         string    `json:"incidentTime"`
+	IncidentType         string    `json:"incidentType"`
+	IncidentSeverity     string    `json:"incidentSeverity"`
+	LocationID           string    `json:"locationId"`
+	LocationName         string    `json:"locationName"`
+	CoordinatorID        string    `json:"coordinatorId"`
+	CoordinatorFirstName string    `json:"coordinatorFirstName"`
+	CoordinatorLastName  string    `json:"coordinatorLastName"`
+	IncidentDescription  string    `json:"incidentDescription"`
+	ActionTaken          string    `json:"actionTaken"`
+	OtherParties         *string   `json:"otherParties"`
+	Status               string    `json:"status"`
+	CreatedAt            time.Time `json:"createdAt"`
+}
+
+type UpdateIncidentRequest struct {
+	IncidentDate        *time.Time `json:"incidentDate"        binding:"omitempty,datetime=2006-01-02"`
+	IncidentTime        *time.Time `json:"incidentTime"        binding:"omitempty,datetime=15:04"`
+	IncidentType        *string    `json:"incidentType"        binding:"omitempty,oneof=aggression medical_emergency safety_concern unwanted_behavior other"`
+	IncidentSeverity    *string    `json:"incidentSeverity"    binding:"omitempty,oneof=minor moderate severe"`
+	LocationID          *string    `json:"locationId"`
+	CoordinatorID       *string    `json:"coordinatorId"`
+	IncidentDescription *string    `json:"incidentDescription"`
+	ActionTaken         *string    `json:"actionTaken"`
+	OtherParties        *string    `json:"otherParties"`
+	Status              *string    `json:"status"              binding:"omitempty,oneof=pending under_investigation completed"`
+}
+
+type UpdateIncidentResponse struct {
+	Success bool `json:"success"`
+}
+
+type DeleteIncidentResponse struct {
+	Success bool `json:"success"`
+}

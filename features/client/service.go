@@ -324,10 +324,24 @@ func (s *clientService) ListWaitingListClients(
 ) (*resp.PaginationResponse[ListWaitingListClientsResponse], error) {
 	limit, offset, page, pageSize := middleware.GetPaginationParams(ctx)
 
-	clients, err := s.db.ListWaitingListClients(ctx, db.ListWaitingListClientsParams{
-		Limit:  limit,
-		Offset: offset,
-		Search: req.Search,
+	var clients []db.ListWaitingListClientsRow
+	var err error
+	err = s.db.ExecTx(ctx, func(tx *db.Queries) error {
+		clients, err = tx.ListWaitingListClients(ctx, db.ListWaitingListClientsParams{
+			Limit:  limit,
+			Offset: offset,
+			Search: req.Search,
+		})
+		if err != nil {
+			s.logger.Error(
+				ctx,
+				"ListWaitingListClients",
+				"Failed to list waiting list clients",
+				zap.Error(err),
+			)
+			return ErrInternal
+		}
+		return nil
 	})
 	if err != nil {
 		s.logger.Error(
@@ -378,10 +392,19 @@ func (s *clientService) ListInCareClients(
 ) (*resp.PaginationResponse[ListInCareClientsResponse], error) {
 	limit, offset, page, pageSize := middleware.GetPaginationParams(ctx)
 
-	clients, err := s.db.ListInCareClients(ctx, db.ListInCareClientsParams{
-		Limit:  limit,
-		Offset: offset,
-		Search: req.Search,
+	var clients []db.ListInCareClientsRow
+	var err error
+	err = s.db.ExecTx(ctx, func(tx *db.Queries) error {
+		clients, err = tx.ListInCareClients(ctx, db.ListInCareClientsParams{
+			Limit:  limit,
+			Offset: offset,
+			Search: req.Search,
+		})
+		if err != nil {
+			s.logger.Error(ctx, "ListInCareClients", "Failed to list in care clients", zap.Error(err))
+			return ErrInternal
+		}
+		return nil
 	})
 	if err != nil {
 		s.logger.Error(ctx, "ListInCareClients", "Failed to list in care clients", zap.Error(err))
@@ -452,12 +475,25 @@ func (s *clientService) ListDischargedClients(
 			Valid:               true,
 		}
 	}
-
-	clients, err := s.db.ListDischargedClients(ctx, db.ListDischargedClientsParams{
-		Limit:           limit,
-		Offset:          offset,
-		Search:          req.Search,
-		DischargeStatus: dischargeStatusFilter,
+	var clients []db.ListDischargedClientsRow
+	var err error
+	err = s.db.ExecTx(ctx, func(tx *db.Queries) error {
+		clients, err = tx.ListDischargedClients(ctx, db.ListDischargedClientsParams{
+			Limit:           limit,
+			Offset:          offset,
+			Search:          req.Search,
+			DischargeStatus: dischargeStatusFilter,
+		})
+		if err != nil {
+			s.logger.Error(
+				ctx,
+				"ListDischargedClients",
+				"Failed to list discharged clients",
+				zap.Error(err),
+			)
+			return ErrInternal
+		}
+		return nil
 	})
 	if err != nil {
 		s.logger.Error(
@@ -509,11 +545,16 @@ func (s *clientService) ListDischargedClients(
 func (s *clientService) GetWaitlistStats(
 	ctx context.Context,
 ) (*GetWaitlistStatsResponse, error) {
-	stats, err := s.db.GetWaitlistStats(ctx)
-	if err != nil {
-		s.logger.Error(ctx, "GetWaitlistStats", "Failed to get waitlist statistics", zap.Error(err))
-		return nil, ErrInternal
-	}
+	var stats db.GetWaitlistStatsRow
+	var err error
+	err = s.db.ExecTx(ctx, func(tx *db.Queries) error {
+		stats, err = tx.GetWaitlistStats(ctx)
+		if err != nil {
+			s.logger.Error(ctx, "GetWaitlistStats", "Failed to get waitlist statistics", zap.Error(err))
+			return ErrInternal
+		}
+		return nil
+	})
 
 	// Type assert avg_days_waiting from numeric/interface{}
 	avgDays, _ := stats.AvgDaysWaiting.(float64)
@@ -533,11 +574,16 @@ func (s *clientService) GetWaitlistStats(
 func (s *clientService) GetInCareStats(
 	ctx context.Context,
 ) (*GetInCareStatsResponse, error) {
-	stats, err := s.db.GetInCareStats(ctx)
-	if err != nil {
-		s.logger.Error(ctx, "GetInCareStats", "Failed to get in-care statistics", zap.Error(err))
-		return nil, ErrInternal
-	}
+	var stats db.GetInCareStatsRow
+	var err error
+	err = s.db.ExecTx(ctx, func(tx *db.Queries) error {
+		stats, err = tx.GetInCareStats(ctx)
+		if err != nil {
+			s.logger.Error(ctx, "GetInCareStats", "Failed to get in-care statistics", zap.Error(err))
+			return ErrInternal
+		}
+		return nil
+	})
 
 	// Type assert avg_days_in_care from numeric/interface{}
 	avgDays, _ := stats.AvgDaysInCare.(float64)
@@ -557,7 +603,16 @@ func (s *clientService) GetInCareStats(
 func (s *clientService) GetDischargeStats(
 	ctx context.Context,
 ) (*GetDischargeStatsResponse, error) {
-	stats, err := s.db.GetDischargeStats(ctx)
+	var stats db.GetDischargeStatsRow
+	var err error
+	err = s.db.ExecTx(ctx, func(tx *db.Queries) error {
+		stats, err = tx.GetDischargeStats(ctx)
+		if err != nil {
+			s.logger.Error(ctx, "GetDischargeStats", "Failed to get discharge statistics", zap.Error(err))
+			return ErrInternal
+		}
+		return nil
+	})
 	if err != nil {
 		s.logger.Error(ctx, "GetDischargeStats", "Failed to get discharge statistics", zap.Error(err))
 		return nil, ErrInternal

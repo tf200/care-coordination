@@ -30,6 +30,9 @@ func (h *IncidentHandler) SetupIncidentRoutes(router *gin.Engine) {
 	incident.POST("", h.mdw.AuthMdw(), h.CreateIncident)
 	incident.GET("/stats", h.mdw.AuthMdw(), h.GetIncidentStats)
 	incident.GET("", h.mdw.AuthMdw(), h.mdw.PaginationMdw(), h.ListIncidents)
+	incident.GET("/:id", h.mdw.AuthMdw(), h.GetIncident)
+	incident.PATCH("/:id", h.mdw.AuthMdw(), h.UpdateIncident)
+	incident.DELETE("/:id", h.mdw.AuthMdw(), h.DeleteIncident)
 }
 
 // @Summary Create an incident
@@ -62,6 +65,105 @@ func (h *IncidentHandler) CreateIncident(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, resp.Success(result, "Incident created successfully"))
+}
+
+// @Summary Get an incident
+// @Description Get a single incident by ID
+// @Tags Incident
+// @Produce json
+// @Param id path string true "Incident ID"
+// @Success 200 {object} resp.SuccessResponse[GetIncidentResponse]
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 404 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /incidents/{id} [get]
+func (h *IncidentHandler) GetIncident(ctx *gin.Context) {
+	id := ctx.Param("id")
+	if id == "" {
+		ctx.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
+		return
+	}
+	result, err := h.incidentService.GetIncident(ctx, id)
+	if err != nil {
+		switch err {
+		case ErrNotFound:
+			ctx.JSON(http.StatusNotFound, resp.Error(err))
+		case ErrInternal:
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
+		default:
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
+		}
+		return
+	}
+	ctx.JSON(http.StatusOK, resp.Success(result, "Incident retrieved successfully"))
+}
+
+// @Summary Update an incident
+// @Description Update an existing incident by ID
+// @Tags Incident
+// @Accept json
+// @Produce json
+// @Param id path string true "Incident ID"
+// @Param incident body UpdateIncidentRequest true "Incident update data"
+// @Success 200 {object} resp.SuccessResponse[UpdateIncidentResponse]
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /incidents/{id} [patch]
+func (h *IncidentHandler) UpdateIncident(ctx *gin.Context) {
+	id := ctx.Param("id")
+	if id == "" {
+		ctx.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
+		return
+	}
+	var req UpdateIncidentRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
+		return
+	}
+	result, err := h.incidentService.UpdateIncident(ctx, id, &req)
+	if err != nil {
+		switch err {
+		case ErrInvalidRequest:
+			ctx.JSON(http.StatusBadRequest, resp.Error(err))
+		case ErrInternal:
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
+		default:
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
+		}
+		return
+	}
+	ctx.JSON(http.StatusOK, resp.Success(result, "Incident updated successfully"))
+}
+
+// @Summary Delete an incident
+// @Description Soft delete an incident by ID
+// @Tags Incident
+// @Produce json
+// @Param id path string true "Incident ID"
+// @Success 200 {object} resp.SuccessResponse[DeleteIncidentResponse]
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /incidents/{id} [delete]
+func (h *IncidentHandler) DeleteIncident(ctx *gin.Context) {
+	id := ctx.Param("id")
+	if id == "" {
+		ctx.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
+		return
+	}
+	result, err := h.incidentService.DeleteIncident(ctx, id)
+	if err != nil {
+		switch err {
+		case ErrInternal:
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
+		default:
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
+		}
+		return
+	}
+	ctx.JSON(http.StatusOK, resp.Success(result, "Incident deleted successfully"))
 }
 
 // @Summary List incidents

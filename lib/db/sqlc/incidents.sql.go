@@ -63,6 +63,71 @@ func (q *Queries) CreateIncident(ctx context.Context, arg CreateIncidentParams) 
 	return err
 }
 
+const getIncident = `-- name: GetIncident :one
+SELECT i.id, i.client_id, i.incident_date, i.incident_time, i.incident_type, i.incident_severity, i.location_id, i.coordinator_id, i.incident_description, i.action_taken, i.other_parties, i.status, i.created_at, i.updated_at, i.is_deleted,
+       c.first_name AS client_first_name,
+       c.last_name AS client_last_name,
+       l.name AS location_name,
+       e.first_name AS coordinator_first_name,
+       e.last_name AS coordinator_last_name
+FROM incidents i
+JOIN clients c ON i.client_id = c.id
+JOIN locations l ON i.location_id = l.id
+JOIN employees e ON i.coordinator_id = e.id
+WHERE i.id = $1 AND i.is_deleted = FALSE
+`
+
+type GetIncidentRow struct {
+	ID                   string               `json:"id"`
+	ClientID             string               `json:"client_id"`
+	IncidentDate         pgtype.Date          `json:"incident_date"`
+	IncidentTime         pgtype.Time          `json:"incident_time"`
+	IncidentType         IncidentTypeEnum     `json:"incident_type"`
+	IncidentSeverity     IncidentSeverityEnum `json:"incident_severity"`
+	LocationID           string               `json:"location_id"`
+	CoordinatorID        string               `json:"coordinator_id"`
+	IncidentDescription  string               `json:"incident_description"`
+	ActionTaken          string               `json:"action_taken"`
+	OtherParties         *string              `json:"other_parties"`
+	Status               IncidentStatusEnum   `json:"status"`
+	CreatedAt            pgtype.Timestamp     `json:"created_at"`
+	UpdatedAt            pgtype.Timestamp     `json:"updated_at"`
+	IsDeleted            *bool                `json:"is_deleted"`
+	ClientFirstName      string               `json:"client_first_name"`
+	ClientLastName       string               `json:"client_last_name"`
+	LocationName         string               `json:"location_name"`
+	CoordinatorFirstName string               `json:"coordinator_first_name"`
+	CoordinatorLastName  string               `json:"coordinator_last_name"`
+}
+
+func (q *Queries) GetIncident(ctx context.Context, id string) (GetIncidentRow, error) {
+	row := q.db.QueryRow(ctx, getIncident, id)
+	var i GetIncidentRow
+	err := row.Scan(
+		&i.ID,
+		&i.ClientID,
+		&i.IncidentDate,
+		&i.IncidentTime,
+		&i.IncidentType,
+		&i.IncidentSeverity,
+		&i.LocationID,
+		&i.CoordinatorID,
+		&i.IncidentDescription,
+		&i.ActionTaken,
+		&i.OtherParties,
+		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.IsDeleted,
+		&i.ClientFirstName,
+		&i.ClientLastName,
+		&i.LocationName,
+		&i.CoordinatorFirstName,
+		&i.CoordinatorLastName,
+	)
+	return i, err
+}
+
 const getIncidentStats = `-- name: GetIncidentStats :one
 SELECT 
     COUNT(*) as total_count,
@@ -81,6 +146,7 @@ SELECT
     COUNT(*) FILTER (WHERE incident_type = 'unwanted_behavior') as unwanted_behavior_count,
     COUNT(*) FILTER (WHERE incident_type = 'other') as other_type_count
 FROM incidents
+WHERE is_deleted = FALSE
 `
 
 type GetIncidentStatsRow struct {
@@ -119,7 +185,7 @@ func (q *Queries) GetIncidentStats(ctx context.Context) (GetIncidentStatsRow, er
 }
 
 const listIncidents = `-- name: ListIncidents :many
-SELECT i.id, i.client_id, i.incident_date, i.incident_time, i.incident_type, i.incident_severity, i.location_id, i.coordinator_id, i.incident_description, i.action_taken, i.other_parties, i.status, i.created_at, i.updated_at,
+SELECT i.id, i.client_id, i.incident_date, i.incident_time, i.incident_type, i.incident_severity, i.location_id, i.coordinator_id, i.incident_description, i.action_taken, i.other_parties, i.status, i.created_at, i.updated_at, i.is_deleted,
        c.first_name AS client_first_name,
        c.last_name AS client_last_name,
        l.name AS location_name,
@@ -130,8 +196,8 @@ FROM incidents i
 JOIN clients c ON i.client_id = c.id
 JOIN locations l ON i.location_id = l.id
 JOIN employees e ON i.coordinator_id = e.id
-WHERE
-(
+WHERE i.is_deleted = FALSE
+AND (
   $3::text IS NULL OR
   c.first_name ILIKE '%' || $3::text || '%' OR
   c.last_name ILIKE '%' || $3::text || '%' OR
@@ -162,6 +228,7 @@ type ListIncidentsRow struct {
 	Status               IncidentStatusEnum   `json:"status"`
 	CreatedAt            pgtype.Timestamp     `json:"created_at"`
 	UpdatedAt            pgtype.Timestamp     `json:"updated_at"`
+	IsDeleted            *bool                `json:"is_deleted"`
 	ClientFirstName      string               `json:"client_first_name"`
 	ClientLastName       string               `json:"client_last_name"`
 	LocationName         string               `json:"location_name"`
@@ -194,6 +261,7 @@ func (q *Queries) ListIncidents(ctx context.Context, arg ListIncidentsParams) ([
 			&i.Status,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.IsDeleted,
 			&i.ClientFirstName,
 			&i.ClientLastName,
 			&i.LocationName,
@@ -209,4 +277,68 @@ func (q *Queries) ListIncidents(ctx context.Context, arg ListIncidentsParams) ([
 		return nil, err
 	}
 	return items, nil
+}
+
+const softDeleteIncident = `-- name: SoftDeleteIncident :exec
+UPDATE incidents
+SET 
+    is_deleted = TRUE,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = $1
+`
+
+func (q *Queries) SoftDeleteIncident(ctx context.Context, id string) error {
+	_, err := q.db.Exec(ctx, softDeleteIncident, id)
+	return err
+}
+
+const updateIncident = `-- name: UpdateIncident :exec
+UPDATE incidents
+SET 
+    incident_date = COALESCE($2::DATE, incident_date),
+    incident_time = COALESCE($3::TIME, incident_time),
+    incident_type = COALESCE($4::incident_type_enum, incident_type),
+    incident_severity = COALESCE($5::incident_severity_enum, incident_severity),
+    location_id = COALESCE($6::TEXT, location_id),
+    coordinator_id = COALESCE($7::TEXT, coordinator_id),
+    incident_description = COALESCE($8::TEXT, incident_description),
+    action_taken = COALESCE($9::TEXT, action_taken),
+    other_parties = CASE 
+        WHEN $10::TEXT = '' THEN NULL
+        ELSE COALESCE($10::TEXT, other_parties)
+    END,
+    status = COALESCE($11::incident_status_enum, status),
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = $1 AND is_deleted = FALSE
+`
+
+type UpdateIncidentParams struct {
+	ID                  string                   `json:"id"`
+	IncidentDate        pgtype.Date              `json:"incident_date"`
+	IncidentTime        pgtype.Time              `json:"incident_time"`
+	IncidentType        NullIncidentTypeEnum     `json:"incident_type"`
+	IncidentSeverity    NullIncidentSeverityEnum `json:"incident_severity"`
+	LocationID          *string                  `json:"location_id"`
+	CoordinatorID       *string                  `json:"coordinator_id"`
+	IncidentDescription *string                  `json:"incident_description"`
+	ActionTaken         *string                  `json:"action_taken"`
+	OtherParties        *string                  `json:"other_parties"`
+	Status              NullIncidentStatusEnum   `json:"status"`
+}
+
+func (q *Queries) UpdateIncident(ctx context.Context, arg UpdateIncidentParams) error {
+	_, err := q.db.Exec(ctx, updateIncident,
+		arg.ID,
+		arg.IncidentDate,
+		arg.IncidentTime,
+		arg.IncidentType,
+		arg.IncidentSeverity,
+		arg.LocationID,
+		arg.CoordinatorID,
+		arg.IncidentDescription,
+		arg.ActionTaken,
+		arg.OtherParties,
+		arg.Status,
+	)
+	return err
 }

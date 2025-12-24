@@ -29,8 +29,8 @@ FROM incidents i
 JOIN clients c ON i.client_id = c.id
 JOIN locations l ON i.location_id = l.id
 JOIN employees e ON i.coordinator_id = e.id
-WHERE
-(
+WHERE i.is_deleted = FALSE
+AND (
   sqlc.narg('search')::text IS NULL OR
   c.first_name ILIKE '%' || sqlc.narg('search')::text || '%' OR
   c.last_name ILIKE '%' || sqlc.narg('search')::text || '%' OR
@@ -56,4 +56,44 @@ SELECT
     COUNT(*) FILTER (WHERE incident_type = 'safety_concern') as safety_concern_count,
     COUNT(*) FILTER (WHERE incident_type = 'unwanted_behavior') as unwanted_behavior_count,
     COUNT(*) FILTER (WHERE incident_type = 'other') as other_type_count
-FROM incidents;
+FROM incidents
+WHERE is_deleted = FALSE;
+
+-- name: GetIncident :one
+SELECT i.*,
+       c.first_name AS client_first_name,
+       c.last_name AS client_last_name,
+       l.name AS location_name,
+       e.first_name AS coordinator_first_name,
+       e.last_name AS coordinator_last_name
+FROM incidents i
+JOIN clients c ON i.client_id = c.id
+JOIN locations l ON i.location_id = l.id
+JOIN employees e ON i.coordinator_id = e.id
+WHERE i.id = $1 AND i.is_deleted = FALSE;
+
+-- name: UpdateIncident :exec
+UPDATE incidents
+SET 
+    incident_date = COALESCE(sqlc.narg('incident_date')::DATE, incident_date),
+    incident_time = COALESCE(sqlc.narg('incident_time')::TIME, incident_time),
+    incident_type = COALESCE(sqlc.narg('incident_type')::incident_type_enum, incident_type),
+    incident_severity = COALESCE(sqlc.narg('incident_severity')::incident_severity_enum, incident_severity),
+    location_id = COALESCE(sqlc.narg('location_id')::TEXT, location_id),
+    coordinator_id = COALESCE(sqlc.narg('coordinator_id')::TEXT, coordinator_id),
+    incident_description = COALESCE(sqlc.narg('incident_description')::TEXT, incident_description),
+    action_taken = COALESCE(sqlc.narg('action_taken')::TEXT, action_taken),
+    other_parties = CASE 
+        WHEN sqlc.narg('other_parties')::TEXT = '' THEN NULL
+        ELSE COALESCE(sqlc.narg('other_parties')::TEXT, other_parties)
+    END,
+    status = COALESCE(sqlc.narg('status')::incident_status_enum, status),
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = $1 AND is_deleted = FALSE;
+
+-- name: SoftDeleteIncident :exec
+UPDATE incidents
+SET 
+    is_deleted = TRUE,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = $1;

@@ -309,7 +309,8 @@ CREATE TABLE incidents (
     other_parties TEXT,
     status incident_status_enum NOT NULL,
     created_at TIMESTAMP  DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP  DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP  DEFAULT CURRENT_TIMESTAMP,
+    is_deleted BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE client_goals (

@@ -737,6 +737,7 @@ type Incident struct {
 	Status              IncidentStatusEnum   `json:"status"`
 	CreatedAt           pgtype.Timestamp     `json:"created_at"`
 	UpdatedAt           pgtype.Timestamp     `json:"updated_at"`
+	IsDeleted           *bool                `json:"is_deleted"`
 }
 
 type IntakeForm struct {

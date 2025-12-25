@@ -467,6 +467,8 @@ definitions:
         type: string
       evaluationDate:
         type: string
+      isDraft:
+        type: boolean
       overallNotes:
         type: string
       progressLogs:
@@ -483,7 +485,54 @@ definitions:
     properties:
       id:
         type: string
+      isDraft:
+        type: boolean
       nextEvaluationDate:
+        description: Only set when not draft
+        type: string
+    type: object
+  evaluation.DraftEvaluationDTO:
+    properties:
+      clientFirstName:
+        type: string
+      clientId:
+        type: string
+      clientLastName:
+        type: string
+      coordinatorFirstName:
+        type: string
+      coordinatorLastName:
+        type: string
+      createdAt:
+        type: string
+      evaluationDate:
+        type: string
+      evaluationId:
+        type: string
+      goalProgress:
+        items:
+          $ref: '#/definitions/evaluation.GoalProgressItemDTO'
+        type: array
+      overallNotes:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  evaluation.DraftEvaluationListItemDTO:
+    properties:
+      clientFirstName:
+        type: string
+      clientId:
+        type: string
+      clientLastName:
+        type: string
+      evaluationDate:
+        type: string
+      evaluationId:
+        type: string
+      goalsCount:
+        type: integer
+      updatedAt:
         type: string
     type: object
   evaluation.EvaluationHistoryItem:
@@ -569,6 +618,32 @@ definitions:
       overallNotes:
         type: string
     type: object
+  evaluation.SaveDraftRequest:
+    properties:
+      clientId:
+        type: string
+      coordinatorId:
+        type: string
+      evaluationDate:
+        type: string
+      overallNotes:
+        type: string
+      progressLogs:
+        items:
+          $ref: '#/definitions/evaluation.GoalProgressDTO'
+        type: array
+    required:
+    - clientId
+    - coordinatorId
+    - evaluationDate
+    type: object
+  evaluation.SaveDraftResponse:
+    properties:
+      id:
+        type: string
+      updatedAt:
+        type: string
+    type: object
   evaluation.UpcomingEvaluationDTO:
     properties:
       coordinatorFirstName:
@@ -587,6 +662,20 @@ definitions:
         type: string
       nextEvaluationDate:
         type: string
+    type: object
+  evaluation.UpdateEvaluationRequest:
+    properties:
+      evaluationDate:
+        type: string
+      overallNotes:
+        type: string
+      progressLogs:
+        items:
+          $ref: '#/definitions/evaluation.GoalProgressDTO'
+        minItems: 1
+        type: array
+    required:
+    - evaluationDate
     type: object
   incident.CreateIncidentRequest:
     properties:
@@ -640,6 +729,50 @@ definitions:
   incident.CreateIncidentResponse:
     properties:
       id:
+        type: string
+    type: object
+  incident.DeleteIncidentResponse:
+    properties:
+      success:
+        type: boolean
+    type: object
+  incident.GetIncidentResponse:
+    properties:
+      actionTaken:
+        type: string
+      clientFirstName:
+        type: string
+      clientId:
+        type: string
+      clientLastName:
+        type: string
+      coordinatorFirstName:
+        type: string
+      coordinatorId:
+        type: string
+      coordinatorLastName:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: string
+      incidentDate:
+        type: string
+      incidentDescription:
+        type: string
+      incidentSeverity:
+        type: string
+      incidentTime:
+        type: string
+      incidentType:
+        type: string
+      locationId:
+        type: string
+      locationName:
+        type: string
+      otherParties:
+        type: string
+      status:
         type: string
     type: object
   incident.GetIncidentStatsResponse:
@@ -722,6 +855,48 @@ definitions:
         type: string
       status:
         type: string
+    type: object
+  incident.UpdateIncidentRequest:
+    properties:
+      actionTaken:
+        type: string
+      coordinatorId:
+        type: string
+      incidentDate:
+        type: string
+      incidentDescription:
+        type: string
+      incidentSeverity:
+        enum:
+        - minor
+        - moderate
+        - severe
+        type: string
+      incidentTime:
+        type: string
+      incidentType:
+        enum:
+        - aggression
+        - medical_emergency
+        - safety_concern
+        - unwanted_behavior
+        - other
+        type: string
+      locationId:
+        type: string
+      otherParties:
+        type: string
+      status:
+        enum:
+        - pending
+        - under_investigation
+        - completed
+        type: string
+    type: object
+  incident.UpdateIncidentResponse:
+    properties:
+      success:
+        type: boolean
     type: object
   intake.CreateIntakeFormRequest:
     properties:
@@ -1559,6 +1734,21 @@ definitions:
       totalPages:
         type: integer
     type: object
+  resp.PaginationResponse-evaluation_DraftEvaluationListItemDTO:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/evaluation.DraftEvaluationListItemDTO'
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      totalCount:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
   resp.PaginationResponse-evaluation_GlobalRecentEvaluationDTO:
     properties:
       data:
@@ -1858,10 +2048,32 @@ definitions:
         example: true
         type: boolean
     type: object
+  resp.SuccessResponse-evaluation_DraftEvaluationDTO:
+    properties:
+      data:
+        $ref: '#/definitions/evaluation.DraftEvaluationDTO'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
   resp.SuccessResponse-evaluation_LastEvaluationDTO:
     properties:
       data:
         $ref: '#/definitions/evaluation.LastEvaluationDTO'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-evaluation_SaveDraftResponse:
+    properties:
+      data:
+        $ref: '#/definitions/evaluation.SaveDraftResponse'
       message:
         example: success message
         type: string
@@ -1880,10 +2092,43 @@ definitions:
         example: true
         type: boolean
     type: object
+  resp.SuccessResponse-incident_DeleteIncidentResponse:
+    properties:
+      data:
+        $ref: '#/definitions/incident.DeleteIncidentResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-incident_GetIncidentResponse:
+    properties:
+      data:
+        $ref: '#/definitions/incident.GetIncidentResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
   resp.SuccessResponse-incident_GetIncidentStatsResponse:
     properties:
       data:
         $ref: '#/definitions/incident.GetIncidentStatsResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-incident_UpdateIncidentResponse:
+    properties:
+      data:
+        $ref: '#/definitions/incident.UpdateIncidentResponse'
       message:
         example: success message
         type: string
@@ -2159,6 +2404,17 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/resp.PaginationResponse-array_locations_ListLocationsResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-resp_PaginationResponse-evaluation_DraftEvaluationListItemDTO:
+    properties:
+      data:
+        $ref: '#/definitions/resp.PaginationResponse-evaluation_DraftEvaluationListItemDTO'
       message:
         example: success message
         type: string
@@ -3326,6 +3582,45 @@ paths:
       summary: Create a client evaluation
       tags:
       - Evaluation
+  /evaluations/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Update an existing evaluation's details and progress logs.
+      parameters:
+      - description: Evaluation ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated Evaluation Details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/evaluation.UpdateEvaluationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-evaluation_SaveDraftResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Update a submitted evaluation
+      tags:
+      - Evaluation
   /evaluations/critical:
     get:
       description: List evaluations due within the next 7 days or overdue.
@@ -3345,6 +3640,172 @@ paths:
           schema:
             $ref: '#/definitions/resp.ErrorResponse'
       summary: Get critical evaluations (Dashboard)
+      tags:
+      - Evaluation
+  /evaluations/drafts:
+    get:
+      description: Retrieve all draft evaluations for the logged-in coordinator.
+      parameters:
+      - description: Coordinator ID
+        in: query
+        name: coordinatorId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-resp_PaginationResponse-evaluation_DraftEvaluationListItemDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get all draft evaluations
+      tags:
+      - Evaluation
+    post:
+      consumes:
+      - application/json
+      description: Create a new draft or update an existing draft evaluation for a
+        client.
+      parameters:
+      - description: Draft Evaluation Details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/evaluation.SaveDraftRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-evaluation_SaveDraftResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Save or update a draft evaluation
+      tags:
+      - Evaluation
+  /evaluations/drafts/{id}:
+    delete:
+      description: Delete a draft evaluation permanently.
+      parameters:
+      - description: Draft Evaluation ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-any'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Delete a draft evaluation
+      tags:
+      - Evaluation
+    get:
+      description: Retrieve a draft evaluation by ID with all progress logs.
+      parameters:
+      - description: Draft Evaluation ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-evaluation_DraftEvaluationDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get a specific draft evaluation
+      tags:
+      - Evaluation
+  /evaluations/drafts/{id}/submit:
+    post:
+      description: Convert a draft evaluation to submitted status and update client's
+        next evaluation date.
+      parameters:
+      - description: Draft Evaluation ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-evaluation_CreateEvaluationResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Submit a draft evaluation
       tags:
       - Evaluation
   /evaluations/history/{clientId}:
@@ -3528,6 +3989,109 @@ paths:
           schema:
             $ref: '#/definitions/resp.ErrorResponse'
       summary: Create an incident
+      tags:
+      - Incident
+  /incidents/{id}:
+    delete:
+      description: Soft delete an incident by ID
+      parameters:
+      - description: Incident ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-incident_DeleteIncidentResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Delete an incident
+      tags:
+      - Incident
+    get:
+      description: Get a single incident by ID
+      parameters:
+      - description: Incident ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-incident_GetIncidentResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get an incident
+      tags:
+      - Incident
+    patch:
+      consumes:
+      - application/json
+      description: Update an existing incident by ID
+      parameters:
+      - description: Incident ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Incident update data
+        in: body
+        name: incident
+        required: true
+        schema:
+          $ref: '#/definitions/incident.UpdateIncidentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-incident_UpdateIncidentResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Update an incident
       tags:
       - Incident
   /incidents/stats:

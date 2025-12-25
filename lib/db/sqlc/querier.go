@@ -43,15 +43,20 @@ type Querier interface {
 	CreateUserSession(ctx context.Context, arg CreateUserSessionParams) error
 	DecrementLocationOccupied(ctx context.Context, id string) error
 	DeleteAllPermissionsFromRole(ctx context.Context, roleID string) error
+	DeleteDraftEvaluation(ctx context.Context, id string) error
 	DeleteGoal(ctx context.Context, id string) error
+	DeleteGoalProgressLogsByEvaluationId(ctx context.Context, evaluationID string) error
 	DeletePermission(ctx context.Context, id string) error
 	DeleteReferringOrg(ctx context.Context, id string) error
 	DeleteRole(ctx context.Context, id string) error
 	DeleteUserSession(ctx context.Context, tokenHash string) error
 	GetClientByID(ctx context.Context, id string) (Client, error)
 	GetClientEvaluationHistory(ctx context.Context, clientID string) ([]GetClientEvaluationHistoryRow, error)
+	GetCoordinatorDrafts(ctx context.Context, arg GetCoordinatorDraftsParams) ([]GetCoordinatorDraftsRow, error)
 	GetCriticalEvaluations(ctx context.Context, arg GetCriticalEvaluationsParams) ([]GetCriticalEvaluationsRow, error)
 	GetDischargeStats(ctx context.Context) (GetDischargeStatsRow, error)
+	GetDraftByClientId(ctx context.Context, clientID string) (ClientEvaluation, error)
+	GetDraftEvaluation(ctx context.Context, id string) ([]GetDraftEvaluationRow, error)
 	GetEmployeeByID(ctx context.Context, id string) (GetEmployeeByIDRow, error)
 	GetEmployeeByUserID(ctx context.Context, userID string) (GetEmployeeByUserIDRow, error)
 	GetInCareStats(ctx context.Context) (GetInCareStatsRow, error)
@@ -104,11 +109,13 @@ type Querier interface {
 	SoftDeleteIncident(ctx context.Context, id string) error
 	SoftDeleteLocation(ctx context.Context, id string) error
 	SoftDeleteRegistrationForm(ctx context.Context, id string) error
+	SubmitDraftEvaluation(ctx context.Context, id string) (ClientEvaluation, error)
 	UpdateClient(ctx context.Context, arg UpdateClientParams) (string, error)
 	UpdateClientByIntakeFormID(ctx context.Context, arg UpdateClientByIntakeFormIDParams) error
 	UpdateClientByRegistrationFormID(ctx context.Context, arg UpdateClientByRegistrationFormIDParams) error
 	UpdateClientGoal(ctx context.Context, arg UpdateClientGoalParams) error
 	UpdateClientNextEvaluationDate(ctx context.Context, arg UpdateClientNextEvaluationDateParams) error
+	UpdateEvaluation(ctx context.Context, arg UpdateEvaluationParams) (ClientEvaluation, error)
 	UpdateIncident(ctx context.Context, arg UpdateIncidentParams) error
 	UpdateIntakeForm(ctx context.Context, arg UpdateIntakeFormParams) error
 	UpdateIntakeFormStatus(ctx context.Context, arg UpdateIntakeFormStatusParams) error

@@ -17,18 +17,20 @@ INSERT INTO client_evaluations (
     client_id,
     coordinator_id,
     evaluation_date,
-    overall_notes
+    overall_notes,
+    status
 ) VALUES (
-    $1, $2, $3, $4, $5
-) RETURNING id, client_id, coordinator_id, evaluation_date, overall_notes, created_at, updated_at
+    $1, $2, $3, $4, $5, $6
+) RETURNING id, client_id, coordinator_id, evaluation_date, overall_notes, status, created_at, updated_at
 `
 
 type CreateClientEvaluationParams struct {
-	ID             string      `json:"id"`
-	ClientID       string      `json:"client_id"`
-	CoordinatorID  string      `json:"coordinator_id"`
-	EvaluationDate pgtype.Date `json:"evaluation_date"`
-	OverallNotes   *string     `json:"overall_notes"`
+	ID             string               `json:"id"`
+	ClientID       string               `json:"client_id"`
+	CoordinatorID  string               `json:"coordinator_id"`
+	EvaluationDate pgtype.Date          `json:"evaluation_date"`
+	OverallNotes   *string              `json:"overall_notes"`
+	Status         EvaluationStatusEnum `json:"status"`
 }
 
 func (q *Queries) CreateClientEvaluation(ctx context.Context, arg CreateClientEvaluationParams) (ClientEvaluation, error) {
@@ -38,6 +40,7 @@ func (q *Queries) CreateClientEvaluation(ctx context.Context, arg CreateClientEv
 		arg.CoordinatorID,
 		arg.EvaluationDate,
 		arg.OverallNotes,
+		arg.Status,
 	)
 	var i ClientEvaluation
 	err := row.Scan(
@@ -46,6 +49,7 @@ func (q *Queries) CreateClientEvaluation(ctx context.Context, arg CreateClientEv
 		&i.CoordinatorID,
 		&i.EvaluationDate,
 		&i.OverallNotes,
+		&i.Status,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -80,6 +84,26 @@ func (q *Queries) CreateGoalProgressLog(ctx context.Context, arg CreateGoalProgr
 		arg.Status,
 		arg.ProgressNotes,
 	)
+	return err
+}
+
+const deleteDraftEvaluation = `-- name: DeleteDraftEvaluation :exec
+DELETE FROM client_evaluations 
+WHERE id = $1 AND status = 'draft'
+`
+
+func (q *Queries) DeleteDraftEvaluation(ctx context.Context, id string) error {
+	_, err := q.db.Exec(ctx, deleteDraftEvaluation, id)
+	return err
+}
+
+const deleteGoalProgressLogsByEvaluationId = `-- name: DeleteGoalProgressLogsByEvaluationId :exec
+DELETE FROM goal_progress_logs 
+WHERE evaluation_id = $1
+`
+
+func (q *Queries) DeleteGoalProgressLogsByEvaluationId(ctx context.Context, evaluationID string) error {
+	_, err := q.db.Exec(ctx, deleteGoalProgressLogsByEvaluationId, evaluationID)
 	return err
 }
 
@@ -133,6 +157,74 @@ func (q *Queries) GetClientEvaluationHistory(ctx context.Context, clientID strin
 			&i.ProgressNotes,
 			&i.CoordinatorFirstName,
 			&i.CoordinatorLastName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getCoordinatorDrafts = `-- name: GetCoordinatorDrafts :many
+SELECT 
+    e.id as evaluation_id,
+    e.client_id,
+    e.evaluation_date,
+    e.created_at,
+    e.updated_at,
+    c.first_name as client_first_name,
+    c.last_name as client_last_name,
+    COUNT(l.id) as goals_count,
+    COUNT(*) OVER() as total_count
+FROM client_evaluations e
+JOIN clients c ON e.client_id = c.id
+LEFT JOIN goal_progress_logs l ON e.id = l.evaluation_id
+WHERE e.coordinator_id = $1 AND e.status = 'draft'
+GROUP BY e.id, e.client_id, e.evaluation_date, e.created_at, e.updated_at, c.first_name, c.last_name
+ORDER BY e.updated_at DESC
+LIMIT $2 OFFSET $3
+`
+
+type GetCoordinatorDraftsParams struct {
+	CoordinatorID string `json:"coordinator_id"`
+	Limit         int32  `json:"limit"`
+	Offset        int32  `json:"offset"`
+}
+
+type GetCoordinatorDraftsRow struct {
+	EvaluationID    string             `json:"evaluation_id"`
+	ClientID        string             `json:"client_id"`
+	EvaluationDate  pgtype.Date        `json:"evaluation_date"`
+	CreatedAt       pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+	ClientFirstName string             `json:"client_first_name"`
+	ClientLastName  string             `json:"client_last_name"`
+	GoalsCount      int64              `json:"goals_count"`
+	TotalCount      int64              `json:"total_count"`
+}
+
+func (q *Queries) GetCoordinatorDrafts(ctx context.Context, arg GetCoordinatorDraftsParams) ([]GetCoordinatorDraftsRow, error) {
+	rows, err := q.db.Query(ctx, getCoordinatorDrafts, arg.CoordinatorID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetCoordinatorDraftsRow{}
+	for rows.Next() {
+		var i GetCoordinatorDraftsRow
+		if err := rows.Scan(
+			&i.EvaluationID,
+			&i.ClientID,
+			&i.EvaluationDate,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.ClientFirstName,
+			&i.ClientLastName,
+			&i.GoalsCount,
+			&i.TotalCount,
 		); err != nil {
 			return nil, err
 		}
@@ -212,6 +304,105 @@ func (q *Queries) GetCriticalEvaluations(ctx context.Context, arg GetCriticalEva
 	return items, nil
 }
 
+const getDraftByClientId = `-- name: GetDraftByClientId :one
+SELECT id, client_id, coordinator_id, evaluation_date, overall_notes, status, created_at, updated_at FROM client_evaluations 
+WHERE client_id = $1 AND status = 'draft'
+LIMIT 1
+`
+
+func (q *Queries) GetDraftByClientId(ctx context.Context, clientID string) (ClientEvaluation, error) {
+	row := q.db.QueryRow(ctx, getDraftByClientId, clientID)
+	var i ClientEvaluation
+	err := row.Scan(
+		&i.ID,
+		&i.ClientID,
+		&i.CoordinatorID,
+		&i.EvaluationDate,
+		&i.OverallNotes,
+		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getDraftEvaluation = `-- name: GetDraftEvaluation :many
+SELECT 
+    e.id as evaluation_id,
+    e.client_id,
+    e.evaluation_date,
+    e.overall_notes,
+    e.created_at,
+    e.updated_at,
+    emp.first_name as coordinator_first_name,
+    emp.last_name as coordinator_last_name,
+    c.first_name as client_first_name,
+    c.last_name as client_last_name,
+    g.id as goal_id,
+    g.title as goal_title,
+    l.status,
+    l.progress_notes
+FROM client_evaluations e
+JOIN employees emp ON e.coordinator_id = emp.id
+JOIN clients c ON e.client_id = c.id
+LEFT JOIN goal_progress_logs l ON e.id = l.evaluation_id
+LEFT JOIN client_goals g ON l.goal_id = g.id
+WHERE e.id = $1 AND e.status = 'draft'
+ORDER BY g.title ASC
+`
+
+type GetDraftEvaluationRow struct {
+	EvaluationID         string                 `json:"evaluation_id"`
+	ClientID             string                 `json:"client_id"`
+	EvaluationDate       pgtype.Date            `json:"evaluation_date"`
+	OverallNotes         *string                `json:"overall_notes"`
+	CreatedAt            pgtype.Timestamptz     `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz     `json:"updated_at"`
+	CoordinatorFirstName string                 `json:"coordinator_first_name"`
+	CoordinatorLastName  string                 `json:"coordinator_last_name"`
+	ClientFirstName      string                 `json:"client_first_name"`
+	ClientLastName       string                 `json:"client_last_name"`
+	GoalID               *string                `json:"goal_id"`
+	GoalTitle            *string                `json:"goal_title"`
+	Status               NullGoalProgressStatus `json:"status"`
+	ProgressNotes        *string                `json:"progress_notes"`
+}
+
+func (q *Queries) GetDraftEvaluation(ctx context.Context, id string) ([]GetDraftEvaluationRow, error) {
+	rows, err := q.db.Query(ctx, getDraftEvaluation, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetDraftEvaluationRow{}
+	for rows.Next() {
+		var i GetDraftEvaluationRow
+		if err := rows.Scan(
+			&i.EvaluationID,
+			&i.ClientID,
+			&i.EvaluationDate,
+			&i.OverallNotes,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.CoordinatorFirstName,
+			&i.CoordinatorLastName,
+			&i.ClientFirstName,
+			&i.ClientLastName,
+			&i.GoalID,
+			&i.GoalTitle,
+			&i.Status,
+			&i.ProgressNotes,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getLastClientEvaluation = `-- name: GetLastClientEvaluation :many
 SELECT 
     e.id as evaluation_id,
@@ -227,10 +418,10 @@ FROM client_evaluations e
 JOIN goal_progress_logs l ON e.id = l.evaluation_id
 JOIN client_goals g ON l.goal_id = g.id
 JOIN employees emp ON e.coordinator_id = emp.id
-WHERE e.client_id = $1
+WHERE e.client_id = $1 AND e.status = 'submitted'
 ORDER BY e.evaluation_date DESC, g.title ASC
 LIMIT (SELECT COUNT(*) FROM goal_progress_logs WHERE evaluation_id = (
-    SELECT id FROM client_evaluations WHERE client_id = $1 ORDER BY evaluation_date DESC LIMIT 1
+    SELECT id FROM client_evaluations WHERE client_id = $1 AND status = 'submitted' ORDER BY evaluation_date DESC LIMIT 1
 ))
 `
 
@@ -410,6 +601,29 @@ func (q *Queries) GetScheduledEvaluations(ctx context.Context, arg GetScheduledE
 	return items, nil
 }
 
+const submitDraftEvaluation = `-- name: SubmitDraftEvaluation :one
+UPDATE client_evaluations 
+SET status = 'submitted', updated_at = NOW()
+WHERE id = $1 AND status = 'draft'
+RETURNING id, client_id, coordinator_id, evaluation_date, overall_notes, status, created_at, updated_at
+`
+
+func (q *Queries) SubmitDraftEvaluation(ctx context.Context, id string) (ClientEvaluation, error) {
+	row := q.db.QueryRow(ctx, submitDraftEvaluation, id)
+	var i ClientEvaluation
+	err := row.Scan(
+		&i.ID,
+		&i.ClientID,
+		&i.CoordinatorID,
+		&i.EvaluationDate,
+		&i.OverallNotes,
+		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const updateClientNextEvaluationDate = `-- name: UpdateClientNextEvaluationDate :exec
 UPDATE clients 
 SET next_evaluation_date = $2, updated_at = NOW() 
@@ -424,4 +638,33 @@ type UpdateClientNextEvaluationDateParams struct {
 func (q *Queries) UpdateClientNextEvaluationDate(ctx context.Context, arg UpdateClientNextEvaluationDateParams) error {
 	_, err := q.db.Exec(ctx, updateClientNextEvaluationDate, arg.ID, arg.NextEvaluationDate)
 	return err
+}
+
+const updateEvaluation = `-- name: UpdateEvaluation :one
+UPDATE client_evaluations
+SET evaluation_date = $2, overall_notes = $3, updated_at = NOW()
+WHERE id = $1
+RETURNING id, client_id, coordinator_id, evaluation_date, overall_notes, status, created_at, updated_at
+`
+
+type UpdateEvaluationParams struct {
+	ID             string      `json:"id"`
+	EvaluationDate pgtype.Date `json:"evaluation_date"`
+	OverallNotes   *string     `json:"overall_notes"`
+}
+
+func (q *Queries) UpdateEvaluation(ctx context.Context, arg UpdateEvaluationParams) (ClientEvaluation, error) {
+	row := q.db.QueryRow(ctx, updateEvaluation, arg.ID, arg.EvaluationDate, arg.OverallNotes)
+	var i ClientEvaluation
+	err := row.Scan(
+		&i.ID,
+		&i.ClientID,
+		&i.CoordinatorID,
+		&i.EvaluationDate,
+		&i.OverallNotes,
+		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }

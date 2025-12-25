@@ -112,6 +112,7 @@ CREATE TABLE  employees (
 CREATE TYPE care_type_enum AS ENUM ('protected_living', 'semi_independent_living', 'independent_assisted_living', 'ambulatory_care');
 CREATE TYPE registration_status_enum AS ENUM ('pending', 'approved', 'rejected', 'in_review');
 CREATE TYPE goal_progress_status AS ENUM ('starting', 'on_track', 'delayed', 'achieved');
+CREATE TYPE evaluation_status_enum AS ENUM ('draft', 'submitted');
 
  CREATE TABLE registration_forms (
  -- client information
@@ -380,9 +381,14 @@ CREATE TABLE client_evaluations (
     coordinator_id TEXT NOT NULL REFERENCES employees(id),
     evaluation_date DATE NOT NULL DEFAULT CURRENT_DATE,
     overall_notes TEXT,
+    status evaluation_status_enum NOT NULL DEFAULT 'submitted',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Partial unique index: Only one draft per client at a time
+CREATE UNIQUE INDEX unique_draft_per_client ON client_evaluations (client_id) 
+WHERE status = 'draft';
 
 -- Goal Progress Logs table
 CREATE TABLE goal_progress_logs (

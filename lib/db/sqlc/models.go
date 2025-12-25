@@ -228,6 +228,48 @@ func (ns NullDischargeStatusEnum) Value() (driver.Value, error) {
 	return string(ns.DischargeStatusEnum), nil
 }
 
+type EvaluationStatusEnum string
+
+const (
+	EvaluationStatusEnumDraft     EvaluationStatusEnum = "draft"
+	EvaluationStatusEnumSubmitted EvaluationStatusEnum = "submitted"
+)
+
+func (e *EvaluationStatusEnum) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = EvaluationStatusEnum(s)
+	case string:
+		*e = EvaluationStatusEnum(s)
+	default:
+		return fmt.Errorf("unsupported scan type for EvaluationStatusEnum: %T", src)
+	}
+	return nil
+}
+
+type NullEvaluationStatusEnum struct {
+	EvaluationStatusEnum EvaluationStatusEnum `json:"evaluation_status_enum"`
+	Valid                bool                 `json:"valid"` // Valid is true if EvaluationStatusEnum is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullEvaluationStatusEnum) Scan(value interface{}) error {
+	if value == nil {
+		ns.EvaluationStatusEnum, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.EvaluationStatusEnum.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullEvaluationStatusEnum) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.EvaluationStatusEnum), nil
+}
+
 type GenderEnum string
 
 const (
@@ -662,13 +704,14 @@ type Client struct {
 }
 
 type ClientEvaluation struct {
-	ID             string             `json:"id"`
-	ClientID       string             `json:"client_id"`
-	CoordinatorID  string             `json:"coordinator_id"`
-	EvaluationDate pgtype.Date        `json:"evaluation_date"`
-	OverallNotes   *string            `json:"overall_notes"`
-	CreatedAt      pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
+	ID             string               `json:"id"`
+	ClientID       string               `json:"client_id"`
+	CoordinatorID  string               `json:"coordinator_id"`
+	EvaluationDate pgtype.Date          `json:"evaluation_date"`
+	OverallNotes   *string              `json:"overall_notes"`
+	Status         EvaluationStatusEnum `json:"status"`
+	CreatedAt      pgtype.Timestamptz   `json:"created_at"`
+	UpdatedAt      pgtype.Timestamptz   `json:"updated_at"`
 }
 
 type ClientGoal struct {

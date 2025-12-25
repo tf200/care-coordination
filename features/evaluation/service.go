@@ -19,6 +19,14 @@ type EvaluationService interface {
 	GetScheduledEvaluations(ctx context.Context) (*resp.PaginationResponse[UpcomingEvaluationDTO], error)
 	GetRecentEvaluations(ctx context.Context) (*resp.PaginationResponse[GlobalRecentEvaluationDTO], error)
 	GetLastEvaluation(ctx context.Context, clientID string) (*LastEvaluationDTO, error)
+	// Draft methods
+	SaveDraft(ctx context.Context, req *SaveDraftRequest) (*SaveDraftResponse, error)
+	GetDrafts(ctx context.Context, coordinatorID string) (*resp.PaginationResponse[DraftEvaluationListItemDTO], error)
+	GetDraft(ctx context.Context, evaluationID string) (*DraftEvaluationDTO, error)
+	SubmitDraft(ctx context.Context, evaluationID string) (*CreateEvaluationResponse, error)
+	DeleteDraft(ctx context.Context, evaluationID string) error
+	// Update method
+	UpdateEvaluation(ctx context.Context, evaluationID string, req *UpdateEvaluationRequest) (*SaveDraftResponse, error)
 }
 
 type evaluationService struct {
@@ -54,6 +62,12 @@ func (s *evaluationService) CreateEvaluation(ctx context.Context, req *CreateEva
 		interval = *client.EvaluationIntervalWeeks
 	}
 
+	// Determine evaluation status
+	status := db.EvaluationStatusEnumSubmitted
+	if req.IsDraft {
+		status = db.EvaluationStatusEnumDraft
+	}
+
 	result, err := s.db.CreateEvaluationTx(ctx, db.CreateEvaluationTxParams{
 		Evaluation: db.CreateClientEvaluationParams{
 			ID:             evaluationID,
@@ -61,6 +75,7 @@ func (s *evaluationService) CreateEvaluation(ctx context.Context, req *CreateEva
 			CoordinatorID:  req.CoordinatorID,
 			EvaluationDate: util.StrToPgtypeDate(req.EvaluationDate),
 			OverallNotes:   req.OverallNotes,
+			Status:         status,
 		},
 		ProgressLogs:  progressLogs,
 		IntervalWeeks: interval,
@@ -71,10 +86,17 @@ func (s *evaluationService) CreateEvaluation(ctx context.Context, req *CreateEva
 		return nil, err
 	}
 
-	return &CreateEvaluationResponse{
-		ID:                 result.EvaluationID,
-		NextEvaluationDate: result.NextEvaluationDate.Time,
-	}, nil
+	response := &CreateEvaluationResponse{
+		ID:      result.EvaluationID,
+		IsDraft: req.IsDraft,
+	}
+
+	// Only set next evaluation date if not a draft
+	if !req.IsDraft {
+		response.NextEvaluationDate = &result.NextEvaluationDate.Time
+	}
+
+	return response, nil
 }
 
 func (s *evaluationService) GetEvaluationHistory(ctx context.Context, clientID string) ([]EvaluationHistoryItem, error) {
@@ -234,5 +256,243 @@ func (s *evaluationService) GetLastEvaluation(ctx context.Context, clientID stri
 			LastName:  firstRow.CoordinatorLastName,
 		},
 		GoalProgress: goalProgress,
+	}, nil
+}
+
+// SaveDraft creates or updates a draft evaluation
+func (s *evaluationService) SaveDraft(ctx context.Context, req *SaveDraftRequest) (*SaveDraftResponse, error) {
+	// Check if a draft already exists for this client
+	existingDraft, err := s.db.GetDraftByClientId(ctx, req.ClientID)
+	if err != nil && err.Error() != "no rows in result set" {
+		s.logger.Error(ctx, "SaveDraft", "Failed to check for existing draft", zap.Error(err))
+		return nil, err
+	}
+
+	var evaluationID string
+	if existingDraft.ID != "" {
+		// Update existing draft
+		evaluationID = existingDraft.ID
+
+		// Delete existing progress logs
+		if err := s.db.DeleteGoalProgressLogsByEvaluationId(ctx, evaluationID); err != nil {
+			s.logger.Error(ctx, "SaveDraft", "Failed to delete old progress logs", zap.Error(err))
+			return nil, err
+		}
+	} else {
+		// Create new draft
+		evaluationID = nanoid.Generate()
+		_, err := s.db.CreateClientEvaluation(ctx, db.CreateClientEvaluationParams{
+			ID:             evaluationID,
+			ClientID:       req.ClientID,
+			CoordinatorID:  req.CoordinatorID,
+			EvaluationDate: util.StrToPgtypeDate(req.EvaluationDate),
+			OverallNotes:   req.OverallNotes,
+			Status:         db.EvaluationStatusEnumDraft,
+		})
+		if err != nil {
+			s.logger.Error(ctx, "SaveDraft", "Failed to create draft evaluation", zap.Error(err))
+			return nil, err
+		}
+	}
+
+	// Create/update progress logs
+	for _, log := range req.ProgressLogs {
+		if err := s.db.CreateGoalProgressLog(ctx, db.CreateGoalProgressLogParams{
+			ID:            nanoid.Generate(),
+			EvaluationID:  evaluationID,
+			GoalID:        log.GoalID,
+			Status:        db.GoalProgressStatus(log.Status),
+			ProgressNotes: log.ProgressNotes,
+		}); err != nil {
+			s.logger.Error(ctx, "SaveDraft", "Failed to create progress log", zap.Error(err))
+			return nil, err
+		}
+	}
+
+	// Get the updated evaluation to return timestamp
+	updatedEval, err := s.db.GetDraftByClientId(ctx, req.ClientID)
+	if err != nil {
+		s.logger.Error(ctx, "SaveDraft", "Failed to retrieve updated draft", zap.Error(err))
+		return nil, err
+	}
+
+	return &SaveDraftResponse{
+		ID:        updatedEval.ID,
+		UpdatedAt: updatedEval.UpdatedAt.Time,
+	}, nil
+}
+
+// GetDrafts retrieves all draft evaluations for a coordinator
+func (s *evaluationService) GetDrafts(ctx context.Context, coordinatorID string) (*resp.PaginationResponse[DraftEvaluationListItemDTO], error) {
+	limit, offset, page, pageSize := middleware.GetPaginationParams(ctx)
+
+	rows, err := s.db.GetCoordinatorDrafts(ctx, db.GetCoordinatorDraftsParams{
+		CoordinatorID: coordinatorID,
+		Limit:         limit,
+		Offset:        offset,
+	})
+	if err != nil {
+		s.logger.Error(ctx, "GetDrafts", "Failed to get coordinator drafts", zap.Error(err))
+		return nil, err
+	}
+
+	var totalCount int64
+	if len(rows) > 0 {
+		totalCount = rows[0].TotalCount
+	}
+
+	result := util.Map(rows, func(row db.GetCoordinatorDraftsRow) DraftEvaluationListItemDTO {
+		return DraftEvaluationListItemDTO{
+			EvaluationID:    row.EvaluationID,
+			ClientID:        row.ClientID,
+			ClientFirstName: row.ClientFirstName,
+			ClientLastName:  row.ClientLastName,
+			EvaluationDate:  row.EvaluationDate.Time,
+			GoalsCount:      int(row.GoalsCount),
+			UpdatedAt:       row.UpdatedAt.Time,
+		}
+	})
+
+	pag := resp.PagResp(result, int(totalCount), int(page), int(pageSize))
+	return &pag, nil
+}
+
+// GetDraft retrieves a specific draft evaluation with all progress logs
+func (s *evaluationService) GetDraft(ctx context.Context, evaluationID string) (*DraftEvaluationDTO, error) {
+	rows, err := s.db.GetDraftEvaluation(ctx, evaluationID)
+	if err != nil {
+		s.logger.Error(ctx, "GetDraft", "Failed to get draft evaluation", zap.Error(err))
+		return nil, err
+	}
+
+	if len(rows) == 0 {
+		return nil, nil // Draft not found
+	}
+
+	firstRow := rows[0]
+
+	// Build goal progress list (filter out empty goals from LEFT JOIN)
+	goalProgress := []GoalProgressItemDTO{}
+	for _, row := range rows {
+		if row.GoalID != nil {
+			goalProgress = append(goalProgress, GoalProgressItemDTO{
+				GoalID:        *row.GoalID,
+				GoalTitle:     *row.GoalTitle,
+				Status:        string(row.Status.GoalProgressStatus),
+				ProgressNotes: row.ProgressNotes,
+			})
+		}
+	}
+
+	return &DraftEvaluationDTO{
+		EvaluationID:         firstRow.EvaluationID,
+		ClientID:             firstRow.ClientID,
+		ClientFirstName:      firstRow.ClientFirstName,
+		ClientLastName:       firstRow.ClientLastName,
+		EvaluationDate:       firstRow.EvaluationDate.Time,
+		OverallNotes:         firstRow.OverallNotes,
+		CoordinatorFirstName: firstRow.CoordinatorFirstName,
+		CoordinatorLastName:  firstRow.CoordinatorLastName,
+		GoalProgress:         goalProgress,
+		CreatedAt:            firstRow.CreatedAt.Time,
+		UpdatedAt:            firstRow.UpdatedAt.Time,
+	}, nil
+}
+
+// SubmitDraft converts a draft evaluation to submitted status
+func (s *evaluationService) SubmitDraft(ctx context.Context, evaluationID string) (*CreateEvaluationResponse, error) {
+	// Get the draft to retrieve client info
+	draft, err := s.GetDraft(ctx, evaluationID)
+	if err != nil {
+		s.logger.Error(ctx, "SubmitDraft", "Failed to get draft for submission", zap.Error(err))
+		return nil, err
+	}
+	if draft == nil {
+		return nil, nil // Draft not found
+	}
+
+	// Get client to calculate next evaluation date
+	client, err := s.db.GetClientByID(ctx, draft.ClientID)
+	if err != nil {
+		s.logger.Error(ctx, "SubmitDraft", "Failed to get client", zap.Error(err))
+		return nil, err
+	}
+
+	// Submit the draft
+	submittedEval, err := s.db.SubmitDraftEvaluation(ctx, evaluationID)
+	if err != nil {
+		s.logger.Error(ctx, "SubmitDraft", "Failed to submit draft", zap.Error(err))
+		return nil, err
+	}
+
+	// Calculate and update next evaluation date
+	interval := int32(5) // Default
+	if client.EvaluationIntervalWeeks != nil {
+		interval = *client.EvaluationIntervalWeeks
+	}
+
+	nextDate := submittedEval.EvaluationDate.Time.AddDate(0, 0, int(interval)*7)
+	nextEvalDate := util.TimeToPgtypeDate(nextDate)
+
+	if err := s.db.UpdateClientNextEvaluationDate(ctx, db.UpdateClientNextEvaluationDateParams{
+		ID:                 client.ID,
+		NextEvaluationDate: nextEvalDate,
+	}); err != nil {
+		s.logger.Error(ctx, "SubmitDraft", "Failed to update next evaluation date", zap.Error(err))
+		return nil, err
+	}
+
+	return &CreateEvaluationResponse{
+		ID:                 submittedEval.ID,
+		NextEvaluationDate: &nextDate,
+		IsDraft:            false,
+	}, nil
+}
+
+// DeleteDraft deletes a draft evaluation
+func (s *evaluationService) DeleteDraft(ctx context.Context, evaluationID string) error {
+	if err := s.db.DeleteDraftEvaluation(ctx, evaluationID); err != nil {
+		s.logger.Error(ctx, "DeleteDraft", "Failed to delete draft", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+// UpdateEvaluation updates a submitted evaluation's details and progress logs
+func (s *evaluationService) UpdateEvaluation(ctx context.Context, evaluationID string, req *UpdateEvaluationRequest) (*SaveDraftResponse, error) {
+	// Update evaluation basic info
+	updatedEval, err := s.db.UpdateEvaluation(ctx, db.UpdateEvaluationParams{
+		ID:             evaluationID,
+		EvaluationDate: util.StrToPgtypeDate(req.EvaluationDate),
+		OverallNotes:   req.OverallNotes,
+	})
+	if err != nil {
+		s.logger.Error(ctx, "UpdateEvaluation", "Failed to update evaluation", zap.Error(err))
+		return nil, err
+	}
+
+	// Delete existing progress logs
+	if err := s.db.DeleteGoalProgressLogsByEvaluationId(ctx, evaluationID); err != nil {
+		s.logger.Error(ctx, "UpdateEvaluation", "Failed to delete old progress logs", zap.Error(err))
+		return nil, err
+	}
+
+	// Create new progress logs
+	for _, log := range req.ProgressLogs {
+		if err := s.db.CreateGoalProgressLog(ctx, db.CreateGoalProgressLogParams{
+			ID:            nanoid.Generate(),
+			EvaluationID:  evaluationID,
+			GoalID:        log.GoalID,
+			Status:        db.GoalProgressStatus(log.Status),
+			ProgressNotes: log.ProgressNotes,
+		}); err != nil {
+			s.logger.Error(ctx, "UpdateEvaluation", "Failed to create progress log", zap.Error(err))
+			return nil, err
+		}
+	}
+
+	return &SaveDraftResponse{
+		ID:        updatedEval.ID,
+		UpdatedAt: updatedEval.UpdatedAt.Time,
 	}, nil
 }

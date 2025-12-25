@@ -1668,6 +1668,254 @@ const docTemplate = `{
                 }
             }
         },
+        "/evaluations/drafts": {
+            "get": {
+                "description": "Retrieve all draft evaluations for the logged-in coordinator.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Evaluation"
+                ],
+                "summary": "Get all draft evaluations",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Coordinator ID",
+                        "name": "coordinatorId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-resp_PaginationResponse-evaluation_DraftEvaluationListItemDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new draft or update an existing draft evaluation for a client.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Evaluation"
+                ],
+                "summary": "Save or update a draft evaluation",
+                "parameters": [
+                    {
+                        "description": "Draft Evaluation Details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/evaluation.SaveDraftRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-evaluation_SaveDraftResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/evaluations/drafts/{id}": {
+            "get": {
+                "description": "Retrieve a draft evaluation by ID with all progress logs.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Evaluation"
+                ],
+                "summary": "Get a specific draft evaluation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Draft Evaluation ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-evaluation_DraftEvaluationDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a draft evaluation permanently.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Evaluation"
+                ],
+                "summary": "Delete a draft evaluation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Draft Evaluation ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-any"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/evaluations/drafts/{id}/submit": {
+            "post": {
+                "description": "Convert a draft evaluation to submitted status and update client's next evaluation date.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Evaluation"
+                ],
+                "summary": "Submit a draft evaluation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Draft Evaluation ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-evaluation_CreateEvaluationResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/evaluations/history/{clientId}": {
             "get": {
                 "description": "Retrieve all past evaluations and goal progress logs for a specific client.",
@@ -1832,6 +2080,65 @@ const docTemplate = `{
                 }
             }
         },
+        "/evaluations/{id}": {
+            "put": {
+                "description": "Update an existing evaluation's details and progress logs.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Evaluation"
+                ],
+                "summary": "Update a submitted evaluation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Evaluation ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated Evaluation Details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/evaluation.UpdateEvaluationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-evaluation_SaveDraftResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/incidents": {
             "get": {
                 "description": "List all incidents with pagination and search by client name",
@@ -1958,6 +2265,161 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/resp.SuccessResponse-incident_GetIncidentStatsResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/incidents/{id}": {
+            "get": {
+                "description": "Get a single incident by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Incident"
+                ],
+                "summary": "Get an incident",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Incident ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-incident_GetIncidentResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Soft delete an incident by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Incident"
+                ],
+                "summary": "Delete an incident",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Incident ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-incident_DeleteIncidentResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Update an existing incident by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Incident"
+                ],
+                "summary": "Update an incident",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Incident ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Incident update data",
+                        "name": "incident",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/incident.UpdateIncidentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-incident_UpdateIncidentResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
                         }
                     },
                     "401": {
@@ -4023,6 +4485,9 @@ const docTemplate = `{
                 "evaluationDate": {
                     "type": "string"
                 },
+                "isDraft": {
+                    "type": "boolean"
+                },
                 "overallNotes": {
                     "type": "string"
                 },
@@ -4041,7 +4506,78 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "isDraft": {
+                    "type": "boolean"
+                },
                 "nextEvaluationDate": {
+                    "description": "Only set when not draft",
+                    "type": "string"
+                }
+            }
+        },
+        "evaluation.DraftEvaluationDTO": {
+            "type": "object",
+            "properties": {
+                "clientFirstName": {
+                    "type": "string"
+                },
+                "clientId": {
+                    "type": "string"
+                },
+                "clientLastName": {
+                    "type": "string"
+                },
+                "coordinatorFirstName": {
+                    "type": "string"
+                },
+                "coordinatorLastName": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "evaluationDate": {
+                    "type": "string"
+                },
+                "evaluationId": {
+                    "type": "string"
+                },
+                "goalProgress": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/evaluation.GoalProgressItemDTO"
+                    }
+                },
+                "overallNotes": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "evaluation.DraftEvaluationListItemDTO": {
+            "type": "object",
+            "properties": {
+                "clientFirstName": {
+                    "type": "string"
+                },
+                "clientId": {
+                    "type": "string"
+                },
+                "clientLastName": {
+                    "type": "string"
+                },
+                "evaluationDate": {
+                    "type": "string"
+                },
+                "evaluationId": {
+                    "type": "string"
+                },
+                "goalsCount": {
+                    "type": "integer"
+                },
+                "updatedAt": {
                     "type": "string"
                 }
             }
@@ -4171,6 +4707,45 @@ const docTemplate = `{
                 }
             }
         },
+        "evaluation.SaveDraftRequest": {
+            "type": "object",
+            "required": [
+                "clientId",
+                "coordinatorId",
+                "evaluationDate"
+            ],
+            "properties": {
+                "clientId": {
+                    "type": "string"
+                },
+                "coordinatorId": {
+                    "type": "string"
+                },
+                "evaluationDate": {
+                    "type": "string"
+                },
+                "overallNotes": {
+                    "type": "string"
+                },
+                "progressLogs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/evaluation.GoalProgressDTO"
+                    }
+                }
+            }
+        },
+        "evaluation.SaveDraftResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
         "evaluation.UpcomingEvaluationDTO": {
             "type": "object",
             "properties": {
@@ -4197,6 +4772,27 @@ const docTemplate = `{
                 },
                 "nextEvaluationDate": {
                     "type": "string"
+                }
+            }
+        },
+        "evaluation.UpdateEvaluationRequest": {
+            "type": "object",
+            "required": [
+                "evaluationDate"
+            ],
+            "properties": {
+                "evaluationDate": {
+                    "type": "string"
+                },
+                "overallNotes": {
+                    "type": "string"
+                },
+                "progressLogs": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "$ref": "#/definitions/evaluation.GoalProgressDTO"
+                    }
                 }
             }
         },
@@ -4270,6 +4866,73 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "incident.DeleteIncidentResponse": {
+            "type": "object",
+            "properties": {
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "incident.GetIncidentResponse": {
+            "type": "object",
+            "properties": {
+                "actionTaken": {
+                    "type": "string"
+                },
+                "clientFirstName": {
+                    "type": "string"
+                },
+                "clientId": {
+                    "type": "string"
+                },
+                "clientLastName": {
+                    "type": "string"
+                },
+                "coordinatorFirstName": {
+                    "type": "string"
+                },
+                "coordinatorId": {
+                    "type": "string"
+                },
+                "coordinatorLastName": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "incidentDate": {
+                    "type": "string"
+                },
+                "incidentDescription": {
+                    "type": "string"
+                },
+                "incidentSeverity": {
+                    "type": "string"
+                },
+                "incidentTime": {
+                    "type": "string"
+                },
+                "incidentType": {
+                    "type": "string"
+                },
+                "locationId": {
+                    "type": "string"
+                },
+                "locationName": {
+                    "type": "string"
+                },
+                "otherParties": {
+                    "type": "string"
+                },
+                "status": {
                     "type": "string"
                 }
             }
@@ -4395,6 +5058,66 @@ const docTemplate = `{
                 },
                 "status": {
                     "type": "string"
+                }
+            }
+        },
+        "incident.UpdateIncidentRequest": {
+            "type": "object",
+            "properties": {
+                "actionTaken": {
+                    "type": "string"
+                },
+                "coordinatorId": {
+                    "type": "string"
+                },
+                "incidentDate": {
+                    "type": "string"
+                },
+                "incidentDescription": {
+                    "type": "string"
+                },
+                "incidentSeverity": {
+                    "type": "string",
+                    "enum": [
+                        "minor",
+                        "moderate",
+                        "severe"
+                    ]
+                },
+                "incidentTime": {
+                    "type": "string"
+                },
+                "incidentType": {
+                    "type": "string",
+                    "enum": [
+                        "aggression",
+                        "medical_emergency",
+                        "safety_concern",
+                        "unwanted_behavior",
+                        "other"
+                    ]
+                },
+                "locationId": {
+                    "type": "string"
+                },
+                "otherParties": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "pending",
+                        "under_investigation",
+                        "completed"
+                    ]
+                }
+            }
+        },
+        "incident.UpdateIncidentResponse": {
+            "type": "object",
+            "properties": {
+                "success": {
+                    "type": "boolean"
                 }
             }
         },
@@ -5653,6 +6376,29 @@ const docTemplate = `{
                 }
             }
         },
+        "resp.PaginationResponse-evaluation_DraftEvaluationListItemDTO": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/evaluation.DraftEvaluationListItemDTO"
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "pageSize": {
+                    "type": "integer"
+                },
+                "totalCount": {
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "type": "integer"
+                }
+            }
+        },
         "resp.PaginationResponse-evaluation_GlobalRecentEvaluationDTO": {
             "type": "object",
             "properties": {
@@ -6097,11 +6843,43 @@ const docTemplate = `{
                 }
             }
         },
+        "resp.SuccessResponse-evaluation_DraftEvaluationDTO": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/evaluation.DraftEvaluationDTO"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
         "resp.SuccessResponse-evaluation_LastEvaluationDTO": {
             "type": "object",
             "properties": {
                 "data": {
                     "$ref": "#/definitions/evaluation.LastEvaluationDTO"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-evaluation_SaveDraftResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/evaluation.SaveDraftResponse"
                 },
                 "message": {
                     "type": "string",
@@ -6129,11 +6907,59 @@ const docTemplate = `{
                 }
             }
         },
+        "resp.SuccessResponse-incident_DeleteIncidentResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/incident.DeleteIncidentResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-incident_GetIncidentResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/incident.GetIncidentResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
         "resp.SuccessResponse-incident_GetIncidentStatsResponse": {
             "type": "object",
             "properties": {
                 "data": {
                     "$ref": "#/definitions/incident.GetIncidentStatsResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-incident_UpdateIncidentResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/incident.UpdateIncidentResponse"
                 },
                 "message": {
                     "type": "string",
@@ -6534,6 +7360,22 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/resp.PaginationResponse-array_locations_ListLocationsResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-resp_PaginationResponse-evaluation_DraftEvaluationListItemDTO": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/resp.PaginationResponse-evaluation_DraftEvaluationListItemDTO"
                 },
                 "message": {
                     "type": "string",

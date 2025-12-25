@@ -36,8 +36,8 @@ func (s *Store) CreateEvaluationTx(ctx context.Context, arg CreateEvaluationTxPa
 			}
 		}
 
-		// 3. Calculate and update next evaluation date
-		if arg.IntervalWeeks > 0 {
+		// 3. Calculate and update next evaluation date (only for submitted evaluations)
+		if arg.IntervalWeeks > 0 && eval.Status == EvaluationStatusEnumSubmitted {
 			nextDate := eval.EvaluationDate.Time.AddDate(0, 0, int(arg.IntervalWeeks)*7)
 			result.NextEvaluationDate = pgtype.Date{Time: nextDate, Valid: true}
 

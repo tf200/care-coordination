@@ -192,17 +192,17 @@ SELECT
             ROUND((COUNT(*) FILTER (WHERE discharge_status = 'completed')::DECIMAL / COUNT(*)::DECIMAL) * 100, 2)
         ELSE 0
     END as discharge_completion_rate,
-    COALESCE(AVG(EXTRACT(EPOCH FROM (discharge_date - care_start_date)::INTERVAL) / 86400), 0) as avg_days_in_care
+    COALESCE(AVG(EXTRACT(EPOCH FROM (discharge_date - care_start_date)) / 86400), 0)::DOUBLE PRECISION as avg_days_in_care
 FROM clients
 WHERE discharge_status IS NOT NULL
 `
 
 type GetDischargeStatsRow struct {
-	TotalCount              int64       `json:"total_count"`
-	CompletedDischarges     int64       `json:"completed_discharges"`
-	PrematureDischarges     int64       `json:"premature_discharges"`
-	DischargeCompletionRate int32       `json:"discharge_completion_rate"`
-	AvgDaysInCare           interface{} `json:"avg_days_in_care"`
+	TotalCount              int64   `json:"total_count"`
+	CompletedDischarges     int64   `json:"completed_discharges"`
+	PrematureDischarges     int64   `json:"premature_discharges"`
+	DischargeCompletionRate int32   `json:"discharge_completion_rate"`
+	AvgDaysInCare           float64 `json:"avg_days_in_care"`
 }
 
 func (q *Queries) GetDischargeStats(ctx context.Context) (GetDischargeStatsRow, error) {

@@ -618,9 +618,9 @@ func (s *clientService) GetDischargeStats(
 		return nil, ErrInternal
 	}
 
-	// Type assert numeric values from interface{}
+	// Use the properly typed values directly
 	completionRate := float64(stats.DischargeCompletionRate)
-	avgDays, _ := stats.AvgDaysInCare.(float64)
+	avgDays := stats.AvgDaysInCare
 
 	return &GetDischargeStatsResponse{
 		TotalCount:              int(stats.TotalCount),

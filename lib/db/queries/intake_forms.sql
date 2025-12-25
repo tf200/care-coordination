@@ -115,9 +115,9 @@ WHERE id = $1;
 SELECT 
     COUNT(*) as total_count,
     COUNT(*) FILTER (WHERE status = 'pending') as pending_count,
-    CASE 
+    (CASE 
         WHEN COUNT(*) > 0 THEN 
             ROUND((COUNT(*) FILTER (WHERE status = 'completed')::DECIMAL / COUNT(*)::DECIMAL) * 100, 2)
-        ELSE 0
-    END as conversion_percentage
+        ELSE 0.0
+    END)::DOUBLE PRECISION as conversion_percentage
 FROM intake_forms;

@@ -187,18 +187,18 @@ const getIntakeStats = `-- name: GetIntakeStats :one
 SELECT 
     COUNT(*) as total_count,
     COUNT(*) FILTER (WHERE status = 'pending') as pending_count,
-    CASE 
+    (CASE 
         WHEN COUNT(*) > 0 THEN 
             ROUND((COUNT(*) FILTER (WHERE status = 'completed')::DECIMAL / COUNT(*)::DECIMAL) * 100, 2)
-        ELSE 0
-    END as conversion_percentage
+        ELSE 0.0
+    END)::DOUBLE PRECISION as conversion_percentage
 FROM intake_forms
 `
 
 type GetIntakeStatsRow struct {
-	TotalCount           int64 `json:"total_count"`
-	PendingCount         int64 `json:"pending_count"`
-	ConversionPercentage int32 `json:"conversion_percentage"`
+	TotalCount           int64   `json:"total_count"`
+	PendingCount         int64   `json:"pending_count"`
+	ConversionPercentage float64 `json:"conversion_percentage"`
 }
 
 func (q *Queries) GetIntakeStats(ctx context.Context) (GetIntakeStatsRow, error) {

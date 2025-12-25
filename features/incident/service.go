@@ -38,9 +38,10 @@ func (s *incidentService) CreateIncident(
 	}
 
 	err := s.store.CreateIncident(ctx, db.CreateIncidentParams{
+		ID:                  id,
 		ClientID:            req.ClientID,
-		IncidentDate:        pgtype.Date{Time: req.IncidentDate, Valid: true},
-		IncidentTime:        util.TimeToPgtypeTime(req.IncidentTime),
+		IncidentDate:        util.StrToPgtypeDate(req.IncidentDate),
+		IncidentTime:        util.StrToPgtypeTime(req.IncidentTime),
 		IncidentType:        db.IncidentTypeEnum(req.IncidentType),
 		IncidentSeverity:    db.IncidentSeverityEnum(req.IncidentSeverity),
 		LocationID:          req.LocationID,
@@ -205,12 +206,12 @@ func (s *incidentService) UpdateIncident(
 ) (*UpdateIncidentResponse, error) {
 	var incidentDate pgtype.Date
 	if req.IncidentDate != nil {
-		incidentDate = pgtype.Date{Time: *req.IncidentDate, Valid: true}
+		incidentDate = util.StrToPgtypeDate(*req.IncidentDate)
 	}
 
 	var incidentTime pgtype.Time
 	if req.IncidentTime != nil {
-		incidentTime = util.TimeToPgtypeTime(*req.IncidentTime)
+		incidentTime = util.StrToPgtypeTime(*req.IncidentTime)
 	}
 
 	var incidentType db.NullIncidentTypeEnum

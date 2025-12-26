@@ -197,7 +197,7 @@ func (h *EvaluationHandler) SaveDraft(c *gin.Context) {
 		return
 	}
 
-	result, err := h.service.SaveDraft(c.Request.Context(), &req)
+	result, err := h.service.SaveDraft(c, &req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, resp.Error(err))
 		return
@@ -218,7 +218,7 @@ func (h *EvaluationHandler) SaveDraft(c *gin.Context) {
 // @Router /evaluations/drafts [get]
 func (h *EvaluationHandler) GetDrafts(c *gin.Context) {
 
-	result, err := h.service.GetDrafts(c.Request.Context())
+	result, err := h.service.GetDrafts(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, resp.Error(err))
 		return

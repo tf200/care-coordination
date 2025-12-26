@@ -50,8 +50,8 @@ func (s *authService) Login(
 	}
 
 	employee, err := s.db.GetEmployeeByUserID(ctx, user.ID)
-	if err == nil {
-		s.logger.Error(ctx, "Login", "User found", zap.String("email", req.Email))
+	if err != nil {
+		s.logger.Error(ctx, "Login", "Employee not found for user", zap.String("email", req.Email), zap.Error(err))
 		return nil, ErrInvalidCredentials
 	}
 

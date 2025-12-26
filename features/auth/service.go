@@ -48,14 +48,14 @@ func (s *authService) Login(
 		s.logger.Error(ctx, "Login", "Invalid password", zap.String("email", req.Email))
 		return nil, ErrInvalidCredentials
 	}
-	// Try to get employee ID
-	employeeID := ""
+
 	employee, err := s.db.GetEmployeeByUserID(ctx, user.ID)
 	if err == nil {
-		employeeID = employee.ID
+		s.logger.Error(ctx, "Login", "User found", zap.String("email", req.Email))
+		return nil, ErrInvalidCredentials
 	}
 
-	accessToken, err := s.tokenManager.GenerateAccessToken(user.ID, employeeID, time.Now())
+	accessToken, err := s.tokenManager.GenerateAccessToken(user.ID, employee.ID, time.Now())
 	if err != nil {
 		s.logger.Error(
 			ctx,

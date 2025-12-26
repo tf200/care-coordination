@@ -640,21 +640,24 @@ func (q *Queries) UpdateClientNextEvaluationDate(ctx context.Context, arg Update
 	return err
 }
 
-const updateEvaluation = `-- name: UpdateEvaluation :one
+const updateSubmittedEvaluation = `-- name: UpdateSubmittedEvaluation :one
 UPDATE client_evaluations
-SET evaluation_date = $2, overall_notes = $3, updated_at = NOW()
-WHERE id = $1
+SET 
+    evaluation_date = COALESCE($2, evaluation_date),
+    overall_notes = COALESCE($3, overall_notes),
+    updated_at = NOW()
+WHERE id = $1 AND status = 'submitted'
 RETURNING id, client_id, coordinator_id, evaluation_date, overall_notes, status, created_at, updated_at
 `
 
-type UpdateEvaluationParams struct {
+type UpdateSubmittedEvaluationParams struct {
 	ID             string      `json:"id"`
 	EvaluationDate pgtype.Date `json:"evaluation_date"`
 	OverallNotes   *string     `json:"overall_notes"`
 }
 
-func (q *Queries) UpdateEvaluation(ctx context.Context, arg UpdateEvaluationParams) (ClientEvaluation, error) {
-	row := q.db.QueryRow(ctx, updateEvaluation, arg.ID, arg.EvaluationDate, arg.OverallNotes)
+func (q *Queries) UpdateSubmittedEvaluation(ctx context.Context, arg UpdateSubmittedEvaluationParams) (ClientEvaluation, error) {
+	row := q.db.QueryRow(ctx, updateSubmittedEvaluation, arg.ID, arg.EvaluationDate, arg.OverallNotes)
 	var i ClientEvaluation
 	err := row.Scan(
 		&i.ID,

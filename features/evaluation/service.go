@@ -8,6 +8,7 @@ import (
 	"care-cordination/lib/resp"
 	"care-cordination/lib/util"
 	"context"
+	"errors"
 
 	"go.uber.org/zap"
 )
@@ -21,12 +22,10 @@ type EvaluationService interface {
 	GetLastEvaluation(ctx context.Context, clientID string) (*LastEvaluationDTO, error)
 	// Draft methods
 	SaveDraft(ctx context.Context, req *SaveDraftRequest) (*SaveDraftResponse, error)
-	GetDrafts(ctx context.Context, coordinatorID string) (*resp.PaginationResponse[DraftEvaluationListItemDTO], error)
+	GetDrafts(ctx context.Context) (*resp.PaginationResponse[DraftEvaluationListItemDTO], error)
 	GetDraft(ctx context.Context, evaluationID string) (*DraftEvaluationDTO, error)
 	SubmitDraft(ctx context.Context, evaluationID string) (*CreateEvaluationResponse, error)
 	DeleteDraft(ctx context.Context, evaluationID string) error
-	// Update method
-	UpdateEvaluation(ctx context.Context, evaluationID string, req *UpdateEvaluationRequest) (*SaveDraftResponse, error)
 }
 
 type evaluationService struct {
@@ -323,7 +322,12 @@ func (s *evaluationService) SaveDraft(ctx context.Context, req *SaveDraftRequest
 }
 
 // GetDrafts retrieves all draft evaluations for a coordinator
-func (s *evaluationService) GetDrafts(ctx context.Context, coordinatorID string) (*resp.PaginationResponse[DraftEvaluationListItemDTO], error) {
+func (s *evaluationService) GetDrafts(ctx context.Context) (*resp.PaginationResponse[DraftEvaluationListItemDTO], error) {
+	coordinatorID := util.GetEmployeeID(ctx)
+	if coordinatorID == "" {
+		return nil, errors.New("user id is required")
+	}
+
 	limit, offset, page, pageSize := middleware.GetPaginationParams(ctx)
 
 	rows, err := s.db.GetCoordinatorDrafts(ctx, db.GetCoordinatorDraftsParams{
@@ -456,43 +460,4 @@ func (s *evaluationService) DeleteDraft(ctx context.Context, evaluationID string
 		return err
 	}
 	return nil
-}
-
-// UpdateEvaluation updates a submitted evaluation's details and progress logs
-func (s *evaluationService) UpdateEvaluation(ctx context.Context, evaluationID string, req *UpdateEvaluationRequest) (*SaveDraftResponse, error) {
-	// Update evaluation basic info
-	updatedEval, err := s.db.UpdateEvaluation(ctx, db.UpdateEvaluationParams{
-		ID:             evaluationID,
-		EvaluationDate: util.StrToPgtypeDate(req.EvaluationDate),
-		OverallNotes:   req.OverallNotes,
-	})
-	if err != nil {
-		s.logger.Error(ctx, "UpdateEvaluation", "Failed to update evaluation", zap.Error(err))
-		return nil, err
-	}
-
-	// Delete existing progress logs
-	if err := s.db.DeleteGoalProgressLogsByEvaluationId(ctx, evaluationID); err != nil {
-		s.logger.Error(ctx, "UpdateEvaluation", "Failed to delete old progress logs", zap.Error(err))
-		return nil, err
-	}
-
-	// Create new progress logs
-	for _, log := range req.ProgressLogs {
-		if err := s.db.CreateGoalProgressLog(ctx, db.CreateGoalProgressLogParams{
-			ID:            nanoid.Generate(),
-			EvaluationID:  evaluationID,
-			GoalID:        log.GoalID,
-			Status:        db.GoalProgressStatus(log.Status),
-			ProgressNotes: log.ProgressNotes,
-		}); err != nil {
-			s.logger.Error(ctx, "UpdateEvaluation", "Failed to create progress log", zap.Error(err))
-			return nil, err
-		}
-	}
-
-	return &SaveDraftResponse{
-		ID:        updatedEval.ID,
-		UpdatedAt: updatedEval.UpdatedAt.Time,
-	}, nil
 }

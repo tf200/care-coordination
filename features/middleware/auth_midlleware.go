@@ -39,6 +39,7 @@ func (m *Middleware) AuthMdw() gin.HandlerFunc {
 		}
 
 		ctx.Set(UserIDKey, payload.Subject)
+		ctx.Set(EmployeeIDKey, payload.EmployeeID)
 		ctx.Next()
 	}
 }

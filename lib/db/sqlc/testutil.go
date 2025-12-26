@@ -267,7 +267,8 @@ func CreateTestReferringOrg(t *testing.T, q *Queries, opts CreateTestReferringOr
 // UserID is required - the user must be created first.
 type CreateTestEmployeeOptions struct {
 	ID          *string
-	UserID      string // Required
+	UserID      string  // Required
+	LocationID  *string // Optional - will be created if not provided
 	FirstName   *string
 	LastName    *string
 	Bsn         *string
@@ -322,6 +323,14 @@ func CreateTestEmployee(t *testing.T, q *Queries, opts CreateTestEmployeeOptions
 		gender = *opts.Gender
 	}
 
+	// Create or use provided location
+	locationID := ""
+	if opts.LocationID != nil {
+		locationID = *opts.LocationID
+	} else {
+		locationID = CreateTestLocation(t, q, CreateTestLocationOptions{})
+	}
+
 	err := q.CreateEmployee(ctx, CreateEmployeeParams{
 		ID:          id,
 		UserID:      opts.UserID,
@@ -331,6 +340,7 @@ func CreateTestEmployee(t *testing.T, q *Queries, opts CreateTestEmployeeOptions
 		DateOfBirth: toPgDate(dob),
 		PhoneNumber: phoneNumber,
 		Gender:      gender,
+		LocationID:  locationID,
 	})
 	if err != nil {
 		t.Fatalf("CreateTestEmployee failed: %v", err)
@@ -784,4 +794,123 @@ func CreateTestSession(t *testing.T, q *Queries, opts CreateTestSessionOptions) 
 	}
 
 	return id
+}
+
+// ============================================================
+// Factory: Permission
+// ============================================================
+
+// CreateTestPermissionOptions configures a test permission.
+type CreateTestPermissionOptions struct {
+	ID          *string
+	Resource    *string
+	Action      *string
+	Description *string
+}
+
+// CreateTestPermission creates a permission for testing.
+func CreateTestPermission(t *testing.T, q *Queries, opts CreateTestPermissionOptions) string {
+	t.Helper()
+	ctx := context.Background()
+
+	id := generateTestID()
+	if opts.ID != nil {
+		id = *opts.ID
+	}
+
+	resource := fmt.Sprintf("resource_%s", id[:8])
+	if opts.Resource != nil {
+		resource = *opts.Resource
+	}
+
+	action := "read"
+	if opts.Action != nil {
+		action = *opts.Action
+	}
+
+	permission, err := q.CreatePermission(ctx, CreatePermissionParams{
+		ID:          id,
+		Resource:    resource,
+		Action:      action,
+		Description: opts.Description,
+	})
+	if err != nil {
+		t.Fatalf("CreateTestPermission failed: %v", err)
+	}
+
+	return permission.ID
+}
+
+// ============================================================
+// Factory: Role
+// ============================================================
+
+// CreateTestRoleOptions configures a test role.
+type CreateTestRoleOptions struct {
+	ID          *string
+	Name        *string
+	Description *string
+}
+
+// CreateTestRole creates a role for testing.
+func CreateTestRole(t *testing.T, q *Queries, opts CreateTestRoleOptions) string {
+	t.Helper()
+	ctx := context.Background()
+
+	id := generateTestID()
+	if opts.ID != nil {
+		id = *opts.ID
+	}
+
+	name := fmt.Sprintf("role_%s", id[:8])
+	if opts.Name != nil {
+		name = *opts.Name
+	}
+
+	role, err := q.CreateRole(ctx, CreateRoleParams{
+		ID:          id,
+		Name:        name,
+		Description: opts.Description,
+	})
+	if err != nil {
+		t.Fatalf("CreateTestRole failed: %v", err)
+	}
+
+	return role.ID
+}
+
+// ============================================================
+// Helper: Role-Permission Assignment
+// ============================================================
+
+// AssignTestPermissionToRole assigns a permission to a role for testing.
+func AssignTestPermissionToRole(t *testing.T, q *Queries, roleID, permissionID string) {
+	t.Helper()
+	ctx := context.Background()
+
+	err := q.AssignPermissionToRole(ctx, AssignPermissionToRoleParams{
+		RoleID:       roleID,
+		PermissionID: permissionID,
+	})
+	if err != nil {
+		t.Fatalf("AssignTestPermissionToRole failed: %v", err)
+	}
+}
+
+// ============================================================
+// Helper: User-Role Assignment
+// ============================================================
+
+// AssignTestRoleToUser assigns a role to a user for testing.
+func AssignTestRoleToUser(t *testing.T, q *Queries, userID, roleID string) {
+	t.Helper()
+	ctx := context.Background()
+
+	err := q.AssignRoleToUser(ctx, AssignRoleToUserParams{
+		UserID: userID,
+		RoleID: roleID,
+	})
+	if err != nil {
+		t.Fatalf("AssignTestRoleToUser failed: %v", err)
+	}
 }

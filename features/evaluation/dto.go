@@ -31,12 +31,6 @@ type SaveDraftRequest struct {
 	ProgressLogs   []GoalProgressDTO `json:"progressLogs"`
 }
 
-type UpdateEvaluationRequest struct {
-	EvaluationDate string            `json:"evaluationDate" binding:"required,datetime=2006-01-02"`
-	OverallNotes   *string           `json:"overallNotes"`
-	ProgressLogs   []GoalProgressDTO `json:"progressLogs"   binding:"min=1"`
-}
-
 type SaveDraftResponse struct {
 	ID        string    `json:"id"`
 	UpdatedAt time.Time `json:"updatedAt"`

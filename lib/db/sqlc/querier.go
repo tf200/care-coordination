@@ -115,7 +115,6 @@ type Querier interface {
 	UpdateClientByRegistrationFormID(ctx context.Context, arg UpdateClientByRegistrationFormIDParams) error
 	UpdateClientGoal(ctx context.Context, arg UpdateClientGoalParams) error
 	UpdateClientNextEvaluationDate(ctx context.Context, arg UpdateClientNextEvaluationDateParams) error
-	UpdateEvaluation(ctx context.Context, arg UpdateEvaluationParams) (ClientEvaluation, error)
 	UpdateIncident(ctx context.Context, arg UpdateIncidentParams) error
 	UpdateIntakeForm(ctx context.Context, arg UpdateIntakeFormParams) error
 	UpdateIntakeFormStatus(ctx context.Context, arg UpdateIntakeFormStatusParams) error
@@ -125,6 +124,7 @@ type Querier interface {
 	UpdateRegistrationForm(ctx context.Context, arg UpdateRegistrationFormParams) error
 	UpdateRegistrationFormStatus(ctx context.Context, arg UpdateRegistrationFormStatusParams) error
 	UpdateRole(ctx context.Context, arg UpdateRoleParams) (Role, error)
+	UpdateSubmittedEvaluation(ctx context.Context, arg UpdateSubmittedEvaluationParams) (ClientEvaluation, error)
 	UpdateUserSession(ctx context.Context, arg UpdateUserSessionParams) error
 }
 

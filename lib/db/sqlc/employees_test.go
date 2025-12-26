@@ -24,6 +24,7 @@ func TestCreateEmployee(t *testing.T) {
 			name: "success",
 			setup: func(t *testing.T, q *Queries) CreateEmployeeParams {
 				userID := CreateTestUser(t, q, CreateTestUserOptions{})
+				locationID := CreateTestLocation(t, q, CreateTestLocationOptions{})
 				return CreateEmployeeParams{
 					ID:          generateTestID(),
 					UserID:      userID,
@@ -33,6 +34,7 @@ func TestCreateEmployee(t *testing.T) {
 					DateOfBirth: toPgDate(time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)),
 					PhoneNumber: "+31612345678",
 					Gender:      GenderEnumMale,
+					LocationID:  locationID,
 				}
 			},
 			wantErr: false,
@@ -45,6 +47,7 @@ func TestCreateEmployee(t *testing.T) {
 				CreateTestEmployee(t, q, CreateTestEmployeeOptions{UserID: userID, Bsn: &bsn})
 				// Return params that will fail
 				userID2 := CreateTestUser(t, q, CreateTestUserOptions{})
+				locationID := CreateTestLocation(t, q, CreateTestLocationOptions{})
 				return CreateEmployeeParams{
 					ID:          generateTestID(),
 					UserID:      userID2,
@@ -54,6 +57,7 @@ func TestCreateEmployee(t *testing.T) {
 					DateOfBirth: toPgDate(time.Date(1992, 2, 2, 0, 0, 0, 0, time.UTC)),
 					PhoneNumber: "+31687654321",
 					Gender:      GenderEnumFemale,
+					LocationID:  locationID,
 				}
 			},
 			wantErr: true,
@@ -68,6 +72,7 @@ func TestCreateEmployee(t *testing.T) {
 				existingID := generateTestID()
 				CreateTestEmployee(t, q, CreateTestEmployeeOptions{ID: &existingID, UserID: userID})
 				userID2 := CreateTestUser(t, q, CreateTestUserOptions{})
+				locationID := CreateTestLocation(t, q, CreateTestLocationOptions{})
 				return CreateEmployeeParams{
 					ID:          existingID,
 					UserID:      userID2,
@@ -77,6 +82,7 @@ func TestCreateEmployee(t *testing.T) {
 					DateOfBirth: toPgDate(time.Date(1985, 5, 5, 0, 0, 0, 0, time.UTC)),
 					PhoneNumber: "+31611223344",
 					Gender:      GenderEnumOther,
+					LocationID:  locationID,
 				}
 			},
 			wantErr: true,
@@ -87,6 +93,7 @@ func TestCreateEmployee(t *testing.T) {
 		{
 			name: "invalid_user_id",
 			setup: func(t *testing.T, q *Queries) CreateEmployeeParams {
+				locationID := CreateTestLocation(t, q, CreateTestLocationOptions{})
 				return CreateEmployeeParams{
 					ID:          generateTestID(),
 					UserID:      "non-existent-user-id",
@@ -96,6 +103,7 @@ func TestCreateEmployee(t *testing.T) {
 					DateOfBirth: toPgDate(time.Date(1980, 10, 10, 0, 0, 0, 0, time.UTC)),
 					PhoneNumber: "+31699887766",
 					Gender:      GenderEnumMale,
+					LocationID:  locationID,
 				}
 			},
 			wantErr: true,

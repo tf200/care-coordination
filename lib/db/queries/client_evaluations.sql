@@ -181,12 +181,6 @@ SET status = 'submitted', updated_at = NOW()
 WHERE id = $1 AND status = 'draft'
 RETURNING *;
 
--- name: UpdateEvaluation :one
-UPDATE client_evaluations
-SET evaluation_date = $2, overall_notes = $3, updated_at = NOW()
-WHERE id = $1
-RETURNING *;
-
 -- name: DeleteDraftEvaluation :exec
 DELETE FROM client_evaluations 
 WHERE id = $1 AND status = 'draft';

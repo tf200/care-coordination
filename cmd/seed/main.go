@@ -482,6 +482,11 @@ func main() {
 		log.Fatalf("Failed to seed incidents: %v", err)
 	}
 
+	// Seed evaluations for in_care clients
+	if err := seedEvaluations(ctx, store, inCareClients); err != nil {
+		log.Fatalf("Failed to seed evaluations: %v", err)
+	}
+
 	fmt.Println("✅ Successfully seeded database!")
 }
 
@@ -1223,6 +1228,15 @@ func createWaitingListClient(
 		return err
 	}
 
+	// Link goals to the client (update client_id in goals table)
+	err = store.LinkGoalsToClient(ctx, db.LinkGoalsToClientParams{
+		ClientID:     &clientID,
+		IntakeFormID: intakeID,
+	})
+	if err != nil {
+		fmt.Printf("  ⚠ Warning: Failed to link goals for client %s: %v\n", clientID, err)
+	}
+
 	// Update intake form status to completed since client is now in waiting list
 	return store.UpdateIntakeFormStatus(ctx, db.UpdateIntakeFormStatusParams{
 		ID:     intakeID,
@@ -1306,6 +1320,15 @@ func createInCareClient(
 	})
 	if err != nil {
 		return nil, err
+	}
+
+	// Link goals to the client (update client_id in goals table)
+	err = store.LinkGoalsToClient(ctx, db.LinkGoalsToClientParams{
+		ClientID:     &clientID,
+		IntakeFormID: intakeInfo.ID,
+	})
+	if err != nil {
+		fmt.Printf("  ⚠ Warning: Failed to link goals for client %s: %v\n", clientID, err)
 	}
 
 	// Update intake form status to completed since client is now in care
@@ -1432,6 +1455,15 @@ func createDischargedClient(
 	})
 	if err != nil {
 		return fmt.Errorf("step 3 (discharge) failed: %w", err)
+	}
+
+	// Link goals to the client (update client_id in goals table)
+	err = store.LinkGoalsToClient(ctx, db.LinkGoalsToClientParams{
+		ClientID:     &clientID,
+		IntakeFormID: intakeInfo.ID,
+	})
+	if err != nil {
+		fmt.Printf("  ⚠ Warning: Failed to link goals for client %s: %v\n", clientID, err)
 	}
 
 	// Update intake form status to completed since client was processed
@@ -1624,6 +1656,200 @@ func createIncident(ctx context.Context, store *db.Store, client ClientInfo) err
 		ActionTaken:         actionTaken,
 		OtherParties:        otherPartiesStr,
 		Status:              status,
+	})
+
+	return err
+}
+
+// ============================================================
+// Evaluations Seeding
+// ============================================================
+
+var (
+	// Goal progress statuses
+	goalStatuses = []db.GoalProgressStatus{
+		db.GoalProgressStatusStarting,
+		db.GoalProgressStatusOnTrack,
+		db.GoalProgressStatusOnTrack, // More likely
+		db.GoalProgressStatusDelayed,
+		db.GoalProgressStatusAchieved,
+	}
+
+	// Progress notes corresponding to statuses (Dutch)
+	progressNotes = map[db.GoalProgressStatus][]string{
+		db.GoalProgressStatusStarting: {
+			"Cliënt is enthousiast om aan dit doel te werken",
+			"Eerste stappen zijn gezet, goede motivatie aanwezig",
+			"Doel is besproken, concrete acties afgesproken",
+			"Cliënt toont interesse maar heeft nog begeleiding nodig",
+		},
+		db.GoalProgressStatusOnTrack: {
+			"Goede voortgang, cliënt houdt zich aan afspraken",
+			"Positieve ontwikkeling zichtbaar, plan wordt gevolgd",
+			"Doel verloopt volgens planning",
+			"Cliënt laat groei zien op dit gebied",
+			"Stappen worden genomen in de goede richting",
+		},
+		db.GoalProgressStatusDelayed: {
+			"Voortgang loopt vertraging op door externe omstandigheden",
+			"Cliënt heeft moeite met motivatie, extra ondersteuning geboden",
+			"Doel blijkt complexer dan verwacht, plan wordt aangepast",
+			"Terugval ervaren, herstelplan opgesteld",
+		},
+		db.GoalProgressStatusAchieved: {
+			"Doel behaald! Cliënt kan dit nu zelfstandig",
+			"Uitstekend resultaat, doel volledig gerealiseerd",
+			"Mijlpaal bereikt, cliënt erg trots",
+			"Met succes afgerond, kan focus op volgend doel",
+		},
+	}
+
+	// Overall evaluation notes (Dutch)
+	overallNotes = []string{
+		"Cliënt heeft over het algemeen goede voortgang gemaakt in deze periode.",
+		"Positieve evaluatie, cliënt toont groei en zelfinzicht.",
+		"Periode met ups en downs, maar alles bij elkaar vooruitgang zichtbaar.",
+		"Cliënt werkt goed mee aan behandelplan, goede samenwerking.",
+		"Focus ligt nu op stabilisatie en behoud van behaalde resultaten.",
+		"Enkele uitdagingen ervaren maar cliënt blijft gemotiveerd.",
+		"Stabiele periode, duidelijke verbeteringen in dagstructuur.",
+		"Goede balans gevonden tussen zelfstandigheid en ondersteuning.",
+		"",
+	}
+)
+
+func seedEvaluations(ctx context.Context, store *db.Store, inCareClients []ClientInfo) error {
+	fmt.Println("🌱 Seeding evaluations for in_care clients...")
+
+	totalEvaluations := 0
+
+	for _, client := range inCareClients {
+		// Get client details to retrieve goals and evaluation interval
+		clientDetails, err := store.GetClientByID(ctx, client.ID)
+		if err != nil {
+			return fmt.Errorf("failed to get client details for %s: %w", client.ID, err)
+		}
+
+		// Get client goals
+		goals, err := store.ListGoalsByClientID(ctx, &client.ID)
+		if err != nil {
+			return fmt.Errorf("failed to get goals for client %s: %w", client.ID, err)
+		}
+
+		if len(goals) == 0 {
+			fmt.Printf("  ⚠ Client %s has no goals, skipping evaluations\n", client.ID)
+			continue
+		}
+
+		// Determine evaluation interval (default to 5 weeks if not set)
+		interval := int32(5)
+		if clientDetails.EvaluationIntervalWeeks != nil {
+			interval = *clientDetails.EvaluationIntervalWeeks
+		}
+
+		// Create 1-3 historical evaluations for each client
+		numEvaluations := 1 + rand.Intn(3) // 1 to 3 evaluations
+
+		for i := 0; i < numEvaluations; i++ {
+			// Calculate evaluation date going backwards from today
+			// Most recent evaluation is 0-2 weeks ago, then interval weeks back for each
+			weeksAgo := i * int(interval)
+			if i == 0 {
+				// Most recent: 0-14 days ago
+				weeksAgo = rand.Intn(15)
+			} else {
+				// Add some randomness (+/- 1 week)
+				variation := rand.Intn(15) - 7
+				weeksAgo += variation
+			}
+
+			evaluationDate := time.Now().AddDate(0, 0, -weeksAgo)
+
+			// Create evaluation with goal progress logs
+			if err := createEvaluationWithGoals(
+				ctx,
+				store,
+				client.ID,
+				client.CoordinatorID,
+				evaluationDate,
+				goals,
+				interval,
+				i == 0, // isLatest - update next_evaluation_date for most recent only
+			); err != nil {
+				return fmt.Errorf("failed to create evaluation for client %s: %w", client.ID, err)
+			}
+
+			totalEvaluations++
+		}
+
+		fmt.Printf("  ✓ Created %d evaluation(s) for client %s\n", numEvaluations, client.ID)
+	}
+
+	fmt.Printf("✅ Successfully seeded %d evaluations\n", totalEvaluations)
+	return nil
+}
+
+func createEvaluationWithGoals(
+	ctx context.Context,
+	store *db.Store,
+	clientID, coordinatorID string,
+	evaluationDate time.Time,
+	goals []db.ClientGoal,
+	interval int32,
+	isLatest bool,
+) error {
+	// Generate evaluation ID
+	evaluationID, err := gonanoid.New()
+	if err != nil {
+		return fmt.Errorf("failed to generate evaluation ID: %w", err)
+	}
+
+	// Create progress logs for each goal
+	progressLogs := make([]db.CreateGoalProgressLogParams, len(goals))
+	for i, goal := range goals {
+		progressLogID, err := gonanoid.New()
+		if err != nil {
+			return fmt.Errorf("failed to generate progress log ID: %w", err)
+		}
+
+		// Random status for this goal
+		status := randomElement(goalStatuses)
+
+		// Get a matching progress note for the status
+		var progressNote *string
+		if notes, ok := progressNotes[status]; ok && len(notes) > 0 {
+			note := randomElement(notes)
+			progressNote = &note
+		}
+
+		progressLogs[i] = db.CreateGoalProgressLogParams{
+			ID:            progressLogID,
+			EvaluationID:  evaluationID, // Will be set in transaction
+			GoalID:        goal.ID,
+			Status:        status,
+			ProgressNotes: progressNote,
+		}
+	}
+
+	// Random overall notes
+	var overallNotesStr *string
+	note := randomElement(overallNotes)
+	if note != "" {
+		overallNotesStr = &note
+	}
+
+	// Call the evaluation transaction (same as the real flow)
+	_, err = store.CreateEvaluationTx(ctx, db.CreateEvaluationTxParams{
+		Evaluation: db.CreateClientEvaluationParams{
+			ID:             evaluationID,
+			ClientID:       clientID,
+			CoordinatorID:  coordinatorID,
+			EvaluationDate: pgtype.Date{Time: evaluationDate, Valid: true},
+			OverallNotes:   overallNotesStr,
+			Status:         db.EvaluationStatusEnumSubmitted,
+		},
+		ProgressLogs:  progressLogs,
+		IntervalWeeks: interval,
 	})
 
 	return err

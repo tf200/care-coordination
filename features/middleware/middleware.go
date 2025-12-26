@@ -11,6 +11,7 @@ const (
 	authorizationHeaderKey  = "authorization"
 	authorizationTypeBearer = "bearer"
 	UserIDKey               = "user_id"
+	EmployeeIDKey           = "employee_id"
 )
 
 type Middleware struct {

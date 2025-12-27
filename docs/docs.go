@@ -2080,65 +2080,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/evaluations/{id}": {
-            "put": {
-                "description": "Update an existing evaluation's details and progress logs.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Evaluation"
-                ],
-                "summary": "Update a submitted evaluation",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Evaluation ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Updated Evaluation Details",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/evaluation.UpdateEvaluationRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/resp.SuccessResponse-evaluation_SaveDraftResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/resp.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/resp.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/resp.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/incidents": {
             "get": {
                 "description": "List all incidents with pagination and search by client name",
@@ -4775,33 +4716,13 @@ const docTemplate = `{
                 }
             }
         },
-        "evaluation.UpdateEvaluationRequest": {
-            "type": "object",
-            "required": [
-                "evaluationDate"
-            ],
-            "properties": {
-                "evaluationDate": {
-                    "type": "string"
-                },
-                "overallNotes": {
-                    "type": "string"
-                },
-                "progressLogs": {
-                    "type": "array",
-                    "minItems": 1,
-                    "items": {
-                        "$ref": "#/definitions/evaluation.GoalProgressDTO"
-                    }
-                }
-            }
-        },
         "incident.CreateIncidentRequest": {
             "type": "object",
             "required": [
                 "actionTaken",
                 "clientId",
                 "coordinatorId",
+                "incidentDate",
                 "incidentDescription",
                 "incidentSeverity",
                 "incidentTime",

@@ -471,6 +471,7 @@ const getRecentEvaluationsGlobal = `-- name: GetRecentEvaluationsGlobal :many
 SELECT 
     e.id as evaluation_id,
     e.evaluation_date,
+    e.client_id,
     c.first_name as client_first_name,
     c.last_name as client_last_name,
     emp.first_name as coordinator_first_name,
@@ -493,6 +494,7 @@ type GetRecentEvaluationsGlobalParams struct {
 type GetRecentEvaluationsGlobalRow struct {
 	EvaluationID         string      `json:"evaluation_id"`
 	EvaluationDate       pgtype.Date `json:"evaluation_date"`
+	ClientID             string      `json:"client_id"`
 	ClientFirstName      string      `json:"client_first_name"`
 	ClientLastName       string      `json:"client_last_name"`
 	CoordinatorFirstName string      `json:"coordinator_first_name"`
@@ -514,6 +516,7 @@ func (q *Queries) GetRecentEvaluationsGlobal(ctx context.Context, arg GetRecentE
 		if err := rows.Scan(
 			&i.EvaluationID,
 			&i.EvaluationDate,
+			&i.ClientID,
 			&i.ClientFirstName,
 			&i.ClientLastName,
 			&i.CoordinatorFirstName,
@@ -638,36 +641,4 @@ type UpdateClientNextEvaluationDateParams struct {
 func (q *Queries) UpdateClientNextEvaluationDate(ctx context.Context, arg UpdateClientNextEvaluationDateParams) error {
 	_, err := q.db.Exec(ctx, updateClientNextEvaluationDate, arg.ID, arg.NextEvaluationDate)
 	return err
-}
-
-const updateSubmittedEvaluation = `-- name: UpdateSubmittedEvaluation :one
-UPDATE client_evaluations
-SET 
-    evaluation_date = COALESCE($2, evaluation_date),
-    overall_notes = COALESCE($3, overall_notes),
-    updated_at = NOW()
-WHERE id = $1 AND status = 'submitted'
-RETURNING id, client_id, coordinator_id, evaluation_date, overall_notes, status, created_at, updated_at
-`
-
-type UpdateSubmittedEvaluationParams struct {
-	ID             string      `json:"id"`
-	EvaluationDate pgtype.Date `json:"evaluation_date"`
-	OverallNotes   *string     `json:"overall_notes"`
-}
-
-func (q *Queries) UpdateSubmittedEvaluation(ctx context.Context, arg UpdateSubmittedEvaluationParams) (ClientEvaluation, error) {
-	row := q.db.QueryRow(ctx, updateSubmittedEvaluation, arg.ID, arg.EvaluationDate, arg.OverallNotes)
-	var i ClientEvaluation
-	err := row.Scan(
-		&i.ID,
-		&i.ClientID,
-		&i.CoordinatorID,
-		&i.EvaluationDate,
-		&i.OverallNotes,
-		&i.Status,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
 }

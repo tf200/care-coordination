@@ -89,6 +89,7 @@ LIMIT $1 OFFSET $2;
 SELECT 
     e.id as evaluation_id,
     e.evaluation_date,
+    e.client_id,
     c.first_name as client_first_name,
     c.last_name as client_last_name,
     emp.first_name as coordinator_first_name,

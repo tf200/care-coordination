@@ -85,6 +85,7 @@ type UpcomingEvaluationDTO struct {
 
 type GlobalRecentEvaluationDTO struct {
 	EvaluationID         string    `json:"evaluationId"`
+	ClientID             string    `json:"clientId"`
 	EvaluationDate       time.Time `json:"evaluationDate"`
 	ClientFirstName      string    `json:"clientFirstName"`
 	ClientLastName       string    `json:"clientLastName"`

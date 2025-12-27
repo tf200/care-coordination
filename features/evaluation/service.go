@@ -208,6 +208,7 @@ func (s *evaluationService) GetRecentEvaluations(ctx context.Context) (*resp.Pag
 	result := util.Map(rows, func(row db.GetRecentEvaluationsGlobalRow) GlobalRecentEvaluationDTO {
 		return GlobalRecentEvaluationDTO{
 			EvaluationID:         row.EvaluationID,
+			ClientID:             row.ClientID,
 			EvaluationDate:       row.EvaluationDate.Time,
 			ClientFirstName:      row.ClientFirstName,
 			ClientLastName:       row.ClientLastName,

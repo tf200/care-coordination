@@ -663,20 +663,6 @@ definitions:
       nextEvaluationDate:
         type: string
     type: object
-  evaluation.UpdateEvaluationRequest:
-    properties:
-      evaluationDate:
-        type: string
-      overallNotes:
-        type: string
-      progressLogs:
-        items:
-          $ref: '#/definitions/evaluation.GoalProgressDTO'
-        minItems: 1
-        type: array
-    required:
-    - evaluationDate
-    type: object
   incident.CreateIncidentRequest:
     properties:
       actionTaken:
@@ -719,6 +705,7 @@ definitions:
     - actionTaken
     - clientId
     - coordinatorId
+    - incidentDate
     - incidentDescription
     - incidentSeverity
     - incidentTime
@@ -3580,45 +3567,6 @@ paths:
           schema:
             $ref: '#/definitions/resp.ErrorResponse'
       summary: Create a client evaluation
-      tags:
-      - Evaluation
-  /evaluations/{id}:
-    put:
-      consumes:
-      - application/json
-      description: Update an existing evaluation's details and progress logs.
-      parameters:
-      - description: Evaluation ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Updated Evaluation Details
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/evaluation.UpdateEvaluationRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/resp.SuccessResponse-evaluation_SaveDraftResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/resp.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/resp.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/resp.ErrorResponse'
-      summary: Update a submitted evaluation
       tags:
       - Evaluation
   /evaluations/critical:

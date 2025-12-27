@@ -124,7 +124,6 @@ type Querier interface {
 	UpdateRegistrationForm(ctx context.Context, arg UpdateRegistrationFormParams) error
 	UpdateRegistrationFormStatus(ctx context.Context, arg UpdateRegistrationFormStatusParams) error
 	UpdateRole(ctx context.Context, arg UpdateRoleParams) (Role, error)
-	UpdateSubmittedEvaluation(ctx context.Context, arg UpdateSubmittedEvaluationParams) (ClientEvaluation, error)
 	UpdateUserSession(ctx context.Context, arg UpdateUserSessionParams) error
 }
 

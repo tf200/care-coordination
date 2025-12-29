@@ -4561,6 +4561,9 @@ const docTemplate = `{
                 "clientFirstName": {
                     "type": "string"
                 },
+                "clientId": {
+                    "type": "string"
+                },
                 "clientLastName": {
                     "type": "string"
                 },
@@ -4701,6 +4704,9 @@ const docTemplate = `{
                 },
                 "firstName": {
                     "type": "string"
+                },
+                "hasDraft": {
+                    "type": "boolean"
                 },
                 "id": {
                     "type": "string"

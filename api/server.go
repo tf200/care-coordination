@@ -27,6 +27,7 @@ import (
 	"care-cordination/features/intake"
 	locTransfer "care-cordination/features/location_transfer"
 	"care-cordination/features/locations"
+	"care-cordination/features/middleware"
 	"care-cordination/features/rbac"
 	referringOrgs "care-cordination/features/referring_orgs"
 	"care-cordination/features/registration"
@@ -145,6 +146,9 @@ func (s *Server) setupRoutes(logger *logger.Logger) {
 		AllowCredentials: false,
 		MaxAge:           12 * time.Hour,
 	}))
+
+	// Request ID middleware - must be before ginzap for logging
+	router.Use(middleware.RequestIDMiddleware())
 
 	router.Use(ginzap.GinzapWithConfig(logger.Logger, &ginzap.Config{
 		UTC:        true,

@@ -54,6 +54,10 @@ SELECT
     l.name as location_name,
     e.first_name as coordinator_first_name,
     e.last_name as coordinator_last_name,
+    EXISTS (
+        SELECT 1 FROM client_evaluations ce 
+        WHERE ce.client_id = c.id AND ce.status = 'draft'
+    ) as has_draft,
     COUNT(*) OVER() as total_count
 FROM clients c
 JOIN locations l ON c.assigned_location_id = l.id
@@ -74,6 +78,10 @@ SELECT
     l.name as location_name,
     e.first_name as coordinator_first_name,
     e.last_name as coordinator_last_name,
+    EXISTS (
+        SELECT 1 FROM client_evaluations ce 
+        WHERE ce.client_id = c.id AND ce.status = 'draft'
+    ) as has_draft,
     COUNT(*) OVER() as total_count
 FROM clients c
 JOIN locations l ON c.assigned_location_id = l.id

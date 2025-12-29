@@ -147,6 +147,7 @@ func (s *evaluationService) GetCriticalEvaluations(ctx context.Context) (*resp.P
 			LocationName:            row.LocationName,
 			CoordinatorFirstName:    row.CoordinatorFirstName,
 			CoordinatorLastName:     row.CoordinatorLastName,
+			HasDraft:                row.HasDraft,
 		}
 	})
 
@@ -181,6 +182,7 @@ func (s *evaluationService) GetScheduledEvaluations(ctx context.Context) (*resp.
 			LocationName:            row.LocationName,
 			CoordinatorFirstName:    row.CoordinatorFirstName,
 			CoordinatorLastName:     row.CoordinatorLastName,
+			HasDraft:                row.HasDraft,
 		}
 	})
 

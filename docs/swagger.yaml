@@ -560,6 +560,8 @@ definitions:
     properties:
       clientFirstName:
         type: string
+      clientId:
+        type: string
       clientLastName:
         type: string
       coordinatorFirstName:
@@ -654,6 +656,8 @@ definitions:
         type: integer
       firstName:
         type: string
+      hasDraft:
+        type: boolean
       id:
         type: string
       lastName:

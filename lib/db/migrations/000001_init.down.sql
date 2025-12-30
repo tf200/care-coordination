@@ -46,3 +46,4 @@ DROP TYPE IF EXISTS care_type_enum CASCADE;
 DROP TYPE IF EXISTS gender_enum CASCADE;
 DROP TYPE IF EXISTS location_transfer_status_enum CASCADE;
 DROP TYPE IF EXISTS contract_type_enum CASCADE;
+DROP TYPE IF EXISTS evaluation_status_enum CASCADE;

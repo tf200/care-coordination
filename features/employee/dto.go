@@ -1,20 +1,18 @@
 package employee
 
-import "time"
-
 type CreateEmployeeRequest struct {
-	Email         string    `json:"email"       binding:"requirednm=,email"`
-	Password      string    `json:"password"    binding:"required"`
-	FirstName     string    `json:"firstName"   binding:"required"`
-	LastName      string    `json:"lastName"    binding:"required"`
-	BSN           string    `json:"bsn"         binding:"required"`
-	DateOfBirth   time.Time `json:"dateOfBirth" binding:"required,datetime=2006-01-02"`
-	PhoneNumber   string    `json:"phoneNumber" binding:"required"`
-	Gender        string    `json:"gender"      binding:"required oneof=male female other"`
-	Role          string    `json:"role"        binding:"required"`
-	LocationID    string    `json:"locationId"  binding:"required"`
-	ContractHours *int32    `json:"contractHours"`
-	ContractType  *string   `json:"contractType"`
+	Email         string  `json:"email"       binding:"requirednm=,email"`
+	Password      string  `json:"password"    binding:"required"`
+	FirstName     string  `json:"firstName"   binding:"required"`
+	LastName      string  `json:"lastName"    binding:"required"`
+	BSN           string  `json:"bsn"         binding:"required"`
+	DateOfBirth   string  `json:"dateOfBirth" binding:"required,datetime=2006-01-02"`
+	PhoneNumber   string  `json:"phoneNumber" binding:"required"`
+	Gender        string  `json:"gender"      binding:"required oneof=male female other"`
+	Role          string  `json:"role"        binding:"required"`
+	LocationID    string  `json:"locationId"  binding:"required"`
+	ContractHours *int32  `json:"contractHours"`
+	ContractType  *string `json:"contractType"`
 }
 
 type CreateEmployeeResponse struct {
@@ -89,17 +87,17 @@ type GetMyProfileResponse struct {
 }
 
 type UpdateEmployeeRequest struct {
-	Email         *string    `json:"email"         binding:"omitempty,email"`
-	Password      *string    `json:"password"      binding:"omitempty,min=6"`
-	FirstName     *string    `json:"firstName"     binding:"omitempty"`
-	LastName      *string    `json:"lastName"      binding:"omitempty"`
-	BSN           *string    `json:"bsn"           binding:"omitempty"`
-	DateOfBirth   *time.Time `json:"dateOfBirth"   binding:"omitempty"`
-	PhoneNumber   *string    `json:"phoneNumber"   binding:"omitempty"`
-	Gender        *string    `json:"gender"        binding:"omitempty,oneof=male female other"`
-	LocationID    *string    `json:"locationId"    binding:"omitempty"`
-	ContractHours *int32     `json:"contractHours"`
-	ContractType  *string    `json:"contractType"`
+	Email         *string `json:"email"         binding:"omitempty,email"`
+	Password      *string `json:"password"      binding:"omitempty,min=6"`
+	FirstName     *string `json:"firstName"     binding:"omitempty"`
+	LastName      *string `json:"lastName"      binding:"omitempty"`
+	BSN           *string `json:"bsn"           binding:"omitempty"`
+	DateOfBirth   *string `json:"dateOfBirth"   binding:"omitempty"`
+	PhoneNumber   *string `json:"phoneNumber"   binding:"omitempty"`
+	Gender        *string `json:"gender"        binding:"omitempty,oneof=male female other"`
+	LocationID    *string `json:"locationId"    binding:"omitempty"`
+	ContractHours *int32  `json:"contractHours"`
+	ContractType  *string `json:"contractType"`
 }
 
 type UpdateEmployeeResponse struct {

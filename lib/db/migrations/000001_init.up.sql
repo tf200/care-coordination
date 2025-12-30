@@ -105,7 +105,8 @@ CREATE TABLE  employees (
     contract_type contract_type_enum,
     location_id TEXT NOT NULL REFERENCES locations(id),
     created_at TIMESTAMP  DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP  DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP  DEFAULT CURRENT_TIMESTAMP,
+    is_deleted BOOLEAN DEFAULT FALSE
 );
  
 

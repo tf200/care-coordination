@@ -9,7 +9,6 @@ import (
 	"care-cordination/lib/util"
 	"context"
 
-	"github.com/jackc/pgx/v5/pgtype"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -43,7 +42,7 @@ func (s *employeeService) CreateEmployee(
 			FirstName:     req.FirstName,
 			LastName:      req.LastName,
 			Bsn:           req.BSN,
-			DateOfBirth:   pgtype.Date{Time: req.DateOfBirth, Valid: true},
+			DateOfBirth:   util.StrToPgtypeDate(req.DateOfBirth),
 			PhoneNumber:   req.PhoneNumber,
 			Gender:        db.GenderEnum(req.Gender),
 			ContractHours: req.ContractHours,
@@ -239,7 +238,7 @@ func (s *employeeService) UpdateEmployee(
 
 	// Handle DateOfBirth
 	if req.DateOfBirth != nil {
-		updateParams.DateOfBirth = pgtype.Date{Time: *req.DateOfBirth, Valid: true}
+		updateParams.DateOfBirth = util.StrToPgtypeDate(*req.DateOfBirth)
 	}
 
 	// Handle Gender

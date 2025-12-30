@@ -1,3 +1,6 @@
+
+
+
 -- name: CreateLocation :exec
 INSERT INTO locations (
    id,

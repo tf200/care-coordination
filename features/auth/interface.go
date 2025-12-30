@@ -2,6 +2,7 @@ package auth
 
 import "context"
 
+//go:generate mockgen -destination=../../internal/mocks/mock_auth_service.go -package=mocks care-cordination/features/auth AuthService
 type AuthService interface {
 	Login(
 		ctx context.Context,

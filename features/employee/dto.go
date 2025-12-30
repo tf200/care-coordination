@@ -87,3 +87,21 @@ type GetMyProfileResponse struct {
 	Role        string               `json:"role"`
 	Permissions []PermissionResponse `json:"permissions"`
 }
+
+type UpdateEmployeeRequest struct {
+	Email         *string    `json:"email"         binding:"omitempty,email"`
+	Password      *string    `json:"password"      binding:"omitempty,min=6"`
+	FirstName     *string    `json:"firstName"     binding:"omitempty"`
+	LastName      *string    `json:"lastName"      binding:"omitempty"`
+	BSN           *string    `json:"bsn"           binding:"omitempty"`
+	DateOfBirth   *time.Time `json:"dateOfBirth"   binding:"omitempty"`
+	PhoneNumber   *string    `json:"phoneNumber"   binding:"omitempty"`
+	Gender        *string    `json:"gender"        binding:"omitempty,oneof=male female other"`
+	LocationID    *string    `json:"locationId"    binding:"omitempty"`
+	ContractHours *int32     `json:"contractHours"`
+	ContractType  *string    `json:"contractType"`
+}
+
+type UpdateEmployeeResponse struct {
+	ID string `json:"id"`
+}

@@ -13,10 +13,10 @@ import (
 
 type locationService struct {
 	store  *db.Store
-	logger *logger.Logger
+	logger logger.Logger
 }
 
-func NewLocationService(store *db.Store, logger *logger.Logger) LocationService {
+func NewLocationService(store *db.Store, logger logger.Logger) LocationService {
 	return &locationService{
 		store:  store,
 		logger: logger,

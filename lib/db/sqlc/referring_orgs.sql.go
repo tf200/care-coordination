@@ -12,6 +12,8 @@ import (
 )
 
 const createReferringOrg = `-- name: CreateReferringOrg :exec
+
+
 INSERT INTO referring_orgs (
     id,
     name,
@@ -31,6 +33,9 @@ type CreateReferringOrgParams struct {
 	Email         string `json:"email"`
 }
 
+// ============================================================
+// Referring Orgs
+// ============================================================
 func (q *Queries) CreateReferringOrg(ctx context.Context, arg CreateReferringOrgParams) error {
 	_, err := q.db.Exec(ctx, createReferringOrg,
 		arg.ID,

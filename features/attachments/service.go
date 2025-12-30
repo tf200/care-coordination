@@ -14,13 +14,13 @@ import (
 type attachmentsService struct {
 	db     *db.Store
 	bucket bucket.ObjectStorage
-	logger *logger.Logger
+	logger logger.Logger
 }
 
 func NewAttachmentsService(
 	db *db.Store,
 	bucket bucket.ObjectStorage,
-	logger *logger.Logger,
+	logger logger.Logger,
 ) AttachmentsService {
 	return &attachmentsService{
 		db:     db,

@@ -14,10 +14,10 @@ import (
 
 type registrationService struct {
 	db     *db.Store
-	logger *logger.Logger
+	logger logger.Logger
 }
 
-func NewRegistrationService(db *db.Store, logger *logger.Logger) RegistrationService {
+func NewRegistrationService(db *db.Store, logger logger.Logger) RegistrationService {
 	return &registrationService{
 		db:     db,
 		logger: logger,

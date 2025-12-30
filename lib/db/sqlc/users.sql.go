@@ -10,6 +10,7 @@ import (
 )
 
 const createUser = `-- name: CreateUser :one
+
 INSERT INTO users (id, email, password_hash) 
 VALUES ($1, $2, $3)
 RETURNING id
@@ -21,6 +22,9 @@ type CreateUserParams struct {
 	PasswordHash string `json:"password_hash"`
 }
 
+// ============================================================
+// Users
+// ============================================================
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (string, error) {
 	row := q.db.QueryRow(ctx, createUser, arg.ID, arg.Email, arg.PasswordHash)
 	var id string
@@ -43,4 +47,23 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const updateUser = `-- name: UpdateUser :exec
+UPDATE users SET 
+    email = COALESCE($2, email),
+    password_hash = COALESCE($3, password_hash),
+    updated_at = now() 
+WHERE id = $1
+`
+
+type UpdateUserParams struct {
+	ID           string  `json:"id"`
+	Email        *string `json:"email"`
+	PasswordHash *string `json:"password_hash"`
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
+	_, err := q.db.Exec(ctx, updateUser, arg.ID, arg.Email, arg.PasswordHash)
+	return err
 }

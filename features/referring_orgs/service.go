@@ -13,10 +13,10 @@ import (
 
 type referringOrgService struct {
 	db     *db.Store
-	logger *logger.Logger
+	logger logger.Logger
 }
 
-func NewReferringOrgService(db *db.Store, logger *logger.Logger) ReferringOrgService {
+func NewReferringOrgService(db *db.Store, logger logger.Logger) ReferringOrgService {
 	return &referringOrgService{
 		db:     db,
 		logger: logger,

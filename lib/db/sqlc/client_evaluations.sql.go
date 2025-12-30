@@ -409,6 +409,26 @@ func (q *Queries) GetDraftEvaluation(ctx context.Context, id string) ([]GetDraft
 	return items, nil
 }
 
+const getEvaluationById = `-- name: GetEvaluationById :one
+SELECT id, client_id, coordinator_id, evaluation_date, overall_notes, status, created_at, updated_at FROM client_evaluations WHERE id = $1
+`
+
+func (q *Queries) GetEvaluationById(ctx context.Context, id string) (ClientEvaluation, error) {
+	row := q.db.QueryRow(ctx, getEvaluationById, id)
+	var i ClientEvaluation
+	err := row.Scan(
+		&i.ID,
+		&i.ClientID,
+		&i.CoordinatorID,
+		&i.EvaluationDate,
+		&i.OverallNotes,
+		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getLastClientEvaluation = `-- name: GetLastClientEvaluation :many
 SELECT 
     e.id as evaluation_id,
@@ -639,6 +659,35 @@ func (q *Queries) SubmitDraftEvaluation(ctx context.Context, id string) (ClientE
 	return i, err
 }
 
+const updateClientEvaluation = `-- name: UpdateClientEvaluation :one
+UPDATE client_evaluations 
+SET evaluation_date = $2, overall_notes = $3, updated_at = NOW()
+WHERE id = $1 AND status = 'submitted'
+RETURNING id, client_id, coordinator_id, evaluation_date, overall_notes, status, created_at, updated_at
+`
+
+type UpdateClientEvaluationParams struct {
+	ID             string      `json:"id"`
+	EvaluationDate pgtype.Date `json:"evaluation_date"`
+	OverallNotes   *string     `json:"overall_notes"`
+}
+
+func (q *Queries) UpdateClientEvaluation(ctx context.Context, arg UpdateClientEvaluationParams) (ClientEvaluation, error) {
+	row := q.db.QueryRow(ctx, updateClientEvaluation, arg.ID, arg.EvaluationDate, arg.OverallNotes)
+	var i ClientEvaluation
+	err := row.Scan(
+		&i.ID,
+		&i.ClientID,
+		&i.CoordinatorID,
+		&i.EvaluationDate,
+		&i.OverallNotes,
+		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const updateClientNextEvaluationDate = `-- name: UpdateClientNextEvaluationDate :exec
 UPDATE clients 
 SET next_evaluation_date = $2, updated_at = NOW() 
@@ -652,5 +701,28 @@ type UpdateClientNextEvaluationDateParams struct {
 
 func (q *Queries) UpdateClientNextEvaluationDate(ctx context.Context, arg UpdateClientNextEvaluationDateParams) error {
 	_, err := q.db.Exec(ctx, updateClientNextEvaluationDate, arg.ID, arg.NextEvaluationDate)
+	return err
+}
+
+const updateGoalProgressLog = `-- name: UpdateGoalProgressLog :exec
+UPDATE goal_progress_logs 
+SET status = $2, progress_notes = $3
+WHERE evaluation_id = $1 AND goal_id = $4
+`
+
+type UpdateGoalProgressLogParams struct {
+	EvaluationID  string             `json:"evaluation_id"`
+	Status        GoalProgressStatus `json:"status"`
+	ProgressNotes *string            `json:"progress_notes"`
+	GoalID        string             `json:"goal_id"`
+}
+
+func (q *Queries) UpdateGoalProgressLog(ctx context.Context, arg UpdateGoalProgressLogParams) error {
+	_, err := q.db.Exec(ctx, updateGoalProgressLog,
+		arg.EvaluationID,
+		arg.Status,
+		arg.ProgressNotes,
+		arg.GoalID,
+	)
 	return err
 }

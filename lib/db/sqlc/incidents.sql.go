@@ -12,6 +12,7 @@ import (
 )
 
 const createIncident = `-- name: CreateIncident :exec
+
 INSERT INTO incidents (
     id,
     client_id,
@@ -45,6 +46,9 @@ type CreateIncidentParams struct {
 	Status              IncidentStatusEnum   `json:"status"`
 }
 
+// ============================================================
+// Incidents
+// ============================================================
 func (q *Queries) CreateIncident(ctx context.Context, arg CreateIncidentParams) error {
 	_, err := q.db.Exec(ctx, createIncident,
 		arg.ID,

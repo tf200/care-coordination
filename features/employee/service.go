@@ -16,10 +16,10 @@ import (
 
 type employeeService struct {
 	store  *db.Store
-	logger *logger.Logger
+	logger logger.Logger
 }
 
-func NewEmployeeService(store *db.Store, logger *logger.Logger) EmployeeService {
+func NewEmployeeService(store *db.Store, logger logger.Logger) EmployeeService {
 	return &employeeService{
 		store:  store,
 		logger: logger,
@@ -212,4 +212,91 @@ func (s *employeeService) GetMyProfile(ctx context.Context) (*GetMyProfileRespon
 		Role:        roleName,
 		Permissions: permissionsResponse,
 	}, nil
+}
+
+func (s *employeeService) UpdateEmployee(
+	ctx context.Context,
+	id string,
+	req *UpdateEmployeeRequest,
+) (*UpdateEmployeeResponse, error) {
+	// Get UserID for user table update
+	currentEmployee, err := s.store.GetEmployeeByID(ctx, id)
+	if err != nil {
+		s.logger.Error(ctx, "UpdateEmployee", "Failed to get employee", zap.Error(err))
+		return nil, ErrInternal
+	}
+
+	// Build update params - COALESCE in SQL will keep existing values for nil fields
+	updateParams := db.UpdateEmployeeParams{
+		ID:            id,
+		FirstName:     req.FirstName,
+		LastName:      req.LastName,
+		Bsn:           req.BSN,
+		PhoneNumber:   req.PhoneNumber,
+		ContractHours: req.ContractHours,
+		LocationID:    req.LocationID,
+	}
+
+	// Handle DateOfBirth
+	if req.DateOfBirth != nil {
+		updateParams.DateOfBirth = pgtype.Date{Time: *req.DateOfBirth, Valid: true}
+	}
+
+	// Handle Gender
+	if req.Gender != nil {
+		updateParams.Gender = db.NullGenderEnum{
+			Valid:      true,
+			GenderEnum: db.GenderEnum(*req.Gender),
+		}
+	}
+
+	// Handle ContractType
+	if req.ContractType != nil {
+		updateParams.ContractType = db.NullContractTypeEnum{
+			Valid:            true,
+			ContractTypeEnum: db.ContractTypeEnum(*req.ContractType),
+		}
+	}
+
+	// Update the employee record
+	err = s.store.UpdateEmployee(ctx, updateParams)
+	if err != nil {
+		s.logger.Error(ctx, "UpdateEmployee", "Failed to update employee", zap.Error(err))
+		return nil, ErrInternal
+	}
+
+	// Update user (email/password) if provided
+	if req.Email != nil || req.Password != nil {
+		userParams := db.UpdateUserParams{
+			ID:    currentEmployee.UserID,
+			Email: req.Email,
+		}
+		if req.Password != nil {
+			passwordHash, err := bcrypt.GenerateFromPassword([]byte(*req.Password), bcrypt.DefaultCost)
+			if err != nil {
+				s.logger.Error(ctx, "UpdateEmployee", "Failed to generate password hash", zap.Error(err))
+				return nil, ErrInternal
+			}
+			hash := string(passwordHash)
+			userParams.PasswordHash = &hash
+		}
+		err = s.store.UpdateUser(ctx, userParams)
+		if err != nil {
+			s.logger.Error(ctx, "UpdateEmployee", "Failed to update user", zap.Error(err))
+			return nil, ErrInternal
+		}
+	}
+
+	return &UpdateEmployeeResponse{
+		ID: id,
+	}, nil
+}
+
+func (s *employeeService) DeleteEmployee(ctx context.Context, id string) error {
+	err := s.store.SoftDeleteEmployee(ctx, id)
+	if err != nil {
+		s.logger.Error(ctx, "DeleteEmployee", "Failed to delete employee", zap.Error(err))
+		return ErrInternal
+	}
+	return nil
 }

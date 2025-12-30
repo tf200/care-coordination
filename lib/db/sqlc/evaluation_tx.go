@@ -54,3 +54,42 @@ func (s *Store) CreateEvaluationTx(ctx context.Context, arg CreateEvaluationTxPa
 
 	return result, err
 }
+
+type UpdateEvaluationTxParams struct {
+	EvaluationID   string
+	EvaluationDate pgtype.Date
+	OverallNotes   *string
+	ProgressLogs   []UpdateGoalProgressLogParams
+}
+
+type UpdateEvaluationTxResult struct {
+	EvaluationID string
+}
+
+func (s *Store) UpdateEvaluationTx(ctx context.Context, arg UpdateEvaluationTxParams) (UpdateEvaluationTxResult, error) {
+	var result UpdateEvaluationTxResult
+
+	err := s.ExecTx(ctx, func(q *Queries) error {
+		// 1. Update evaluation record
+		eval, err := q.UpdateClientEvaluation(ctx, UpdateClientEvaluationParams{
+			ID:             arg.EvaluationID,
+			EvaluationDate: arg.EvaluationDate,
+			OverallNotes:   arg.OverallNotes,
+		})
+		if err != nil {
+			return err
+		}
+		result.EvaluationID = eval.ID
+
+		// 2. Update all progress logs
+		for _, log := range arg.ProgressLogs {
+			if err := q.UpdateGoalProgressLog(ctx, log); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+
+	return result, err
+}

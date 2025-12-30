@@ -452,6 +452,41 @@ definitions:
       resource:
         type: string
     type: object
+  employee.UpdateEmployeeRequest:
+    properties:
+      bsn:
+        type: string
+      contractHours:
+        type: integer
+      contractType:
+        type: string
+      dateOfBirth:
+        type: string
+      email:
+        type: string
+      firstName:
+        type: string
+      gender:
+        enum:
+        - male
+        - female
+        - other
+        type: string
+      lastName:
+        type: string
+      locationId:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      phoneNumber:
+        type: string
+    type: object
+  employee.UpdateEmployeeResponse:
+    properties:
+      id:
+        type: string
+    type: object
   evaluation.CoordinatorInfoDTO:
     properties:
       firstName:
@@ -665,6 +700,26 @@ definitions:
       locationName:
         type: string
       nextEvaluationDate:
+        type: string
+    type: object
+  evaluation.UpdateEvaluationRequest:
+    properties:
+      evaluationDate:
+        type: string
+      overallNotes:
+        type: string
+      progressLogs:
+        items:
+          $ref: '#/definitions/evaluation.GoalProgressDTO'
+        minItems: 1
+        type: array
+    required:
+    - evaluationDate
+    - progressLogs
+    type: object
+  evaluation.UpdateEvaluationResponse:
+    properties:
+      id:
         type: string
     type: object
   incident.CreateIncidentRequest:
@@ -2028,6 +2083,17 @@ definitions:
         example: true
         type: boolean
     type: object
+  resp.SuccessResponse-employee_UpdateEmployeeResponse:
+    properties:
+      data:
+        $ref: '#/definitions/employee.UpdateEmployeeResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
   resp.SuccessResponse-evaluation_CreateEvaluationResponse:
     properties:
       data:
@@ -2065,6 +2131,17 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/evaluation.SaveDraftResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-evaluation_UpdateEvaluationResponse:
+    properties:
+      data:
+        $ref: '#/definitions/evaluation.UpdateEvaluationResponse'
       message:
         example: success message
         type: string
@@ -3483,6 +3560,36 @@ paths:
       tags:
       - Employee
   /employees/{id}:
+    delete:
+      description: Soft delete an employee by ID
+      parameters:
+      - description: Employee ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-any'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Delete an employee
+      tags:
+      - Employee
     get:
       description: Get a single employee by their ID with all details
       parameters:
@@ -3515,6 +3622,44 @@ paths:
           schema:
             $ref: '#/definitions/resp.ErrorResponse'
       summary: Get employee by ID
+      tags:
+      - Employee
+    put:
+      consumes:
+      - application/json
+      description: Update an existing employee's details including password
+      parameters:
+      - description: Employee ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Employee update data
+        in: body
+        name: employee
+        required: true
+        schema:
+          $ref: '#/definitions/employee.UpdateEmployeeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-employee_UpdateEmployeeResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Update an employee
       tags:
       - Employee
   /employees/me:
@@ -3571,6 +3716,50 @@ paths:
           schema:
             $ref: '#/definitions/resp.ErrorResponse'
       summary: Create a client evaluation
+      tags:
+      - Evaluation
+  /evaluations/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Update an existing submitted evaluation's date, notes, and goal
+        progress.
+      parameters:
+      - description: Evaluation ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated Evaluation Details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/evaluation.UpdateEvaluationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-evaluation_UpdateEvaluationResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Update a submitted evaluation
       tags:
       - Evaluation
   /evaluations/critical:

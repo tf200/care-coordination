@@ -19,26 +19,50 @@ type Querier interface {
 	AssignRoleToUser(ctx context.Context, arg AssignRoleToUserParams) error
 	BatchAssignPermissionsToRole(ctx context.Context, arg BatchAssignPermissionsToRoleParams) error
 	ConfirmLocationTransfer(ctx context.Context, id string) error
+	// ============================================================
+	// Attachments
+	// ============================================================
 	CreateAttachment(ctx context.Context, arg CreateAttachmentParams) error
+	// ============================================================
+	// Clients
+	// ============================================================
 	CreateClient(ctx context.Context, arg CreateClientParams) (CreateClientRow, error)
 	CreateClientEvaluation(ctx context.Context, arg CreateClientEvaluationParams) (ClientEvaluation, error)
 	CreateClientGoal(ctx context.Context, arg CreateClientGoalParams) error
+	// ============================================================
+	// Employees
+	// ============================================================
 	CreateEmployee(ctx context.Context, arg CreateEmployeeParams) error
 	CreateGoalProgressLog(ctx context.Context, arg CreateGoalProgressLogParams) error
+	// ============================================================
+	// Incidents
+	// ============================================================
 	CreateIncident(ctx context.Context, arg CreateIncidentParams) error
+	// ============================================================
+	// Intake Forms
+	// ============================================================
 	CreateIntakeForm(ctx context.Context, arg CreateIntakeFormParams) error
 	CreateLocation(ctx context.Context, arg CreateLocationParams) error
+	// ============================================================
+	// Location Transfers
+	// ============================================================
 	CreateLocationTransfer(ctx context.Context, arg CreateLocationTransferParams) (CreateLocationTransferRow, error)
 	// ============================================================
 	// Permissions
 	// ============================================================
 	CreatePermission(ctx context.Context, arg CreatePermissionParams) (Permission, error)
+	// ============================================================
+	// Referring Orgs
+	// ============================================================
 	CreateReferringOrg(ctx context.Context, arg CreateReferringOrgParams) error
 	CreateRegistrationForm(ctx context.Context, arg CreateRegistrationFormParams) error
 	// ============================================================
 	// Roles
 	// ============================================================
 	CreateRole(ctx context.Context, arg CreateRoleParams) (Role, error)
+	// ============================================================
+	// Users
+	// ============================================================
 	CreateUser(ctx context.Context, arg CreateUserParams) (string, error)
 	CreateUserSession(ctx context.Context, arg CreateUserSessionParams) error
 	DecrementLocationOccupied(ctx context.Context, id string) error
@@ -59,6 +83,7 @@ type Querier interface {
 	GetDraftEvaluation(ctx context.Context, id string) ([]GetDraftEvaluationRow, error)
 	GetEmployeeByID(ctx context.Context, id string) (GetEmployeeByIDRow, error)
 	GetEmployeeByUserID(ctx context.Context, userID string) (GetEmployeeByUserIDRow, error)
+	GetEvaluationById(ctx context.Context, id string) (ClientEvaluation, error)
 	GetInCareStats(ctx context.Context) (GetInCareStatsRow, error)
 	GetIncident(ctx context.Context, id string) (GetIncidentRow, error)
 	GetIncidentStats(ctx context.Context) (GetIncidentStatsRow, error)
@@ -106,6 +131,7 @@ type Querier interface {
 	RefuseLocationTransfer(ctx context.Context, arg RefuseLocationTransferParams) error
 	RemovePermissionFromRole(ctx context.Context, arg RemovePermissionFromRoleParams) error
 	RemoveRoleFromUser(ctx context.Context, userID string) error
+	SoftDeleteEmployee(ctx context.Context, id string) error
 	SoftDeleteIncident(ctx context.Context, id string) error
 	SoftDeleteLocation(ctx context.Context, id string) error
 	SoftDeleteRegistrationForm(ctx context.Context, id string) error
@@ -113,8 +139,11 @@ type Querier interface {
 	UpdateClient(ctx context.Context, arg UpdateClientParams) (string, error)
 	UpdateClientByIntakeFormID(ctx context.Context, arg UpdateClientByIntakeFormIDParams) error
 	UpdateClientByRegistrationFormID(ctx context.Context, arg UpdateClientByRegistrationFormIDParams) error
+	UpdateClientEvaluation(ctx context.Context, arg UpdateClientEvaluationParams) (ClientEvaluation, error)
 	UpdateClientGoal(ctx context.Context, arg UpdateClientGoalParams) error
 	UpdateClientNextEvaluationDate(ctx context.Context, arg UpdateClientNextEvaluationDateParams) error
+	UpdateEmployee(ctx context.Context, arg UpdateEmployeeParams) error
+	UpdateGoalProgressLog(ctx context.Context, arg UpdateGoalProgressLogParams) error
 	UpdateIncident(ctx context.Context, arg UpdateIncidentParams) error
 	UpdateIntakeForm(ctx context.Context, arg UpdateIntakeFormParams) error
 	UpdateIntakeFormStatus(ctx context.Context, arg UpdateIntakeFormStatusParams) error
@@ -124,6 +153,7 @@ type Querier interface {
 	UpdateRegistrationForm(ctx context.Context, arg UpdateRegistrationFormParams) error
 	UpdateRegistrationFormStatus(ctx context.Context, arg UpdateRegistrationFormStatusParams) error
 	UpdateRole(ctx context.Context, arg UpdateRoleParams) (Role, error)
+	UpdateUser(ctx context.Context, arg UpdateUserParams) error
 	UpdateUserSession(ctx context.Context, arg UpdateUserSessionParams) error
 }
 

@@ -1,3 +1,8 @@
+-- ============================================================
+-- Location Transfers
+-- ============================================================
+
+
 -- name: CreateLocationTransfer :one
 INSERT INTO client_location_transfers (
     id,

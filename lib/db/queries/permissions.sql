@@ -1,3 +1,5 @@
+
+
 -- name: HasPermission :one
 SELECT EXISTS (
     SELECT 1

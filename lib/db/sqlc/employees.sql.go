@@ -12,6 +12,7 @@ import (
 )
 
 const createEmployee = `-- name: CreateEmployee :exec
+
 INSERT INTO employees (
     id,
     user_id,
@@ -43,6 +44,9 @@ type CreateEmployeeParams struct {
 	LocationID    string               `json:"location_id"`
 }
 
+// ============================================================
+// Employees
+// ============================================================
 func (q *Queries) CreateEmployee(ctx context.Context, arg CreateEmployeeParams) error {
 	_, err := q.db.Exec(ctx, createEmployee,
 		arg.ID,
@@ -285,4 +289,57 @@ func (q *Queries) ListEmployees(ctx context.Context, arg ListEmployeesParams) ([
 		return nil, err
 	}
 	return items, nil
+}
+
+const softDeleteEmployee = `-- name: SoftDeleteEmployee :exec
+UPDATE employees SET is_deleted = true, updated_at = now() WHERE id = $1
+`
+
+func (q *Queries) SoftDeleteEmployee(ctx context.Context, id string) error {
+	_, err := q.db.Exec(ctx, softDeleteEmployee, id)
+	return err
+}
+
+const updateEmployee = `-- name: UpdateEmployee :exec
+UPDATE employees SET
+    first_name = COALESCE($2, first_name),
+    last_name = COALESCE($3, last_name),
+    bsn = COALESCE($4, bsn),
+    date_of_birth = COALESCE($5, date_of_birth),
+    phone_number = COALESCE($6, phone_number),
+    gender = COALESCE($7, gender),
+    contract_hours = COALESCE($8, contract_hours),
+    contract_type = COALESCE($9, contract_type),
+    location_id = COALESCE($10, location_id),
+    updated_at = now()
+WHERE id = $1
+`
+
+type UpdateEmployeeParams struct {
+	ID            string               `json:"id"`
+	FirstName     *string              `json:"first_name"`
+	LastName      *string              `json:"last_name"`
+	Bsn           *string              `json:"bsn"`
+	DateOfBirth   pgtype.Date          `json:"date_of_birth"`
+	PhoneNumber   *string              `json:"phone_number"`
+	Gender        NullGenderEnum       `json:"gender"`
+	ContractHours *int32               `json:"contract_hours"`
+	ContractType  NullContractTypeEnum `json:"contract_type"`
+	LocationID    *string              `json:"location_id"`
+}
+
+func (q *Queries) UpdateEmployee(ctx context.Context, arg UpdateEmployeeParams) error {
+	_, err := q.db.Exec(ctx, updateEmployee,
+		arg.ID,
+		arg.FirstName,
+		arg.LastName,
+		arg.Bsn,
+		arg.DateOfBirth,
+		arg.PhoneNumber,
+		arg.Gender,
+		arg.ContractHours,
+		arg.ContractType,
+		arg.LocationID,
+	)
+	return err
 }

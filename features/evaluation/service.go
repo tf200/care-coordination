@@ -15,6 +15,7 @@ import (
 
 type EvaluationService interface {
 	CreateEvaluation(ctx context.Context, req *CreateEvaluationRequest) (*CreateEvaluationResponse, error)
+	UpdateEvaluation(ctx context.Context, evaluationID string, req *UpdateEvaluationRequest) (*UpdateEvaluationResponse, error)
 	GetEvaluationHistory(ctx context.Context, clientID string) ([]EvaluationHistoryItem, error)
 	GetCriticalEvaluations(ctx context.Context) (*resp.PaginationResponse[UpcomingEvaluationDTO], error)
 	GetScheduledEvaluations(ctx context.Context) (*resp.PaginationResponse[UpcomingEvaluationDTO], error)
@@ -30,10 +31,10 @@ type EvaluationService interface {
 
 type evaluationService struct {
 	db     *db.Store
-	logger *logger.Logger
+	logger logger.Logger
 }
 
-func NewEvaluationService(db *db.Store, logger *logger.Logger) EvaluationService {
+func NewEvaluationService(db *db.Store, logger logger.Logger) EvaluationService {
 	return &evaluationService{db: db, logger: logger}
 }
 
@@ -463,4 +464,33 @@ func (s *evaluationService) DeleteDraft(ctx context.Context, evaluationID string
 		return err
 	}
 	return nil
+}
+
+// UpdateEvaluation updates an existing submitted evaluation
+func (s *evaluationService) UpdateEvaluation(ctx context.Context, evaluationID string, req *UpdateEvaluationRequest) (*UpdateEvaluationResponse, error) {
+	// Build progress log params
+	progressLogs := util.Map(req.ProgressLogs, func(log GoalProgressDTO) db.UpdateGoalProgressLogParams {
+		return db.UpdateGoalProgressLogParams{
+			EvaluationID:  evaluationID,
+			GoalID:        log.GoalID,
+			Status:        db.GoalProgressStatus(log.Status),
+			ProgressNotes: log.ProgressNotes,
+		}
+	})
+
+	// Execute update transaction
+	result, err := s.db.UpdateEvaluationTx(ctx, db.UpdateEvaluationTxParams{
+		EvaluationID:   evaluationID,
+		EvaluationDate: util.StrToPgtypeDate(req.EvaluationDate),
+		OverallNotes:   req.OverallNotes,
+		ProgressLogs:   progressLogs,
+	})
+	if err != nil {
+		s.logger.Error(ctx, "UpdateEvaluation", "Failed to update evaluation tx", zap.Error(err))
+		return nil, err
+	}
+
+	return &UpdateEvaluationResponse{
+		ID: result.EvaluationID,
+	}, nil
 }

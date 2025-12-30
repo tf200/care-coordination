@@ -10,6 +10,7 @@ import (
 )
 
 const createAttachment = `-- name: CreateAttachment :exec
+
 INSERT INTO attachments (
     id,
     filekey,
@@ -25,6 +26,9 @@ type CreateAttachmentParams struct {
 	ContentType string `json:"content_type"`
 }
 
+// ============================================================
+// Attachments
+// ============================================================
 func (q *Queries) CreateAttachment(ctx context.Context, arg CreateAttachmentParams) error {
 	_, err := q.db.Exec(ctx, createAttachment, arg.ID, arg.Filekey, arg.ContentType)
 	return err

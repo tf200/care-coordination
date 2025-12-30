@@ -12,6 +12,9 @@ import (
 )
 
 const createIntakeForm = `-- name: CreateIntakeForm :exec
+
+
+
 INSERT INTO intake_forms (
     id,
     registration_form_id,
@@ -45,6 +48,9 @@ type CreateIntakeFormParams struct {
 	EvaluationIntervalWeeks *int32      `json:"evaluation_interval_weeks"`
 }
 
+// ============================================================
+// Intake Forms
+// ============================================================
 func (q *Queries) CreateIntakeForm(ctx context.Context, arg CreateIntakeFormParams) error {
 	_, err := q.db.Exec(ctx, createIntakeForm,
 		arg.ID,

@@ -15,11 +15,20 @@ const (
 	LogLevelError   LogLevel = "error"
 )
 
-type Logger struct {
+//go:generate mockgen -destination=mocks/mock_logger.go -package=mocks care-cordination/lib/logger Logger
+type Logger interface {
+	Debug(ctx context.Context, operation string, message string, fields ...zap.Field)
+	Info(ctx context.Context, operation string, message string, fields ...zap.Field)
+	Warn(ctx context.Context, operation string, message string, fields ...zap.Field)
+	Error(ctx context.Context, operation string, message string, fields ...zap.Field)
+	ZapLogger() *zap.Logger
+}
+
+type logger struct {
 	Logger *zap.Logger
 }
 
-func NewLogger(env string) *Logger {
+func NewLogger(env string) Logger {
 	var config zap.Config
 	if env == "production" {
 		config = zap.NewProductionConfig()
@@ -31,16 +40,16 @@ func NewLogger(env string) *Logger {
 		config.OutputPaths = []string{"stdout"}
 		config.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
 	}
-	logger, err := config.Build()
+	zapLogger, err := config.Build()
 	if err != nil {
 		panic(err)
 	}
-	return &Logger{
-		Logger: logger,
+	return &logger{
+		Logger: zapLogger,
 	}
 }
 
-func (l *Logger) getCommonFields(
+func (l *logger) getCommonFields(
 	ctx context.Context,
 	event string,
 	operation string,
@@ -61,22 +70,26 @@ func (l *Logger) getCommonFields(
 }
 
 // Convenience methods for simpler logging
-func (l *Logger) Debug(ctx context.Context, operation string, message string, fields ...zap.Field) {
+func (l *logger) Debug(ctx context.Context, operation string, message string, fields ...zap.Field) {
 	fields = l.getCommonFields(ctx, "app", operation, fields...)
 	l.Logger.Debug(message, fields...)
 }
 
-func (l *Logger) Info(ctx context.Context, operation string, message string, fields ...zap.Field) {
+func (l *logger) Info(ctx context.Context, operation string, message string, fields ...zap.Field) {
 	fields = l.getCommonFields(ctx, "app", operation, fields...)
 	l.Logger.Info(message, fields...)
 }
 
-func (l *Logger) Warn(ctx context.Context, operation string, message string, fields ...zap.Field) {
+func (l *logger) Warn(ctx context.Context, operation string, message string, fields ...zap.Field) {
 	fields = l.getCommonFields(ctx, "app", operation, fields...)
 	l.Logger.Warn(message, fields...)
 }
 
-func (l *Logger) Error(ctx context.Context, operation string, message string, fields ...zap.Field) {
+func (l *logger) Error(ctx context.Context, operation string, message string, fields ...zap.Field) {
 	fields = l.getCommonFields(ctx, "app", operation, fields...)
 	l.Logger.Error(message, fields...)
+}
+
+func (l *logger) ZapLogger() *zap.Logger {
+	return l.Logger
 }

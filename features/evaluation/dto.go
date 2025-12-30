@@ -23,6 +23,16 @@ type CreateEvaluationResponse struct {
 	IsDraft            bool       `json:"isDraft"`
 }
 
+type UpdateEvaluationRequest struct {
+	EvaluationDate string            `json:"evaluationDate" binding:"required,datetime=2006-01-02"`
+	OverallNotes   *string           `json:"overallNotes"`
+	ProgressLogs   []GoalProgressDTO `json:"progressLogs" binding:"required,min=1"`
+}
+
+type UpdateEvaluationResponse struct {
+	ID string `json:"id"`
+}
+
 type SaveDraftRequest struct {
 	ClientID       string            `json:"clientId"      binding:"required"`
 	CoordinatorID  string            `json:"coordinatorId" binding:"required"`

@@ -31,6 +31,8 @@ func (h *EmployeeHandler) SetupEmployeeRoutes(router *gin.Engine) {
 	employee.POST("", h.mdw.AuthMdw(), h.CreateEmployee)
 	employee.GET("", h.mdw.AuthMdw(), h.mdw.PaginationMdw(), h.ListEmployees)
 	employee.GET("/:id", h.mdw.AuthMdw(), h.GetEmployeeByID)
+	employee.PUT("/:id", h.mdw.AuthMdw(), h.UpdateEmployee)
+	employee.DELETE("/:id", h.mdw.AuthMdw(), h.DeleteEmployee)
 }
 
 // @Summary Create an employee
@@ -148,4 +150,72 @@ func (h *EmployeeHandler) GetMyProfile(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, resp.Success(result, "Employee profile retrieved successfully"))
+}
+
+// @Summary Update an employee
+// @Description Update an existing employee's details including password
+// @Tags Employee
+// @Accept json
+// @Produce json
+// @Param id path string true "Employee ID"
+// @Param employee body UpdateEmployeeRequest true "Employee update data"
+// @Success 200 {object} resp.SuccessResponse[UpdateEmployeeResponse]
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /employees/{id} [put]
+func (h *EmployeeHandler) UpdateEmployee(ctx *gin.Context) {
+	id := ctx.Param("id")
+	if id == "" {
+		ctx.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
+		return
+	}
+
+	var req UpdateEmployeeRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
+		return
+	}
+
+	result, err := h.employeeService.UpdateEmployee(ctx, id, &req)
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrInternal):
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
+		default:
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
+		}
+		return
+	}
+	ctx.JSON(http.StatusOK, resp.Success(result, "Employee updated successfully"))
+}
+
+// @Summary Delete an employee
+// @Description Soft delete an employee by ID
+// @Tags Employee
+// @Produce json
+// @Param id path string true "Employee ID"
+// @Success 200 {object} resp.SuccessResponse[any]
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /employees/{id} [delete]
+func (h *EmployeeHandler) DeleteEmployee(ctx *gin.Context) {
+	id := ctx.Param("id")
+	if id == "" {
+		ctx.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
+		return
+	}
+
+	err := h.employeeService.DeleteEmployee(ctx, id)
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrInternal):
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
+		default:
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
+		}
+		return
+	}
+	ctx.JSON(http.StatusOK, resp.Success(struct{}{}, "Employee deleted successfully"))
 }

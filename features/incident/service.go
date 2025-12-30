@@ -15,10 +15,10 @@ import (
 
 type incidentService struct {
 	store  *db.Store
-	logger *logger.Logger
+	logger logger.Logger
 }
 
-func NewIncidentService(store *db.Store, logger *logger.Logger) IncidentService {
+func NewIncidentService(store *db.Store, logger logger.Logger) IncidentService {
 	return &incidentService{
 		store:  store,
 		logger: logger,

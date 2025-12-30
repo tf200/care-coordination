@@ -13,10 +13,10 @@ import (
 
 type rbacService struct {
 	store  *db.Store
-	logger *logger.Logger
+	logger logger.Logger
 }
 
-func NewRBACService(store *db.Store, logger *logger.Logger) RBACService {
+func NewRBACService(store *db.Store, logger logger.Logger) RBACService {
 	return &rbacService{
 		store:  store,
 		logger: logger,

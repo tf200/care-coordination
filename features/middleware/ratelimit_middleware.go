@@ -61,7 +61,6 @@ func (m *Middleware) RateLimitMiddleware() gin.HandlerFunc {
 // It checks both IP and email-based rate limits
 func (m *Middleware) LoginRateLimitMiddleware(
 	limiter ratelimit.RateLimiter,
-	logger *zap.Logger,
 ) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// Skip rate limiting if limiter is nil
@@ -76,9 +75,8 @@ func (m *Middleware) LoginRateLimitMiddleware(
 		// Check IP-based rate limit first
 		ipResult, err := limiter.CheckIPLimit(ctx, ip)
 		if err != nil {
-			logger.Error("IP rate limit check failed",
-				zap.Error(err),
-				zap.String("ip", ip))
+			m.logger.Error(ctx, "RateLimitMiddleware", "IP rate limit check failed",
+				zap.Error(err), zap.String("ip", ip))
 			// Fail open - continue to next check
 		} else {
 			// Set IP-based rate limit headers
@@ -87,7 +85,7 @@ func (m *Middleware) LoginRateLimitMiddleware(
 			ctx.Header("X-RateLimit-IP-Reset", strconv.FormatInt(ipResult.ResetAt.Unix(), 10))
 
 			if !ipResult.Allowed {
-				logger.Warn("IP rate limit exceeded",
+				m.logger.Warn(ctx, "RateLimitMiddleware", "IP rate limit exceeded",
 					zap.String("ip", ip),
 					zap.String("user_agent", ctx.Request.UserAgent()),
 					zap.Duration("retry_after", ipResult.RetryAfter))
@@ -112,9 +110,8 @@ func (m *Middleware) LoginRateLimitMiddleware(
 			// Check email-based rate limit
 			emailResult, err := limiter.CheckEmailLimit(ctx, loginReq.Email)
 			if err != nil {
-				logger.Error("Email rate limit check failed",
-					zap.Error(err),
-					zap.String("email", loginReq.Email))
+				m.logger.Error(ctx, "RateLimitMiddleware", "Email rate limit check failed",
+					zap.Error(err), zap.String("email", loginReq.Email))
 				// Fail open - continue to handler
 			} else {
 				// Set email-based rate limit headers
@@ -123,7 +120,7 @@ func (m *Middleware) LoginRateLimitMiddleware(
 				ctx.Header("X-RateLimit-Email-Reset", strconv.FormatInt(emailResult.ResetAt.Unix(), 10))
 
 				if !emailResult.Allowed {
-					logger.Warn("Email rate limit exceeded",
+					m.logger.Warn(ctx, "RateLimitMiddleware", "Email rate limit exceeded",
 						zap.String("email", loginReq.Email),
 						zap.String("ip", ip),
 						zap.Duration("retry_after", emailResult.RetryAfter))

@@ -193,3 +193,17 @@ RETURNING *;
 -- name: DeleteDraftEvaluation :exec
 DELETE FROM client_evaluations 
 WHERE id = $1 AND status = 'draft';
+
+-- name: UpdateClientEvaluation :one
+UPDATE client_evaluations 
+SET evaluation_date = $2, overall_notes = $3, updated_at = NOW()
+WHERE id = $1 AND status = 'submitted'
+RETURNING *;
+
+-- name: UpdateGoalProgressLog :exec
+UPDATE goal_progress_logs 
+SET status = $2, progress_notes = $3
+WHERE evaluation_id = $1 AND goal_id = $4;
+
+-- name: GetEvaluationById :one
+SELECT * FROM client_evaluations WHERE id = $1;

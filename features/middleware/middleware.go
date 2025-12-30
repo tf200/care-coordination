@@ -15,16 +15,16 @@ const (
 )
 
 type Middleware struct {
-	tokenMaker  *token.TokenManager
+	tokenMaker  token.TokenManager
 	rateLimiter ratelimit.RateLimiter
-	logger      *logger.Logger
+	logger      logger.Logger
 	store       *db.Store
 }
 
 func NewMiddleware(
-	tokenMaker *token.TokenManager,
+	tokenMaker token.TokenManager,
 	rateLimiter ratelimit.RateLimiter,
-	logger *logger.Logger,
+	logger logger.Logger,
 	store *db.Store,
 ) *Middleware {
 	return &Middleware{

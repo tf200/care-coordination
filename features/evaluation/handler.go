@@ -26,6 +26,7 @@ func (h *EvaluationHandler) SetupEvaluationRoutes(router *gin.Engine) {
 	ev.Use(h.mdw.PaginationMdw())
 
 	ev.POST("", h.CreateEvaluation)
+	ev.PUT("/:id", h.UpdateEvaluation)
 	ev.GET("/critical", h.GetCritical)
 	ev.GET("/scheduled", h.GetScheduled)
 	ev.GET("/recent", h.GetRecent)
@@ -65,6 +66,41 @@ func (h *EvaluationHandler) CreateEvaluation(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, resp.Success(result, "Evaluation created successfully"))
+}
+
+// @Summary Update a submitted evaluation
+// @Description Update an existing submitted evaluation's date, notes, and goal progress.
+// @Tags Evaluation
+// @Accept json
+// @Produce json
+// @Param id path string true "Evaluation ID"
+// @Param request body UpdateEvaluationRequest true "Updated Evaluation Details"
+// @Success 200 {object} resp.SuccessResponse[UpdateEvaluationResponse]
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 404 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /evaluations/{id} [put]
+func (h *EvaluationHandler) UpdateEvaluation(c *gin.Context) {
+	evaluationID := c.Param("id")
+	if evaluationID == "" {
+		c.JSON(http.StatusBadRequest, resp.Error(nil))
+		return
+	}
+
+	var req UpdateEvaluationRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, resp.Error(err))
+		return
+	}
+
+	result, err := h.service.UpdateEvaluation(c.Request.Context(), evaluationID, &req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, resp.Error(err))
+		return
+	}
+
+	c.JSON(http.StatusOK, resp.Success(result, "Evaluation updated successfully"))
 }
 
 // @Summary Get evaluation history for a client

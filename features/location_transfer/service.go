@@ -14,11 +14,11 @@ import (
 )
 
 type locTransferService struct {
-	logger *logger.Logger
+	logger logger.Logger
 	db     *db.Store
 }
 
-func NewLocationTransferService(db *db.Store, logger *logger.Logger) LocationTransferService {
+func NewLocationTransferService(db *db.Store, logger logger.Logger) LocationTransferService {
 	return &locTransferService{
 		logger: logger,
 		db:     db,

@@ -1,3 +1,7 @@
+-- ============================================================
+-- Employees
+-- ============================================================
+
 -- name: CreateEmployee :exec
 INSERT INTO employees (
     id,
@@ -90,3 +94,20 @@ LEFT JOIN user_roles ur ON e.user_id = ur.user_id
 LEFT JOIN roles r ON ur.role_id = r.id
 LEFT JOIN locations l ON e.location_id = l.id
 WHERE e.user_id = $1 LIMIT 1;
+
+-- name: UpdateEmployee :exec
+UPDATE employees SET
+    first_name = COALESCE(sqlc.narg('first_name'), first_name),
+    last_name = COALESCE(sqlc.narg('last_name'), last_name),
+    bsn = COALESCE(sqlc.narg('bsn'), bsn),
+    date_of_birth = COALESCE(sqlc.narg('date_of_birth'), date_of_birth),
+    phone_number = COALESCE(sqlc.narg('phone_number'), phone_number),
+    gender = COALESCE(sqlc.narg('gender'), gender),
+    contract_hours = COALESCE(sqlc.narg('contract_hours'), contract_hours),
+    contract_type = COALESCE(sqlc.narg('contract_type'), contract_type),
+    location_id = COALESCE(sqlc.narg('location_id'), location_id),
+    updated_at = now()
+WHERE id = $1;
+
+-- name: SoftDeleteEmployee :exec
+UPDATE employees SET is_deleted = true, updated_at = now() WHERE id = $1;

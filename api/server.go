@@ -65,13 +65,13 @@ type Server struct {
 
 	environment string
 	rateLimiter ratelimit.RateLimiter
-	logger      *logger.Logger
+	logger      logger.Logger
 	addr        string
 	url         string
 }
 
 func NewServer(
-	logger *logger.Logger,
+	logger logger.Logger,
 	environment string,
 	authHandler *auth.AuthHandler,
 	employeeHandler *employee.EmployeeHandler,
@@ -127,7 +127,7 @@ func (s *Server) GetRouter() *gin.Engine {
 	return s.router
 }
 
-func (s *Server) setupRoutes(logger *logger.Logger) {
+func (s *Server) setupRoutes(logger logger.Logger) {
 	s.setupSwagger()
 	gin.SetMode(func() string {
 		if s.environment == "production" {
@@ -150,7 +150,7 @@ func (s *Server) setupRoutes(logger *logger.Logger) {
 	// Request ID middleware - must be before ginzap for logging
 	router.Use(middleware.RequestIDMiddleware())
 
-	router.Use(ginzap.GinzapWithConfig(logger.Logger, &ginzap.Config{
+	router.Use(ginzap.GinzapWithConfig(logger.ZapLogger(), &ginzap.Config{
 		UTC:        true,
 		TimeFormat: "2006-01-02 15:04:05",
 		Context: ginzap.Fn(func(c *gin.Context) []zapcore.Field {
@@ -161,11 +161,11 @@ func (s *Server) setupRoutes(logger *logger.Logger) {
 			return fields
 		}),
 	}))
-	router.Use(ginzap.RecoveryWithZap(logger.Logger, true))
+	router.Use(ginzap.RecoveryWithZap(logger.ZapLogger(), true))
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	s.authHandler.SetupAuthRoutes(router, s.rateLimiter, logger)
+	s.authHandler.SetupAuthRoutes(router, s.rateLimiter)
 	s.employeeHandler.SetupEmployeeRoutes(router)
 	s.registrationHandler.SetupRegistrationRoutes(router)
 	s.attachmentsHandler.SetupAttachmentsRoutes(router)

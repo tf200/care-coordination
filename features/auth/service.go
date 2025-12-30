@@ -15,15 +15,15 @@ import (
 )
 
 type authService struct {
-	db           *db.Store
-	tokenManager *token.TokenManager
-	logger       *logger.Logger
+	db           db.StoreInterface
+	tokenManager token.TokenManager
+	logger       logger.Logger
 }
 
 func NewAuthService(
-	db *db.Store,
-	tokenManager *token.TokenManager,
-	logger *logger.Logger,
+	db db.StoreInterface,
+	tokenManager token.TokenManager,
+	logger logger.Logger,
 ) AuthService {
 	return &authService{
 		db:           db,

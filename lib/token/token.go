@@ -9,7 +9,15 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-type TokenManager struct {
+//go:generate mockgen -destination=mocks/mock_token_manager.go -package=mocks care-cordination/lib/token TokenManager
+type TokenManager interface {
+	GenerateAccessToken(userID, employeeID string, now time.Time) (string, error)
+	GenerateRefreshToken(userID string, now time.Time) (string, *RefreshTokenClaims, error)
+	ValidateAccessToken(tokenStr string) (*AccessTokenClaims, error)
+	ValidateRefreshToken(tokenStr string) (*RefreshTokenClaims, error)
+}
+
+type tokenManager struct {
 	accessSecret  []byte
 	refreshSecret []byte
 	accessTTL     time.Duration
@@ -33,8 +41,8 @@ type RefreshTokenClaims struct {
 func NewTokenManager(
 	accessSecret, refreshSecret string,
 	accessTTL, refreshTTL time.Duration,
-) *TokenManager {
-	return &TokenManager{
+) TokenManager {
+	return &tokenManager{
 		accessSecret:  []byte(accessSecret),
 		refreshSecret: []byte(refreshSecret),
 		accessTTL:     accessTTL,
@@ -44,7 +52,7 @@ func NewTokenManager(
 	}
 }
 
-func (tm *TokenManager) GenerateAccessToken(
+func (tm *tokenManager) GenerateAccessToken(
 	userID, employeeID string,
 	now time.Time,
 ) (string, error) {
@@ -66,7 +74,7 @@ func (tm *TokenManager) GenerateAccessToken(
 	return accessToken.SignedString(tm.accessSecret)
 }
 
-func (tm *TokenManager) GenerateRefreshToken(
+func (tm *tokenManager) GenerateRefreshToken(
 	userID string,
 	now time.Time,
 ) (string, *RefreshTokenClaims, error) {
@@ -93,7 +101,7 @@ func (tm *TokenManager) GenerateRefreshToken(
 	return token, refreshClaims, nil
 }
 
-func (tm *TokenManager) ValidateAccessToken(tokenStr string) (*AccessTokenClaims, error) {
+func (tm *tokenManager) ValidateAccessToken(tokenStr string) (*AccessTokenClaims, error) {
 	token, err := jwt.ParseWithClaims(
 		tokenStr,
 		&AccessTokenClaims{},
@@ -113,7 +121,7 @@ func (tm *TokenManager) ValidateAccessToken(tokenStr string) (*AccessTokenClaims
 	return nil, errors.New("invalid access token")
 }
 
-func (tm *TokenManager) ValidateRefreshToken(tokenStr string) (*RefreshTokenClaims, error) {
+func (tm *tokenManager) ValidateRefreshToken(tokenStr string) (*RefreshTokenClaims, error) {
 	token, err := jwt.ParseWithClaims(
 		tokenStr,
 		&RefreshTokenClaims{},

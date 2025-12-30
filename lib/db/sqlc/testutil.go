@@ -914,3 +914,101 @@ func AssignTestRoleToUser(t *testing.T, q *Queries, userID, roleID string) {
 		t.Fatalf("AssignTestRoleToUser failed: %v", err)
 	}
 }
+
+// ============================================================
+// Factory: Incident
+// ============================================================
+
+// CreateTestIncidentOptions configures a test incident.
+// ClientID, LocationID, and CoordinatorID are required.
+type CreateTestIncidentOptions struct {
+	ID                  *string
+	ClientID            string // Required
+	IncidentDate        *time.Time
+	IncidentTime        *time.Time
+	IncidentType        *IncidentTypeEnum
+	IncidentSeverity    *IncidentSeverityEnum
+	LocationID          string // Required
+	CoordinatorID       string // Required
+	IncidentDescription *string
+	ActionTaken         *string
+	OtherParties        *string
+	Status              *IncidentStatusEnum
+}
+
+// CreateTestIncident creates an incident for testing.
+// Requires Client, Location, and Employee (coordinator) to be created first.
+func CreateTestIncident(t *testing.T, q *Queries, opts CreateTestIncidentOptions) string {
+	t.Helper()
+	ctx := context.Background()
+
+	if opts.ClientID == "" {
+		t.Fatal("CreateTestIncident requires ClientID")
+	}
+	if opts.LocationID == "" {
+		t.Fatal("CreateTestIncident requires LocationID")
+	}
+	if opts.CoordinatorID == "" {
+		t.Fatal("CreateTestIncident requires CoordinatorID")
+	}
+
+	id := generateTestID()
+	if opts.ID != nil {
+		id = *opts.ID
+	}
+
+	incidentDate := time.Now()
+	if opts.IncidentDate != nil {
+		incidentDate = *opts.IncidentDate
+	}
+
+	incidentTime := time.Date(0, 1, 1, 14, 30, 0, 0, time.UTC)
+	if opts.IncidentTime != nil {
+		incidentTime = *opts.IncidentTime
+	}
+
+	incidentType := IncidentTypeEnumOther
+	if opts.IncidentType != nil {
+		incidentType = *opts.IncidentType
+	}
+
+	incidentSeverity := IncidentSeverityEnumMinor
+	if opts.IncidentSeverity != nil {
+		incidentSeverity = *opts.IncidentSeverity
+	}
+
+	description := "Test incident description"
+	if opts.IncidentDescription != nil {
+		description = *opts.IncidentDescription
+	}
+
+	actionTaken := "Test action taken"
+	if opts.ActionTaken != nil {
+		actionTaken = *opts.ActionTaken
+	}
+
+	status := IncidentStatusEnumPending
+	if opts.Status != nil {
+		status = *opts.Status
+	}
+
+	err := q.CreateIncident(ctx, CreateIncidentParams{
+		ID:                  id,
+		ClientID:            opts.ClientID,
+		IncidentDate:        toPgDate(incidentDate),
+		IncidentTime:        toPgTime(incidentTime),
+		IncidentType:        incidentType,
+		IncidentSeverity:    incidentSeverity,
+		LocationID:          opts.LocationID,
+		CoordinatorID:       opts.CoordinatorID,
+		IncidentDescription: description,
+		ActionTaken:         actionTaken,
+		OtherParties:        opts.OtherParties,
+		Status:              status,
+	})
+	if err != nil {
+		t.Fatalf("CreateTestIncident failed: %v", err)
+	}
+
+	return id
+}

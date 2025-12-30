@@ -23,6 +23,8 @@ func (q *Queries) ConfirmLocationTransfer(ctx context.Context, id string) error 
 }
 
 const createLocationTransfer = `-- name: CreateLocationTransfer :one
+
+
 INSERT INTO client_location_transfers (
     id,
     client_id,
@@ -59,6 +61,9 @@ type CreateLocationTransferRow struct {
 	TransferDate         pgtype.Timestamp `json:"transfer_date"`
 }
 
+// ============================================================
+// Location Transfers
+// ============================================================
 func (q *Queries) CreateLocationTransfer(ctx context.Context, arg CreateLocationTransferParams) (CreateLocationTransferRow, error) {
 	row := q.db.QueryRow(ctx, createLocationTransfer,
 		arg.ID,

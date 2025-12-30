@@ -14,10 +14,10 @@ import (
 
 type intakeService struct {
 	db     *db.Store
-	logger *logger.Logger
+	logger logger.Logger
 }
 
-func NewIntakeService(db *db.Store, logger *logger.Logger) IntakeService {
+func NewIntakeService(db *db.Store, logger logger.Logger) IntakeService {
 	return &intakeService{
 		db:     db,
 		logger: logger,

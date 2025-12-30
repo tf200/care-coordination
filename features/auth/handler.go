@@ -2,7 +2,6 @@ package auth
 
 import (
 	"care-cordination/features/middleware"
-	"care-cordination/lib/logger"
 	"care-cordination/lib/ratelimit"
 	"care-cordination/lib/resp"
 	"net/http"
@@ -26,13 +25,12 @@ func NewAuthHandler(authService AuthService, mdw *middleware.Middleware) *AuthHa
 func (h *AuthHandler) SetupAuthRoutes(
 	router *gin.Engine,
 	rateLimiter ratelimit.RateLimiter,
-	logger *logger.Logger,
 ) {
 	auth := router.Group("/auth")
 
 	// Apply rate limiting to login endpoint
 	if rateLimiter != nil {
-		auth.POST("/login", h.mdw.LoginRateLimitMiddleware(rateLimiter, logger.Logger), h.Login)
+		auth.POST("/login", h.mdw.LoginRateLimitMiddleware(rateLimiter), h.Login)
 	} else {
 		auth.POST("/login", h.Login)
 	}

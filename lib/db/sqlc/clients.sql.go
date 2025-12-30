@@ -12,6 +12,7 @@ import (
 )
 
 const createClient = `-- name: CreateClient :one
+
 INSERT INTO clients (
     id,
     first_name,
@@ -87,6 +88,9 @@ type CreateClientRow struct {
 	UpdatedAt               pgtype.Timestamp `json:"updated_at"`
 }
 
+// ============================================================
+// Clients
+// ============================================================
 func (q *Queries) CreateClient(ctx context.Context, arg CreateClientParams) (CreateClientRow, error) {
 	row := q.db.QueryRow(ctx, createClient,
 		arg.ID,

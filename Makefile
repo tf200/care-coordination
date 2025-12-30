@@ -35,7 +35,7 @@ admin:
 	@echo "Seeding admin user..."
 	go run cmd/admin/main.go
 
-dokcer-rebuild:
+docker-rebuild:
 	@echo "Rebuilding docker image..."
 	docker compose rm -s -f app
 	docker compose up --build -d app

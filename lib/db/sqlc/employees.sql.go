@@ -218,6 +218,7 @@ JOIN locations l ON e.location_id = l.id
 JOIN users u ON e.user_id = u.id
 LEFT JOIN clients c ON c.coordinator_id = e.id
 WHERE
+e.is_deleted = false AND
 (
   $3::text IS NULL OR
   e.first_name ILIKE '%' || $3::text || '%' OR

@@ -10,8 +10,8 @@ type MoveClientToWaitingListResponse struct {
 }
 
 type MoveClientInCareRequest struct {
-	CareStartDate         string `json:"careStartDate"         binding:"required format=2006-01-02"`
-	CareEndDate           string `json:"careEndDate"           binding:"required format=2006-01-02"`
+	CareStartDate         string `json:"careStartDate"         binding:"required,datetime=2006-01-02"`
+	CareEndDate           string `json:"careEndDate"           binding:"required,datetime=2006-01-02"`
 	AmbulatoryWeeklyHours *int32 `json:"ambulatoryWeeklyHours"`
 }
 

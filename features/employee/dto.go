@@ -8,11 +8,11 @@ type CreateEmployeeRequest struct {
 	BSN           string  `json:"bsn"         binding:"required"`
 	DateOfBirth   string  `json:"dateOfBirth" binding:"required,datetime=2006-01-02"`
 	PhoneNumber   string  `json:"phoneNumber" binding:"required"`
-	Gender        string  `json:"gender"      binding:"required oneof=male female other"`
+	Gender        string  `json:"gender"      binding:"required,oneof=male female other"`
 	Role          string  `json:"role"        binding:"required"`
 	LocationID    string  `json:"locationId"  binding:"required"`
 	ContractHours *int32  `json:"contractHours"`
-	ContractType  *string `json:"contractType" binding:"omitempty oneof=self_employed payroll_service"`
+	ContractType  *string `json:"contractType" binding:"omitempty,oneof=self_employed payroll_service"`
 }
 
 type CreateEmployeeResponse struct {
@@ -97,7 +97,7 @@ type UpdateEmployeeRequest struct {
 	Gender        *string `json:"gender"        binding:"omitempty,oneof=male female other"`
 	LocationID    *string `json:"locationId"    binding:"omitempty"`
 	ContractHours *int32  `json:"contractHours"`
-	ContractType  *string `json:"contractType" binding:"omitempty oneof=self_employed payroll_service"`
+	ContractType  *string `json:"contractType" binding:"omitempty,oneof=self_employed payroll_service"`
 }
 
 type UpdateEmployeeResponse struct {

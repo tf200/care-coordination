@@ -141,7 +141,8 @@ func (s *evaluationService) GetCriticalEvaluations(ctx context.Context) (*resp.P
 
 	result := util.Map(rows, func(row db.GetCriticalEvaluationsRow) UpcomingEvaluationDTO {
 		var draftID *string
-		if row.DraftID != "" {
+		hasDraft := row.DraftID != ""
+		if hasDraft {
 			draftID = &row.DraftID
 		}
 		return UpcomingEvaluationDTO{
@@ -153,6 +154,7 @@ func (s *evaluationService) GetCriticalEvaluations(ctx context.Context) (*resp.P
 			LocationName:            row.LocationName,
 			CoordinatorFirstName:    row.CoordinatorFirstName,
 			CoordinatorLastName:     row.CoordinatorLastName,
+			HasDraft:                hasDraft,
 			DraftID:                 draftID,
 		}
 	})
@@ -180,7 +182,8 @@ func (s *evaluationService) GetScheduledEvaluations(ctx context.Context) (*resp.
 
 	result := util.Map(rows, func(row db.GetScheduledEvaluationsRow) UpcomingEvaluationDTO {
 		var draftID *string
-		if row.DraftID != "" {
+		hasDraft := row.DraftID != ""
+		if hasDraft {
 			draftID = &row.DraftID
 		}
 		return UpcomingEvaluationDTO{
@@ -192,6 +195,7 @@ func (s *evaluationService) GetScheduledEvaluations(ctx context.Context) (*resp.
 			LocationName:            row.LocationName,
 			CoordinatorFirstName:    row.CoordinatorFirstName,
 			CoordinatorLastName:     row.CoordinatorLastName,
+			HasDraft:                hasDraft,
 			DraftID:                 draftID,
 		}
 	})

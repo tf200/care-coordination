@@ -2183,6 +2183,57 @@ const docTemplate = `{
             }
         },
         "/evaluations/{id}": {
+            "get": {
+                "description": "Retrieve an evaluation (submitted or draft) by ID with all progress logs.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Evaluation"
+                ],
+                "summary": "Get a specific evaluation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Evaluation ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-evaluation_EvaluationDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            },
             "put": {
                 "description": "Update an existing submitted evaluation's date, notes, and goal progress.",
                 "consumes": [
@@ -4256,6 +4307,10 @@ const docTemplate = `{
         },
         "client.MoveClientInCareRequest": {
             "type": "object",
+            "required": [
+                "careEndDate",
+                "careStartDate"
+            ],
             "properties": {
                 "ambulatoryWeeklyHours": {
                     "type": "integer"
@@ -4353,7 +4408,9 @@ const docTemplate = `{
             "required": [
                 "bsn",
                 "dateOfBirth",
+                "email",
                 "firstName",
+                "gender",
                 "lastName",
                 "locationId",
                 "password",
@@ -4368,7 +4425,11 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "contractType": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "self_employed",
+                        "payroll_service"
+                    ]
                 },
                 "dateOfBirth": {
                     "type": "string"
@@ -4380,7 +4441,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "gender": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "male",
+                        "female",
+                        "other"
+                    ]
                 },
                 "lastName": {
                     "type": "string"
@@ -4575,7 +4641,11 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "contractType": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "self_employed",
+                        "payroll_service"
+                    ]
                 },
                 "dateOfBirth": {
                     "type": "string"
@@ -4736,6 +4806,50 @@ const docTemplate = `{
                 },
                 "goalsCount": {
                     "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "evaluation.EvaluationDTO": {
+            "type": "object",
+            "properties": {
+                "clientFirstName": {
+                    "type": "string"
+                },
+                "clientId": {
+                    "type": "string"
+                },
+                "clientLastName": {
+                    "type": "string"
+                },
+                "coordinatorFirstName": {
+                    "type": "string"
+                },
+                "coordinatorLastName": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "evaluationDate": {
+                    "type": "string"
+                },
+                "evaluationId": {
+                    "type": "string"
+                },
+                "goalProgress": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/evaluation.GoalProgressItemDTO"
+                    }
+                },
+                "overallNotes": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
                 },
                 "updatedAt": {
                     "type": "string"
@@ -7040,6 +7154,22 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/evaluation.DraftEvaluationDTO"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-evaluation_EvaluationDTO": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/evaluation.EvaluationDTO"
                 },
                 "message": {
                     "type": "string",

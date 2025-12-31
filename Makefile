@@ -50,5 +50,8 @@ add-feature:
 seed:
 	@echo "Seeding admin user..."
 	go run cmd/seed/main.go
+deploy:
+	@echo "Deploying..."
+	./scripts/deploy.sh
 
-.PHONY: sqlc swagger migrate-up migrate-down migrate-up1 migrate-down1 migrate-version migrate-force admin dokcer-rebuild add-feature seed
+.PHONY: sqlc swagger migrate-up migrate-down migrate-up1 migrate-down1 migrate-version migrate-force admin dokcer-rebuild add-feature seed deploy

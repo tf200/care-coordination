@@ -5032,14 +5032,14 @@ const docTemplate = `{
                 "coordinatorLastName": {
                     "type": "string"
                 },
+                "draftId": {
+                    "type": "string"
+                },
                 "evaluationIntervalWeeks": {
                     "type": "integer"
                 },
                 "firstName": {
                     "type": "string"
-                },
-                "hasDraft": {
-                    "type": "boolean"
                 },
                 "id": {
                     "type": "string"

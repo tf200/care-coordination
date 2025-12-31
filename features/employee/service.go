@@ -14,11 +14,11 @@ import (
 )
 
 type employeeService struct {
-	store  *db.Store
+	store  db.StoreInterface
 	logger logger.Logger
 }
 
-func NewEmployeeService(store *db.Store, logger logger.Logger) EmployeeService {
+func NewEmployeeService(store db.StoreInterface, logger logger.Logger) EmployeeService {
 	return &employeeService{
 		store:  store,
 		logger: logger,

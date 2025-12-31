@@ -5,6 +5,7 @@ import (
 	"context"
 )
 
+//go:generate mockgen -destination=../../internal/mocks/mock_employee_service.go -package=mocks care-cordination/features/employee EmployeeService
 type EmployeeService interface {
 	CreateEmployee(ctx context.Context, req *CreateEmployeeRequest) (CreateEmployeeResponse, error)
 	ListEmployees(

@@ -17,6 +17,12 @@ type StoreInterface interface {
 	// Evaluation transaction
 	CreateEvaluationTx(ctx context.Context, params CreateEvaluationTxParams) (CreateEvaluationTxResult, error)
 	UpdateEvaluationTx(ctx context.Context, params UpdateEvaluationTxParams) (UpdateEvaluationTxResult, error)
+
+	// Client transaction
+	MoveClientToWaitingListTx(ctx context.Context, arg MoveClientToWaitingListTxParams) (MoveClientToWaitingListTxResult, error)
+
+	// Employee transaction
+	CreateEmployeeTx(ctx context.Context, arg CreateEmployeeTxParams) error
 }
 
 // Ensure Store implements StoreInterface

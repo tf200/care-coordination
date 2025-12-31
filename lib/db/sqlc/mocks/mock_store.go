@@ -169,6 +169,20 @@ func (mr *MockStoreInterfaceMockRecorder) CreateEmployee(ctx, arg any) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateEmployee", reflect.TypeOf((*MockStoreInterface)(nil).CreateEmployee), ctx, arg)
 }
 
+// CreateEmployeeTx mocks base method.
+func (m *MockStoreInterface) CreateEmployeeTx(ctx context.Context, arg db.CreateEmployeeTxParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateEmployeeTx", ctx, arg)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateEmployeeTx indicates an expected call of CreateEmployeeTx.
+func (mr *MockStoreInterfaceMockRecorder) CreateEmployeeTx(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateEmployeeTx", reflect.TypeOf((*MockStoreInterface)(nil).CreateEmployeeTx), ctx, arg)
+}
+
 // CreateEvaluationTx mocks base method.
 func (m *MockStoreInterface) CreateEvaluationTx(ctx context.Context, params db.CreateEvaluationTxParams) (db.CreateEvaluationTxResult, error) {
 	m.ctrl.T.Helper()
@@ -630,6 +644,21 @@ func (m *MockStoreInterface) GetEvaluationById(ctx context.Context, id string) (
 func (mr *MockStoreInterfaceMockRecorder) GetEvaluationById(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetEvaluationById", reflect.TypeOf((*MockStoreInterface)(nil).GetEvaluationById), ctx, id)
+}
+
+// GetEvaluationDetails mocks base method.
+func (m *MockStoreInterface) GetEvaluationDetails(ctx context.Context, id string) ([]db.GetEvaluationDetailsRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetEvaluationDetails", ctx, id)
+	ret0, _ := ret[0].([]db.GetEvaluationDetailsRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetEvaluationDetails indicates an expected call of GetEvaluationDetails.
+func (mr *MockStoreInterfaceMockRecorder) GetEvaluationDetails(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetEvaluationDetails", reflect.TypeOf((*MockStoreInterface)(nil).GetEvaluationDetails), ctx, id)
 }
 
 // GetInCareStats mocks base method.
@@ -1288,6 +1317,21 @@ func (m *MockStoreInterface) ListWaitingListClients(ctx context.Context, arg db.
 func (mr *MockStoreInterfaceMockRecorder) ListWaitingListClients(ctx, arg any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListWaitingListClients", reflect.TypeOf((*MockStoreInterface)(nil).ListWaitingListClients), ctx, arg)
+}
+
+// MoveClientToWaitingListTx mocks base method.
+func (m *MockStoreInterface) MoveClientToWaitingListTx(ctx context.Context, arg db.MoveClientToWaitingListTxParams) (db.MoveClientToWaitingListTxResult, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "MoveClientToWaitingListTx", ctx, arg)
+	ret0, _ := ret[0].(db.MoveClientToWaitingListTxResult)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// MoveClientToWaitingListTx indicates an expected call of MoveClientToWaitingListTx.
+func (mr *MockStoreInterfaceMockRecorder) MoveClientToWaitingListTx(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MoveClientToWaitingListTx", reflect.TypeOf((*MockStoreInterface)(nil).MoveClientToWaitingListTx), ctx, arg)
 }
 
 // RefuseLocationTransfer mocks base method.

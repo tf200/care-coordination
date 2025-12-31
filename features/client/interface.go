@@ -5,6 +5,7 @@ import (
 	"context"
 )
 
+//go:generate mockgen -destination=../../internal/mocks/mock_client_service.go -package=mocks care-cordination/features/client ClientService
 type ClientService interface {
 	MoveClientToWaitingList(
 		ctx context.Context,

@@ -15,11 +15,11 @@ import (
 )
 
 type clientService struct {
-	db     *db.Store
+	db     db.StoreInterface
 	logger logger.Logger
 }
 
-func NewClientService(db *db.Store, logger logger.Logger) ClientService {
+func NewClientService(db db.StoreInterface, logger logger.Logger) ClientService {
 	return &clientService{db: db, logger: logger}
 }
 

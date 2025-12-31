@@ -250,7 +250,7 @@ SELECT
         SELECT ce.id FROM client_evaluations ce 
         WHERE ce.client_id = c.id AND ce.status = 'draft'
         LIMIT 1
-    ), '') as draft_id,
+    ), '')::text as draft_id,
     COUNT(*) OVER() as total_count
 FROM clients c
 JOIN locations l ON c.assigned_location_id = l.id
@@ -276,7 +276,7 @@ type GetCriticalEvaluationsRow struct {
 	LocationName            string      `json:"location_name"`
 	CoordinatorFirstName    string      `json:"coordinator_first_name"`
 	CoordinatorLastName     string      `json:"coordinator_last_name"`
-	DraftID                 interface{} `json:"draft_id"`
+	DraftID                 string      `json:"draft_id"`
 	TotalCount              int64       `json:"total_count"`
 }
 
@@ -656,7 +656,7 @@ SELECT
         SELECT ce.id FROM client_evaluations ce 
         WHERE ce.client_id = c.id AND ce.status = 'draft'
         LIMIT 1
-    ), '') as draft_id,
+    ), '')::text as draft_id,
     COUNT(*) OVER() as total_count
 FROM clients c
 JOIN locations l ON c.assigned_location_id = l.id
@@ -683,7 +683,7 @@ type GetScheduledEvaluationsRow struct {
 	LocationName            string      `json:"location_name"`
 	CoordinatorFirstName    string      `json:"coordinator_first_name"`
 	CoordinatorLastName     string      `json:"coordinator_last_name"`
-	DraftID                 interface{} `json:"draft_id"`
+	DraftID                 string      `json:"draft_id"`
 	TotalCount              int64       `json:"total_count"`
 }
 

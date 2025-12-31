@@ -58,7 +58,7 @@ SELECT
         SELECT ce.id FROM client_evaluations ce 
         WHERE ce.client_id = c.id AND ce.status = 'draft'
         LIMIT 1
-    ), '') as draft_id,
+    ), '')::text as draft_id,
     COUNT(*) OVER() as total_count
 FROM clients c
 JOIN locations l ON c.assigned_location_id = l.id
@@ -83,7 +83,7 @@ SELECT
         SELECT ce.id FROM client_evaluations ce 
         WHERE ce.client_id = c.id AND ce.status = 'draft'
         LIMIT 1
-    ), '') as draft_id,
+    ), '')::text as draft_id,
     COUNT(*) OVER() as total_count
 FROM clients c
 JOIN locations l ON c.assigned_location_id = l.id

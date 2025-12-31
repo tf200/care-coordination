@@ -207,3 +207,28 @@ WHERE evaluation_id = $1 AND goal_id = $4;
 
 -- name: GetEvaluationById :one
 SELECT * FROM client_evaluations WHERE id = $1;
+
+-- name: GetEvaluationDetails :many
+SELECT 
+    e.id as evaluation_id,
+    e.client_id,
+    e.evaluation_date,
+    e.overall_notes,
+    e.status as evaluation_status,
+    e.created_at,
+    e.updated_at,
+    emp.first_name as coordinator_first_name,
+    emp.last_name as coordinator_last_name,
+    c.first_name as client_first_name,
+    c.last_name as client_last_name,
+    g.id as goal_id,
+    g.title as goal_title,
+    l.status as progress_status,
+    l.progress_notes
+FROM client_evaluations e
+JOIN employees emp ON e.coordinator_id = emp.id
+JOIN clients c ON e.client_id = c.id
+LEFT JOIN goal_progress_logs l ON e.id = l.evaluation_id
+LEFT JOIN client_goals g ON l.goal_id = g.id
+WHERE e.id = $1
+ORDER BY g.title ASC;

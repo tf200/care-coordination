@@ -125,3 +125,18 @@ type LastEvaluationDTO struct {
 	Coordinator    CoordinatorInfoDTO    `json:"coordinator"`
 	GoalProgress   []GoalProgressItemDTO `json:"goalProgress"`
 }
+
+type EvaluationDTO struct {
+	EvaluationID         string                `json:"evaluationId"`
+	ClientID             string                `json:"clientId"`
+	ClientFirstName      string                `json:"clientFirstName"`
+	ClientLastName       string                `json:"clientLastName"`
+	EvaluationDate       time.Time             `json:"evaluationDate"`
+	OverallNotes         *string               `json:"overallNotes"`
+	Status               string                `json:"status"`
+	CoordinatorFirstName string                `json:"coordinatorFirstName"`
+	CoordinatorLastName  string                `json:"coordinatorLastName"`
+	GoalProgress         []GoalProgressItemDTO `json:"goalProgress"`
+	CreatedAt            time.Time             `json:"createdAt"`
+	UpdatedAt            time.Time             `json:"updatedAt"`
+}

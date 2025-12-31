@@ -84,6 +84,7 @@ type Querier interface {
 	GetEmployeeByID(ctx context.Context, id string) (GetEmployeeByIDRow, error)
 	GetEmployeeByUserID(ctx context.Context, userID string) (GetEmployeeByUserIDRow, error)
 	GetEvaluationById(ctx context.Context, id string) (ClientEvaluation, error)
+	GetEvaluationDetails(ctx context.Context, id string) ([]GetEvaluationDetailsRow, error)
 	GetInCareStats(ctx context.Context) (GetInCareStatsRow, error)
 	GetIncident(ctx context.Context, id string) (GetIncidentRow, error)
 	GetIncidentStats(ctx context.Context) (GetIncidentStatsRow, error)

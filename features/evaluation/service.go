@@ -21,6 +21,7 @@ type EvaluationService interface {
 	GetScheduledEvaluations(ctx context.Context) (*resp.PaginationResponse[UpcomingEvaluationDTO], error)
 	GetRecentEvaluations(ctx context.Context) (*resp.PaginationResponse[GlobalRecentEvaluationDTO], error)
 	GetLastEvaluation(ctx context.Context, clientID string) (*LastEvaluationDTO, error)
+	GetEvaluationDetails(ctx context.Context, evaluationID string) (*EvaluationDTO, error)
 	// Draft methods
 	SaveDraft(ctx context.Context, req *SaveDraftRequest) (*SaveDraftResponse, error)
 	GetDrafts(ctx context.Context) (*resp.PaginationResponse[DraftEvaluationListItemDTO], error)
@@ -492,5 +493,47 @@ func (s *evaluationService) UpdateEvaluation(ctx context.Context, evaluationID s
 
 	return &UpdateEvaluationResponse{
 		ID: result.EvaluationID,
+	}, nil
+}
+
+func (s *evaluationService) GetEvaluationDetails(ctx context.Context, evaluationID string) (*EvaluationDTO, error) {
+	rows, err := s.db.GetEvaluationDetails(ctx, evaluationID)
+	if err != nil {
+		s.logger.Error(ctx, "GetEvaluationDetails", "Failed to get evaluation details", zap.Error(err))
+		return nil, err
+	}
+
+	if len(rows) == 0 {
+		return nil, nil // Evaluation not found
+	}
+
+	firstRow := rows[0]
+
+	// Build goal progress list (filter out empty goals from LEFT JOIN if any, though evaluations usually have goals)
+	goalProgress := []GoalProgressItemDTO{}
+	for _, row := range rows {
+		if row.GoalID != nil {
+			goalProgress = append(goalProgress, GoalProgressItemDTO{
+				GoalID:        *row.GoalID,
+				GoalTitle:     *row.GoalTitle,
+				Status:        string(row.ProgressStatus.GoalProgressStatus),
+				ProgressNotes: row.ProgressNotes,
+			})
+		}
+	}
+
+	return &EvaluationDTO{
+		EvaluationID:         firstRow.EvaluationID,
+		ClientID:             firstRow.ClientID,
+		ClientFirstName:      firstRow.ClientFirstName,
+		ClientLastName:       firstRow.ClientLastName,
+		EvaluationDate:       firstRow.EvaluationDate.Time,
+		OverallNotes:         firstRow.OverallNotes,
+		Status:               string(firstRow.EvaluationStatus),
+		CoordinatorFirstName: firstRow.CoordinatorFirstName,
+		CoordinatorLastName:  firstRow.CoordinatorLastName,
+		GoalProgress:         goalProgress,
+		CreatedAt:            firstRow.CreatedAt.Time,
+		UpdatedAt:            firstRow.UpdatedAt.Time,
 	}, nil
 }

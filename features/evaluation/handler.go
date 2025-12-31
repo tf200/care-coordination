@@ -26,6 +26,7 @@ func (h *EvaluationHandler) SetupEvaluationRoutes(router *gin.Engine) {
 	ev.Use(h.mdw.PaginationMdw())
 
 	ev.POST("", h.CreateEvaluation)
+	ev.GET("/:id", h.GetEvaluationById)
 	ev.PUT("/:id", h.UpdateEvaluation)
 	ev.GET("/critical", h.GetCritical)
 	ev.GET("/scheduled", h.GetScheduled)
@@ -351,4 +352,36 @@ func (h *EvaluationHandler) DeleteDraft(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, resp.Success(struct{}{}, "Draft deleted successfully"))
+}
+
+// @Summary Get a specific evaluation
+// @Description Retrieve an evaluation (submitted or draft) by ID with all progress logs.
+// @Tags Evaluation
+// @Produce json
+// @Param id path string true "Evaluation ID"
+// @Success 200 {object} resp.SuccessResponse[EvaluationDTO]
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 404 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /evaluations/{id} [get]
+func (h *EvaluationHandler) GetEvaluationById(c *gin.Context) {
+	evaluationID := c.Param("id")
+	if evaluationID == "" {
+		c.JSON(http.StatusBadRequest, resp.Error(nil))
+		return
+	}
+
+	result, err := h.service.GetEvaluationDetails(c.Request.Context(), evaluationID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, resp.Error(err))
+		return
+	}
+
+	if result == nil {
+		c.JSON(http.StatusNotFound, resp.Error(nil))
+		return
+	}
+
+	c.JSON(http.StatusOK, resp.Success(result, "Evaluation retrieved successfully"))
 }

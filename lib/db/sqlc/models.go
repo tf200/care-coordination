@@ -753,6 +753,7 @@ type Employee struct {
 	LocationID    string               `json:"location_id"`
 	CreatedAt     pgtype.Timestamp     `json:"created_at"`
 	UpdatedAt     pgtype.Timestamp     `json:"updated_at"`
+	IsDeleted     *bool                `json:"is_deleted"`
 }
 
 type GoalProgressLog struct {

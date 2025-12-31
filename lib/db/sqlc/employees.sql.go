@@ -139,7 +139,7 @@ func (q *Queries) GetEmployeeByID(ctx context.Context, id string) (GetEmployeeBy
 }
 
 const getEmployeeByUserID = `-- name: GetEmployeeByUserID :one
-SELECT e.id, e.user_id, e.first_name, e.last_name, e.bsn, e.date_of_birth, e.phone_number, e.gender, e.contract_hours, e.contract_type, e.location_id, e.created_at, e.updated_at, u.email,
+SELECT e.id, e.user_id, e.first_name, e.last_name, e.bsn, e.date_of_birth, e.phone_number, e.gender, e.contract_hours, e.contract_type, e.location_id, e.created_at, e.updated_at, e.is_deleted, u.email,
        r.id as role_id,
        r.name as role_name,
        l.name as location_name
@@ -165,6 +165,7 @@ type GetEmployeeByUserIDRow struct {
 	LocationID    string               `json:"location_id"`
 	CreatedAt     pgtype.Timestamp     `json:"created_at"`
 	UpdatedAt     pgtype.Timestamp     `json:"updated_at"`
+	IsDeleted     *bool                `json:"is_deleted"`
 	Email         string               `json:"email"`
 	RoleID        *string              `json:"role_id"`
 	RoleName      *string              `json:"role_name"`
@@ -188,6 +189,7 @@ func (q *Queries) GetEmployeeByUserID(ctx context.Context, userID string) (GetEm
 		&i.LocationID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.IsDeleted,
 		&i.Email,
 		&i.RoleID,
 		&i.RoleName,

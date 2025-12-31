@@ -429,6 +429,86 @@ func (q *Queries) GetEvaluationById(ctx context.Context, id string) (ClientEvalu
 	return i, err
 }
 
+const getEvaluationDetails = `-- name: GetEvaluationDetails :many
+SELECT 
+    e.id as evaluation_id,
+    e.client_id,
+    e.evaluation_date,
+    e.overall_notes,
+    e.status as evaluation_status,
+    e.created_at,
+    e.updated_at,
+    emp.first_name as coordinator_first_name,
+    emp.last_name as coordinator_last_name,
+    c.first_name as client_first_name,
+    c.last_name as client_last_name,
+    g.id as goal_id,
+    g.title as goal_title,
+    l.status as progress_status,
+    l.progress_notes
+FROM client_evaluations e
+JOIN employees emp ON e.coordinator_id = emp.id
+JOIN clients c ON e.client_id = c.id
+LEFT JOIN goal_progress_logs l ON e.id = l.evaluation_id
+LEFT JOIN client_goals g ON l.goal_id = g.id
+WHERE e.id = $1
+ORDER BY g.title ASC
+`
+
+type GetEvaluationDetailsRow struct {
+	EvaluationID         string                 `json:"evaluation_id"`
+	ClientID             string                 `json:"client_id"`
+	EvaluationDate       pgtype.Date            `json:"evaluation_date"`
+	OverallNotes         *string                `json:"overall_notes"`
+	EvaluationStatus     EvaluationStatusEnum   `json:"evaluation_status"`
+	CreatedAt            pgtype.Timestamptz     `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz     `json:"updated_at"`
+	CoordinatorFirstName string                 `json:"coordinator_first_name"`
+	CoordinatorLastName  string                 `json:"coordinator_last_name"`
+	ClientFirstName      string                 `json:"client_first_name"`
+	ClientLastName       string                 `json:"client_last_name"`
+	GoalID               *string                `json:"goal_id"`
+	GoalTitle            *string                `json:"goal_title"`
+	ProgressStatus       NullGoalProgressStatus `json:"progress_status"`
+	ProgressNotes        *string                `json:"progress_notes"`
+}
+
+func (q *Queries) GetEvaluationDetails(ctx context.Context, id string) ([]GetEvaluationDetailsRow, error) {
+	rows, err := q.db.Query(ctx, getEvaluationDetails, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetEvaluationDetailsRow{}
+	for rows.Next() {
+		var i GetEvaluationDetailsRow
+		if err := rows.Scan(
+			&i.EvaluationID,
+			&i.ClientID,
+			&i.EvaluationDate,
+			&i.OverallNotes,
+			&i.EvaluationStatus,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.CoordinatorFirstName,
+			&i.CoordinatorLastName,
+			&i.ClientFirstName,
+			&i.ClientLastName,
+			&i.GoalID,
+			&i.GoalTitle,
+			&i.ProgressStatus,
+			&i.ProgressNotes,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getLastClientEvaluation = `-- name: GetLastClientEvaluation :many
 SELECT 
     e.id as evaluation_id,

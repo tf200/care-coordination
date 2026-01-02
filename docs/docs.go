@@ -904,7 +904,7 @@ const docTemplate = `{
         },
         "/clients/in-care": {
             "get": {
-                "description": "List all clients currently in care with pagination and search. Returns weeks in accommodation for living care types or used ambulatory hours for ambulatory care.",
+                "description": "List all clients currently in care with pagination, search, and care type filter. Returns weeks in accommodation for living care types or used ambulatory hours for ambulatory care.",
                 "consumes": [
                     "application/json"
                 ],
@@ -932,6 +932,12 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Search by client first name or last name",
                         "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by care type (protected_living, semi_independent_living, independent_assisted_living, ambulatory_care)",
+                        "name": "careType",
                         "in": "query"
                     }
                 ],

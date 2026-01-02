@@ -138,6 +138,8 @@ WHERE c.status = 'in_care'
          LOWER(c.first_name) LIKE LOWER('%' || sqlc.narg('search')::text || '%') OR
          LOWER(c.last_name) LIKE LOWER('%' || sqlc.narg('search')::text || '%') OR
          LOWER(c.first_name || ' ' || c.last_name) LIKE LOWER('%' || sqlc.narg('search')::text || '%'))
+    AND (sqlc.narg('care_type')::care_type_enum IS NULL OR
+         c.care_type = sqlc.narg('care_type')::care_type_enum)
 ORDER BY c.care_start_date DESC
 LIMIT $1 OFFSET $2;
 

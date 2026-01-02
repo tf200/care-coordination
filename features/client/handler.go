@@ -259,13 +259,14 @@ func (h *ClientHandler) ListWaitingListClients(ctx *gin.Context) {
 }
 
 // @Summary List in-care clients
-// @Description List all clients currently in care with pagination and search. Returns weeks in accommodation for living care types or used ambulatory hours for ambulatory care.
+// @Description List all clients currently in care with pagination, search, and care type filter. Returns weeks in accommodation for living care types or used ambulatory hours for ambulatory care.
 // @Tags Client
 // @Accept json
 // @Produce json
 // @Param page query int false "Page number (default: 1)"
 // @Param page_size query int false "Page size (default: 10, max: 100)"
 // @Param search query string false "Search by client first name or last name"
+// @Param careType query string false "Filter by care type (protected_living, semi_independent_living, independent_assisted_living, ambulatory_care)"
 // @Success 200 {object} resp.SuccessResponse[resp.PaginationResponse[[]ListInCareClientsResponse]]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse

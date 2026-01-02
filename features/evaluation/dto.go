@@ -4,7 +4,7 @@ import "time"
 
 type GoalProgressDTO struct {
 	GoalID        string  `json:"goalId"        binding:"required"`
-	Status        string  `json:"status"        binding:"required,oneof=starting on_track delayed achieved"`
+	Status        string  `json:"status"        binding:"required,oneof=not_started starting in_progress on_track delayed stagnant deteriorating adjusted not_applicable achieved"`
 	ProgressNotes *string `json:"progressNotes"`
 }
 

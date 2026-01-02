@@ -316,10 +316,16 @@ func (ns NullGenderEnum) Value() (driver.Value, error) {
 type GoalProgressStatus string
 
 const (
-	GoalProgressStatusStarting GoalProgressStatus = "starting"
-	GoalProgressStatusOnTrack  GoalProgressStatus = "on_track"
-	GoalProgressStatusDelayed  GoalProgressStatus = "delayed"
-	GoalProgressStatusAchieved GoalProgressStatus = "achieved"
+	GoalProgressStatusNotStarted    GoalProgressStatus = "not_started"
+	GoalProgressStatusStarting      GoalProgressStatus = "starting"
+	GoalProgressStatusInProgress    GoalProgressStatus = "in_progress"
+	GoalProgressStatusOnTrack       GoalProgressStatus = "on_track"
+	GoalProgressStatusDelayed       GoalProgressStatus = "delayed"
+	GoalProgressStatusStagnant      GoalProgressStatus = "stagnant"
+	GoalProgressStatusDeteriorating GoalProgressStatus = "deteriorating"
+	GoalProgressStatusAdjusted      GoalProgressStatus = "adjusted"
+	GoalProgressStatusNotApplicable GoalProgressStatus = "not_applicable"
+	GoalProgressStatusAchieved      GoalProgressStatus = "achieved"
 )
 
 func (e *GoalProgressStatus) Scan(src interface{}) error {

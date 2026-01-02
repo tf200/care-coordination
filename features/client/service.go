@@ -392,13 +392,23 @@ func (s *clientService) ListInCareClients(
 ) (*resp.PaginationResponse[ListInCareClientsResponse], error) {
 	limit, offset, page, pageSize := middleware.GetPaginationParams(ctx)
 
+	// Build care type filter
+	var careTypeFilter db.NullCareTypeEnum
+	if req.CareType != nil {
+		careTypeFilter = db.NullCareTypeEnum{
+			CareTypeEnum: db.CareTypeEnum(*req.CareType),
+			Valid:        true,
+		}
+	}
+
 	var clients []db.ListInCareClientsRow
 	var err error
 	err = s.db.ExecTx(ctx, func(tx *db.Queries) error {
 		clients, err = tx.ListInCareClients(ctx, db.ListInCareClientsParams{
-			Limit:  limit,
-			Offset: offset,
-			Search: req.Search,
+			Limit:    limit,
+			Offset:   offset,
+			Search:   req.Search,
+			CareType: careTypeFilter,
 		})
 		if err != nil {
 			s.logger.Error(ctx, "ListInCareClients", "Failed to list in care clients", zap.Error(err))

@@ -664,9 +664,15 @@ definitions:
         type: string
       status:
         enum:
+        - not_started
         - starting
+        - in_progress
         - on_track
         - delayed
+        - stagnant
+        - deteriorating
+        - adjusted
+        - not_applicable
         - achieved
         type: string
     required:
@@ -737,6 +743,8 @@ definitions:
         type: integer
       firstName:
         type: string
+      hasDraft:
+        type: boolean
       id:
         type: string
       lastName:

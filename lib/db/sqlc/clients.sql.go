@@ -438,14 +438,17 @@ WHERE c.status = 'in_care'
          LOWER(c.first_name) LIKE LOWER('%' || $3::text || '%') OR
          LOWER(c.last_name) LIKE LOWER('%' || $3::text || '%') OR
          LOWER(c.first_name || ' ' || c.last_name) LIKE LOWER('%' || $3::text || '%'))
+    AND ($4::care_type_enum IS NULL OR
+         c.care_type = $4::care_type_enum)
 ORDER BY c.care_start_date DESC
 LIMIT $1 OFFSET $2
 `
 
 type ListInCareClientsParams struct {
-	Limit  int32   `json:"limit"`
-	Offset int32   `json:"offset"`
-	Search *string `json:"search"`
+	Limit    int32            `json:"limit"`
+	Offset   int32            `json:"offset"`
+	Search   *string          `json:"search"`
+	CareType NullCareTypeEnum `json:"care_type"`
 }
 
 type ListInCareClientsRow struct {
@@ -471,7 +474,12 @@ type ListInCareClientsRow struct {
 }
 
 func (q *Queries) ListInCareClients(ctx context.Context, arg ListInCareClientsParams) ([]ListInCareClientsRow, error) {
-	rows, err := q.db.Query(ctx, listInCareClients, arg.Limit, arg.Offset, arg.Search)
+	rows, err := q.db.Query(ctx, listInCareClients,
+		arg.Limit,
+		arg.Offset,
+		arg.Search,
+		arg.CareType,
+	)
 	if err != nil {
 		return nil, err
 	}

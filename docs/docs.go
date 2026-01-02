@@ -4936,9 +4936,15 @@ const docTemplate = `{
                 "status": {
                     "type": "string",
                     "enum": [
+                        "not_started",
                         "starting",
+                        "in_progress",
                         "on_track",
                         "delayed",
+                        "stagnant",
+                        "deteriorating",
+                        "adjusted",
+                        "not_applicable",
                         "achieved"
                     ]
                 }
@@ -5040,6 +5046,9 @@ const docTemplate = `{
                 },
                 "firstName": {
                     "type": "string"
+                },
+                "hasDraft": {
+                    "type": "boolean"
                 },
                 "id": {
                     "type": "string"

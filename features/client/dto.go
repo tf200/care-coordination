@@ -66,7 +66,8 @@ type ListWaitingListClientsResponse struct {
 }
 
 type ListInCareClientsRequest struct {
-	Search *string `form:"search"`
+	Search   *string `form:"search"`
+	CareType *string `form:"careType" binding:"omitempty,oneof=protected_living semi_independent_living independent_assisted_living ambulatory_care"`
 }
 
 type ListInCareClientsResponse struct {

@@ -112,7 +112,7 @@ CREATE TABLE  employees (
 
 CREATE TYPE care_type_enum AS ENUM ('protected_living', 'semi_independent_living', 'independent_assisted_living', 'ambulatory_care');
 CREATE TYPE registration_status_enum AS ENUM ('pending', 'approved', 'rejected', 'in_review');
-CREATE TYPE goal_progress_status AS ENUM ('starting', 'on_track', 'delayed', 'achieved');
+CREATE TYPE goal_progress_status AS ENUM ('not_started','starting', 'in_progress', 'on_track', 'delayed', 'stagnant', 'deteriorating', 'adjusted', 'not_applicable', 'achieved');
 CREATE TYPE evaluation_status_enum AS ENUM ('draft', 'submitted');
 
  CREATE TABLE registration_forms (

@@ -592,6 +592,57 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/calendar/view": {
+            "get": {
+                "description": "Get a unified list of appointments and reminders for a date range",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Calendar"
+                ],
+                "summary": "Get calendar view",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Start time (ISO8601)",
+                        "name": "start",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "End time (ISO8601)",
+                        "name": "end",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-array_calendar_CalendarEventDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/attachments": {
             "post": {
                 "description": "Upload a file attachment",
@@ -4006,6 +4057,56 @@ const docTemplate = `{
                 }
             }
         },
+        "calendar.CalendarEventDTO": {
+            "type": "object",
+            "properties": {
+                "all_day": {
+                    "type": "boolean"
+                },
+                "background_color": {
+                    "type": "string"
+                },
+                "end": {
+                    "type": "string"
+                },
+                "extended_props": {
+                    "$ref": "#/definitions/calendar.CalendarExtendedProps"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "start": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "description": "\"appointment\" or \"reminder\"",
+                    "type": "string"
+                }
+            }
+        },
+        "calendar.CalendarExtendedProps": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "is_completed": {
+                    "type": "boolean"
+                },
+                "location": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
         "client.CareTypeCountsDTO": {
             "type": "object",
             "properties": {
@@ -6892,6 +6993,25 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {},
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-array_calendar_CalendarEventDTO": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/calendar.CalendarEventDTO"
+                    }
+                },
                 "message": {
                     "type": "string",
                     "example": "success message"

@@ -43,6 +43,39 @@ definitions:
       refreshToken:
         type: string
     type: object
+  calendar.CalendarEventDTO:
+    properties:
+      all_day:
+        type: boolean
+      background_color:
+        type: string
+      end:
+        type: string
+      extended_props:
+        $ref: '#/definitions/calendar.CalendarExtendedProps'
+      id:
+        type: string
+      start:
+        type: string
+      title:
+        type: string
+      type:
+        description: '"appointment" or "reminder"'
+        type: string
+    type: object
+  calendar.CalendarExtendedProps:
+    properties:
+      description:
+        type: string
+      is_completed:
+        type: boolean
+      location:
+        type: string
+      status:
+        type: string
+      type:
+        type: string
+    type: object
   client.CareTypeCountsDTO:
     properties:
       ambulatoryCare:
@@ -1977,6 +2010,19 @@ definitions:
         example: true
         type: boolean
     type: object
+  resp.SuccessResponse-array_calendar_CalendarEventDTO:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/calendar.CalendarEventDTO'
+        type: array
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
   resp.SuccessResponse-array_client_ListClientGoalsResponse:
     properties:
       data:
@@ -3018,6 +3064,40 @@ paths:
       summary: Get role for user
       tags:
       - RBAC - User Roles
+  /api/v1/calendar/view:
+    get:
+      consumes:
+      - application/json
+      description: Get a unified list of appointments and reminders for a date range
+      parameters:
+      - description: Start time (ISO8601)
+        in: query
+        name: start
+        required: true
+        type: string
+      - description: End time (ISO8601)
+        in: query
+        name: end
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-array_calendar_CalendarEventDTO'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get calendar view
+      tags:
+      - Calendar
   /attachments:
     post:
       consumes:

@@ -16,8 +16,18 @@ DROP TABLE IF EXISTS role_permissions;
 DROP TABLE IF EXISTS user_roles;
 DROP TABLE IF EXISTS permissions;
 DROP TABLE IF EXISTS roles;
+DROP TABLE IF EXISTS appointment_external_mappings;
+DROP TABLE IF EXISTS calendar_integrations;
+DROP TABLE IF EXISTS reminders;
+DROP TABLE IF EXISTS appointment_participants;
+DROP TABLE IF EXISTS appointments;
+DROP TYPE IF EXISTS participant_type_enum;
+DROP TYPE IF EXISTS appointment_type_enum;
+DROP TYPE IF EXISTS appointment_status_enum;
+
 DROP TABLE IF EXISTS goal_progress_logs;
 DROP TABLE IF EXISTS client_evaluations;
+
 DROP TABLE IF EXISTS client_goals;
 DROP TABLE IF EXISTS incidents;
 DROP TABLE IF EXISTS client_location_transfers;

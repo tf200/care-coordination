@@ -20,6 +20,7 @@ import (
 	"care-cordination/docs"
 	"care-cordination/features/attachments"
 	"care-cordination/features/auth"
+	"care-cordination/features/calendar"
 	"care-cordination/features/client"
 	"care-cordination/features/employee"
 	"care-cordination/features/evaluation"
@@ -62,6 +63,7 @@ type Server struct {
 	locTransferHandler  *locTransfer.LocTransferHandler
 	evaluationHandler   *evaluation.EvaluationHandler
 	rbacHandler         *rbac.RBACHandler
+	calendarHandler     *calendar.CalendarHandler
 
 	environment string
 	rateLimiter ratelimit.RateLimiter
@@ -85,6 +87,7 @@ func NewServer(
 	locTransferHandler *locTransfer.LocTransferHandler,
 	rbacHandler *rbac.RBACHandler,
 	evaluationHandler *evaluation.EvaluationHandler,
+	calendarHandler *calendar.CalendarHandler,
 	rateLimiter ratelimit.RateLimiter, addr string, url string) *Server {
 	s := &Server{
 		environment:         environment,
@@ -101,6 +104,7 @@ func NewServer(
 		locTransferHandler:  locTransferHandler,
 		rbacHandler:         rbacHandler,
 		evaluationHandler:   evaluationHandler,
+		calendarHandler:     calendarHandler,
 		logger:              logger,
 		addr:                addr,
 		url:                 url,
@@ -177,6 +181,7 @@ func (s *Server) setupRoutes(logger logger.Logger) {
 	s.locTransferHandler.SetupLocTransferRoutes(router)
 	s.rbacHandler.SetupRBACRoutes(router)
 	s.evaluationHandler.SetupEvaluationRoutes(router)
+	s.calendarHandler.SetupRoutes(router.Group("/api/v1"))
 	s.router = router
 }
 

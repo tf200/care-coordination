@@ -570,6 +570,161 @@ INSERT INTO role_permissions (role_id, permission_id) VALUES
     ('role_viewer', 'perm_client_read'),
     ('role_viewer', 'perm_employee_read'),
     ('role_viewer', 'perm_location_read'),
-    ('role_viewer', 'perm_registration_read'),
-    ('role_viewer', 'perm_intake_read'),
-    ('role_viewer', 'perm_incident_read');
+    ('role_viewer', 'perm_registration_read');
+-- ============================================================
+-- Calendar Feature
+-- ============================================================
+CREATE TYPE appointment_status_enum AS ENUM ('confirmed', 'cancelled', 'tentative');
+CREATE TYPE appointment_type_enum AS ENUM ('general', 'intake', 'ambulatory');
+CREATE TYPE participant_type_enum AS ENUM ('employee', 'client');
+
+CREATE TABLE appointments (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    description TEXT,
+    start_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    end_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    location TEXT,
+    organizer_id TEXT NOT NULL REFERENCES employees(id),
+    status appointment_status_enum DEFAULT 'confirmed',
+    type appointment_type_enum NOT NULL DEFAULT 'general',
+    recurrence_rule TEXT, -- iCalendar RRULE string
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE appointment_participants (
+    appointment_id TEXT NOT NULL REFERENCES appointments(id) ON DELETE CASCADE,
+    participant_id TEXT NOT NULL, -- nanoid of employee or client
+    participant_type participant_type_enum NOT NULL,
+    PRIMARY KEY (appointment_id, participant_id)
+);
+
+CREATE TABLE reminders (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES employees(id),
+    title TEXT NOT NULL,
+    description TEXT,
+    due_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    is_completed BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE calendar_integrations (
+    user_id TEXT PRIMARY KEY REFERENCES users(id),
+    provider TEXT NOT NULL, -- 'google' or 'microsoft'
+    access_token TEXT NOT NULL,
+    refresh_token TEXT NOT NULL,
+    token_expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    sync_token TEXT,
+    channel_id TEXT,
+    resource_id TEXT,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE appointment_external_mappings (
+    appointment_id TEXT NOT NULL REFERENCES appointments(id) ON DELETE CASCADE,
+    external_event_id TEXT NOT NULL,
+    provider TEXT NOT NULL,
+    PRIMARY KEY (appointment_id, provider)
+);
+-- ============================================================
+-- RLS for Calendar Feature
+-- ============================================================
+
+-- Appointments RLS
+ALTER TABLE appointments ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY admin_all_appointments ON appointments
+    FOR ALL TO PUBLIC
+    USING (
+        EXISTS (
+            SELECT 1 FROM user_roles ur
+            JOIN roles r ON ur.role_id = r.id
+            WHERE ur.user_id = current_setting('app.current_user_id', true)::text
+            AND r.name = 'admin'
+        )
+    );
+
+CREATE POLICY coordinator_appointments ON appointments
+    FOR ALL TO PUBLIC
+    USING (
+        organizer_id = (
+            SELECT id FROM employees 
+            WHERE user_id = current_setting('app.current_user_id', true)::text
+            LIMIT 1
+        )
+        OR EXISTS (
+            SELECT 1 FROM appointment_participants ap
+            WHERE ap.appointment_id = id
+            AND ap.participant_id = (
+                SELECT id FROM employees 
+                WHERE user_id = current_setting('app.current_user_id', true)::text
+                LIMIT 1
+            )
+        )
+    );
+
+-- Appointment Participants RLS
+ALTER TABLE appointment_participants ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY admin_all_participants ON appointment_participants
+    FOR ALL TO PUBLIC
+    USING (
+        EXISTS (
+            SELECT 1 FROM user_roles ur
+            JOIN roles r ON ur.role_id = r.id
+            WHERE ur.user_id = current_setting('app.current_user_id', true)::text
+            AND r.name = 'admin'
+        )
+    );
+
+CREATE POLICY coordinator_participants ON appointment_participants
+    FOR ALL TO PUBLIC
+    USING (
+        EXISTS (
+            SELECT 1 FROM appointments a
+            WHERE a.id = appointment_id
+            AND (
+                a.organizer_id = (
+                    SELECT id FROM employees 
+                    WHERE user_id = current_setting('app.current_user_id', true)::text
+                    LIMIT 1
+                )
+                OR EXISTS (
+                    SELECT 1 FROM appointment_participants ap_sub
+                    WHERE ap_sub.appointment_id = a.id
+                    AND ap_sub.participant_id = (
+                        SELECT id FROM employees 
+                        WHERE user_id = current_setting('app.current_user_id', true)::text
+                        LIMIT 1
+                    )
+                )
+            )
+        )
+    );
+
+-- Reminders RLS
+ALTER TABLE reminders ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY admin_all_reminders ON reminders
+    FOR ALL TO PUBLIC
+    USING (
+        EXISTS (
+            SELECT 1 FROM user_roles ur
+            JOIN roles r ON ur.role_id = r.id
+            WHERE ur.user_id = current_setting('app.current_user_id', true)::text
+            AND r.name = 'admin'
+        )
+    );
+
+CREATE POLICY coordinator_reminders ON reminders
+    FOR ALL TO PUBLIC
+    USING (
+        user_id = (
+            SELECT id FROM employees 
+            WHERE user_id = current_setting('app.current_user_id', true)::text
+            LIMIT 1
+        )
+    );

@@ -1012,3 +1012,150 @@ func CreateTestIncident(t *testing.T, q *Queries, opts CreateTestIncidentOptions
 
 	return id
 }
+
+// ============================================================
+// Factory: Calendar
+// ============================================================
+
+// CreateTestAppointmentOptions configures a test appointment.
+// OrganizerID is required.
+type CreateTestAppointmentOptions struct {
+	ID             *string
+	Title          *string
+	Description    *string
+	StartTime      *time.Time
+	EndTime        *time.Time
+	Location       *string
+	OrganizerID    string // Required
+	Status         *AppointmentStatusEnum
+	Type           *AppointmentTypeEnum
+	RecurrenceRule *string
+}
+
+// CreateTestAppointment creates an appointment for testing.
+func CreateTestAppointment(t *testing.T, q *Queries, opts CreateTestAppointmentOptions) string {
+	t.Helper()
+	ctx := context.Background()
+
+	if opts.OrganizerID == "" {
+		t.Fatal("CreateTestAppointment requires OrganizerID")
+	}
+
+	id := generateTestID()
+	if opts.ID != nil {
+		id = *opts.ID
+	}
+
+	title := "Test Appointment"
+	if opts.Title != nil {
+		title = *opts.Title
+	}
+
+	startTime := time.Now().Add(time.Hour)
+	if opts.StartTime != nil {
+		startTime = *opts.StartTime
+	}
+
+	endTime := startTime.Add(time.Hour)
+	if opts.EndTime != nil {
+		endTime = *opts.EndTime
+	}
+
+	status := AppointmentStatusEnumConfirmed
+	if opts.Status != nil {
+		status = *opts.Status
+	}
+
+	appType := AppointmentTypeEnumGeneral
+	if opts.Type != nil {
+		appType = *opts.Type
+	}
+
+	appointment, err := q.CreateAppointment(ctx, CreateAppointmentParams{
+		ID:             id,
+		Title:          title,
+		Description:    opts.Description,
+		StartTime:      pgtype.Timestamptz{Time: startTime, Valid: true},
+		EndTime:        pgtype.Timestamptz{Time: endTime, Valid: true},
+		Location:       opts.Location,
+		OrganizerID:    opts.OrganizerID,
+		Status:         NullAppointmentStatusEnum{AppointmentStatusEnum: status, Valid: true},
+		Type:           appType,
+		RecurrenceRule: opts.RecurrenceRule,
+	})
+	if err != nil {
+		t.Fatalf("CreateTestAppointment failed: %v", err)
+	}
+
+	return appointment.ID
+}
+
+// CreateTestAppointmentParticipant creates a participant for an appointment.
+func CreateTestAppointmentParticipant(t *testing.T, q *Queries, appointmentID, participantID string, pType ParticipantTypeEnum) {
+	t.Helper()
+	ctx := context.Background()
+
+	err := q.AddAppointmentParticipant(ctx, AddAppointmentParticipantParams{
+		AppointmentID:   appointmentID,
+		ParticipantID:   participantID,
+		ParticipantType: pType,
+	})
+	if err != nil {
+		t.Fatalf("CreateTestAppointmentParticipant failed: %v", err)
+	}
+}
+
+// CreateTestReminderOptions configures a test reminder.
+// UserID is required.
+type CreateTestReminderOptions struct {
+	ID          *string
+	UserID      string // Required (Employee ID)
+	Title       *string
+	Description *string
+	DueTime     *time.Time
+	IsCompleted *bool
+}
+
+// CreateTestReminder creates a reminder for testing.
+func CreateTestReminder(t *testing.T, q *Queries, opts CreateTestReminderOptions) string {
+	t.Helper()
+	ctx := context.Background()
+
+	if opts.UserID == "" {
+		t.Fatal("CreateTestReminder requires UserID")
+	}
+
+	id := generateTestID()
+	if opts.ID != nil {
+		id = *opts.ID
+	}
+
+	title := "Test Reminder"
+	if opts.Title != nil {
+		title = *opts.Title
+	}
+
+	dueTime := time.Now().Add(time.Hour)
+	if opts.DueTime != nil {
+		dueTime = *opts.DueTime
+	}
+
+	isCompleted := false
+	if opts.IsCompleted != nil {
+		isCompleted = *opts.IsCompleted
+	}
+
+	reminder, err := q.CreateReminder(ctx, CreateReminderParams{
+		ID:          id,
+		UserID:      opts.UserID,
+		Title:       title,
+		Description: opts.Description,
+		DueTime:     pgtype.Timestamptz{Time: dueTime, Valid: true},
+		IsCompleted: &isCompleted,
+	})
+	if err != nil {
+		t.Fatalf("CreateTestReminder failed: %v", err)
+	}
+
+	return reminder.ID
+}

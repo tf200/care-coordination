@@ -11,6 +11,92 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type AppointmentStatusEnum string
+
+const (
+	AppointmentStatusEnumConfirmed AppointmentStatusEnum = "confirmed"
+	AppointmentStatusEnumCancelled AppointmentStatusEnum = "cancelled"
+	AppointmentStatusEnumTentative AppointmentStatusEnum = "tentative"
+)
+
+func (e *AppointmentStatusEnum) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = AppointmentStatusEnum(s)
+	case string:
+		*e = AppointmentStatusEnum(s)
+	default:
+		return fmt.Errorf("unsupported scan type for AppointmentStatusEnum: %T", src)
+	}
+	return nil
+}
+
+type NullAppointmentStatusEnum struct {
+	AppointmentStatusEnum AppointmentStatusEnum `json:"appointment_status_enum"`
+	Valid                 bool                  `json:"valid"` // Valid is true if AppointmentStatusEnum is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullAppointmentStatusEnum) Scan(value interface{}) error {
+	if value == nil {
+		ns.AppointmentStatusEnum, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.AppointmentStatusEnum.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullAppointmentStatusEnum) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.AppointmentStatusEnum), nil
+}
+
+type AppointmentTypeEnum string
+
+const (
+	AppointmentTypeEnumGeneral    AppointmentTypeEnum = "general"
+	AppointmentTypeEnumIntake     AppointmentTypeEnum = "intake"
+	AppointmentTypeEnumAmbulatory AppointmentTypeEnum = "ambulatory"
+)
+
+func (e *AppointmentTypeEnum) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = AppointmentTypeEnum(s)
+	case string:
+		*e = AppointmentTypeEnum(s)
+	default:
+		return fmt.Errorf("unsupported scan type for AppointmentTypeEnum: %T", src)
+	}
+	return nil
+}
+
+type NullAppointmentTypeEnum struct {
+	AppointmentTypeEnum AppointmentTypeEnum `json:"appointment_type_enum"`
+	Valid               bool                `json:"valid"` // Valid is true if AppointmentTypeEnum is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullAppointmentTypeEnum) Scan(value interface{}) error {
+	if value == nil {
+		ns.AppointmentTypeEnum, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.AppointmentTypeEnum.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullAppointmentTypeEnum) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.AppointmentTypeEnum), nil
+}
+
 type CareTypeEnum string
 
 const (
@@ -580,6 +666,48 @@ func (ns NullLocationTransferStatusEnum) Value() (driver.Value, error) {
 	return string(ns.LocationTransferStatusEnum), nil
 }
 
+type ParticipantTypeEnum string
+
+const (
+	ParticipantTypeEnumEmployee ParticipantTypeEnum = "employee"
+	ParticipantTypeEnumClient   ParticipantTypeEnum = "client"
+)
+
+func (e *ParticipantTypeEnum) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = ParticipantTypeEnum(s)
+	case string:
+		*e = ParticipantTypeEnum(s)
+	default:
+		return fmt.Errorf("unsupported scan type for ParticipantTypeEnum: %T", src)
+	}
+	return nil
+}
+
+type NullParticipantTypeEnum struct {
+	ParticipantTypeEnum ParticipantTypeEnum `json:"participant_type_enum"`
+	Valid               bool                `json:"valid"` // Valid is true if ParticipantTypeEnum is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullParticipantTypeEnum) Scan(value interface{}) error {
+	if value == nil {
+		ns.ParticipantTypeEnum, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.ParticipantTypeEnum.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullParticipantTypeEnum) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.ParticipantTypeEnum), nil
+}
+
 type RegistrationStatusEnum string
 
 const (
@@ -667,11 +795,50 @@ func (ns NullWaitingListPriorityEnum) Value() (driver.Value, error) {
 	return string(ns.WaitingListPriorityEnum), nil
 }
 
+type Appointment struct {
+	ID             string                    `json:"id"`
+	Title          string                    `json:"title"`
+	Description    *string                   `json:"description"`
+	StartTime      pgtype.Timestamptz        `json:"start_time"`
+	EndTime        pgtype.Timestamptz        `json:"end_time"`
+	Location       *string                   `json:"location"`
+	OrganizerID    string                    `json:"organizer_id"`
+	Status         NullAppointmentStatusEnum `json:"status"`
+	Type           AppointmentTypeEnum       `json:"type"`
+	RecurrenceRule *string                   `json:"recurrence_rule"`
+	CreatedAt      pgtype.Timestamptz        `json:"created_at"`
+	UpdatedAt      pgtype.Timestamptz        `json:"updated_at"`
+}
+
+type AppointmentExternalMapping struct {
+	AppointmentID   string `json:"appointment_id"`
+	ExternalEventID string `json:"external_event_id"`
+	Provider        string `json:"provider"`
+}
+
+type AppointmentParticipant struct {
+	AppointmentID   string              `json:"appointment_id"`
+	ParticipantID   string              `json:"participant_id"`
+	ParticipantType ParticipantTypeEnum `json:"participant_type"`
+}
+
 type Attachment struct {
 	ID          string             `json:"id"`
 	Filekey     string             `json:"filekey"`
 	ContentType string             `json:"content_type"`
 	UploadedAt  pgtype.Timestamptz `json:"uploaded_at"`
+}
+
+type CalendarIntegration struct {
+	UserID         string             `json:"user_id"`
+	Provider       string             `json:"provider"`
+	AccessToken    string             `json:"access_token"`
+	RefreshToken   string             `json:"refresh_token"`
+	TokenExpiresAt pgtype.Timestamptz `json:"token_expires_at"`
+	SyncToken      *string            `json:"sync_token"`
+	ChannelID      *string            `json:"channel_id"`
+	ResourceID     *string            `json:"resource_id"`
+	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
 }
 
 type Client struct {
@@ -856,6 +1023,17 @@ type RegistrationForm struct {
 	CreatedAt          pgtype.Timestamptz         `json:"created_at"`
 	UpdatedAt          pgtype.Timestamptz         `json:"updated_at"`
 	IsDeleted          *bool                      `json:"is_deleted"`
+}
+
+type Reminder struct {
+	ID          string             `json:"id"`
+	UserID      string             `json:"user_id"`
+	Title       string             `json:"title"`
+	Description *string            `json:"description"`
+	DueTime     pgtype.Timestamptz `json:"due_time"`
+	IsCompleted *bool              `json:"is_completed"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
 }
 
 type Role struct {

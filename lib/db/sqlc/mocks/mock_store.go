@@ -41,6 +41,20 @@ func (m *MockStoreInterface) EXPECT() *MockStoreInterfaceMockRecorder {
 	return m.recorder
 }
 
+// AddAppointmentParticipant mocks base method.
+func (m *MockStoreInterface) AddAppointmentParticipant(ctx context.Context, arg db.AddAppointmentParticipantParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddAppointmentParticipant", ctx, arg)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AddAppointmentParticipant indicates an expected call of AddAppointmentParticipant.
+func (mr *MockStoreInterfaceMockRecorder) AddAppointmentParticipant(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddAppointmentParticipant", reflect.TypeOf((*MockStoreInterface)(nil).AddAppointmentParticipant), ctx, arg)
+}
+
 // AssignPermissionToRole mocks base method.
 func (m *MockStoreInterface) AssignPermissionToRole(ctx context.Context, arg db.AssignPermissionToRoleParams) error {
 	m.ctrl.T.Helper()
@@ -95,6 +109,21 @@ func (m *MockStoreInterface) ConfirmLocationTransfer(ctx context.Context, id str
 func (mr *MockStoreInterfaceMockRecorder) ConfirmLocationTransfer(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ConfirmLocationTransfer", reflect.TypeOf((*MockStoreInterface)(nil).ConfirmLocationTransfer), ctx, id)
+}
+
+// CreateAppointment mocks base method.
+func (m *MockStoreInterface) CreateAppointment(ctx context.Context, arg db.CreateAppointmentParams) (db.Appointment, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateAppointment", ctx, arg)
+	ret0, _ := ret[0].(db.Appointment)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateAppointment indicates an expected call of CreateAppointment.
+func (mr *MockStoreInterfaceMockRecorder) CreateAppointment(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAppointment", reflect.TypeOf((*MockStoreInterface)(nil).CreateAppointment), ctx, arg)
 }
 
 // CreateAttachment mocks base method.
@@ -312,6 +341,21 @@ func (mr *MockStoreInterfaceMockRecorder) CreateRegistrationForm(ctx, arg any) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRegistrationForm", reflect.TypeOf((*MockStoreInterface)(nil).CreateRegistrationForm), ctx, arg)
 }
 
+// CreateReminder mocks base method.
+func (m *MockStoreInterface) CreateReminder(ctx context.Context, arg db.CreateReminderParams) (db.Reminder, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateReminder", ctx, arg)
+	ret0, _ := ret[0].(db.Reminder)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateReminder indicates an expected call of CreateReminder.
+func (mr *MockStoreInterfaceMockRecorder) CreateReminder(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateReminder", reflect.TypeOf((*MockStoreInterface)(nil).CreateReminder), ctx, arg)
+}
+
 // CreateRole mocks base method.
 func (m *MockStoreInterface) CreateRole(ctx context.Context, arg db.CreateRoleParams) (db.Role, error) {
 	m.ctrl.T.Helper()
@@ -384,6 +428,20 @@ func (mr *MockStoreInterfaceMockRecorder) DeleteAllPermissionsFromRole(ctx, role
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAllPermissionsFromRole", reflect.TypeOf((*MockStoreInterface)(nil).DeleteAllPermissionsFromRole), ctx, roleID)
 }
 
+// DeleteAppointment mocks base method.
+func (m *MockStoreInterface) DeleteAppointment(ctx context.Context, id string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteAppointment", ctx, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteAppointment indicates an expected call of DeleteAppointment.
+func (mr *MockStoreInterfaceMockRecorder) DeleteAppointment(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAppointment", reflect.TypeOf((*MockStoreInterface)(nil).DeleteAppointment), ctx, id)
+}
+
 // DeleteDraftEvaluation mocks base method.
 func (m *MockStoreInterface) DeleteDraftEvaluation(ctx context.Context, id string) error {
 	m.ctrl.T.Helper()
@@ -454,6 +512,20 @@ func (mr *MockStoreInterfaceMockRecorder) DeleteReferringOrg(ctx, id any) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteReferringOrg", reflect.TypeOf((*MockStoreInterface)(nil).DeleteReferringOrg), ctx, id)
 }
 
+// DeleteReminder mocks base method.
+func (m *MockStoreInterface) DeleteReminder(ctx context.Context, id string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteReminder", ctx, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteReminder indicates an expected call of DeleteReminder.
+func (mr *MockStoreInterfaceMockRecorder) DeleteReminder(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteReminder", reflect.TypeOf((*MockStoreInterface)(nil).DeleteReminder), ctx, id)
+}
+
 // DeleteRole mocks base method.
 func (m *MockStoreInterface) DeleteRole(ctx context.Context, id string) error {
 	m.ctrl.T.Helper()
@@ -494,6 +566,21 @@ func (m *MockStoreInterface) ExecTx(ctx context.Context, fn func(*db.Queries) er
 func (mr *MockStoreInterfaceMockRecorder) ExecTx(ctx, fn any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExecTx", reflect.TypeOf((*MockStoreInterface)(nil).ExecTx), ctx, fn)
+}
+
+// GetAppointment mocks base method.
+func (m *MockStoreInterface) GetAppointment(ctx context.Context, id string) (db.Appointment, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAppointment", ctx, id)
+	ret0, _ := ret[0].(db.Appointment)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAppointment indicates an expected call of GetAppointment.
+func (mr *MockStoreInterfaceMockRecorder) GetAppointment(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAppointment", reflect.TypeOf((*MockStoreInterface)(nil).GetAppointment), ctx, id)
 }
 
 // GetClientByID mocks base method.
@@ -916,6 +1003,21 @@ func (mr *MockStoreInterfaceMockRecorder) GetRegistrationStats(ctx any) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRegistrationStats", reflect.TypeOf((*MockStoreInterface)(nil).GetRegistrationStats), ctx)
 }
 
+// GetReminder mocks base method.
+func (m *MockStoreInterface) GetReminder(ctx context.Context, id string) (db.Reminder, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetReminder", ctx, id)
+	ret0, _ := ret[0].(db.Reminder)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetReminder indicates an expected call of GetReminder.
+func (mr *MockStoreInterfaceMockRecorder) GetReminder(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetReminder", reflect.TypeOf((*MockStoreInterface)(nil).GetReminder), ctx, id)
+}
+
 // GetRoleByID mocks base method.
 func (m *MockStoreInterface) GetRoleByID(ctx context.Context, id string) (db.Role, error) {
 	m.ctrl.T.Helper()
@@ -1062,6 +1164,66 @@ func (m *MockStoreInterface) LinkGoalsToClient(ctx context.Context, arg db.LinkG
 func (mr *MockStoreInterfaceMockRecorder) LinkGoalsToClient(ctx, arg any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LinkGoalsToClient", reflect.TypeOf((*MockStoreInterface)(nil).LinkGoalsToClient), ctx, arg)
+}
+
+// ListAppointmentParticipants mocks base method.
+func (m *MockStoreInterface) ListAppointmentParticipants(ctx context.Context, appointmentID string) ([]db.AppointmentParticipant, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListAppointmentParticipants", ctx, appointmentID)
+	ret0, _ := ret[0].([]db.AppointmentParticipant)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListAppointmentParticipants indicates an expected call of ListAppointmentParticipants.
+func (mr *MockStoreInterfaceMockRecorder) ListAppointmentParticipants(ctx, appointmentID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListAppointmentParticipants", reflect.TypeOf((*MockStoreInterface)(nil).ListAppointmentParticipants), ctx, appointmentID)
+}
+
+// ListAppointmentsByOrganizer mocks base method.
+func (m *MockStoreInterface) ListAppointmentsByOrganizer(ctx context.Context, organizerID string) ([]db.Appointment, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListAppointmentsByOrganizer", ctx, organizerID)
+	ret0, _ := ret[0].([]db.Appointment)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListAppointmentsByOrganizer indicates an expected call of ListAppointmentsByOrganizer.
+func (mr *MockStoreInterfaceMockRecorder) ListAppointmentsByOrganizer(ctx, organizerID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListAppointmentsByOrganizer", reflect.TypeOf((*MockStoreInterface)(nil).ListAppointmentsByOrganizer), ctx, organizerID)
+}
+
+// ListAppointmentsByParticipant mocks base method.
+func (m *MockStoreInterface) ListAppointmentsByParticipant(ctx context.Context, arg db.ListAppointmentsByParticipantParams) ([]db.Appointment, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListAppointmentsByParticipant", ctx, arg)
+	ret0, _ := ret[0].([]db.Appointment)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListAppointmentsByParticipant indicates an expected call of ListAppointmentsByParticipant.
+func (mr *MockStoreInterfaceMockRecorder) ListAppointmentsByParticipant(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListAppointmentsByParticipant", reflect.TypeOf((*MockStoreInterface)(nil).ListAppointmentsByParticipant), ctx, arg)
+}
+
+// ListAppointmentsByRange mocks base method.
+func (m *MockStoreInterface) ListAppointmentsByRange(ctx context.Context, arg db.ListAppointmentsByRangeParams) ([]db.Appointment, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListAppointmentsByRange", ctx, arg)
+	ret0, _ := ret[0].([]db.Appointment)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListAppointmentsByRange indicates an expected call of ListAppointmentsByRange.
+func (mr *MockStoreInterfaceMockRecorder) ListAppointmentsByRange(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListAppointmentsByRange", reflect.TypeOf((*MockStoreInterface)(nil).ListAppointmentsByRange), ctx, arg)
 }
 
 // ListDischargedClients mocks base method.
@@ -1274,6 +1436,36 @@ func (mr *MockStoreInterfaceMockRecorder) ListRegistrationForms(ctx, arg any) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListRegistrationForms", reflect.TypeOf((*MockStoreInterface)(nil).ListRegistrationForms), ctx, arg)
 }
 
+// ListRemindersByRange mocks base method.
+func (m *MockStoreInterface) ListRemindersByRange(ctx context.Context, arg db.ListRemindersByRangeParams) ([]db.Reminder, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListRemindersByRange", ctx, arg)
+	ret0, _ := ret[0].([]db.Reminder)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListRemindersByRange indicates an expected call of ListRemindersByRange.
+func (mr *MockStoreInterfaceMockRecorder) ListRemindersByRange(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListRemindersByRange", reflect.TypeOf((*MockStoreInterface)(nil).ListRemindersByRange), ctx, arg)
+}
+
+// ListRemindersByUser mocks base method.
+func (m *MockStoreInterface) ListRemindersByUser(ctx context.Context, userID string) ([]db.Reminder, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListRemindersByUser", ctx, userID)
+	ret0, _ := ret[0].([]db.Reminder)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListRemindersByUser indicates an expected call of ListRemindersByUser.
+func (mr *MockStoreInterfaceMockRecorder) ListRemindersByUser(ctx, userID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListRemindersByUser", reflect.TypeOf((*MockStoreInterface)(nil).ListRemindersByUser), ctx, userID)
+}
+
 // ListRoles mocks base method.
 func (m *MockStoreInterface) ListRoles(ctx context.Context, arg db.ListRolesParams) ([]db.ListRolesRow, error) {
 	m.ctrl.T.Helper()
@@ -1346,6 +1538,20 @@ func (m *MockStoreInterface) RefuseLocationTransfer(ctx context.Context, arg db.
 func (mr *MockStoreInterfaceMockRecorder) RefuseLocationTransfer(ctx, arg any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RefuseLocationTransfer", reflect.TypeOf((*MockStoreInterface)(nil).RefuseLocationTransfer), ctx, arg)
+}
+
+// RemoveAppointmentParticipants mocks base method.
+func (m *MockStoreInterface) RemoveAppointmentParticipants(ctx context.Context, appointmentID string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RemoveAppointmentParticipants", ctx, appointmentID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RemoveAppointmentParticipants indicates an expected call of RemoveAppointmentParticipants.
+func (mr *MockStoreInterfaceMockRecorder) RemoveAppointmentParticipants(ctx, appointmentID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveAppointmentParticipants", reflect.TypeOf((*MockStoreInterface)(nil).RemoveAppointmentParticipants), ctx, appointmentID)
 }
 
 // RemovePermissionFromRole mocks base method.
@@ -1445,6 +1651,21 @@ func (m *MockStoreInterface) SubmitDraftEvaluation(ctx context.Context, id strin
 func (mr *MockStoreInterfaceMockRecorder) SubmitDraftEvaluation(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SubmitDraftEvaluation", reflect.TypeOf((*MockStoreInterface)(nil).SubmitDraftEvaluation), ctx, id)
+}
+
+// UpdateAppointment mocks base method.
+func (m *MockStoreInterface) UpdateAppointment(ctx context.Context, arg db.UpdateAppointmentParams) (db.Appointment, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateAppointment", ctx, arg)
+	ret0, _ := ret[0].(db.Appointment)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateAppointment indicates an expected call of UpdateAppointment.
+func (mr *MockStoreInterfaceMockRecorder) UpdateAppointment(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAppointment", reflect.TypeOf((*MockStoreInterface)(nil).UpdateAppointment), ctx, arg)
 }
 
 // UpdateClient mocks base method.
@@ -1686,6 +1907,21 @@ func (m *MockStoreInterface) UpdateRegistrationFormStatus(ctx context.Context, a
 func (mr *MockStoreInterfaceMockRecorder) UpdateRegistrationFormStatus(ctx, arg any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateRegistrationFormStatus", reflect.TypeOf((*MockStoreInterface)(nil).UpdateRegistrationFormStatus), ctx, arg)
+}
+
+// UpdateReminder mocks base method.
+func (m *MockStoreInterface) UpdateReminder(ctx context.Context, arg db.UpdateReminderParams) (db.Reminder, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateReminder", ctx, arg)
+	ret0, _ := ret[0].(db.Reminder)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateReminder indicates an expected call of UpdateReminder.
+func (mr *MockStoreInterfaceMockRecorder) UpdateReminder(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateReminder", reflect.TypeOf((*MockStoreInterface)(nil).UpdateReminder), ctx, arg)
 }
 
 // UpdateRole mocks base method.

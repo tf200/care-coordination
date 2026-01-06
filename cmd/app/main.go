@@ -4,6 +4,7 @@ import (
 	"care-cordination/api"
 	"care-cordination/features/attachments"
 	"care-cordination/features/auth"
+	"care-cordination/features/calendar"
 	"care-cordination/features/client"
 	"care-cordination/features/employee"
 	"care-cordination/features/evaluation"
@@ -165,6 +166,9 @@ func main() {
 	rbacService := rbac.NewRBACService(store, l)
 	rbacHandler := rbac.NewRBACHandler(rbacService, mdw)
 
+	calendarService := calendar.NewCalendarService(store, l)
+	calendarHandler := calendar.NewCalendarHandler(calendarService, mdw)
+
 	// 6. Initialize Server
 	server := api.NewServer(
 		l,
@@ -181,6 +185,7 @@ func main() {
 		locTransferHandler,
 		rbacHandler,
 		evaluationHandler,
+		calendarHandler,
 		rateLimiter,
 		cfg.ServerAddress,
 		cfg.Url,

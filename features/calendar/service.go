@@ -4,6 +4,7 @@ import (
 	db "care-cordination/lib/db/sqlc"
 	"care-cordination/lib/logger"
 	"care-cordination/lib/nanoid"
+	"care-cordination/lib/recurrence"
 	"care-cordination/lib/util"
 	"context"
 	"time"
@@ -397,9 +398,19 @@ func (s *calendarService) ListReminders(ctx context.Context, userID string) ([]R
 func (s *calendarService) GetCalendarView(ctx context.Context, userID string, startTime, endTime time.Time) ([]CalendarEventDTO, error) {
 	var events []CalendarEventDTO
 	err := s.store.ExecTx(ctx, func(q *db.Queries) error {
+		// Fetch non-recurring appointments in range
 		appointments, err := q.ListAppointmentsByRange(ctx, db.ListAppointmentsByRangeParams{
 			OrganizerID: userID,
 			StartTime:   pgtype.Timestamptz{Time: startTime, Valid: true},
+			EndTime:     pgtype.Timestamptz{Time: endTime, Valid: true},
+		})
+		if err != nil {
+			return err
+		}
+
+		// Fetch recurring appointments that may have occurrences in range
+		recurringAppointments, err := q.ListRecurringAppointments(ctx, db.ListRecurringAppointmentsParams{
+			OrganizerID: userID,
 			EndTime:     pgtype.Timestamptz{Time: endTime, Valid: true},
 		})
 		if err != nil {
@@ -417,7 +428,12 @@ func (s *calendarService) GetCalendarView(ctx context.Context, userID string, st
 
 		events = make([]CalendarEventDTO, 0, len(appointments)+len(reminders))
 
+		// Add non-recurring appointments (filter out any that have recurrence rules)
 		for _, a := range appointments {
+			// Skip if this is a recurring appointment (will be handled separately)
+			if a.RecurrenceRule != nil && *a.RecurrenceRule != "" {
+				continue
+			}
 			endTimeValue := a.EndTime.Time
 			events = append(events, CalendarEventDTO{
 				ID:              a.ID,
@@ -434,6 +450,44 @@ func (s *calendarService) GetCalendarView(ctx context.Context, userID string, st
 					Type:        string(a.Type),
 				},
 			})
+		}
+
+		// Expand recurring appointments
+		for _, a := range recurringAppointments {
+			rruleStr := util.HandleNilString(a.RecurrenceRule)
+			if rruleStr == "" {
+				continue
+			}
+
+			occurrences, err := recurrence.ExpandRecurrence(rruleStr, a.StartTime.Time, startTime, endTime)
+			if err != nil {
+				// Log error but continue - don't fail entire request for one bad rrule
+				s.logger.Error(ctx, "GetCalendarView", "Failed to expand recurrence", zap.Error(err), zap.String("appointment_id", a.ID))
+				continue
+			}
+
+			for _, occurrenceStart := range occurrences {
+				occurrenceEnd := recurrence.CalculateOccurrenceEnd(occurrenceStart, a.StartTime.Time, a.EndTime.Time)
+				occurrenceID := recurrence.GenerateOccurrenceID(a.ID, occurrenceStart)
+
+				events = append(events, CalendarEventDTO{
+					ID:              occurrenceID,
+					Title:           a.Title,
+					Start:           occurrenceStart,
+					End:             &occurrenceEnd,
+					AllDay:          false,
+					Type:            "appointment",
+					BackgroundColor: "#9c27b0", // Purple for recurring
+					ExtendedProps: CalendarExtendedProps{
+						Description:     util.HandleNilString(a.Description),
+						Location:        util.HandleNilString(a.Location),
+						Status:          string(a.Status.AppointmentStatusEnum),
+						Type:            string(a.Type),
+						IsRecurring:     true,
+						OriginalEventID: a.ID,
+					},
+				})
+			}
 		}
 
 		for _, r := range reminders {

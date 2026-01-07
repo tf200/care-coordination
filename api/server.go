@@ -181,7 +181,7 @@ func (s *Server) setupRoutes(logger logger.Logger) {
 	s.locTransferHandler.SetupLocTransferRoutes(router)
 	s.rbacHandler.SetupRBACRoutes(router)
 	s.evaluationHandler.SetupEvaluationRoutes(router)
-	s.calendarHandler.SetupRoutes(router.Group("/api/v1"))
+	s.calendarHandler.SetupRoutes(router)
 	s.router = router
 }
 

@@ -337,6 +337,53 @@ func (q *Queries) ListAppointmentsByRange(ctx context.Context, arg ListAppointme
 	return items, nil
 }
 
+const listRecurringAppointments = `-- name: ListRecurringAppointments :many
+SELECT id, title, description, start_time, end_time, location, organizer_id, status, type, recurrence_rule, created_at, updated_at FROM appointments 
+WHERE organizer_id = $1 
+AND recurrence_rule IS NOT NULL 
+AND recurrence_rule <> ''
+AND start_time <= $2::timestamptz
+ORDER BY start_time ASC
+`
+
+type ListRecurringAppointmentsParams struct {
+	OrganizerID string             `json:"organizer_id"`
+	EndTime     pgtype.Timestamptz `json:"end_time"`
+}
+
+func (q *Queries) ListRecurringAppointments(ctx context.Context, arg ListRecurringAppointmentsParams) ([]Appointment, error) {
+	rows, err := q.db.Query(ctx, listRecurringAppointments, arg.OrganizerID, arg.EndTime)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Appointment{}
+	for rows.Next() {
+		var i Appointment
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Description,
+			&i.StartTime,
+			&i.EndTime,
+			&i.Location,
+			&i.OrganizerID,
+			&i.Status,
+			&i.Type,
+			&i.RecurrenceRule,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listRemindersByRange = `-- name: ListRemindersByRange :many
 SELECT id, user_id, title, description, due_time, is_completed, created_at, updated_at FROM reminders 
 WHERE user_id = $1 

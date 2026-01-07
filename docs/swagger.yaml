@@ -43,6 +43,57 @@ definitions:
       refreshToken:
         type: string
     type: object
+  calendar.AppointmentResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      end_time:
+        type: string
+      id:
+        type: string
+      location:
+        type: string
+      organizer_id:
+        type: string
+      participants:
+        items:
+          $ref: '#/definitions/calendar.ParticipantDTO'
+        type: array
+      recurrence_rule:
+        type: string
+      start_time:
+        type: string
+      status:
+        $ref: '#/definitions/calendar.AppointmentStatus'
+      title:
+        type: string
+      type:
+        $ref: '#/definitions/calendar.AppointmentType'
+      updated_at:
+        type: string
+    type: object
+  calendar.AppointmentStatus:
+    enum:
+    - confirmed
+    - cancelled
+    - tentative
+    type: string
+    x-enum-varnames:
+    - StatusConfirmed
+    - StatusCancelled
+    - StatusTentative
+  calendar.AppointmentType:
+    enum:
+    - general
+    - intake
+    - ambulatory
+    type: string
+    x-enum-varnames:
+    - TypeGeneral
+    - TypeIntake
+    - TypeAmbulatory
   calendar.CalendarEventDTO:
     properties:
       all_day:
@@ -69,12 +120,147 @@ definitions:
         type: string
       is_completed:
         type: boolean
+      is_recurring:
+        type: boolean
       location:
+        type: string
+      original_event_id:
         type: string
       status:
         type: string
       type:
         type: string
+    type: object
+  calendar.CreateAppointmentRequest:
+    properties:
+      description:
+        type: string
+      end_time:
+        type: string
+      location:
+        type: string
+      participants:
+        items:
+          $ref: '#/definitions/calendar.ParticipantDTO'
+        minItems: 1
+        type: array
+      recurrence_rule:
+        type: string
+      start_time:
+        type: string
+      status:
+        allOf:
+        - $ref: '#/definitions/calendar.AppointmentStatus'
+        enum:
+        - confirmed
+        - cancelled
+        - tentative
+      title:
+        type: string
+      type:
+        allOf:
+        - $ref: '#/definitions/calendar.AppointmentType'
+        enum:
+        - general
+        - intake
+        - ambulatory
+    required:
+    - end_time
+    - participants
+    - start_time
+    - title
+    - type
+    type: object
+  calendar.CreateReminderRequest:
+    properties:
+      description:
+        type: string
+      due_time:
+        type: string
+      title:
+        type: string
+    required:
+    - due_time
+    - title
+    type: object
+  calendar.ParticipantDTO:
+    properties:
+      id:
+        type: string
+      type:
+        allOf:
+        - $ref: '#/definitions/calendar.ParticipantType'
+        enum:
+        - employee
+        - client
+    required:
+    - id
+    - type
+    type: object
+  calendar.ParticipantType:
+    enum:
+    - employee
+    - client
+    type: string
+    x-enum-varnames:
+    - ParticipantEmployee
+    - ParticipantClient
+  calendar.ReminderResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      due_time:
+        type: string
+      id:
+        type: string
+      is_completed:
+        type: boolean
+      title:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  calendar.UpdateAppointmentRequest:
+    properties:
+      description:
+        type: string
+      end_time:
+        type: string
+      location:
+        type: string
+      participants:
+        items:
+          $ref: '#/definitions/calendar.ParticipantDTO'
+        type: array
+      recurrence_rule:
+        type: string
+      start_time:
+        type: string
+      status:
+        allOf:
+        - $ref: '#/definitions/calendar.AppointmentStatus'
+        enum:
+        - confirmed
+        - cancelled
+        - tentative
+      title:
+        type: string
+      type:
+        allOf:
+        - $ref: '#/definitions/calendar.AppointmentType'
+        enum:
+        - general
+        - intake
+        - ambulatory
+    type: object
+  calendar.UpdateReminderRequest:
+    properties:
+      is_completed:
+        type: boolean
     type: object
   client.CareTypeCountsDTO:
     properties:
@@ -2010,11 +2196,37 @@ definitions:
         example: true
         type: boolean
     type: object
+  resp.SuccessResponse-array_calendar_AppointmentResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/calendar.AppointmentResponse'
+        type: array
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
   resp.SuccessResponse-array_calendar_CalendarEventDTO:
     properties:
       data:
         items:
           $ref: '#/definitions/calendar.CalendarEventDTO'
+        type: array
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-array_calendar_ReminderResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/calendar.ReminderResponse'
         type: array
       message:
         example: success message
@@ -2064,6 +2276,28 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/auth.RefreshTokensResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-calendar_AppointmentResponse:
+    properties:
+      data:
+        $ref: '#/definitions/calendar.AppointmentResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-calendar_ReminderResponse:
+    properties:
+      data:
+        $ref: '#/definitions/calendar.ReminderResponse'
       message:
         example: success message
         type: string
@@ -3064,40 +3298,6 @@ paths:
       summary: Get role for user
       tags:
       - RBAC - User Roles
-  /api/v1/calendar/view:
-    get:
-      consumes:
-      - application/json
-      description: Get a unified list of appointments and reminders for a date range
-      parameters:
-      - description: Start time (ISO8601)
-        in: query
-        name: start
-        required: true
-        type: string
-      - description: End time (ISO8601)
-        in: query
-        name: end
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/resp.SuccessResponse-array_calendar_CalendarEventDTO'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/resp.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/resp.ErrorResponse'
-      summary: Get calendar view
-      tags:
-      - Calendar
   /attachments:
     post:
       consumes:
@@ -3235,6 +3435,406 @@ paths:
       summary: Refresh tokens
       tags:
       - Auth
+  /calendar/appointments:
+    get:
+      consumes:
+      - application/json
+      description: List all appointments for an employee
+      parameters:
+      - description: Employee ID (defaults to current user)
+        in: query
+        name: employee_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-array_calendar_AppointmentResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List appointments
+      tags:
+      - Calendar - Appointments
+    post:
+      consumes:
+      - application/json
+      description: Create a new calendar appointment
+      parameters:
+      - description: Appointment details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/calendar.CreateAppointmentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-calendar_AppointmentResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create appointment
+      tags:
+      - Calendar - Appointments
+  /calendar/appointments/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an appointment by ID
+      parameters:
+      - description: Appointment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.MessageResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete appointment
+      tags:
+      - Calendar - Appointments
+    get:
+      consumes:
+      - application/json
+      description: Get a specific appointment by ID
+      parameters:
+      - description: Appointment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-calendar_AppointmentResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get appointment
+      tags:
+      - Calendar - Appointments
+    patch:
+      consumes:
+      - application/json
+      description: Update an existing appointment
+      parameters:
+      - description: Appointment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated appointment details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/calendar.UpdateAppointmentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-calendar_AppointmentResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update appointment
+      tags:
+      - Calendar - Appointments
+  /calendar/reminders:
+    get:
+      consumes:
+      - application/json
+      description: List all reminders for an employee
+      parameters:
+      - description: Employee ID (defaults to current user)
+        in: query
+        name: employee_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-array_calendar_ReminderResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List reminders
+      tags:
+      - Calendar - Reminders
+    post:
+      consumes:
+      - application/json
+      description: Create a new reminder
+      parameters:
+      - description: Reminder details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/calendar.CreateReminderRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-calendar_ReminderResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create reminder
+      tags:
+      - Calendar - Reminders
+  /calendar/reminders/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a reminder by ID
+      parameters:
+      - description: Reminder ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.MessageResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete reminder
+      tags:
+      - Calendar - Reminders
+    get:
+      consumes:
+      - application/json
+      description: Get a specific reminder by ID
+      parameters:
+      - description: Reminder ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-calendar_ReminderResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get reminder
+      tags:
+      - Calendar - Reminders
+    patch:
+      consumes:
+      - application/json
+      description: Update a reminder's completion status
+      parameters:
+      - description: Reminder ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated reminder details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/calendar.UpdateReminderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-calendar_ReminderResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update reminder
+      tags:
+      - Calendar - Reminders
+  /calendar/view:
+    get:
+      consumes:
+      - application/json
+      description: Get a unified list of appointments and reminders for a date range
+      parameters:
+      - description: Start time (RFC3339 format)
+        in: query
+        name: start
+        required: true
+        type: string
+      - description: End time (RFC3339 format)
+        in: query
+        name: end
+        required: true
+        type: string
+      - description: Employee ID (defaults to current user)
+        in: query
+        name: employee_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-array_calendar_CalendarEventDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get calendar view
+      tags:
+      - Calendar
   /clients/{id}/complete-discharge:
     post:
       consumes:

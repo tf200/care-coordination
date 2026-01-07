@@ -86,3 +86,11 @@ WHERE user_id = $1
 AND due_time >= sqlc.arg('start_time')::timestamptz 
 AND due_time <= sqlc.arg('end_time')::timestamptz
 ORDER BY due_time ASC;
+
+-- name: ListRecurringAppointments :many
+SELECT * FROM appointments 
+WHERE organizer_id = $1 
+AND recurrence_rule IS NOT NULL 
+AND recurrence_rule <> ''
+AND start_time <= sqlc.arg('end_time')::timestamptz
+ORDER BY start_time ASC;

@@ -1391,6 +1391,21 @@ func (mr *MockStoreInterfaceMockRecorder) ListPermissionsForRole(ctx, roleID any
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListPermissionsForRole", reflect.TypeOf((*MockStoreInterface)(nil).ListPermissionsForRole), ctx, roleID)
 }
 
+// ListRecurringAppointments mocks base method.
+func (m *MockStoreInterface) ListRecurringAppointments(ctx context.Context, arg db.ListRecurringAppointmentsParams) ([]db.Appointment, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListRecurringAppointments", ctx, arg)
+	ret0, _ := ret[0].([]db.Appointment)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListRecurringAppointments indicates an expected call of ListRecurringAppointments.
+func (mr *MockStoreInterfaceMockRecorder) ListRecurringAppointments(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListRecurringAppointments", reflect.TypeOf((*MockStoreInterface)(nil).ListRecurringAppointments), ctx, arg)
+}
+
 // ListReferringOrgs mocks base method.
 func (m *MockStoreInterface) ListReferringOrgs(ctx context.Context, arg db.ListReferringOrgsParams) ([]db.ListReferringOrgsRow, error) {
 	m.ctrl.T.Helper()

@@ -5,7 +5,6 @@ import (
 	"care-cordination/lib/resp"
 	"care-cordination/lib/util"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -22,7 +21,7 @@ func NewCalendarHandler(service CalendarService, mdw *middleware.Middleware) *Ca
 	}
 }
 
-func (h *CalendarHandler) SetupRoutes(router *gin.RouterGroup) {
+func (h *CalendarHandler) SetupRoutes(router *gin.Engine) {
 	calendar := router.Group("/calendar")
 	calendar.Use(h.mdw.AuthMdw())
 	{
@@ -47,39 +46,28 @@ func (h *CalendarHandler) SetupRoutes(router *gin.RouterGroup) {
 // @Tags Calendar
 // @Accept json
 // @Produce json
-// @Param start query string true "Start time (ISO8601)"
-// @Param end query string true "End time (ISO8601)"
+// @Security BearerAuth
+// @Param start query string true "Start time (RFC3339 format)"
+// @Param end query string true "End time (RFC3339 format)"
+// @Param employee_id query string false "Employee ID (defaults to current user)"
 // @Success 200 {object} resp.SuccessResponse[[]CalendarEventDTO]
+// @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
-// @Router /api/v1/calendar/view [get]
+// @Router /calendar/view [get]
 func (h *CalendarHandler) GetCalendarView(ctx *gin.Context) {
-	startStr := ctx.Query("start")
-	endStr := ctx.Query("end")
-
-	if startStr == "" || endStr == "" {
-		ctx.JSON(http.StatusBadRequest, resp.Error(ErrInvalidRequest))
-		return
-	}
-
-	start, err := time.Parse(time.RFC3339, startStr)
-	if err != nil {
+	var req GetCalendarViewRequest
+	if err := ctx.ShouldBindQuery(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, resp.Error(err))
 		return
 	}
 
-	end, err := time.Parse(time.RFC3339, endStr)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, resp.Error(err))
-		return
+	targetEmployeeID := util.GetEmployeeID(ctx)
+	if req.EmployeeID != nil {
+		targetEmployeeID = *req.EmployeeID
 	}
 
-	targetEmployeeID := ctx.Query("employee_id")
-	if targetEmployeeID == "" {
-		targetEmployeeID = util.GetEmployeeID(ctx)
-	}
-
-	res, err := h.service.GetCalendarView(ctx, targetEmployeeID, start, end)
+	res, err := h.service.GetCalendarView(ctx, targetEmployeeID, req.Start, req.End)
 	if err != nil {
 		h.handleError(ctx, err)
 		return
@@ -90,6 +78,18 @@ func (h *CalendarHandler) GetCalendarView(ctx *gin.Context) {
 
 // Appointment handlers
 
+// @Summary Create appointment
+// @Description Create a new calendar appointment
+// @Tags Calendar - Appointments
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body CreateAppointmentRequest true "Appointment details"
+// @Success 201 {object} resp.SuccessResponse[AppointmentResponse]
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /calendar/appointments [post]
 func (h *CalendarHandler) CreateAppointment(ctx *gin.Context) {
 	var req CreateAppointmentRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -107,6 +107,18 @@ func (h *CalendarHandler) CreateAppointment(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, resp.Success(res, "Appointment created successfully"))
 }
 
+// @Summary Get appointment
+// @Description Get a specific appointment by ID
+// @Tags Calendar - Appointments
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Appointment ID"
+// @Success 200 {object} resp.SuccessResponse[AppointmentResponse]
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 404 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /calendar/appointments/{id} [get]
 func (h *CalendarHandler) GetAppointment(ctx *gin.Context) {
 	id := ctx.Param("id")
 	res, err := h.service.GetAppointment(ctx, id)
@@ -118,6 +130,17 @@ func (h *CalendarHandler) GetAppointment(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp.Success(res, "Appointment retrieved successfully"))
 }
 
+// @Summary List appointments
+// @Description List all appointments for an employee
+// @Tags Calendar - Appointments
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param employee_id query string false "Employee ID (defaults to current user)"
+// @Success 200 {object} resp.SuccessResponse[[]AppointmentResponse]
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /calendar/appointments [get]
 func (h *CalendarHandler) ListAppointments(ctx *gin.Context) {
 	targetEmployeeID := ctx.Query("employee_id")
 	if targetEmployeeID == "" {
@@ -132,6 +155,20 @@ func (h *CalendarHandler) ListAppointments(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp.Success(res, "Appointments retrieved successfully"))
 }
 
+// @Summary Update appointment
+// @Description Update an existing appointment
+// @Tags Calendar - Appointments
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Appointment ID"
+// @Param request body UpdateAppointmentRequest true "Updated appointment details"
+// @Success 200 {object} resp.SuccessResponse[AppointmentResponse]
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 404 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /calendar/appointments/{id} [patch]
 func (h *CalendarHandler) UpdateAppointment(ctx *gin.Context) {
 	id := ctx.Param("id")
 	var req UpdateAppointmentRequest
@@ -149,6 +186,18 @@ func (h *CalendarHandler) UpdateAppointment(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp.Success(res, "Appointment updated successfully"))
 }
 
+// @Summary Delete appointment
+// @Description Delete an appointment by ID
+// @Tags Calendar - Appointments
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Appointment ID"
+// @Success 200 {object} resp.MessageResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 404 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /calendar/appointments/{id} [delete]
 func (h *CalendarHandler) DeleteAppointment(ctx *gin.Context) {
 	id := ctx.Param("id")
 	err := h.service.DeleteAppointment(ctx, id)
@@ -162,6 +211,18 @@ func (h *CalendarHandler) DeleteAppointment(ctx *gin.Context) {
 
 // Reminder handlers
 
+// @Summary Create reminder
+// @Description Create a new reminder
+// @Tags Calendar - Reminders
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body CreateReminderRequest true "Reminder details"
+// @Success 201 {object} resp.SuccessResponse[ReminderResponse]
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /calendar/reminders [post]
 func (h *CalendarHandler) CreateReminder(ctx *gin.Context) {
 	var req CreateReminderRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -179,6 +240,18 @@ func (h *CalendarHandler) CreateReminder(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, resp.Success(res, "Reminder created successfully"))
 }
 
+// @Summary Get reminder
+// @Description Get a specific reminder by ID
+// @Tags Calendar - Reminders
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Reminder ID"
+// @Success 200 {object} resp.SuccessResponse[ReminderResponse]
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 404 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /calendar/reminders/{id} [get]
 func (h *CalendarHandler) GetReminder(ctx *gin.Context) {
 	id := ctx.Param("id")
 	res, err := h.service.GetReminder(ctx, id)
@@ -190,6 +263,17 @@ func (h *CalendarHandler) GetReminder(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp.Success(res, "Reminder retrieved successfully"))
 }
 
+// @Summary List reminders
+// @Description List all reminders for an employee
+// @Tags Calendar - Reminders
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param employee_id query string false "Employee ID (defaults to current user)"
+// @Success 200 {object} resp.SuccessResponse[[]ReminderResponse]
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /calendar/reminders [get]
 func (h *CalendarHandler) ListReminders(ctx *gin.Context) {
 	targetEmployeeID := ctx.Query("employee_id")
 	if targetEmployeeID == "" {
@@ -204,6 +288,20 @@ func (h *CalendarHandler) ListReminders(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp.Success(res, "Reminders retrieved successfully"))
 }
 
+// @Summary Update reminder
+// @Description Update a reminder's completion status
+// @Tags Calendar - Reminders
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Reminder ID"
+// @Param request body UpdateReminderRequest true "Updated reminder details"
+// @Success 200 {object} resp.SuccessResponse[ReminderResponse]
+// @Failure 400 {object} resp.ErrorResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 404 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /calendar/reminders/{id} [patch]
 func (h *CalendarHandler) UpdateReminder(ctx *gin.Context) {
 	id := ctx.Param("id")
 	var req struct {
@@ -223,6 +321,18 @@ func (h *CalendarHandler) UpdateReminder(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp.Success(res, "Reminder updated successfully"))
 }
 
+// @Summary Delete reminder
+// @Description Delete a reminder by ID
+// @Tags Calendar - Reminders
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Reminder ID"
+// @Success 200 {object} resp.MessageResponse
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 404 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /calendar/reminders/{id} [delete]
 func (h *CalendarHandler) DeleteReminder(ctx *gin.Context) {
 	id := ctx.Param("id")
 	err := h.service.DeleteReminder(ctx, id)

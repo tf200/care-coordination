@@ -519,15 +519,39 @@ INSERT INTO permissions (id, resource, action, description) VALUES
     -- Location permissions
     ('perm_location_read', 'location', 'read', 'View locations'),
     ('perm_location_write', 'location', 'write', 'Create and update locations'),
+    ('perm_location_delete', 'location', 'delete', 'Delete locations'),
+    -- Location Transfer permissions
+    ('perm_location_transfer_read', 'location_transfer', 'read', 'View location transfers'),
+    ('perm_location_transfer_write', 'location_transfer', 'write', 'Create and update location transfers'),
+    ('perm_location_transfer_delete', 'location_transfer', 'delete', 'Delete location transfers'),
     -- Registration permissions
     ('perm_registration_read', 'registration', 'read', 'View registrations'),
     ('perm_registration_write', 'registration', 'write', 'Create and update registrations'),
+    ('perm_registration_delete', 'registration', 'delete', 'Delete registrations'),
     -- Intake permissions
     ('perm_intake_read', 'intake', 'read', 'View intakes'),
     ('perm_intake_write', 'intake', 'write', 'Create and update intakes'),
+    ('perm_intake_delete', 'intake', 'delete', 'Delete intakes'),
     -- Incident permissions
     ('perm_incident_read', 'incident', 'read', 'View incidents'),
     ('perm_incident_write', 'incident', 'write', 'Create and update incidents'),
+    ('perm_incident_delete', 'incident', 'delete', 'Delete incidents'),
+    -- Refering Organization permissions
+    ('perm_referring_organization_read', 'referring_organization', 'read', 'View referring organizations'),
+    ('perm_referring_organization_write', 'referring_organization', 'write', 'Create and update referring organizations'),
+    ('perm_referring_organization_delete', 'referring_organization', 'delete', 'Delete referring organizations'),
+    -- Evaluation permissions
+    ('perm_evaluation_read', 'evaluation', 'read', 'View evaluations'),
+    ('perm_evaluation_write', 'evaluation', 'write', 'Create and update evaluations'),
+    ('perm_evaluation_delete', 'evaluation', 'delete', 'Delete evaluations'),
+    -- Calendar permissions
+    ('perm_calendar_read', 'calendar', 'read', 'View calendar'),
+    ('perm_calendar_write', 'calendar', 'write', 'Create and update calendar'),
+    ('perm_calendar_delete', 'calendar', 'delete', 'Delete calendar'),
+    -- RBAC permissions
+    ('perm_rbac_read', 'rbac', 'read', 'View rbac'),
+    ('perm_rbac_write', 'rbac', 'write', 'Create and update rbac'),
+    ('perm_rbac_delete', 'rbac', 'delete', 'Delete rbac'),
     -- Admin permissions
     ('perm_admin_manage', 'admin', 'manage', 'Full admin access');
 

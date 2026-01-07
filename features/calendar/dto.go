@@ -89,6 +89,16 @@ type ReminderResponse struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
+type UpdateReminderRequest struct {
+	IsCompleted bool `json:"is_completed"`
+}
+
+type GetCalendarViewRequest struct {
+	Start      time.Time `form:"start" binding:"required" time_format:"2006-01-02T15:04:05Z07:00"`
+	End        time.Time `form:"end" binding:"required" time_format:"2006-01-02T15:04:05Z07:00"`
+	EmployeeID *string   `form:"employee_id"`
+}
+
 type CalendarEventDTO struct {
 	ID              string                `json:"id"`
 	Title           string                `json:"title"`
@@ -101,9 +111,11 @@ type CalendarEventDTO struct {
 }
 
 type CalendarExtendedProps struct {
-	Description string `json:"description,omitempty"`
-	Location    string `json:"location,omitempty"`
-	Status      string `json:"status,omitempty"`
-	Type        string `json:"type,omitempty"`
-	IsCompleted bool   `json:"is_completed,omitempty"`
+	Description     string `json:"description,omitempty"`
+	Location        string `json:"location,omitempty"`
+	Status          string `json:"status,omitempty"`
+	Type            string `json:"type,omitempty"`
+	IsCompleted     bool   `json:"is_completed,omitempty"`
+	IsRecurring     bool   `json:"is_recurring,omitempty"`
+	OriginalEventID string `json:"original_event_id,omitempty"`
 }

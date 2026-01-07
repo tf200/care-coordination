@@ -134,6 +134,7 @@ type Querier interface {
 	ListLocations(ctx context.Context, arg ListLocationsParams) ([]ListLocationsRow, error)
 	ListPermissions(ctx context.Context, arg ListPermissionsParams) ([]ListPermissionsRow, error)
 	ListPermissionsForRole(ctx context.Context, roleID string) ([]Permission, error)
+	ListRecurringAppointments(ctx context.Context, arg ListRecurringAppointmentsParams) ([]Appointment, error)
 	ListReferringOrgs(ctx context.Context, arg ListReferringOrgsParams) ([]ListReferringOrgsRow, error)
 	ListReferringOrgsWithCounts(ctx context.Context, arg ListReferringOrgsWithCountsParams) ([]ListReferringOrgsWithCountsRow, error)
 	ListRegistrationForms(ctx context.Context, arg ListRegistrationFormsParams) ([]ListRegistrationFormsRow, error)

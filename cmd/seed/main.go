@@ -487,6 +487,11 @@ func main() {
 		log.Fatalf("Failed to seed evaluations: %v", err)
 	}
 
+	// Seed appointments for admin user
+	if err := seedAppointments(ctx, store, cfg.AdminEmail, inCareClients); err != nil {
+		log.Fatalf("Failed to seed appointments: %v", err)
+	}
+
 	fmt.Println("✅ Successfully seeded database!")
 }
 
@@ -1853,4 +1858,141 @@ func createEvaluationWithGoals(
 	})
 
 	return err
+}
+
+// ============================================================
+// Appointments Seeding
+// ============================================================
+
+// Appointment sample data
+var (
+	appointmentTitles = []string{
+		"Intake gesprek",
+		"Voortgangsgesprek",
+		"Evaluatie bespreking",
+		"Medicatie controle",
+		"Familie bijeenkomst",
+		"Teamoverleg cliënt",
+		"Zorgplan bespreking",
+		"Huisbezoek",
+		"Ambulante begeleiding",
+		"Crisisinterventie overleg",
+	}
+
+	appointmentDescriptions = []string{
+		"Reguliere afspraak met cliënt voor voortgangsbespreking",
+		"Bespreking van huidige situatie en doelen",
+		"Evaluatie van behaalde resultaten afgelopen periode",
+		"Controle medicatie-inname en bijwerkingen",
+		"Gesprek met cliënt en familieleden over zorgplan",
+		"Teamoverleg over voortgang cliënt",
+		"Aanpassing zorgplan na evaluatie",
+		"Bezoek aan cliënt thuis ter ondersteuning",
+		"Ambulante begeleiding sessie",
+		"Overleg naar aanleiding van crisissituatie",
+	}
+
+	appointmentLocations = []string{
+		"Kantoor begeleider",
+		"Woonkamer locatie",
+		"Cliënt thuis",
+		"Spreekkamer 1",
+		"Spreekkamer 2",
+		"Online via videobellen",
+		"Gemeenschappelijke ruimte",
+	}
+)
+
+func seedAppointments(
+	ctx context.Context,
+	store *db.Store,
+	adminEmail string,
+	inCareClients []ClientInfo,
+) error {
+	if adminEmail == "" {
+		fmt.Println("⚠️  ADMIN_EMAIL not set, skipping appointment seeding")
+		return nil
+	}
+
+	fmt.Printf("🌱 Seeding appointments for admin user: %s...\n", adminEmail)
+
+	// Get admin user by email
+	user, err := store.GetUserByEmail(ctx, adminEmail)
+	if err != nil {
+		return fmt.Errorf("failed to get admin user by email %s: %w", adminEmail, err)
+	}
+
+	// Get employee by user ID
+	employee, err := store.GetEmployeeByUserID(ctx, user.ID)
+	if err != nil {
+		return fmt.Errorf("failed to get employee for user %s: %w", user.ID, err)
+	}
+
+	organizerID := employee.ID
+	now := time.Now()
+
+	// Create appointments for the next 30 days
+	appointmentCount := 0
+	for i := 0; i < 15; i++ {
+		appointmentID, err := gonanoid.New()
+		if err != nil {
+			return fmt.Errorf("failed to generate appointment ID: %w", err)
+		}
+
+		// Random offset in days (0-30) and hours (8-18)
+		daysOffset := rand.Intn(30)
+		hourOffset := 8 + rand.Intn(10) // Between 8:00 and 18:00
+		startTime := now.AddDate(0, 0, daysOffset).Truncate(24 * time.Hour).Add(time.Duration(hourOffset) * time.Hour)
+		endTime := startTime.Add(time.Duration(30+rand.Intn(60)) * time.Minute) // 30-90 min duration
+
+		title := randomElement(appointmentTitles)
+		description := randomElement(appointmentDescriptions)
+		location := randomElement(appointmentLocations)
+
+		// Random appointment type
+		appointmentTypes := []db.AppointmentTypeEnum{
+			db.AppointmentTypeEnumGeneral,
+			db.AppointmentTypeEnumIntake,
+			db.AppointmentTypeEnumAmbulatory,
+		}
+		appointmentType := randomElement(appointmentTypes)
+
+		// Create appointment
+		_, err = store.CreateAppointment(ctx, db.CreateAppointmentParams{
+			ID:          appointmentID,
+			Title:       title,
+			Description: &description,
+			StartTime:   pgtype.Timestamptz{Time: startTime, Valid: true},
+			EndTime:     pgtype.Timestamptz{Time: endTime, Valid: true},
+			Location:    &location,
+			OrganizerID: organizerID,
+			Status: db.NullAppointmentStatusEnum{
+				AppointmentStatusEnum: db.AppointmentStatusEnumConfirmed,
+				Valid:                 true,
+			},
+			Type: appointmentType,
+		})
+		if err != nil {
+			return fmt.Errorf("failed to create appointment: %w", err)
+		}
+
+		// Add a client participant if available
+		if len(inCareClients) > 0 {
+			client := inCareClients[rand.Intn(len(inCareClients))]
+			err = store.AddAppointmentParticipant(ctx, db.AddAppointmentParticipantParams{
+				AppointmentID:   appointmentID,
+				ParticipantID:   client.ID,
+				ParticipantType: db.ParticipantTypeEnumClient,
+			})
+			if err != nil {
+				return fmt.Errorf("failed to add appointment participant: %w", err)
+			}
+		}
+
+		appointmentCount++
+		fmt.Printf("  ✓ Created appointment: %s (%s)\n", title, startTime.Format("2006-01-02 15:04"))
+	}
+
+	fmt.Printf("✅ Successfully seeded %d appointments for admin\n", appointmentCount)
+	return nil
 }

@@ -230,7 +230,7 @@ func (h *CalendarHandler) CreateReminder(ctx *gin.Context) {
 		return
 	}
 
-	userID := util.GetUserID(ctx)
+	userID := util.GetEmployeeID(ctx)
 	res, err := h.service.CreateReminder(ctx, userID, req)
 	if err != nil {
 		h.handleError(ctx, err)

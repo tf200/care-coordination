@@ -4635,13 +4635,13 @@ const docTemplate = `{
         "calendar.AppointmentResponse": {
             "type": "object",
             "properties": {
-                "created_at": {
+                "createdAt": {
                     "type": "string"
                 },
                 "description": {
                     "type": "string"
                 },
-                "end_time": {
+                "endTime": {
                     "type": "string"
                 },
                 "id": {
@@ -4650,7 +4650,7 @@ const docTemplate = `{
                 "location": {
                     "type": "string"
                 },
-                "organizer_id": {
+                "organizerId": {
                     "type": "string"
                 },
                 "participants": {
@@ -4659,10 +4659,10 @@ const docTemplate = `{
                         "$ref": "#/definitions/calendar.ParticipantDTO"
                     }
                 },
-                "recurrence_rule": {
+                "recurrenceRule": {
                     "type": "string"
                 },
-                "start_time": {
+                "startTime": {
                     "type": "string"
                 },
                 "status": {
@@ -4674,7 +4674,7 @@ const docTemplate = `{
                 "type": {
                     "$ref": "#/definitions/calendar.AppointmentType"
                 },
-                "updated_at": {
+                "updatedAt": {
                     "type": "string"
                 }
             }
@@ -4708,16 +4708,16 @@ const docTemplate = `{
         "calendar.CalendarEventDTO": {
             "type": "object",
             "properties": {
-                "all_day": {
+                "allDay": {
                     "type": "boolean"
                 },
-                "background_color": {
+                "backgroundColor": {
                     "type": "string"
                 },
                 "end": {
                     "type": "string"
                 },
-                "extended_props": {
+                "extendedProps": {
                     "$ref": "#/definitions/calendar.CalendarExtendedProps"
                 },
                 "id": {
@@ -4741,16 +4741,16 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
-                "is_completed": {
+                "isCompleted": {
                     "type": "boolean"
                 },
-                "is_recurring": {
+                "isRecurring": {
                     "type": "boolean"
                 },
                 "location": {
                     "type": "string"
                 },
-                "original_event_id": {
+                "originalEventId": {
                     "type": "string"
                 },
                 "status": {
@@ -4764,9 +4764,9 @@ const docTemplate = `{
         "calendar.CreateAppointmentRequest": {
             "type": "object",
             "required": [
-                "end_time",
+                "endTime",
                 "participants",
-                "start_time",
+                "startTime",
                 "title",
                 "type"
             ],
@@ -4774,7 +4774,7 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
-                "end_time": {
+                "endTime": {
                     "type": "string"
                 },
                 "location": {
@@ -4787,10 +4787,10 @@ const docTemplate = `{
                         "$ref": "#/definitions/calendar.ParticipantDTO"
                     }
                 },
-                "recurrence_rule": {
+                "recurrenceRule": {
                     "type": "string"
                 },
-                "start_time": {
+                "startTime": {
                     "type": "string"
                 },
                 "status": {
@@ -4825,14 +4825,14 @@ const docTemplate = `{
         "calendar.CreateReminderRequest": {
             "type": "object",
             "required": [
-                "due_time",
+                "dueTime",
                 "title"
             ],
             "properties": {
                 "description": {
                     "type": "string"
                 },
-                "due_time": {
+                "dueTime": {
                     "type": "string"
                 },
                 "title": {
@@ -4877,28 +4877,28 @@ const docTemplate = `{
         "calendar.ReminderResponse": {
             "type": "object",
             "properties": {
-                "created_at": {
+                "createdAt": {
                     "type": "string"
                 },
                 "description": {
                     "type": "string"
                 },
-                "due_time": {
+                "dueTime": {
                     "type": "string"
                 },
                 "id": {
                     "type": "string"
                 },
-                "is_completed": {
+                "isCompleted": {
                     "type": "boolean"
                 },
                 "title": {
                     "type": "string"
                 },
-                "updated_at": {
+                "updatedAt": {
                     "type": "string"
                 },
-                "user_id": {
+                "userId": {
                     "type": "string"
                 }
             }
@@ -4909,7 +4909,7 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
-                "end_time": {
+                "endTime": {
                     "type": "string"
                 },
                 "location": {
@@ -4921,10 +4921,10 @@ const docTemplate = `{
                         "$ref": "#/definitions/calendar.ParticipantDTO"
                     }
                 },
-                "recurrence_rule": {
+                "recurrenceRule": {
                     "type": "string"
                 },
-                "start_time": {
+                "startTime": {
                     "type": "string"
                 },
                 "status": {
@@ -4959,7 +4959,7 @@ const docTemplate = `{
         "calendar.UpdateReminderRequest": {
             "type": "object",
             "properties": {
-                "is_completed": {
+                "isCompleted": {
                     "type": "boolean"
                 }
             }

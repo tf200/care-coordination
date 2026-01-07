@@ -45,25 +45,25 @@ definitions:
     type: object
   calendar.AppointmentResponse:
     properties:
-      created_at:
+      createdAt:
         type: string
       description:
         type: string
-      end_time:
+      endTime:
         type: string
       id:
         type: string
       location:
         type: string
-      organizer_id:
+      organizerId:
         type: string
       participants:
         items:
           $ref: '#/definitions/calendar.ParticipantDTO'
         type: array
-      recurrence_rule:
+      recurrenceRule:
         type: string
-      start_time:
+      startTime:
         type: string
       status:
         $ref: '#/definitions/calendar.AppointmentStatus'
@@ -71,7 +71,7 @@ definitions:
         type: string
       type:
         $ref: '#/definitions/calendar.AppointmentType'
-      updated_at:
+      updatedAt:
         type: string
     type: object
   calendar.AppointmentStatus:
@@ -96,13 +96,13 @@ definitions:
     - TypeAmbulatory
   calendar.CalendarEventDTO:
     properties:
-      all_day:
+      allDay:
         type: boolean
-      background_color:
+      backgroundColor:
         type: string
       end:
         type: string
-      extended_props:
+      extendedProps:
         $ref: '#/definitions/calendar.CalendarExtendedProps'
       id:
         type: string
@@ -118,13 +118,13 @@ definitions:
     properties:
       description:
         type: string
-      is_completed:
+      isCompleted:
         type: boolean
-      is_recurring:
+      isRecurring:
         type: boolean
       location:
         type: string
-      original_event_id:
+      originalEventId:
         type: string
       status:
         type: string
@@ -135,7 +135,7 @@ definitions:
     properties:
       description:
         type: string
-      end_time:
+      endTime:
         type: string
       location:
         type: string
@@ -144,9 +144,9 @@ definitions:
           $ref: '#/definitions/calendar.ParticipantDTO'
         minItems: 1
         type: array
-      recurrence_rule:
+      recurrenceRule:
         type: string
-      start_time:
+      startTime:
         type: string
       status:
         allOf:
@@ -165,9 +165,9 @@ definitions:
         - intake
         - ambulatory
     required:
-    - end_time
+    - endTime
     - participants
-    - start_time
+    - startTime
     - title
     - type
     type: object
@@ -175,12 +175,12 @@ definitions:
     properties:
       description:
         type: string
-      due_time:
+      dueTime:
         type: string
       title:
         type: string
     required:
-    - due_time
+    - dueTime
     - title
     type: object
   calendar.ParticipantDTO:
@@ -207,28 +207,28 @@ definitions:
     - ParticipantClient
   calendar.ReminderResponse:
     properties:
-      created_at:
+      createdAt:
         type: string
       description:
         type: string
-      due_time:
+      dueTime:
         type: string
       id:
         type: string
-      is_completed:
+      isCompleted:
         type: boolean
       title:
         type: string
-      updated_at:
+      updatedAt:
         type: string
-      user_id:
+      userId:
         type: string
     type: object
   calendar.UpdateAppointmentRequest:
     properties:
       description:
         type: string
-      end_time:
+      endTime:
         type: string
       location:
         type: string
@@ -236,9 +236,9 @@ definitions:
         items:
           $ref: '#/definitions/calendar.ParticipantDTO'
         type: array
-      recurrence_rule:
+      recurrenceRule:
         type: string
-      start_time:
+      startTime:
         type: string
       status:
         allOf:
@@ -259,7 +259,7 @@ definitions:
     type: object
   calendar.UpdateReminderRequest:
     properties:
-      is_completed:
+      isCompleted:
         type: boolean
     type: object
   client.CareTypeCountsDTO:

@@ -97,7 +97,7 @@ func (h *CalendarHandler) CreateAppointment(ctx *gin.Context) {
 		return
 	}
 
-	userID := util.GetUserID(ctx)
+	userID := util.GetEmployeeID(ctx)
 	res, err := h.service.CreateAppointment(ctx, userID, req)
 	if err != nil {
 		h.handleError(ctx, err)

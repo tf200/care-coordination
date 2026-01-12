@@ -194,7 +194,7 @@ func (h *NotificationHandler) DeleteNotification(ctx *gin.Context) {
 // @Router /ws/auth [post]
 func (h *NotificationHandler) CreateWSTicket(ctx *gin.Context) {
 	// User is already authenticated via middleware, get user ID from context
-	userID, exists := ctx.Get("userID")
+	userID, exists := ctx.Get("user_id")
 	if !exists {
 		ctx.JSON(http.StatusUnauthorized, resp.Error(ErrUnauthorized))
 		return

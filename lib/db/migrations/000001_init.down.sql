@@ -11,6 +11,22 @@ DROP POLICY IF EXISTS admin_all_goals ON client_goals;
 DROP POLICY IF EXISTS coordinator_own_clients ON clients;
 DROP POLICY IF EXISTS admin_all ON clients;
 
+-- Drop calendar-related RLS policies
+DROP POLICY IF EXISTS admin_all_appointments ON appointments;
+DROP POLICY IF EXISTS coordinator_appointments ON appointments;
+DROP POLICY IF EXISTS admin_all_participants ON appointment_participants;
+DROP POLICY IF EXISTS coordinator_participants ON appointment_participants;
+DROP POLICY IF EXISTS admin_all_reminders ON reminders;
+DROP POLICY IF EXISTS user_own_reminders ON reminders;
+
+-- Drop notification RLS policy
+DROP POLICY IF EXISTS user_own_notifications ON notifications;
+
+-- Drop notifications table
+DROP TABLE IF EXISTS notifications;
+DROP TYPE IF EXISTS notification_priority_enum;
+DROP TYPE IF EXISTS notification_type_enum;
+
 -- Then drop the tables
 DROP TABLE IF EXISTS role_permissions;
 DROP TABLE IF EXISTS user_roles;

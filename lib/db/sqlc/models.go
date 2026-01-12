@@ -666,6 +666,99 @@ func (ns NullLocationTransferStatusEnum) Value() (driver.Value, error) {
 	return string(ns.LocationTransferStatusEnum), nil
 }
 
+type NotificationPriorityEnum string
+
+const (
+	NotificationPriorityEnumLow    NotificationPriorityEnum = "low"
+	NotificationPriorityEnumNormal NotificationPriorityEnum = "normal"
+	NotificationPriorityEnumHigh   NotificationPriorityEnum = "high"
+	NotificationPriorityEnumUrgent NotificationPriorityEnum = "urgent"
+)
+
+func (e *NotificationPriorityEnum) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = NotificationPriorityEnum(s)
+	case string:
+		*e = NotificationPriorityEnum(s)
+	default:
+		return fmt.Errorf("unsupported scan type for NotificationPriorityEnum: %T", src)
+	}
+	return nil
+}
+
+type NullNotificationPriorityEnum struct {
+	NotificationPriorityEnum NotificationPriorityEnum `json:"notification_priority_enum"`
+	Valid                    bool                     `json:"valid"` // Valid is true if NotificationPriorityEnum is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullNotificationPriorityEnum) Scan(value interface{}) error {
+	if value == nil {
+		ns.NotificationPriorityEnum, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.NotificationPriorityEnum.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullNotificationPriorityEnum) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.NotificationPriorityEnum), nil
+}
+
+type NotificationTypeEnum string
+
+const (
+	NotificationTypeEnumEvaluationDue            NotificationTypeEnum = "evaluation_due"
+	NotificationTypeEnumAppointmentReminder      NotificationTypeEnum = "appointment_reminder"
+	NotificationTypeEnumIncidentCreated          NotificationTypeEnum = "incident_created"
+	NotificationTypeEnumLocationTransferRequest  NotificationTypeEnum = "location_transfer_request"
+	NotificationTypeEnumLocationTransferApproved NotificationTypeEnum = "location_transfer_approved"
+	NotificationTypeEnumLocationTransferRejected NotificationTypeEnum = "location_transfer_rejected"
+	NotificationTypeEnumClientStatusChange       NotificationTypeEnum = "client_status_change"
+	NotificationTypeEnumRegistrationStatusChange NotificationTypeEnum = "registration_status_change"
+	NotificationTypeEnumSystemAlert              NotificationTypeEnum = "system_alert"
+)
+
+func (e *NotificationTypeEnum) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = NotificationTypeEnum(s)
+	case string:
+		*e = NotificationTypeEnum(s)
+	default:
+		return fmt.Errorf("unsupported scan type for NotificationTypeEnum: %T", src)
+	}
+	return nil
+}
+
+type NullNotificationTypeEnum struct {
+	NotificationTypeEnum NotificationTypeEnum `json:"notification_type_enum"`
+	Valid                bool                 `json:"valid"` // Valid is true if NotificationTypeEnum is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullNotificationTypeEnum) Scan(value interface{}) error {
+	if value == nil {
+		ns.NotificationTypeEnum, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.NotificationTypeEnum.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullNotificationTypeEnum) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.NotificationTypeEnum), nil
+}
+
 type ParticipantTypeEnum string
 
 const (
@@ -985,6 +1078,21 @@ type Location struct {
 	CreatedAt  pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
 	IsDeleted  *bool              `json:"is_deleted"`
+}
+
+type Notification struct {
+	ID           string                   `json:"id"`
+	UserID       string                   `json:"user_id"`
+	Type         NotificationTypeEnum     `json:"type"`
+	Priority     NotificationPriorityEnum `json:"priority"`
+	Title        string                   `json:"title"`
+	Message      string                   `json:"message"`
+	ResourceType *string                  `json:"resource_type"`
+	ResourceID   *string                  `json:"resource_id"`
+	IsRead       *bool                    `json:"is_read"`
+	ReadAt       pgtype.Timestamptz       `json:"read_at"`
+	CreatedAt    pgtype.Timestamptz       `json:"created_at"`
+	ExpiresAt    pgtype.Timestamptz       `json:"expires_at"`
 }
 
 type Permission struct {

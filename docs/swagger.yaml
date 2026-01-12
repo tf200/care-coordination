@@ -1570,6 +1570,39 @@ definitions:
       success:
         type: boolean
     type: object
+  notification.NotificationResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      is_read:
+        type: boolean
+      message:
+        type: string
+      priority:
+        type: string
+      read_at:
+        type: string
+      resource_id:
+        type: string
+      resource_type:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+    type: object
+  notification.UnreadCountResponse:
+    properties:
+      count:
+        type: integer
+    type: object
+  notification.WSAuthResponse:
+    properties:
+      ticket:
+        type: string
+    type: object
   rbac.AssignPermissionRequest:
     properties:
       permissionId:
@@ -2040,6 +2073,23 @@ definitions:
         items:
           items:
             $ref: '#/definitions/locations.ListLocationsResponse'
+          type: array
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      totalCount:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  resp.PaginationResponse-array_notification_NotificationResponse:
+    properties:
+      data:
+        items:
+          items:
+            $ref: '#/definitions/notification.NotificationResponse'
           type: array
         type: array
       page:
@@ -2668,6 +2718,28 @@ definitions:
         example: true
         type: boolean
     type: object
+  resp.SuccessResponse-notification_UnreadCountResponse:
+    properties:
+      data:
+        $ref: '#/definitions/notification.UnreadCountResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-notification_WSAuthResponse:
+    properties:
+      data:
+        $ref: '#/definitions/notification.WSAuthResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
   resp.SuccessResponse-rbac_CreateRoleResponse:
     properties:
       data:
@@ -2815,6 +2887,17 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/resp.PaginationResponse-array_locations_ListLocationsResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-resp_PaginationResponse-array_notification_NotificationResponse:
+    properties:
+      data:
+        $ref: '#/definitions/resp.PaginationResponse-array_notification_NotificationResponse'
       message:
         example: success message
         type: string
@@ -5610,6 +5693,154 @@ paths:
       summary: Get location capacity statistics
       tags:
       - Location
+  /notifications:
+    get:
+      description: List notifications for the current user with optional filtering
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Page size (default: 10, max: 100)'
+        in: query
+        name: page_size
+        type: integer
+      - description: Filter by read status
+        in: query
+        name: is_read
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-resp_PaginationResponse-array_notification_NotificationResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: List notifications
+      tags:
+      - Notifications
+  /notifications/{id}:
+    delete:
+      description: Delete a notification
+      parameters:
+      - description: Notification ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-any'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Delete notification
+      tags:
+      - Notifications
+  /notifications/{id}/read:
+    patch:
+      description: Mark a single notification as read
+      parameters:
+      - description: Notification ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-any'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Mark notification as read
+      tags:
+      - Notifications
+  /notifications/read-all:
+    patch:
+      description: Mark all notifications as read for the current user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-any'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Mark all notifications as read
+      tags:
+      - Notifications
+  /notifications/unread-count:
+    get:
+      description: Get the count of unread notifications for the current user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-notification_UnreadCountResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get unread notification count
+      tags:
+      - Notifications
   /referring-orgs:
     get:
       consumes:
@@ -5927,6 +6158,48 @@ paths:
       summary: Get registration statistics
       tags:
       - Registration
+  /ws/auth:
+    post:
+      description: Exchange JWT for a one-time WebSocket connection ticket
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-notification_WSAuthResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Create WebSocket auth ticket
+      tags:
+      - Notifications
+  /ws/notifications:
+    get:
+      description: Establish WebSocket connection for real-time notifications
+      parameters:
+      - description: One-time auth ticket from /ws/auth
+        in: query
+        name: ticket
+        required: true
+        type: string
+      responses:
+        "101":
+          description: Switching Protocols
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Connect to WebSocket
+      tags:
+      - Notifications
 security:
 - Bearer: []
 securityDefinitions:

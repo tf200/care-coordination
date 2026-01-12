@@ -43,6 +43,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: app
     container_name: care-coordination-app
     restart: unless-stopped
     ports:
@@ -54,6 +55,24 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
+    networks:
+      - care-coordination-network
+
+  # Notification Worker
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: worker
+    container_name: care-coordination-worker
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      redis:
+        condition: service_healthy
+      app:
+        condition: service_started
     networks:
       - care-coordination-network
 

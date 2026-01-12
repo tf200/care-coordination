@@ -164,6 +164,46 @@ func (q *Queries) GetAppointment(ctx context.Context, id string) (Appointment, e
 	return i, err
 }
 
+const getPendingRemindersByDueTime = `-- name: GetPendingRemindersByDueTime :many
+SELECT 
+    r.id, r.user_id, r.title, r.description, r.due_time, r.is_completed, r.created_at, r.updated_at
+FROM reminders r
+WHERE r.due_time >= CURRENT_TIMESTAMP 
+AND r.due_time <= CURRENT_TIMESTAMP + INTERVAL '1 hour'
+AND r.is_completed = FALSE
+ORDER BY r.due_time ASC
+`
+
+// Get reminders due in the next hour that haven't been completed
+func (q *Queries) GetPendingRemindersByDueTime(ctx context.Context) ([]Reminder, error) {
+	rows, err := q.db.Query(ctx, getPendingRemindersByDueTime)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Reminder{}
+	for rows.Next() {
+		var i Reminder
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.Title,
+			&i.Description,
+			&i.DueTime,
+			&i.IsCompleted,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getReminder = `-- name: GetReminder :one
 SELECT id, user_id, title, description, due_time, is_completed, created_at, updated_at FROM reminders WHERE id = $1
 `
@@ -182,6 +222,69 @@ func (q *Queries) GetReminder(ctx context.Context, id string) (Reminder, error) 
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const getUpcomingAppointments = `-- name: GetUpcomingAppointments :many
+SELECT 
+    a.id, a.title, a.description, a.start_time, a.end_time, a.location, a.organizer_id, a.status, a.type, a.recurrence_rule, a.created_at, a.updated_at,
+    e.user_id as organizer_user_id
+FROM appointments a
+JOIN employees e ON a.organizer_id = e.id
+WHERE a.start_time >= CURRENT_TIMESTAMP 
+AND a.start_time <= CURRENT_TIMESTAMP + INTERVAL '1 hour'
+AND a.status = 'scheduled'
+ORDER BY a.start_time ASC
+`
+
+type GetUpcomingAppointmentsRow struct {
+	ID              string                    `json:"id"`
+	Title           string                    `json:"title"`
+	Description     *string                   `json:"description"`
+	StartTime       pgtype.Timestamptz        `json:"start_time"`
+	EndTime         pgtype.Timestamptz        `json:"end_time"`
+	Location        *string                   `json:"location"`
+	OrganizerID     string                    `json:"organizer_id"`
+	Status          NullAppointmentStatusEnum `json:"status"`
+	Type            AppointmentTypeEnum       `json:"type"`
+	RecurrenceRule  *string                   `json:"recurrence_rule"`
+	CreatedAt       pgtype.Timestamptz        `json:"created_at"`
+	UpdatedAt       pgtype.Timestamptz        `json:"updated_at"`
+	OrganizerUserID string                    `json:"organizer_user_id"`
+}
+
+// Get appointments starting in the next hour for reminder notifications
+func (q *Queries) GetUpcomingAppointments(ctx context.Context) ([]GetUpcomingAppointmentsRow, error) {
+	rows, err := q.db.Query(ctx, getUpcomingAppointments)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetUpcomingAppointmentsRow{}
+	for rows.Next() {
+		var i GetUpcomingAppointmentsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Description,
+			&i.StartTime,
+			&i.EndTime,
+			&i.Location,
+			&i.OrganizerID,
+			&i.Status,
+			&i.Type,
+			&i.RecurrenceRule,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.OrganizerUserID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listAppointmentParticipants = `-- name: ListAppointmentParticipants :many

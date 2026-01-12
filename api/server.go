@@ -29,11 +29,13 @@ import (
 	locTransfer "care-cordination/features/location_transfer"
 	"care-cordination/features/locations"
 	"care-cordination/features/middleware"
+	"care-cordination/features/notification"
 	"care-cordination/features/rbac"
 	referringOrgs "care-cordination/features/referring_orgs"
 	"care-cordination/features/registration"
 	"care-cordination/lib/logger"
 	"care-cordination/lib/ratelimit"
+	"care-cordination/lib/websocket"
 	"context"
 	"net/http"
 	"time"
@@ -64,6 +66,8 @@ type Server struct {
 	evaluationHandler   *evaluation.EvaluationHandler
 	rbacHandler         *rbac.RBACHandler
 	calendarHandler     *calendar.CalendarHandler
+	notificationHandler *notification.NotificationHandler
+	wsHub               *websocket.Hub
 
 	environment string
 	rateLimiter ratelimit.RateLimiter
@@ -88,6 +92,8 @@ func NewServer(
 	rbacHandler *rbac.RBACHandler,
 	evaluationHandler *evaluation.EvaluationHandler,
 	calendarHandler *calendar.CalendarHandler,
+	notificationHandler *notification.NotificationHandler,
+	wsHub *websocket.Hub,
 	rateLimiter ratelimit.RateLimiter, addr string, url string) *Server {
 	s := &Server{
 		environment:         environment,
@@ -105,6 +111,8 @@ func NewServer(
 		rbacHandler:         rbacHandler,
 		evaluationHandler:   evaluationHandler,
 		calendarHandler:     calendarHandler,
+		notificationHandler: notificationHandler,
+		wsHub:               wsHub,
 		logger:              logger,
 		addr:                addr,
 		url:                 url,
@@ -182,6 +190,7 @@ func (s *Server) setupRoutes(logger logger.Logger) {
 	s.rbacHandler.SetupRBACRoutes(router)
 	s.evaluationHandler.SetupEvaluationRoutes(router)
 	s.calendarHandler.SetupRoutes(router)
+	s.notificationHandler.SetupRoutes(router)
 	s.router = router
 }
 

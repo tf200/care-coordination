@@ -2,26 +2,34 @@ package incident
 
 import (
 	"care-cordination/features/middleware"
+	"care-cordination/features/notification"
 	db "care-cordination/lib/db/sqlc"
 	"care-cordination/lib/logger"
 	"care-cordination/lib/nanoid"
 	"care-cordination/lib/resp"
 	"care-cordination/lib/util"
 	"context"
+	"fmt"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"go.uber.org/zap"
 )
 
 type incidentService struct {
-	store  *db.Store
-	logger logger.Logger
+	store               *db.Store
+	logger              logger.Logger
+	notificationService notification.NotificationService
 }
 
-func NewIncidentService(store *db.Store, logger logger.Logger) IncidentService {
+func NewIncidentService(
+	store *db.Store,
+	logger logger.Logger,
+	notificationService notification.NotificationService,
+) IncidentService {
 	return &incidentService{
-		store:  store,
-		logger: logger,
+		store:               store,
+		logger:              logger,
+		notificationService: notificationService,
 	}
 }
 
@@ -54,6 +62,29 @@ func (s *incidentService) CreateIncident(
 	if err != nil {
 		s.logger.Error(ctx, "CreateIncident", "Failed to create incident", zap.Error(err))
 		return CreateIncidentResponse{}, ErrInternal
+	}
+
+	// Trigger: Notify all admins about new incident
+	if s.notificationService != nil {
+		resourceType := notification.ResourceTypeIncident
+		resourceID := id
+
+		// Map severity to priority
+		priority := notification.PriorityNormal
+		if req.IncidentSeverity == "severe" {
+			priority = notification.PriorityUrgent
+		} else if req.IncidentSeverity == "moderate" {
+			priority = notification.PriorityHigh
+		}
+
+		s.notificationService.EnqueueForRole(ctx, "admin", &notification.CreateNotificationRequest{
+			Type:         notification.TypeIncidentCreated,
+			Priority:     priority,
+			Title:        "New Incident Reported",
+			Message:      fmt.Sprintf("%s incident at location", req.IncidentType),
+			ResourceType: &resourceType,
+			ResourceID:   &resourceID,
+		})
 	}
 
 	return CreateIncidentResponse{

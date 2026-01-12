@@ -49,6 +49,7 @@ type Querier interface {
 	// Location Transfers
 	// ============================================================
 	CreateLocationTransfer(ctx context.Context, arg CreateLocationTransferParams) (CreateLocationTransferRow, error)
+	CreateNotification(ctx context.Context, arg CreateNotificationParams) (Notification, error)
 	// ============================================================
 	// Permissions
 	// ============================================================
@@ -72,8 +73,10 @@ type Querier interface {
 	DeleteAllPermissionsFromRole(ctx context.Context, roleID string) error
 	DeleteAppointment(ctx context.Context, id string) error
 	DeleteDraftEvaluation(ctx context.Context, id string) error
+	DeleteExpiredNotifications(ctx context.Context) error
 	DeleteGoal(ctx context.Context, id string) error
 	DeleteGoalProgressLogsByEvaluationId(ctx context.Context, evaluationID string) error
+	DeleteNotification(ctx context.Context, arg DeleteNotificationParams) error
 	DeletePermission(ctx context.Context, id string) error
 	DeleteReferringOrg(ctx context.Context, id string) error
 	DeleteReminder(ctx context.Context, id string) error
@@ -91,6 +94,8 @@ type Querier interface {
 	GetEmployeeByUserID(ctx context.Context, userID string) (GetEmployeeByUserIDRow, error)
 	GetEvaluationById(ctx context.Context, id string) (ClientEvaluation, error)
 	GetEvaluationDetails(ctx context.Context, id string) ([]GetEvaluationDetailsRow, error)
+	// Get clients with evaluations due in the next 3 days for reminder notifications
+	GetEvaluationsDueSoon(ctx context.Context) ([]GetEvaluationsDueSoonRow, error)
 	GetInCareStats(ctx context.Context) (GetInCareStatsRow, error)
 	GetIncident(ctx context.Context, id string) (GetIncidentRow, error)
 	GetIncidentStats(ctx context.Context) (GetIncidentStatsRow, error)
@@ -101,6 +106,9 @@ type Querier interface {
 	GetLocationCapacityStats(ctx context.Context) (GetLocationCapacityStatsRow, error)
 	GetLocationTransferByID(ctx context.Context, id string) (GetLocationTransferByIDRow, error)
 	GetLocationTransferStats(ctx context.Context) (GetLocationTransferStatsRow, error)
+	GetNotification(ctx context.Context, id string) (Notification, error)
+	// Get reminders due in the next hour that haven't been completed
+	GetPendingRemindersByDueTime(ctx context.Context) ([]Reminder, error)
 	GetPermissionByID(ctx context.Context, id string) (Permission, error)
 	GetRecentEvaluationsGlobal(ctx context.Context, arg GetRecentEvaluationsGlobalParams) ([]GetRecentEvaluationsGlobalRow, error)
 	GetReferringOrgByID(ctx context.Context, id string) (ReferringOrg, error)
@@ -113,7 +121,11 @@ type Querier interface {
 	GetRoleByName(ctx context.Context, name string) (Role, error)
 	GetRoleForUser(ctx context.Context, userID string) (Role, error)
 	GetScheduledEvaluations(ctx context.Context, arg GetScheduledEvaluationsParams) ([]GetScheduledEvaluationsRow, error)
+	GetUnreadCount(ctx context.Context, userID string) (int64, error)
+	// Get appointments starting in the next hour for reminder notifications
+	GetUpcomingAppointments(ctx context.Context) ([]GetUpcomingAppointmentsRow, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
+	GetUserIDsByRoleName(ctx context.Context, name string) ([]string, error)
 	GetUserSession(ctx context.Context, tokenHash string) (Session, error)
 	GetWaitlistStats(ctx context.Context) (GetWaitlistStatsRow, error)
 	HasPermission(ctx context.Context, arg HasPermissionParams) (bool, error)
@@ -132,6 +144,7 @@ type Querier interface {
 	ListIntakeForms(ctx context.Context, arg ListIntakeFormsParams) ([]ListIntakeFormsRow, error)
 	ListLocationTransfers(ctx context.Context, arg ListLocationTransfersParams) ([]ListLocationTransfersRow, error)
 	ListLocations(ctx context.Context, arg ListLocationsParams) ([]ListLocationsRow, error)
+	ListNotifications(ctx context.Context, arg ListNotificationsParams) ([]ListNotificationsRow, error)
 	ListPermissions(ctx context.Context, arg ListPermissionsParams) ([]ListPermissionsRow, error)
 	ListPermissionsForRole(ctx context.Context, roleID string) ([]Permission, error)
 	ListRecurringAppointments(ctx context.Context, arg ListRecurringAppointmentsParams) ([]Appointment, error)
@@ -143,6 +156,8 @@ type Querier interface {
 	ListRoles(ctx context.Context, arg ListRolesParams) ([]ListRolesRow, error)
 	ListUsersWithRole(ctx context.Context, roleID string) ([]ListUsersWithRoleRow, error)
 	ListWaitingListClients(ctx context.Context, arg ListWaitingListClientsParams) ([]ListWaitingListClientsRow, error)
+	MarkAllNotificationsAsRead(ctx context.Context, userID string) error
+	MarkNotificationAsRead(ctx context.Context, arg MarkNotificationAsReadParams) error
 	RefuseLocationTransfer(ctx context.Context, arg RefuseLocationTransferParams) error
 	RemoveAppointmentParticipants(ctx context.Context, appointmentID string) error
 	RemovePermissionFromRole(ctx context.Context, arg RemovePermissionFromRoleParams) error

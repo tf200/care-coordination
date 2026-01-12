@@ -225,6 +225,34 @@ func (q *Queries) GetRoleForUser(ctx context.Context, userID string) (Role, erro
 	return i, err
 }
 
+const getUserIDsByRoleName = `-- name: GetUserIDsByRoleName :many
+SELECT u.id
+FROM users u
+JOIN user_roles ur ON u.id = ur.user_id
+JOIN roles r ON ur.role_id = r.id
+WHERE r.name = $1
+`
+
+func (q *Queries) GetUserIDsByRoleName(ctx context.Context, name string) ([]string, error) {
+	rows, err := q.db.Query(ctx, getUserIDsByRoleName, name)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []string{}
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		items = append(items, id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listPermissions = `-- name: ListPermissions :many
 SELECT id, resource, action, description, created_at, COUNT(*) OVER() as total_count
 FROM permissions

@@ -2,11 +2,13 @@ package locTransfer
 
 import (
 	"care-cordination/features/middleware"
+	"care-cordination/features/notification"
 	db "care-cordination/lib/db/sqlc"
 	"care-cordination/lib/logger"
 	"care-cordination/lib/nanoid"
 	"care-cordination/lib/resp"
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -14,14 +16,20 @@ import (
 )
 
 type locTransferService struct {
-	logger logger.Logger
-	db     *db.Store
+	logger              logger.Logger
+	db                  *db.Store
+	notificationService notification.NotificationService
 }
 
-func NewLocationTransferService(db *db.Store, logger logger.Logger) LocationTransferService {
+func NewLocationTransferService(
+	db *db.Store,
+	logger logger.Logger,
+	notificationService notification.NotificationService,
+) LocationTransferService {
 	return &locTransferService{
-		logger: logger,
-		db:     db,
+		logger:              logger,
+		db:                  db,
+		notificationService: notificationService,
 	}
 }
 
@@ -202,6 +210,39 @@ func (s *locTransferService) ConfirmLocationTransfer(
 		return ErrInternal
 	}
 
+	// Trigger: Notify both coordinators about approved transfer
+	if s.notificationService != nil {
+		resourceType := notification.ResourceTypeLocationTransfer
+		resourceID := transferID
+
+		// Get user IDs for both coordinators
+		currentCoordUserID := s.getEmployeeUserID(ctx, transfer.CurrentCoordinatorID)
+		newCoordUserID := s.getEmployeeUserID(ctx, transfer.NewCoordinatorID)
+
+		userIDs := []string{}
+		if currentCoordUserID != "" {
+			userIDs = append(userIDs, currentCoordUserID)
+		}
+		if newCoordUserID != "" && newCoordUserID != currentCoordUserID {
+			userIDs = append(userIDs, newCoordUserID)
+		}
+
+		if len(userIDs) > 0 {
+			toLocationName := ""
+			if transfer.ToLocationName != nil {
+				toLocationName = *transfer.ToLocationName
+			}
+			s.notificationService.EnqueueForUsers(userIDs, &notification.CreateNotificationRequest{
+				Type:         notification.TypeLocationTransferApproved,
+				Priority:     notification.PriorityNormal,
+				Title:        "Location Transfer Approved",
+				Message:      fmt.Sprintf("Client %s %s transferred to %s", transfer.ClientFirstName, transfer.ClientLastName, toLocationName),
+				ResourceType: &resourceType,
+				ResourceID:   &resourceID,
+			})
+		}
+	}
+
 	return nil
 }
 
@@ -232,6 +273,25 @@ func (s *locTransferService) RefuseLocationTransfer(
 	if err != nil {
 		s.logger.Error(ctx, "RefuseLocationTransfer", "Failed to refuse transfer", zap.Error(err))
 		return ErrInternal
+	}
+
+	// Trigger: Notify requesting coordinator about rejection
+	if s.notificationService != nil {
+		resourceType := notification.ResourceTypeLocationTransfer
+		resourceID := transferID
+
+		currentCoordUserID := s.getEmployeeUserID(ctx, transfer.CurrentCoordinatorID)
+		if currentCoordUserID != "" {
+			s.notificationService.Enqueue(&notification.CreateNotificationRequest{
+				UserID:       currentCoordUserID,
+				Type:         notification.TypeLocationTransferRejected,
+				Priority:     notification.PriorityNormal,
+				Title:        "Location Transfer Rejected",
+				Message:      fmt.Sprintf("Transfer request for %s %s was rejected: %s", transfer.ClientFirstName, transfer.ClientLastName, req.Reason),
+				ResourceType: &resourceType,
+				ResourceID:   &resourceID,
+			})
+		}
 	}
 
 	return nil
@@ -293,4 +353,13 @@ func (s *locTransferService) GetLocationTransferStats(
 			Rejected: int(stats.RejectedCount),
 		},
 	}, nil
+}
+
+// getEmployeeUserID looks up the user ID for an employee
+func (s *locTransferService) getEmployeeUserID(ctx context.Context, employeeID string) string {
+	employee, err := s.db.GetEmployeeByID(ctx, employeeID)
+	if err != nil {
+		return ""
+	}
+	return employee.UserID
 }

@@ -106,3 +106,10 @@ func PointerInt32ToIntValue(v *int32) int {
 	}
 	return int(*v)
 }
+
+func PgtypeTimestamptzToStr(t pgtype.Timestamptz) string {
+	if !t.Valid {
+		return ""
+	}
+	return t.Time.Format(time.RFC3339)
+}

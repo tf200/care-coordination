@@ -94,3 +94,25 @@ AND recurrence_rule IS NOT NULL
 AND recurrence_rule <> ''
 AND start_time <= sqlc.arg('end_time')::timestamptz
 ORDER BY start_time ASC;
+
+-- name: GetUpcomingAppointments :many
+-- Get appointments starting in the next hour for reminder notifications
+SELECT 
+    a.*,
+    e.user_id as organizer_user_id
+FROM appointments a
+JOIN employees e ON a.organizer_id = e.id
+WHERE a.start_time >= CURRENT_TIMESTAMP 
+AND a.start_time <= CURRENT_TIMESTAMP + INTERVAL '1 hour'
+AND a.status = 'scheduled'
+ORDER BY a.start_time ASC;
+
+-- name: GetPendingRemindersByDueTime :many
+-- Get reminders due in the next hour that haven't been completed
+SELECT 
+    r.*
+FROM reminders r
+WHERE r.due_time >= CURRENT_TIMESTAMP 
+AND r.due_time <= CURRENT_TIMESTAMP + INTERVAL '1 hour'
+AND r.is_completed = FALSE
+ORDER BY r.due_time ASC;

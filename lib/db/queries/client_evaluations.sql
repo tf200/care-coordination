@@ -234,3 +234,22 @@ LEFT JOIN goal_progress_logs l ON e.id = l.evaluation_id
 LEFT JOIN client_goals g ON l.goal_id = g.id
 WHERE e.id = $1
 ORDER BY g.title ASC;
+
+-- name: GetEvaluationsDueSoon :many
+-- Get clients with evaluations due in the next 3 days for reminder notifications
+SELECT 
+    c.id as client_id,
+    c.first_name,
+    c.last_name,
+    c.next_evaluation_date,
+    c.coordinator_id,
+    e.user_id as coordinator_user_id,
+    l.name as location_name
+FROM clients c
+JOIN employees e ON c.coordinator_id = e.id
+JOIN locations l ON c.assigned_location_id = l.id
+WHERE c.status = 'in_care' 
+  AND c.next_evaluation_date IS NOT NULL
+  AND c.next_evaluation_date <= (CURRENT_DATE + INTERVAL '3 days')::date
+  AND c.next_evaluation_date >= CURRENT_DATE
+ORDER BY c.next_evaluation_date ASC;

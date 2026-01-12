@@ -13,6 +13,7 @@ import (
 	locTransfer "care-cordination/features/location_transfer"
 	"care-cordination/features/locations"
 	"care-cordination/features/middleware"
+	"care-cordination/features/notification"
 	"care-cordination/features/rbac"
 	referringOrgs "care-cordination/features/referring_orgs"
 	"care-cordination/features/registration"
@@ -22,6 +23,7 @@ import (
 	"care-cordination/lib/logger"
 	"care-cordination/lib/ratelimit"
 	"care-cordination/lib/token"
+	"care-cordination/lib/websocket"
 	"context"
 	"log"
 	"net/http"
@@ -32,6 +34,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 )
 
@@ -145,17 +148,11 @@ func main() {
 	referringOrgService := referringOrgs.NewReferringOrgService(store, l)
 	referringOrgHandler := referringOrgs.NewReferringOrgHandler(referringOrgService, mdw)
 
-	locTransferService := locTransfer.NewLocationTransferService(store, l)
-	locTransferHandler := locTransfer.NewLocTransferHandler(locTransferService, mdw)
-
 	locationService := locations.NewLocationService(store, l)
 	locationHandler := locations.NewLocationHandler(locationService, mdw)
 
 	intakeService := intake.NewIntakeService(store, l)
 	intakeHandler := intake.NewIntakeHandler(intakeService, mdw)
-
-	incidentService := incident.NewIncidentService(store, l)
-	incidentHandler := incident.NewIncidentHandler(incidentService, mdw)
 
 	evaluationService := evaluation.NewEvaluationService(store, l)
 	evaluationHandler := evaluation.NewEvaluationHandler(evaluationService, mdw)
@@ -168,6 +165,41 @@ func main() {
 
 	calendarService := calendar.NewCalendarService(store, l)
 	calendarHandler := calendar.NewCalendarHandler(calendarService, mdw)
+
+	// Initialize WebSocket Hub and Notification Feature
+	wsHub := websocket.NewHub(l)
+	go wsHub.Run() // Start hub in background
+
+	// Initialize Redis client for ticket manager
+	var ticketManager *websocket.TicketManager
+	if cfg.RedisURL != "" {
+		opts, err := redis.ParseURL(cfg.RedisURL)
+		if err != nil {
+			l.Error(ctx, "main", "cannot parse redis url for ticket manager", zap.Error(err))
+			os.Exit(1)
+		}
+		redisClient := redis.NewClient(opts)
+		ticketManager = websocket.NewTicketManager(redisClient, 30*time.Second)
+		l.Info(ctx, "main", "websocket ticket manager initialized")
+	} else {
+		l.Warn(ctx, "main", "redis URL not set, websocket auth tickets disabled")
+	}
+
+	notificationService := notification.NewNotificationService(store, wsHub, l)
+	notificationHandler := notification.NewNotificationHandler(
+		notificationService,
+		wsHub,
+		ticketManager,
+		tokenManager,
+		mdw,
+	)
+
+	// Services with notification triggers
+	locTransferService := locTransfer.NewLocationTransferService(store, l, notificationService)
+	locTransferHandler := locTransfer.NewLocTransferHandler(locTransferService, mdw)
+
+	incidentService := incident.NewIncidentService(store, l, notificationService)
+	incidentHandler := incident.NewIncidentHandler(incidentService, mdw)
 
 	// 6. Initialize Server
 	server := api.NewServer(
@@ -186,6 +218,8 @@ func main() {
 		rbacHandler,
 		evaluationHandler,
 		calendarHandler,
+		notificationHandler,
+		wsHub,
 		rateLimiter,
 		cfg.ServerAddress,
 		cfg.Url,

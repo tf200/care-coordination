@@ -106,3 +106,10 @@ FROM users u
 JOIN user_roles ur ON u.id = ur.user_id
 WHERE ur.role_id = $1
 ORDER BY u.email;
+
+-- name: GetUserIDsByRoleName :many
+SELECT u.id
+FROM users u
+JOIN user_roles ur ON u.id = ur.user_id
+JOIN roles r ON ur.role_id = r.id
+WHERE r.name = $1;

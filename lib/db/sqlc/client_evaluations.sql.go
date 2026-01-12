@@ -510,6 +510,64 @@ func (q *Queries) GetEvaluationDetails(ctx context.Context, id string) ([]GetEva
 	return items, nil
 }
 
+const getEvaluationsDueSoon = `-- name: GetEvaluationsDueSoon :many
+SELECT 
+    c.id as client_id,
+    c.first_name,
+    c.last_name,
+    c.next_evaluation_date,
+    c.coordinator_id,
+    e.user_id as coordinator_user_id,
+    l.name as location_name
+FROM clients c
+JOIN employees e ON c.coordinator_id = e.id
+JOIN locations l ON c.assigned_location_id = l.id
+WHERE c.status = 'in_care' 
+  AND c.next_evaluation_date IS NOT NULL
+  AND c.next_evaluation_date <= (CURRENT_DATE + INTERVAL '3 days')::date
+  AND c.next_evaluation_date >= CURRENT_DATE
+ORDER BY c.next_evaluation_date ASC
+`
+
+type GetEvaluationsDueSoonRow struct {
+	ClientID           string      `json:"client_id"`
+	FirstName          string      `json:"first_name"`
+	LastName           string      `json:"last_name"`
+	NextEvaluationDate pgtype.Date `json:"next_evaluation_date"`
+	CoordinatorID      string      `json:"coordinator_id"`
+	CoordinatorUserID  string      `json:"coordinator_user_id"`
+	LocationName       string      `json:"location_name"`
+}
+
+// Get clients with evaluations due in the next 3 days for reminder notifications
+func (q *Queries) GetEvaluationsDueSoon(ctx context.Context) ([]GetEvaluationsDueSoonRow, error) {
+	rows, err := q.db.Query(ctx, getEvaluationsDueSoon)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetEvaluationsDueSoonRow{}
+	for rows.Next() {
+		var i GetEvaluationsDueSoonRow
+		if err := rows.Scan(
+			&i.ClientID,
+			&i.FirstName,
+			&i.LastName,
+			&i.NextEvaluationDate,
+			&i.CoordinatorID,
+			&i.CoordinatorUserID,
+			&i.LocationName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getLastClientEvaluation = `-- name: GetLastClientEvaluation :many
 SELECT 
     e.id as evaluation_id,

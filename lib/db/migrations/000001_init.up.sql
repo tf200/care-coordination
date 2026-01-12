@@ -752,3 +752,50 @@ CREATE POLICY coordinator_reminders ON reminders
             LIMIT 1
         )
     );
+
+-- ============================================================
+-- Notification System
+-- ============================================================
+
+CREATE TYPE notification_type_enum AS ENUM (
+    'evaluation_due',
+    'appointment_reminder',
+    'incident_created',
+    'location_transfer_request',
+    'location_transfer_approved',
+    'location_transfer_rejected',
+    'client_status_change',
+    'registration_status_change',
+    'system_alert'
+);
+
+CREATE TYPE notification_priority_enum AS ENUM ('low', 'normal', 'high', 'urgent');
+
+CREATE TABLE notifications (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    type notification_type_enum NOT NULL,
+    priority notification_priority_enum NOT NULL DEFAULT 'normal',
+    title TEXT NOT NULL,
+    message TEXT NOT NULL,
+    resource_type TEXT,
+    resource_id TEXT,
+    is_read BOOLEAN DEFAULT FALSE,
+    read_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP WITH TIME ZONE
+);
+
+-- Indexes for efficient querying
+CREATE INDEX idx_notifications_user_unread ON notifications(user_id, is_read) 
+    WHERE is_read = FALSE;
+CREATE INDEX idx_notifications_user_created ON notifications(user_id, created_at DESC);
+CREATE INDEX idx_notifications_expires ON notifications(expires_at) 
+    WHERE expires_at IS NOT NULL;
+
+-- RLS for notifications
+ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY user_own_notifications ON notifications
+    FOR ALL TO PUBLIC
+    USING (user_id = current_setting('app.current_user_id', true)::text);

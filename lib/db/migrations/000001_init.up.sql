@@ -799,3 +799,44 @@ ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 CREATE POLICY user_own_notifications ON notifications
     FOR ALL TO PUBLIC
     USING (user_id = current_setting('app.current_user_id', true)::text);
+
+-- ============================================================
+-- Audit Logging (NEN7510 / ISO27001 Compliance)
+-- ============================================================
+
+CREATE TYPE audit_action_enum AS ENUM ('read', 'create', 'update', 'delete', 'login', 'logout', 'export');
+CREATE TYPE audit_status_enum AS ENUM ('success', 'failure');
+
+CREATE TABLE audit_logs (
+    id TEXT PRIMARY KEY,
+    sequence_number BIGSERIAL NOT NULL,  -- For ordering and chain verification
+    user_id TEXT REFERENCES users(id),
+    employee_id TEXT REFERENCES employees(id),
+    client_id TEXT REFERENCES clients(id),  -- NEN7510: Track which client's data was accessed
+    action audit_action_enum NOT NULL,
+    resource_type TEXT NOT NULL,
+    resource_id TEXT,
+    old_value JSONB,
+    new_value JSONB,
+    ip_address TEXT,
+    user_agent TEXT,
+    request_id TEXT,
+    status audit_status_enum NOT NULL DEFAULT 'success',
+    failure_reason TEXT,
+    prev_hash TEXT NOT NULL,       -- SHA-256 hash of previous entry (or "GENESIS" for first)
+    current_hash TEXT NOT NULL,    -- SHA-256 hash of this entry including prev_hash
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Indexes for efficient querying
+CREATE INDEX idx_audit_logs_user_id ON audit_logs(user_id);
+CREATE INDEX idx_audit_logs_resource ON audit_logs(resource_type, resource_id);
+CREATE INDEX idx_audit_logs_created_at ON audit_logs(created_at DESC);
+CREATE INDEX idx_audit_logs_action ON audit_logs(action);
+CREATE INDEX idx_audit_logs_sequence ON audit_logs(sequence_number DESC);
+
+-- Composite index for common query patterns
+CREATE INDEX idx_audit_logs_user_resource_time ON audit_logs(user_id, resource_type, created_at DESC);
+
+-- Unique index on sequence_number for integrity
+CREATE UNIQUE INDEX idx_audit_logs_sequence_unique ON audit_logs(sequence_number);

@@ -19,6 +19,7 @@ package api
 import (
 	"care-cordination/docs"
 	"care-cordination/features/attachments"
+	"care-cordination/features/audit"
 	"care-cordination/features/auth"
 	"care-cordination/features/calendar"
 	"care-cordination/features/client"
@@ -67,6 +68,7 @@ type Server struct {
 	rbacHandler         *rbac.RBACHandler
 	calendarHandler     *calendar.CalendarHandler
 	notificationHandler *notification.NotificationHandler
+	auditHandler        *audit.AuditHandler
 	wsHub               *websocket.Hub
 
 	environment string
@@ -93,6 +95,7 @@ func NewServer(
 	evaluationHandler *evaluation.EvaluationHandler,
 	calendarHandler *calendar.CalendarHandler,
 	notificationHandler *notification.NotificationHandler,
+	auditHandler *audit.AuditHandler,
 	wsHub *websocket.Hub,
 	rateLimiter ratelimit.RateLimiter, addr string, url string) *Server {
 	s := &Server{
@@ -112,6 +115,7 @@ func NewServer(
 		evaluationHandler:   evaluationHandler,
 		calendarHandler:     calendarHandler,
 		notificationHandler: notificationHandler,
+		auditHandler:        auditHandler,
 		wsHub:               wsHub,
 		logger:              logger,
 		addr:                addr,
@@ -191,6 +195,7 @@ func (s *Server) setupRoutes(logger logger.Logger) {
 	s.evaluationHandler.SetupEvaluationRoutes(router)
 	s.calendarHandler.SetupRoutes(router)
 	s.notificationHandler.SetupRoutes(router)
+	s.auditHandler.SetupAuditRoutes(router)
 	s.router = router
 }
 

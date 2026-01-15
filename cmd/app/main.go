@@ -3,6 +3,7 @@ package main
 import (
 	"care-cordination/api"
 	"care-cordination/features/attachments"
+	"care-cordination/features/audit"
 	"care-cordination/features/auth"
 	"care-cordination/features/calendar"
 	"care-cordination/features/client"
@@ -131,7 +132,9 @@ func main() {
 	}
 
 	// 5. Initialize Features
-	mdw := middleware.NewMiddleware(tokenManager, rateLimiter, l, store)
+	// Create audit logger first (needed by middleware)
+	auditLogger := middleware.NewAuditLoggerService(*store, l)
+	mdw := middleware.NewMiddleware(tokenManager, rateLimiter, l, store, auditLogger)
 
 	authService := auth.NewAuthService(store, tokenManager, l)
 	authHandler := auth.NewAuthHandler(authService, mdw)
@@ -201,6 +204,10 @@ func main() {
 	incidentService := incident.NewIncidentService(store, l, notificationService)
 	incidentHandler := incident.NewIncidentHandler(incidentService, mdw)
 
+	// Audit Service - NEN7510/ISO27001 compliant audit logging
+	auditService := audit.NewAuditService(*store, l)
+	auditHandler := audit.NewAuditHandler(auditService, mdw)
+
 	// 6. Initialize Server
 	server := api.NewServer(
 		l,
@@ -219,6 +226,7 @@ func main() {
 		evaluationHandler,
 		calendarHandler,
 		notificationHandler,
+		auditHandler,
 		wsHub,
 		rateLimiter,
 		cfg.ServerAddress,

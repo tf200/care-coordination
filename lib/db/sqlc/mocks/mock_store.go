@@ -111,6 +111,21 @@ func (mr *MockStoreInterfaceMockRecorder) ConfirmLocationTransfer(ctx, id any) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ConfirmLocationTransfer", reflect.TypeOf((*MockStoreInterface)(nil).ConfirmLocationTransfer), ctx, id)
 }
 
+// CountAuditLogs mocks base method.
+func (m *MockStoreInterface) CountAuditLogs(ctx context.Context) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CountAuditLogs", ctx)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CountAuditLogs indicates an expected call of CountAuditLogs.
+func (mr *MockStoreInterfaceMockRecorder) CountAuditLogs(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountAuditLogs", reflect.TypeOf((*MockStoreInterface)(nil).CountAuditLogs), ctx)
+}
+
 // CreateAppointment mocks base method.
 func (m *MockStoreInterface) CreateAppointment(ctx context.Context, arg db.CreateAppointmentParams) (db.Appointment, error) {
 	m.ctrl.T.Helper()
@@ -138,6 +153,20 @@ func (m *MockStoreInterface) CreateAttachment(ctx context.Context, arg db.Create
 func (mr *MockStoreInterfaceMockRecorder) CreateAttachment(ctx, arg any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAttachment", reflect.TypeOf((*MockStoreInterface)(nil).CreateAttachment), ctx, arg)
+}
+
+// CreateAuditLog mocks base method.
+func (m *MockStoreInterface) CreateAuditLog(ctx context.Context, arg db.CreateAuditLogParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateAuditLog", ctx, arg)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateAuditLog indicates an expected call of CreateAuditLog.
+func (mr *MockStoreInterfaceMockRecorder) CreateAuditLog(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAuditLog", reflect.TypeOf((*MockStoreInterface)(nil).CreateAuditLog), ctx, arg)
 }
 
 // CreateClient mocks base method.
@@ -626,6 +655,96 @@ func (mr *MockStoreInterfaceMockRecorder) GetAppointment(ctx, id any) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAppointment", reflect.TypeOf((*MockStoreInterface)(nil).GetAppointment), ctx, id)
 }
 
+// GetAuditLogByID mocks base method.
+func (m *MockStoreInterface) GetAuditLogByID(ctx context.Context, id string) (db.GetAuditLogByIDRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAuditLogByID", ctx, id)
+	ret0, _ := ret[0].(db.GetAuditLogByIDRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAuditLogByID indicates an expected call of GetAuditLogByID.
+func (mr *MockStoreInterfaceMockRecorder) GetAuditLogByID(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAuditLogByID", reflect.TypeOf((*MockStoreInterface)(nil).GetAuditLogByID), ctx, id)
+}
+
+// GetAuditLogBySequence mocks base method.
+func (m *MockStoreInterface) GetAuditLogBySequence(ctx context.Context, sequenceNumber int64) (db.AuditLog, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAuditLogBySequence", ctx, sequenceNumber)
+	ret0, _ := ret[0].(db.AuditLog)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAuditLogBySequence indicates an expected call of GetAuditLogBySequence.
+func (mr *MockStoreInterfaceMockRecorder) GetAuditLogBySequence(ctx, sequenceNumber any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAuditLogBySequence", reflect.TypeOf((*MockStoreInterface)(nil).GetAuditLogBySequence), ctx, sequenceNumber)
+}
+
+// GetAuditLogStats mocks base method.
+func (m *MockStoreInterface) GetAuditLogStats(ctx context.Context) (db.GetAuditLogStatsRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAuditLogStats", ctx)
+	ret0, _ := ret[0].(db.GetAuditLogStatsRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAuditLogStats indicates an expected call of GetAuditLogStats.
+func (mr *MockStoreInterfaceMockRecorder) GetAuditLogStats(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAuditLogStats", reflect.TypeOf((*MockStoreInterface)(nil).GetAuditLogStats), ctx)
+}
+
+// GetAuditLogsByResource mocks base method.
+func (m *MockStoreInterface) GetAuditLogsByResource(ctx context.Context, arg db.GetAuditLogsByResourceParams) ([]db.AuditLog, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAuditLogsByResource", ctx, arg)
+	ret0, _ := ret[0].([]db.AuditLog)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAuditLogsByResource indicates an expected call of GetAuditLogsByResource.
+func (mr *MockStoreInterfaceMockRecorder) GetAuditLogsByResource(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAuditLogsByResource", reflect.TypeOf((*MockStoreInterface)(nil).GetAuditLogsByResource), ctx, arg)
+}
+
+// GetAuditLogsByUser mocks base method.
+func (m *MockStoreInterface) GetAuditLogsByUser(ctx context.Context, arg db.GetAuditLogsByUserParams) ([]db.AuditLog, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAuditLogsByUser", ctx, arg)
+	ret0, _ := ret[0].([]db.AuditLog)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAuditLogsByUser indicates an expected call of GetAuditLogsByUser.
+func (mr *MockStoreInterfaceMockRecorder) GetAuditLogsByUser(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAuditLogsByUser", reflect.TypeOf((*MockStoreInterface)(nil).GetAuditLogsByUser), ctx, arg)
+}
+
+// GetAuditLogsForVerification mocks base method.
+func (m *MockStoreInterface) GetAuditLogsForVerification(ctx context.Context, arg db.GetAuditLogsForVerificationParams) ([]db.AuditLog, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAuditLogsForVerification", ctx, arg)
+	ret0, _ := ret[0].([]db.AuditLog)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAuditLogsForVerification indicates an expected call of GetAuditLogsForVerification.
+func (mr *MockStoreInterfaceMockRecorder) GetAuditLogsForVerification(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAuditLogsForVerification", reflect.TypeOf((*MockStoreInterface)(nil).GetAuditLogsForVerification), ctx, arg)
+}
+
 // GetClientByID mocks base method.
 func (m *MockStoreInterface) GetClientByID(ctx context.Context, id string) (db.Client, error) {
 	m.ctrl.T.Helper()
@@ -909,6 +1028,21 @@ func (m *MockStoreInterface) GetLastClientEvaluation(ctx context.Context, client
 func (mr *MockStoreInterfaceMockRecorder) GetLastClientEvaluation(ctx, clientID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLastClientEvaluation", reflect.TypeOf((*MockStoreInterface)(nil).GetLastClientEvaluation), ctx, clientID)
+}
+
+// GetLatestAuditLog mocks base method.
+func (m *MockStoreInterface) GetLatestAuditLog(ctx context.Context) (db.GetLatestAuditLogRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetLatestAuditLog", ctx)
+	ret0, _ := ret[0].(db.GetLatestAuditLogRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetLatestAuditLog indicates an expected call of GetLatestAuditLog.
+func (mr *MockStoreInterfaceMockRecorder) GetLatestAuditLog(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLatestAuditLog", reflect.TypeOf((*MockStoreInterface)(nil).GetLatestAuditLog), ctx)
 }
 
 // GetLocationCapacityStats mocks base method.
@@ -1357,6 +1491,21 @@ func (m *MockStoreInterface) ListAppointmentsByRange(ctx context.Context, arg db
 func (mr *MockStoreInterfaceMockRecorder) ListAppointmentsByRange(ctx, arg any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListAppointmentsByRange", reflect.TypeOf((*MockStoreInterface)(nil).ListAppointmentsByRange), ctx, arg)
+}
+
+// ListAuditLogs mocks base method.
+func (m *MockStoreInterface) ListAuditLogs(ctx context.Context, arg db.ListAuditLogsParams) ([]db.ListAuditLogsRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListAuditLogs", ctx, arg)
+	ret0, _ := ret[0].([]db.ListAuditLogsRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListAuditLogs indicates an expected call of ListAuditLogs.
+func (mr *MockStoreInterfaceMockRecorder) ListAuditLogs(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListAuditLogs", reflect.TypeOf((*MockStoreInterface)(nil).ListAuditLogs), ctx, arg)
 }
 
 // ListDischargedClients mocks base method.

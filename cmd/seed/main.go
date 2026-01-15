@@ -492,6 +492,11 @@ func main() {
 		log.Fatalf("Failed to seed appointments: %v", err)
 	}
 
+	// Seed notifications for admin users
+	if err := seedNotifications(ctx, store); err != nil {
+		log.Fatalf("Failed to seed notifications: %v", err)
+	}
+
 	fmt.Println("✅ Successfully seeded database!")
 }
 
@@ -1995,4 +2000,235 @@ func seedAppointments(
 
 	fmt.Printf("✅ Successfully seeded %d appointments for admin\n", appointmentCount)
 	return nil
+}
+
+// ============================================================
+// Notifications Seeding
+// ============================================================
+
+// Notification templates for realistic scenarios
+var notificationTemplates = []struct {
+	Type           db.NotificationTypeEnum
+	Priority       db.NotificationPriorityEnum
+	TitlePattern   string
+	MessagePattern string
+}{
+	// Incident notifications
+	{
+		Type:           db.NotificationTypeEnumIncidentCreated,
+		Priority:       db.NotificationPriorityEnumHigh,
+		TitlePattern:   "Nieuw incident gemeld",
+		MessagePattern: "Er is een nieuw incident gemeld bij %s. Ernst: %s. Actie vereist.",
+	},
+	{
+		Type:           db.NotificationTypeEnumIncidentCreated,
+		Priority:       db.NotificationPriorityEnumUrgent,
+		TitlePattern:   "Urgent: Ernstig incident",
+		MessagePattern: "Er is een ernstig incident gemeld bij %s. Directe aandacht vereist.",
+	},
+	// Evaluation notifications
+	{
+		Type:           db.NotificationTypeEnumEvaluationDue,
+		Priority:       db.NotificationPriorityEnumNormal,
+		TitlePattern:   "Evaluatie binnenkort",
+		MessagePattern: "De evaluatie voor cliënt %s staat gepland voor over %d dagen.",
+	},
+	{
+		Type:           db.NotificationTypeEnumEvaluationDue,
+		Priority:       db.NotificationPriorityEnumHigh,
+		TitlePattern:   "Evaluatie morgen!",
+		MessagePattern: "Herinnering: De evaluatie voor cliënt %s is morgen gepland.",
+	},
+	// Location transfer notifications
+	{
+		Type:           db.NotificationTypeEnumLocationTransferApproved,
+		Priority:       db.NotificationPriorityEnumNormal,
+		TitlePattern:   "Overplaatsing goedgekeurd",
+		MessagePattern: "De overplaatsingsaanvraag voor cliënt %s is goedgekeurd.",
+	},
+	{
+		Type:           db.NotificationTypeEnumLocationTransferRejected,
+		Priority:       db.NotificationPriorityEnumNormal,
+		TitlePattern:   "Overplaatsing afgewezen",
+		MessagePattern: "De overplaatsingsaanvraag voor cliënt %s is afgewezen. Reden: %s",
+	},
+	// Appointment notifications
+	{
+		Type:           db.NotificationTypeEnumAppointmentReminder,
+		Priority:       db.NotificationPriorityEnumNormal,
+		TitlePattern:   "Afspraak vandaag",
+		MessagePattern: "U heeft vandaag om %s een afspraak: %s",
+	},
+	{
+		Type:           db.NotificationTypeEnumAppointmentReminder,
+		Priority:       db.NotificationPriorityEnumLow,
+		TitlePattern:   "Afspraak morgen",
+		MessagePattern: "Herinnering: Morgen om %s heeft u een afspraak: %s",
+	},
+	// Client status notifications
+	{
+		Type:           db.NotificationTypeEnumClientStatusChange,
+		Priority:       db.NotificationPriorityEnumNormal,
+		TitlePattern:   "Cliëntstatus gewijzigd",
+		MessagePattern: "De status van cliënt %s is gewijzigd naar '%s'.",
+	},
+	// System alerts
+	{
+		Type:           db.NotificationTypeEnumSystemAlert,
+		Priority:       db.NotificationPriorityEnumHigh,
+		TitlePattern:   "Systeemmelding",
+		MessagePattern: "Gepland onderhoud: Het systeem zal op %s tijdelijk niet beschikbaar zijn.",
+	},
+}
+
+// Client names for realistic notifications
+var notificationClientNames = []string{
+	"Jan de Vries", "Sophie Jansen", "Piet Bakker", "Emma Visser",
+	"Lucas Smit", "Daan Meijer", "Lotte de Groot", "Finn Mulder",
+}
+
+// Location names for notifications
+var notificationLocationNames = []string{
+	"Woonlocatie De Zonnetuin", "Huize De Linde", "Villa Sereniteit",
+	"Woongroep Horizon", "Locatie Oost", "Wooncentrum De Haven",
+}
+
+// Appointment titles for notifications
+var notificationAppointmentTitles = []string{
+	"Teamoverleg", "Evaluatiegesprek", "Intake nieuwe cliënt",
+	"Voortgangsgesprek", "Behandelplanbespreking", "Multidisciplinair overleg",
+}
+
+func seedNotifications(ctx context.Context, store *db.Store) error {
+	fmt.Println("🌱 Seeding notifications for admin users...")
+
+	// Get all admin users
+	adminUserIDs, err := store.GetUserIDsByRoleName(ctx, "admin")
+	if err != nil {
+		return fmt.Errorf("failed to get admin users: %w", err)
+	}
+
+	if len(adminUserIDs) == 0 {
+		fmt.Println("  ⚠ No admin users found, skipping notification seeding")
+		return nil
+	}
+
+	fmt.Printf("  Found %d admin users\n", len(adminUserIDs))
+
+	// Create notifications for each admin user
+	notificationCount := 0
+	for _, userID := range adminUserIDs {
+		// Create 10-15 notifications per admin
+		numNotifications := 10 + rand.Intn(6)
+
+		for i := 0; i < numNotifications; i++ {
+			if err := createRandomNotification(ctx, store, userID); err != nil {
+				return fmt.Errorf("failed to create notification: %w", err)
+			}
+			notificationCount++
+		}
+	}
+
+	fmt.Printf("✅ Successfully seeded %d notifications for admin users\n", notificationCount)
+	return nil
+}
+
+func createRandomNotification(ctx context.Context, store *db.Store, userID string) error {
+	// Generate notification ID
+	notificationID, err := gonanoid.New()
+	if err != nil {
+		return fmt.Errorf("failed to generate notification ID: %w", err)
+	}
+
+	// Pick a random template
+	template := randomElement(notificationTemplates)
+
+	// Generate title and message based on template type
+	var title, message string
+	var resourceType, resourceID *string
+
+	switch template.Type {
+	case db.NotificationTypeEnumIncidentCreated:
+		location := randomElement(notificationLocationNames)
+		severity := randomElement([]string{"Minor", "Moderate", "Severe"})
+		title = template.TitlePattern
+		message = fmt.Sprintf(template.MessagePattern, location, severity)
+		rt, rid := "incident", generateFakeID()
+		resourceType, resourceID = &rt, &rid
+
+	case db.NotificationTypeEnumEvaluationDue:
+		client := randomElement(notificationClientNames)
+		days := rand.Intn(7) + 1
+		title = template.TitlePattern
+		if days == 1 {
+			message = fmt.Sprintf("Herinnering: De evaluatie voor cliënt %s is morgen gepland.", client)
+		} else {
+			message = fmt.Sprintf(template.MessagePattern, client, days)
+		}
+		rt, rid := "client", generateFakeID()
+		resourceType, resourceID = &rt, &rid
+
+	case db.NotificationTypeEnumLocationTransferApproved:
+		client := randomElement(notificationClientNames)
+		title = template.TitlePattern
+		message = fmt.Sprintf(template.MessagePattern, client)
+		rt, rid := "location_transfer", generateFakeID()
+		resourceType, resourceID = &rt, &rid
+
+	case db.NotificationTypeEnumLocationTransferRejected:
+		client := randomElement(notificationClientNames)
+		reasons := []string{"Geen beschikbare plek", "Zorgvraag niet passend", "Wachtlijst vol"}
+		title = template.TitlePattern
+		message = fmt.Sprintf(template.MessagePattern, client, randomElement(reasons))
+		rt, rid := "location_transfer", generateFakeID()
+		resourceType, resourceID = &rt, &rid
+
+	case db.NotificationTypeEnumAppointmentReminder:
+		appointmentTitle := randomElement(notificationAppointmentTitles)
+		appointmentTime := fmt.Sprintf("%02d:%02d", 8+rand.Intn(10), rand.Intn(4)*15)
+		title = template.TitlePattern
+		message = fmt.Sprintf(template.MessagePattern, appointmentTime, appointmentTitle)
+		rt, rid := "appointment", generateFakeID()
+		resourceType, resourceID = &rt, &rid
+
+	case db.NotificationTypeEnumClientStatusChange:
+		client := randomElement(notificationClientNames)
+		statuses := []string{"In zorg", "Wachtlijst", "Uitstroom gepland"}
+		title = template.TitlePattern
+		message = fmt.Sprintf(template.MessagePattern, client, randomElement(statuses))
+		rt, rid := "client", generateFakeID()
+		resourceType, resourceID = &rt, &rid
+
+	case db.NotificationTypeEnumSystemAlert:
+		dates := []string{"maandag 9:00-11:00", "woensdag 22:00-23:00", "zaterdag 05:00-07:00"}
+		title = template.TitlePattern
+		message = fmt.Sprintf(template.MessagePattern, randomElement(dates))
+		// No resource for system alerts
+
+	default:
+		title = "Melding"
+		message = "Er is een nieuwe melding voor u."
+	}
+
+	// Create the notification
+	_, err = store.CreateNotification(ctx, db.CreateNotificationParams{
+		ID:           notificationID,
+		UserID:       userID,
+		Type:         template.Type,
+		Priority:     template.Priority,
+		Title:        title,
+		Message:      message,
+		ResourceType: resourceType,
+		ResourceID:   resourceID,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create notification: %w", err)
+	}
+
+	return nil
+}
+
+func generateFakeID() string {
+	id, _ := gonanoid.New()
+	return id
 }

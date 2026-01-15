@@ -20,11 +20,13 @@ type Querier interface {
 	AssignRoleToUser(ctx context.Context, arg AssignRoleToUserParams) error
 	BatchAssignPermissionsToRole(ctx context.Context, arg BatchAssignPermissionsToRoleParams) error
 	ConfirmLocationTransfer(ctx context.Context, id string) error
+	CountAuditLogs(ctx context.Context) (int64, error)
 	CreateAppointment(ctx context.Context, arg CreateAppointmentParams) (Appointment, error)
 	// ============================================================
 	// Attachments
 	// ============================================================
 	CreateAttachment(ctx context.Context, arg CreateAttachmentParams) error
+	CreateAuditLog(ctx context.Context, arg CreateAuditLogParams) error
 	// ============================================================
 	// Clients
 	// ============================================================
@@ -83,6 +85,13 @@ type Querier interface {
 	DeleteRole(ctx context.Context, id string) error
 	DeleteUserSession(ctx context.Context, tokenHash string) error
 	GetAppointment(ctx context.Context, id string) (Appointment, error)
+	GetAuditLogByID(ctx context.Context, id string) (GetAuditLogByIDRow, error)
+	GetAuditLogBySequence(ctx context.Context, sequenceNumber int64) (AuditLog, error)
+	GetAuditLogStats(ctx context.Context) (GetAuditLogStatsRow, error)
+	GetAuditLogsByResource(ctx context.Context, arg GetAuditLogsByResourceParams) ([]AuditLog, error)
+	GetAuditLogsByUser(ctx context.Context, arg GetAuditLogsByUserParams) ([]AuditLog, error)
+	// Get audit logs in sequence order for hash chain verification
+	GetAuditLogsForVerification(ctx context.Context, arg GetAuditLogsForVerificationParams) ([]GetAuditLogsForVerificationRow, error)
 	GetClientByID(ctx context.Context, id string) (Client, error)
 	GetClientEvaluationHistory(ctx context.Context, clientID string) ([]GetClientEvaluationHistoryRow, error)
 	GetCoordinatorDrafts(ctx context.Context, arg GetCoordinatorDraftsParams) ([]GetCoordinatorDraftsRow, error)
@@ -103,6 +112,8 @@ type Querier interface {
 	GetIntakeFormWithDetails(ctx context.Context, id string) (GetIntakeFormWithDetailsRow, error)
 	GetIntakeStats(ctx context.Context) (GetIntakeStatsRow, error)
 	GetLastClientEvaluation(ctx context.Context, clientID string) ([]GetLastClientEvaluationRow, error)
+	// Get the most recent audit log entry to retrieve its hash for the chain
+	GetLatestAuditLog(ctx context.Context) (GetLatestAuditLogRow, error)
 	GetLocationCapacityStats(ctx context.Context) (GetLocationCapacityStatsRow, error)
 	GetLocationTransferByID(ctx context.Context, id string) (GetLocationTransferByIDRow, error)
 	GetLocationTransferStats(ctx context.Context) (GetLocationTransferStatsRow, error)
@@ -135,6 +146,7 @@ type Querier interface {
 	ListAppointmentsByOrganizer(ctx context.Context, organizerID string) ([]Appointment, error)
 	ListAppointmentsByParticipant(ctx context.Context, arg ListAppointmentsByParticipantParams) ([]Appointment, error)
 	ListAppointmentsByRange(ctx context.Context, arg ListAppointmentsByRangeParams) ([]Appointment, error)
+	ListAuditLogs(ctx context.Context, arg ListAuditLogsParams) ([]ListAuditLogsRow, error)
 	ListDischargedClients(ctx context.Context, arg ListDischargedClientsParams) ([]ListDischargedClientsRow, error)
 	ListEmployees(ctx context.Context, arg ListEmployeesParams) ([]ListEmployeesRow, error)
 	ListGoalsByClientID(ctx context.Context, clientID *string) ([]ClientGoal, error)

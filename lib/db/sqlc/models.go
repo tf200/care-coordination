@@ -97,6 +97,95 @@ func (ns NullAppointmentTypeEnum) Value() (driver.Value, error) {
 	return string(ns.AppointmentTypeEnum), nil
 }
 
+type AuditActionEnum string
+
+const (
+	AuditActionEnumRead   AuditActionEnum = "read"
+	AuditActionEnumCreate AuditActionEnum = "create"
+	AuditActionEnumUpdate AuditActionEnum = "update"
+	AuditActionEnumDelete AuditActionEnum = "delete"
+	AuditActionEnumLogin  AuditActionEnum = "login"
+	AuditActionEnumLogout AuditActionEnum = "logout"
+	AuditActionEnumExport AuditActionEnum = "export"
+)
+
+func (e *AuditActionEnum) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = AuditActionEnum(s)
+	case string:
+		*e = AuditActionEnum(s)
+	default:
+		return fmt.Errorf("unsupported scan type for AuditActionEnum: %T", src)
+	}
+	return nil
+}
+
+type NullAuditActionEnum struct {
+	AuditActionEnum AuditActionEnum `json:"audit_action_enum"`
+	Valid           bool            `json:"valid"` // Valid is true if AuditActionEnum is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullAuditActionEnum) Scan(value interface{}) error {
+	if value == nil {
+		ns.AuditActionEnum, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.AuditActionEnum.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullAuditActionEnum) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.AuditActionEnum), nil
+}
+
+type AuditStatusEnum string
+
+const (
+	AuditStatusEnumSuccess AuditStatusEnum = "success"
+	AuditStatusEnumFailure AuditStatusEnum = "failure"
+)
+
+func (e *AuditStatusEnum) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = AuditStatusEnum(s)
+	case string:
+		*e = AuditStatusEnum(s)
+	default:
+		return fmt.Errorf("unsupported scan type for AuditStatusEnum: %T", src)
+	}
+	return nil
+}
+
+type NullAuditStatusEnum struct {
+	AuditStatusEnum AuditStatusEnum `json:"audit_status_enum"`
+	Valid           bool            `json:"valid"` // Valid is true if AuditStatusEnum is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullAuditStatusEnum) Scan(value interface{}) error {
+	if value == nil {
+		ns.AuditStatusEnum, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.AuditStatusEnum.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullAuditStatusEnum) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.AuditStatusEnum), nil
+}
+
 type CareTypeEnum string
 
 const (
@@ -920,6 +1009,27 @@ type Attachment struct {
 	Filekey     string             `json:"filekey"`
 	ContentType string             `json:"content_type"`
 	UploadedAt  pgtype.Timestamptz `json:"uploaded_at"`
+}
+
+type AuditLog struct {
+	ID             string             `json:"id"`
+	SequenceNumber int64              `json:"sequence_number"`
+	UserID         *string            `json:"user_id"`
+	EmployeeID     *string            `json:"employee_id"`
+	ClientID       *string            `json:"client_id"`
+	Action         AuditActionEnum    `json:"action"`
+	ResourceType   string             `json:"resource_type"`
+	ResourceID     *string            `json:"resource_id"`
+	OldValue       []byte             `json:"old_value"`
+	NewValue       []byte             `json:"new_value"`
+	IpAddress      *string            `json:"ip_address"`
+	UserAgent      *string            `json:"user_agent"`
+	RequestID      *string            `json:"request_id"`
+	Status         AuditStatusEnum    `json:"status"`
+	FailureReason  *string            `json:"failure_reason"`
+	PrevHash       string             `json:"prev_hash"`
+	CurrentHash    string             `json:"current_hash"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
 }
 
 type CalendarIntegration struct {

@@ -19,6 +19,7 @@ type Middleware struct {
 	rateLimiter ratelimit.RateLimiter
 	logger      logger.Logger
 	store       *db.Store
+	auditLogger AuditLogger
 }
 
 func NewMiddleware(
@@ -26,11 +27,13 @@ func NewMiddleware(
 	rateLimiter ratelimit.RateLimiter,
 	logger logger.Logger,
 	store *db.Store,
+	auditLogger AuditLogger,
 ) *Middleware {
 	return &Middleware{
 		tokenMaker:  tokenMaker,
 		rateLimiter: rateLimiter,
 		logger:      logger,
 		store:       store,
+		auditLogger: auditLogger,
 	}
 }

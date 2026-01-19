@@ -731,10 +731,10 @@ func (mr *MockStoreInterfaceMockRecorder) GetAuditLogsByUser(ctx, arg any) *gomo
 }
 
 // GetAuditLogsForVerification mocks base method.
-func (m *MockStoreInterface) GetAuditLogsForVerification(ctx context.Context, arg db.GetAuditLogsForVerificationParams) ([]db.AuditLog, error) {
+func (m *MockStoreInterface) GetAuditLogsForVerification(ctx context.Context, arg db.GetAuditLogsForVerificationParams) ([]db.GetAuditLogsForVerificationRow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAuditLogsForVerification", ctx, arg)
-	ret0, _ := ret[0].([]db.AuditLog)
+	ret0, _ := ret[0].([]db.GetAuditLogsForVerificationRow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -743,6 +743,21 @@ func (m *MockStoreInterface) GetAuditLogsForVerification(ctx context.Context, ar
 func (mr *MockStoreInterfaceMockRecorder) GetAuditLogsForVerification(ctx, arg any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAuditLogsForVerification", reflect.TypeOf((*MockStoreInterface)(nil).GetAuditLogsForVerification), ctx, arg)
+}
+
+// GetCareTypeDistribution mocks base method.
+func (m *MockStoreInterface) GetCareTypeDistribution(ctx context.Context) (db.GetCareTypeDistributionRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCareTypeDistribution", ctx)
+	ret0, _ := ret[0].(db.GetCareTypeDistributionRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCareTypeDistribution indicates an expected call of GetCareTypeDistribution.
+func (mr *MockStoreInterfaceMockRecorder) GetCareTypeDistribution(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCareTypeDistribution", reflect.TypeOf((*MockStoreInterface)(nil).GetCareTypeDistribution), ctx)
 }
 
 // GetClientByID mocks base method.
@@ -790,6 +805,21 @@ func (mr *MockStoreInterfaceMockRecorder) GetCoordinatorDrafts(ctx, arg any) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCoordinatorDrafts", reflect.TypeOf((*MockStoreInterface)(nil).GetCoordinatorDrafts), ctx, arg)
 }
 
+// GetCriticalAlertsData mocks base method.
+func (m *MockStoreInterface) GetCriticalAlertsData(ctx context.Context) (db.GetCriticalAlertsDataRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCriticalAlertsData", ctx)
+	ret0, _ := ret[0].(db.GetCriticalAlertsDataRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCriticalAlertsData indicates an expected call of GetCriticalAlertsData.
+func (mr *MockStoreInterfaceMockRecorder) GetCriticalAlertsData(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCriticalAlertsData", reflect.TypeOf((*MockStoreInterface)(nil).GetCriticalAlertsData), ctx)
+}
+
 // GetCriticalEvaluations mocks base method.
 func (m *MockStoreInterface) GetCriticalEvaluations(ctx context.Context, arg db.GetCriticalEvaluationsParams) ([]db.GetCriticalEvaluationsRow, error) {
 	m.ctrl.T.Helper()
@@ -803,6 +833,36 @@ func (m *MockStoreInterface) GetCriticalEvaluations(ctx context.Context, arg db.
 func (mr *MockStoreInterfaceMockRecorder) GetCriticalEvaluations(ctx, arg any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCriticalEvaluations", reflect.TypeOf((*MockStoreInterface)(nil).GetCriticalEvaluations), ctx, arg)
+}
+
+// GetDashboardDischargeStats mocks base method.
+func (m *MockStoreInterface) GetDashboardDischargeStats(ctx context.Context) (db.GetDashboardDischargeStatsRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetDashboardDischargeStats", ctx)
+	ret0, _ := ret[0].(db.GetDashboardDischargeStatsRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetDashboardDischargeStats indicates an expected call of GetDashboardDischargeStats.
+func (mr *MockStoreInterfaceMockRecorder) GetDashboardDischargeStats(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDashboardDischargeStats", reflect.TypeOf((*MockStoreInterface)(nil).GetDashboardDischargeStats), ctx)
+}
+
+// GetDashboardOverviewStats mocks base method.
+func (m *MockStoreInterface) GetDashboardOverviewStats(ctx context.Context) (db.GetDashboardOverviewStatsRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetDashboardOverviewStats", ctx)
+	ret0, _ := ret[0].(db.GetDashboardOverviewStatsRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetDashboardOverviewStats indicates an expected call of GetDashboardOverviewStats.
+func (mr *MockStoreInterfaceMockRecorder) GetDashboardOverviewStats(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDashboardOverviewStats", reflect.TypeOf((*MockStoreInterface)(nil).GetDashboardOverviewStats), ctx)
 }
 
 // GetDischargeStats mocks base method.
@@ -908,6 +968,21 @@ func (m *MockStoreInterface) GetEvaluationDetails(ctx context.Context, id string
 func (mr *MockStoreInterfaceMockRecorder) GetEvaluationDetails(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetEvaluationDetails", reflect.TypeOf((*MockStoreInterface)(nil).GetEvaluationDetails), ctx, id)
+}
+
+// GetEvaluationStats mocks base method.
+func (m *MockStoreInterface) GetEvaluationStats(ctx context.Context) (db.GetEvaluationStatsRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetEvaluationStats", ctx)
+	ret0, _ := ret[0].(db.GetEvaluationStatsRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetEvaluationStats indicates an expected call of GetEvaluationStats.
+func (mr *MockStoreInterfaceMockRecorder) GetEvaluationStats(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetEvaluationStats", reflect.TypeOf((*MockStoreInterface)(nil).GetEvaluationStats), ctx)
 }
 
 // GetEvaluationsDueSoon mocks base method.
@@ -1045,6 +1120,21 @@ func (mr *MockStoreInterfaceMockRecorder) GetLatestAuditLog(ctx any) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLatestAuditLog", reflect.TypeOf((*MockStoreInterface)(nil).GetLatestAuditLog), ctx)
 }
 
+// GetLocationCapacityList mocks base method.
+func (m *MockStoreInterface) GetLocationCapacityList(ctx context.Context) ([]db.GetLocationCapacityListRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetLocationCapacityList", ctx)
+	ret0, _ := ret[0].([]db.GetLocationCapacityListRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetLocationCapacityList indicates an expected call of GetLocationCapacityList.
+func (mr *MockStoreInterfaceMockRecorder) GetLocationCapacityList(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLocationCapacityList", reflect.TypeOf((*MockStoreInterface)(nil).GetLocationCapacityList), ctx)
+}
+
 // GetLocationCapacityStats mocks base method.
 func (m *MockStoreInterface) GetLocationCapacityStats(ctx context.Context) (db.GetLocationCapacityStatsRow, error) {
 	m.ctrl.T.Helper()
@@ -1058,6 +1148,21 @@ func (m *MockStoreInterface) GetLocationCapacityStats(ctx context.Context) (db.G
 func (mr *MockStoreInterfaceMockRecorder) GetLocationCapacityStats(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLocationCapacityStats", reflect.TypeOf((*MockStoreInterface)(nil).GetLocationCapacityStats), ctx)
+}
+
+// GetLocationCapacityTotals mocks base method.
+func (m *MockStoreInterface) GetLocationCapacityTotals(ctx context.Context) (db.GetLocationCapacityTotalsRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetLocationCapacityTotals", ctx)
+	ret0, _ := ret[0].(db.GetLocationCapacityTotalsRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetLocationCapacityTotals indicates an expected call of GetLocationCapacityTotals.
+func (mr *MockStoreInterfaceMockRecorder) GetLocationCapacityTotals(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLocationCapacityTotals", reflect.TypeOf((*MockStoreInterface)(nil).GetLocationCapacityTotals), ctx)
 }
 
 // GetLocationTransferByID mocks base method.
@@ -1133,6 +1238,21 @@ func (m *MockStoreInterface) GetPermissionByID(ctx context.Context, id string) (
 func (mr *MockStoreInterfaceMockRecorder) GetPermissionByID(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPermissionByID", reflect.TypeOf((*MockStoreInterface)(nil).GetPermissionByID), ctx, id)
+}
+
+// GetPipelineStats mocks base method.
+func (m *MockStoreInterface) GetPipelineStats(ctx context.Context) (db.GetPipelineStatsRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPipelineStats", ctx)
+	ret0, _ := ret[0].(db.GetPipelineStatsRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPipelineStats indicates an expected call of GetPipelineStats.
+func (mr *MockStoreInterfaceMockRecorder) GetPipelineStats(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPipelineStats", reflect.TypeOf((*MockStoreInterface)(nil).GetPipelineStats), ctx)
 }
 
 // GetRecentEvaluationsGlobal mocks base method.
@@ -1298,6 +1418,21 @@ func (m *MockStoreInterface) GetScheduledEvaluations(ctx context.Context, arg db
 func (mr *MockStoreInterfaceMockRecorder) GetScheduledEvaluations(ctx, arg any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetScheduledEvaluations", reflect.TypeOf((*MockStoreInterface)(nil).GetScheduledEvaluations), ctx, arg)
+}
+
+// GetTodayAppointmentsForEmployee mocks base method.
+func (m *MockStoreInterface) GetTodayAppointmentsForEmployee(ctx context.Context, organizerID string) ([]db.GetTodayAppointmentsForEmployeeRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTodayAppointmentsForEmployee", ctx, organizerID)
+	ret0, _ := ret[0].([]db.GetTodayAppointmentsForEmployeeRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTodayAppointmentsForEmployee indicates an expected call of GetTodayAppointmentsForEmployee.
+func (mr *MockStoreInterfaceMockRecorder) GetTodayAppointmentsForEmployee(ctx, organizerID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTodayAppointmentsForEmployee", reflect.TypeOf((*MockStoreInterface)(nil).GetTodayAppointmentsForEmployee), ctx, organizerID)
 }
 
 // GetUnreadCount mocks base method.

@@ -7,6 +7,7 @@ import (
 	"care-cordination/features/auth"
 	"care-cordination/features/calendar"
 	"care-cordination/features/client"
+	"care-cordination/features/dashboard"
 	"care-cordination/features/employee"
 	"care-cordination/features/evaluation"
 	"care-cordination/features/incident"
@@ -208,6 +209,10 @@ func main() {
 	auditService := audit.NewAuditService(*store, l)
 	auditHandler := audit.NewAuditHandler(auditService, mdw)
 
+	// Dashboard Service
+	dashboardService := dashboard.NewDashboardService(store, l)
+	dashboardHandler := dashboard.NewDashboardHandler(dashboardService, mdw)
+
 	// 6. Initialize Server
 	server := api.NewServer(
 		l,
@@ -227,6 +232,7 @@ func main() {
 		calendarHandler,
 		notificationHandler,
 		auditHandler,
+		dashboardHandler,
 		wsHub,
 		rateLimiter,
 		cfg.ServerAddress,

@@ -100,6 +100,7 @@ func (s *clientService) MoveClientToWaitingList(
 		"Client created and intake form completed successfully",
 		zap.String("clientId", result.ClientID),
 	)
+	util.SetClientID(ctx, clientID)
 
 	return &MoveClientToWaitingListResponse{
 		ClientID: result.ClientID,
@@ -116,6 +117,7 @@ func (s *clientService) MoveClientInCare(
 		s.logger.Error(ctx, "MoveClientInCare", "Failed to get client", zap.Error(err))
 		return nil, ErrClientNotFound
 	}
+	util.SetClientID(ctx, clientID)
 
 	// Validate client is on waiting list
 	if client.Status != db.ClientStatusEnumWaitingList {
@@ -198,6 +200,7 @@ func (s *clientService) StartDischarge(
 		s.logger.Error(ctx, "StartDischarge", "Failed to get client", zap.Error(err))
 		return nil, ErrClientNotFound
 	}
+	util.SetClientID(ctx, clientID)
 
 	// Validate client is in care
 	if client.Status != db.ClientStatusEnumInCare {
@@ -266,6 +269,7 @@ func (s *clientService) CompleteDischarge(
 		s.logger.Error(ctx, "CompleteDischarge", "Failed to get client", zap.Error(err))
 		return nil, ErrClientNotFound
 	}
+	util.SetClientID(ctx, clientID)
 
 	// Validate client is in care
 	if client.Status != db.ClientStatusEnumInCare {
@@ -645,6 +649,7 @@ func (s *clientService) ListClientGoals(
 	ctx context.Context,
 	clientID string,
 ) ([]ListClientGoalsResponse, error) {
+	util.SetClientID(ctx, clientID)
 	goals, err := s.db.ListGoalsByClientID(ctx, &clientID)
 	if err != nil {
 		s.logger.Error(ctx, "ListClientGoals", "Failed to list client goals", zap.Error(err))

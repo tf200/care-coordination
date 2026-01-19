@@ -2,9 +2,9 @@ package middleware
 
 import (
 	"bytes"
+	"care-cordination/lib/audit"
 	"care-cordination/lib/util"
 	"context"
-	"regexp"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -76,8 +76,22 @@ func (rw *responseWriter) Write(b []byte) (int, error) {
 	return rw.ResponseWriter.Write(b)
 }
 
-// resourcePattern matches paths like /api/v1/resource or /api/v1/resource/:id
-var resourcePattern = regexp.MustCompile(`^/api/v\d+/([a-z_-]+)(?:/([^/]+))?`)
+var routeResourceMap = map[string]string{
+	"/attachments":        audit.ResourceTypeAttachment,
+	"/audit":              audit.ResourceTypeAudit,
+	"/calendar":           audit.ResourceTypeCalendar,
+	"/clients":            audit.ResourceTypeClient,
+	"/employees":          audit.ResourceTypeEmployee,
+	"/evaluations":        audit.ResourceTypeEvaluation,
+	"/incidents":          audit.ResourceTypeIncident,
+	"/intake-forms":       audit.ResourceTypeIntakeForm,
+	"/locations":          audit.ResourceTypeLocation,
+	"/location-transfers": audit.ResourceTypeLocationTransfer,
+	"/notifications":      audit.ResourceTypeNotification,
+	"/rbac":               audit.ResourceTypeRBAC,
+	"/referring-orgs":     audit.ResourceTypeReferringOrg,
+	"/registrations":      audit.ResourceTypeRegistration,
+}
 
 // AuditMdw returns a middleware that logs all requests to the audit service
 func (m *Middleware) AuditMdw() gin.HandlerFunc {
@@ -107,10 +121,10 @@ func shouldSkipAudit(path string) bool {
 		"/swagger",
 		"/health",
 		"/metrics",
-		"/api/v1/auth/login",   // Login is handled separately in auth service
-		"/api/v1/auth/logout",  // Logout is handled separately in auth service
-		"/api/v1/auth/refresh", // Token refresh doesn't need audit
-		"/api/v1/audit",        // Don't audit audit log access (avoid recursion)
+		"/auth/login",   // Login is handled separately in auth service
+		"/auth/logout",  // Logout is handled separately in auth service
+		"/auth/refresh", // Token refresh doesn't need audit
+		"/audit",        // Don't audit audit log access (avoid recursion)
 	}
 
 	for _, skip := range skipPaths {
@@ -139,15 +153,17 @@ func httpMethodToAction(method string) AuditAction {
 
 // extractResourceInfo extracts resource type and ID from URL path
 func extractResourceInfo(path string) (resourceType, resourceID string) {
-	matches := resourcePattern.FindStringSubmatch(path)
-	if len(matches) >= 2 {
-		resourceType = matches[1]
-		// Convert plural to singular and normalize
-		resourceType = strings.TrimSuffix(resourceType, "s")
-		resourceType = strings.ReplaceAll(resourceType, "-", "_")
-	}
-	if len(matches) >= 3 {
-		resourceID = matches[2]
+	// Check for exact match or prefix match
+	for route, rt := range routeResourceMap {
+		if strings.HasPrefix(path, route) {
+			resourceType = rt
+			// Extract ID if present after the route
+			remaining := strings.TrimPrefix(path, route)
+			if len(remaining) > 0 && remaining[0] == '/' {
+				resourceID = strings.TrimPrefix(remaining, "/")
+			}
+			return
+		}
 	}
 	return
 }

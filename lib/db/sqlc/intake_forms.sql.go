@@ -121,6 +121,7 @@ SELECT
     l.name as location_name,
     e.first_name as coordinator_first_name,
     e.last_name as coordinator_last_name,
+    (SELECT c.id FROM clients c WHERE c.intake_form_id = i.id LIMIT 1) AS client_id,
     EXISTS (SELECT 1 FROM clients c WHERE c.intake_form_id = i.id) AS has_client
 FROM intake_forms i
 LEFT JOIN registration_forms r ON i.registration_form_id = r.id
@@ -154,6 +155,7 @@ type GetIntakeFormWithDetailsRow struct {
 	LocationName            *string          `json:"location_name"`
 	CoordinatorFirstName    *string          `json:"coordinator_first_name"`
 	CoordinatorLastName     *string          `json:"coordinator_last_name"`
+	ClientID                string           `json:"client_id"`
 	HasClient               bool             `json:"has_client"`
 }
 
@@ -184,6 +186,7 @@ func (q *Queries) GetIntakeFormWithDetails(ctx context.Context, id string) (GetI
 		&i.LocationName,
 		&i.CoordinatorFirstName,
 		&i.CoordinatorLastName,
+		&i.ClientID,
 		&i.HasClient,
 	)
 	return i, err

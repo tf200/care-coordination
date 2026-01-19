@@ -2,6 +2,9 @@ package main
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"log"
 	"math/rand"
@@ -495,6 +498,39 @@ func main() {
 	// Seed notifications for admin users
 	if err := seedNotifications(ctx, store); err != nil {
 		log.Fatalf("Failed to seed notifications: %v", err)
+	}
+
+	// Seed audit logs for realistic activity tracking
+	// Get users and clients from seeded data for realistic audit entries
+	adminUserIDs, _ := store.GetUserIDsByRoleName(ctx, "admin")
+	coordinatorUserIDs, _ := store.GetUserIDsByRoleName(ctx, "coordinator")
+	allUserIDs := append(adminUserIDs, coordinatorUserIDs...)
+
+	if len(allUserIDs) == 0 {
+		fmt.Println("  ⚠ No users found, skipping audit log seeding")
+	} else {
+		// Get all clients for client-related audit entries
+		inCareClients, _ := store.ListInCareClients(ctx, db.ListInCareClientsParams{Limit: 1000, Offset: 0})
+		waitingListClients, _ := store.ListWaitingListClients(ctx, db.ListWaitingListClientsParams{Limit: 1000, Offset: 0})
+		var clientIDs []string
+		for _, c := range inCareClients {
+			clientIDs = append(clientIDs, c.ID)
+		}
+		for _, c := range waitingListClients {
+			clientIDs = append(clientIDs, c.ID)
+		}
+
+		// Get all employees for employee-related audit entries
+		employees, _ := store.ListEmployees(ctx, db.ListEmployeesParams{Limit: 100, Offset: 0})
+		var employeeIDs []string
+		for _, e := range employees {
+			employeeIDs = append(employeeIDs, e.ID)
+		}
+
+		// Create 500 audit logs spread over the last 30 days
+		if err := seedAuditLogs(ctx, store, allUserIDs, employeeIDs, clientIDs, 30, 500); err != nil {
+			log.Fatalf("Failed to seed audit logs: %v", err)
+		}
 	}
 
 	fmt.Println("✅ Successfully seeded database!")
@@ -2231,4 +2267,257 @@ func createRandomNotification(ctx context.Context, store *db.Store, userID strin
 func generateFakeID() string {
 	id, _ := gonanoid.New()
 	return id
+}
+
+// ============================================================
+// Audit Logs Seeding
+// ============================================================
+
+// Realistic resource types that match API endpoints
+var auditResourceTypes = []string{
+	"client", "employee", "incident", "evaluation", "appointment",
+	"location", "location_transfer", "notification", "referring_org",
+	"registration_form", "intake_form",
+}
+
+// Realistic user agents for different devices
+var userAgents = []string{
+	"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+	"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+	"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+	"Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1",
+	"Mozilla/5.0 (iPad; CPU OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1",
+	"Mozilla/5.0 (Linux; Android 14; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.43 Mobile Safari/537.36",
+}
+
+// Realistic failure reasons
+var failureReasons = []string{
+	"unauthorized", "forbidden", "not_found", "validation_error",
+	"server_error", "rate_limited", "connection_timeout",
+}
+
+// Action distribution - reads are most common
+var actionWeights = map[db.AuditActionEnum]int{
+	db.AuditActionEnumRead:   60, // 60% reads
+	db.AuditActionEnumCreate: 15, // 15% creates
+	db.AuditActionEnumUpdate: 15, // 15% updates
+	db.AuditActionEnumDelete: 5,  // 5% deletes
+	db.AuditActionEnumLogin:  3,  // 3% logins
+	db.AuditActionEnumLogout: 2,  // 2% logouts
+}
+
+func seedAuditLogs(
+	ctx context.Context,
+	store *db.Store,
+	userIDs, employeeIDs, clientIDs []string,
+	daysBack int,
+	count int,
+) error {
+	fmt.Printf("🌱 Seeding %d audit logs over the last %d days...\n", count, daysBack)
+
+	if len(userIDs) == 0 {
+		fmt.Println("  ⚠ No users found, skipping audit log seeding")
+		return nil
+	}
+
+	prevHash := "GENESIS"
+	var lastCreatedAt time.Time
+
+	for i := 0; i < count; i++ {
+		// Select random user and employee
+		userID := randomElement(userIDs)
+		var employeeID *string
+		if len(employeeIDs) > 0 && rand.Float32() < 0.9 {
+			empID := randomElement(employeeIDs)
+			employeeID = &empID
+		}
+
+		// Select random action based on weights
+		action := selectWeightedAction()
+
+		// Select random resource type
+		resourceType := randomElement(auditResourceTypes)
+
+		// Generate timestamp spread over the past N days
+		daysAgo := rand.Intn(daysBack)
+		hoursAgo := rand.Intn(24)
+		minutesAgo := rand.Intn(60)
+		createdAt := time.Now().AddDate(0, 0, -daysAgo).Add(-time.Duration(hoursAgo)*time.Hour - time.Duration(minutesAgo)*time.Minute)
+
+		// Ensure timestamps are sequential
+		if !lastCreatedAt.IsZero() && createdAt.After(lastCreatedAt) {
+			createdAt = lastCreatedAt.Add(time.Second)
+		}
+		lastCreatedAt = createdAt
+
+		// Most operations succeed, small chance of failure
+		isFailure := rand.Float32() < 0.05
+		var status db.AuditStatusEnum
+		var failureReason *string
+		if isFailure {
+			status = db.AuditStatusEnumFailure
+			fr := randomElement(failureReasons)
+			failureReason = &fr
+		} else {
+			status = db.AuditStatusEnumSuccess
+		}
+
+		// Generate resource ID for non-read operations
+		var resourceID *string
+		if action != db.AuditActionEnumRead && action != db.AuditActionEnumLogin && action != db.AuditActionEnumLogout {
+			rid := generateFakeID()
+			resourceID = &rid
+		}
+
+		// Generate client ID for client-related operations
+		var clientID *string
+		if resourceType == "client" && len(clientIDs) > 0 && rand.Float32() < 0.8 {
+			cid := randomElement(clientIDs)
+			clientID = &cid
+		}
+
+		// Generate IP address (realistic Dutch IP ranges)
+		ipAddress := fmt.Sprintf("10.0.%d.%d", rand.Intn(256), rand.Intn(256))
+		if rand.Float32() < 0.3 {
+			ipAddress = fmt.Sprintf("192.168.%d.%d", rand.Intn(256), rand.Intn(256))
+		}
+		if rand.Float32() < 0.1 {
+			ipAddress = fmt.Sprintf("213.34.%d.%d", rand.Intn(256), rand.Intn(256))
+		}
+
+		// Generate request ID
+		requestID := generateFakeID()
+
+		// Generate old/new values for updates/deletes
+		var oldValue, newValue []byte
+		if action == db.AuditActionEnumUpdate || action == db.AuditActionEnumDelete {
+			oldData := map[string]interface{}{
+				"updated_at": createdAt.Add(-24 * time.Hour).Format(time.RFC3339),
+				"version":    rand.Intn(5) + 1,
+			}
+			oldValue, _ = json.Marshal(oldData)
+		}
+		if action == db.AuditActionEnumCreate || action == db.AuditActionEnumUpdate {
+			newData := map[string]interface{}{
+				"created_at": createdAt.Format(time.RFC3339),
+				"created_by": userID,
+				"version":    rand.Intn(5) + 1,
+			}
+			newValue, _ = json.Marshal(newData)
+		}
+
+		// Generate audit log entry
+		id := generateFakeID()
+		currentHash := computeAuditHash(
+			id,
+			strPtr(userID),
+			employeeID,
+			string(action),
+			resourceType,
+			resourceID,
+			oldValue,
+			newValue,
+			&ipAddress,
+			strPtr(requestID),
+			status,
+			failureReason,
+			prevHash,
+			createdAt,
+		)
+
+		// Create the audit log entry
+		err := store.CreateAuditLog(ctx, db.CreateAuditLogParams{
+			ID:            id,
+			UserID:        strPtr(userID),
+			EmployeeID:    employeeID,
+			ClientID:      clientID,
+			Action:        action,
+			ResourceType:  resourceType,
+			ResourceID:    resourceID,
+			OldValue:      oldValue,
+			NewValue:      newValue,
+			IpAddress:     strPtr(ipAddress),
+			UserAgent:     strPtr(randomElement(userAgents)),
+			RequestID:     strPtr(requestID),
+			Status:        status,
+			FailureReason: failureReason,
+			PrevHash:      prevHash,
+			CurrentHash:   currentHash,
+		})
+		if err != nil {
+			return fmt.Errorf("failed to create audit log %d: %w", i+1, err)
+		}
+
+		prevHash = currentHash
+	}
+
+	fmt.Printf("✅ Successfully seeded %d audit logs\n", count)
+	return nil
+}
+
+func strPtr(s string) *string {
+	if s == "" {
+		return nil
+	}
+	return &s
+}
+
+func selectWeightedAction() db.AuditActionEnum {
+	total := 0
+	for _, weight := range actionWeights {
+		total += weight
+	}
+
+	randVal := rand.Intn(total)
+	cumulative := 0
+
+	for action, weight := range actionWeights {
+		cumulative += weight
+		if randVal < cumulative {
+			return action
+		}
+	}
+
+	return db.AuditActionEnumRead
+}
+
+// computeAuditHash generates a SHA-256 hash matching the middleware's logic
+func computeAuditHash(
+	id string,
+	userID, employeeID *string,
+	action, resourceType string,
+	resourceID *string,
+	oldValue, newValue []byte,
+	ipAddress, requestID *string,
+	status db.AuditStatusEnum,
+	failureReason *string,
+	prevHash string,
+	createdAt time.Time,
+) string {
+	data := fmt.Sprintf("%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s",
+		id,
+		strVal(userID),
+		strVal(employeeID),
+		action,
+		resourceType,
+		strVal(resourceID),
+		string(oldValue),
+		string(newValue),
+		strVal(ipAddress),
+		strVal(requestID),
+		string(status),
+		strVal(failureReason),
+		prevHash,
+		createdAt.UTC().Format(time.RFC3339Nano),
+	)
+
+	hash := sha256.Sum256([]byte(data))
+	return hex.EncodeToString(hash[:])
+}
+
+func strVal(s *string) string {
+	if s == nil {
+		return "<nil>"
+	}
+	return *s
 }

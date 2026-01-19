@@ -64,8 +64,12 @@ func GetUserAgent(ctx context.Context) string {
 
 // SetClientID sets the client ID in context for audit logging
 // Call this from handlers after fetching client-related resources
-func SetClientID(ctx *gin.Context, clientID string) {
-	ctx.Set(ClientIDKey, clientID)
+func SetClientID(ctx context.Context, clientID string) {
+	if ginCtx, ok := ctx.(*gin.Context); ok {
+		ginCtx.Set(ClientIDKey, clientID)
+		return
+	}
+	ctx = context.WithValue(ctx, ClientIDKey, clientID)
 }
 
 // GetClientID retrieves the client ID from context for audit logging

@@ -92,10 +92,17 @@ type Querier interface {
 	GetAuditLogsByUser(ctx context.Context, arg GetAuditLogsByUserParams) ([]AuditLog, error)
 	// Get audit logs in sequence order for hash chain verification
 	GetAuditLogsForVerification(ctx context.Context, arg GetAuditLogsForVerificationParams) ([]GetAuditLogsForVerificationRow, error)
+	GetCareTypeDistribution(ctx context.Context) (GetCareTypeDistributionRow, error)
 	GetClientByID(ctx context.Context, id string) (Client, error)
 	GetClientEvaluationHistory(ctx context.Context, clientID string) ([]GetClientEvaluationHistoryRow, error)
 	GetCoordinatorDrafts(ctx context.Context, arg GetCoordinatorDraftsParams) ([]GetCoordinatorDraftsRow, error)
+	GetCriticalAlertsData(ctx context.Context) (GetCriticalAlertsDataRow, error)
 	GetCriticalEvaluations(ctx context.Context, arg GetCriticalEvaluationsParams) ([]GetCriticalEvaluationsRow, error)
+	GetDashboardDischargeStats(ctx context.Context) (GetDashboardDischargeStatsRow, error)
+	// ============================================================
+	// Dashboard
+	// ============================================================
+	GetDashboardOverviewStats(ctx context.Context) (GetDashboardOverviewStatsRow, error)
 	GetDischargeStats(ctx context.Context) (GetDischargeStatsRow, error)
 	GetDraftByClientId(ctx context.Context, clientID string) (ClientEvaluation, error)
 	GetDraftEvaluation(ctx context.Context, id string) ([]GetDraftEvaluationRow, error)
@@ -103,6 +110,7 @@ type Querier interface {
 	GetEmployeeByUserID(ctx context.Context, userID string) (GetEmployeeByUserIDRow, error)
 	GetEvaluationById(ctx context.Context, id string) (ClientEvaluation, error)
 	GetEvaluationDetails(ctx context.Context, id string) ([]GetEvaluationDetailsRow, error)
+	GetEvaluationStats(ctx context.Context) (GetEvaluationStatsRow, error)
 	// Get clients with evaluations due in the next 3 days for reminder notifications
 	GetEvaluationsDueSoon(ctx context.Context) ([]GetEvaluationsDueSoonRow, error)
 	GetInCareStats(ctx context.Context) (GetInCareStatsRow, error)
@@ -114,13 +122,16 @@ type Querier interface {
 	GetLastClientEvaluation(ctx context.Context, clientID string) ([]GetLastClientEvaluationRow, error)
 	// Get the most recent audit log entry to retrieve its hash for the chain
 	GetLatestAuditLog(ctx context.Context) (GetLatestAuditLogRow, error)
+	GetLocationCapacityList(ctx context.Context) ([]GetLocationCapacityListRow, error)
 	GetLocationCapacityStats(ctx context.Context) (GetLocationCapacityStatsRow, error)
+	GetLocationCapacityTotals(ctx context.Context) (GetLocationCapacityTotalsRow, error)
 	GetLocationTransferByID(ctx context.Context, id string) (GetLocationTransferByIDRow, error)
 	GetLocationTransferStats(ctx context.Context) (GetLocationTransferStatsRow, error)
 	GetNotification(ctx context.Context, id string) (Notification, error)
 	// Get reminders due in the next hour that haven't been completed
 	GetPendingRemindersByDueTime(ctx context.Context) ([]Reminder, error)
 	GetPermissionByID(ctx context.Context, id string) (Permission, error)
+	GetPipelineStats(ctx context.Context) (GetPipelineStatsRow, error)
 	GetRecentEvaluationsGlobal(ctx context.Context, arg GetRecentEvaluationsGlobalParams) ([]GetRecentEvaluationsGlobalRow, error)
 	GetReferringOrgByID(ctx context.Context, id string) (ReferringOrg, error)
 	GetReferringOrgStats(ctx context.Context) (GetReferringOrgStatsRow, error)
@@ -132,6 +143,7 @@ type Querier interface {
 	GetRoleByName(ctx context.Context, name string) (Role, error)
 	GetRoleForUser(ctx context.Context, userID string) (Role, error)
 	GetScheduledEvaluations(ctx context.Context, arg GetScheduledEvaluationsParams) ([]GetScheduledEvaluationsRow, error)
+	GetTodayAppointmentsForEmployee(ctx context.Context, organizerID string) ([]GetTodayAppointmentsForEmployeeRow, error)
 	GetUnreadCount(ctx context.Context, userID string) (int64, error)
 	// Get appointments starting in the next hour for reminder notifications
 	GetUpcomingAppointments(ctx context.Context) ([]GetUpcomingAppointmentsRow, error)

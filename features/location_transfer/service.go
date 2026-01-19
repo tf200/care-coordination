@@ -7,6 +7,7 @@ import (
 	"care-cordination/lib/logger"
 	"care-cordination/lib/nanoid"
 	"care-cordination/lib/resp"
+	"care-cordination/lib/util"
 	"context"
 	"fmt"
 	"time"
@@ -42,6 +43,7 @@ func (s *locTransferService) RegisterLocationTransfer(
 		s.logger.Error(ctx, "RegisterLocationTransfer", "Failed to get client", zap.Error(err))
 		return nil, ErrClientNotFound
 	}
+	util.SetClientID(ctx, client.ID)
 
 	result, err := s.db.CreateLocationTransfer(ctx, db.CreateLocationTransferParams{
 		ID:                   nanoid.Generate(),
@@ -133,6 +135,8 @@ func (s *locTransferService) GetLocationTransferByID(
 		return nil, ErrInternal
 	}
 
+	util.SetClientID(ctx, transfer.ClientID)
+
 	return &ListLocationTransfersResponse{
 		ID:                          transfer.ID,
 		ClientID:                    transfer.ClientID,
@@ -168,6 +172,7 @@ func (s *locTransferService) ConfirmLocationTransfer(
 		s.logger.Error(ctx, "ConfirmLocationTransfer", "Failed to get transfer", zap.Error(err))
 		return ErrInternal
 	}
+	util.SetClientID(ctx, transfer.ClientID)
 
 	// Check if already processed
 	if transfer.Status != db.LocationTransferStatusEnumPending {
@@ -261,6 +266,8 @@ func (s *locTransferService) RefuseLocationTransfer(
 		return ErrInternal
 	}
 
+	util.SetClientID(ctx, transfer.ClientID)
+
 	// Check if already processed
 	if transfer.Status != db.LocationTransferStatusEnumPending {
 		return ErrTransferAlreadyProcessed
@@ -311,6 +318,8 @@ func (s *locTransferService) UpdateLocationTransfer(
 		s.logger.Error(ctx, "UpdateLocationTransfer", "Failed to get transfer", zap.Error(err))
 		return ErrInternal
 	}
+
+	util.SetClientID(ctx, transfer.ClientID)
 
 	// Check if already processed
 	if transfer.Status != db.LocationTransferStatusEnumPending {

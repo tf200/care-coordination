@@ -23,6 +23,7 @@ import (
 	"care-cordination/features/auth"
 	"care-cordination/features/calendar"
 	"care-cordination/features/client"
+	"care-cordination/features/dashboard"
 	"care-cordination/features/employee"
 	"care-cordination/features/evaluation"
 	"care-cordination/features/incident"
@@ -69,6 +70,7 @@ type Server struct {
 	calendarHandler     *calendar.CalendarHandler
 	notificationHandler *notification.NotificationHandler
 	auditHandler        *audit.AuditHandler
+	dashboardHandler    *dashboard.DashboardHandler
 	wsHub               *websocket.Hub
 
 	environment string
@@ -96,6 +98,7 @@ func NewServer(
 	calendarHandler *calendar.CalendarHandler,
 	notificationHandler *notification.NotificationHandler,
 	auditHandler *audit.AuditHandler,
+	dashboardHandler *dashboard.DashboardHandler,
 	wsHub *websocket.Hub,
 	rateLimiter ratelimit.RateLimiter, addr string, url string) *Server {
 	s := &Server{
@@ -116,6 +119,7 @@ func NewServer(
 		calendarHandler:     calendarHandler,
 		notificationHandler: notificationHandler,
 		auditHandler:        auditHandler,
+		dashboardHandler:    dashboardHandler,
 		wsHub:               wsHub,
 		logger:              logger,
 		addr:                addr,
@@ -196,6 +200,7 @@ func (s *Server) setupRoutes(logger logger.Logger) {
 	s.calendarHandler.SetupRoutes(router)
 	s.notificationHandler.SetupRoutes(router)
 	s.auditHandler.SetupAuditRoutes(router)
+	s.dashboardHandler.SetupDashboardRoutes(router)
 	s.router = router
 }
 

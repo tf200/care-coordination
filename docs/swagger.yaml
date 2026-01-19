@@ -610,6 +610,187 @@ definitions:
       clientId:
         type: string
     type: object
+  dashboard.AlertDTO:
+    properties:
+      count:
+        type: integer
+      description:
+        type: string
+      id:
+        type: string
+      link:
+        type: string
+      severity:
+        $ref: '#/definitions/dashboard.AlertSeverity'
+      title:
+        type: string
+      type:
+        $ref: '#/definitions/dashboard.AlertType'
+    type: object
+  dashboard.AlertSeverity:
+    enum:
+    - critical
+    - warning
+    type: string
+    x-enum-varnames:
+    - AlertSeverityCritical
+    - AlertSeverityWarning
+  dashboard.AlertType:
+    enum:
+    - evaluation
+    - care_end
+    - incident
+    - waitlist
+    - transfer
+    type: string
+    x-enum-varnames:
+    - AlertTypeEvaluation
+    - AlertTypeCareEnd
+    - AlertTypeIncident
+    - AlertTypeWaitlist
+    - AlertTypeTransfer
+  dashboard.CareTypeDistributionDTO:
+    properties:
+      distribution:
+        items:
+          $ref: '#/definitions/dashboard.CareTypeDistributionItem'
+        type: array
+      total:
+        type: integer
+    type: object
+  dashboard.CareTypeDistributionItem:
+    properties:
+      careType:
+        type: string
+      count:
+        type: integer
+      label:
+        type: string
+      percentage:
+        type: number
+    type: object
+  dashboard.CriticalAlertsDTO:
+    properties:
+      alerts:
+        items:
+          $ref: '#/definitions/dashboard.AlertDTO'
+        type: array
+    type: object
+  dashboard.DischargeStatsDTO:
+    properties:
+      averageDaysInCare:
+        type: integer
+      plannedRate:
+        type: integer
+      thisMonth:
+        type: integer
+      thisYear:
+        type: integer
+    type: object
+  dashboard.EvaluationStatsDTO:
+    properties:
+      completed:
+        type: integer
+      completionRate:
+        type: integer
+      dueSoon:
+        type: integer
+      overdue:
+        type: integer
+      total:
+        type: integer
+    type: object
+  dashboard.LocationCapacityDTO:
+    properties:
+      locations:
+        items:
+          $ref: '#/definitions/dashboard.LocationCapacityItem'
+        type: array
+      totals:
+        $ref: '#/definitions/dashboard.LocationCapacityTotals'
+    type: object
+  dashboard.LocationCapacityItem:
+    properties:
+      available:
+        type: integer
+      capacity:
+        type: integer
+      id:
+        type: string
+      name:
+        type: string
+      occupied:
+        type: integer
+      percentage:
+        type: number
+    type: object
+  dashboard.LocationCapacityTotals:
+    properties:
+      overallPercentage:
+        type: number
+      totalAvailable:
+        type: integer
+      totalCapacity:
+        type: integer
+      totalOccupied:
+        type: integer
+    type: object
+  dashboard.OverviewDTO:
+    properties:
+      openIncidents:
+        type: integer
+      pendingRegistrations:
+        type: integer
+      totalActiveClients:
+        type: integer
+      totalCoordinators:
+        type: integer
+      totalEmployees:
+        type: integer
+      waitingListCount:
+        type: integer
+    type: object
+  dashboard.PipelineStatsDTO:
+    properties:
+      discharged:
+        type: integer
+      inCare:
+        type: integer
+      intakes:
+        type: integer
+      registrations:
+        type: integer
+      waitingList:
+        type: integer
+    type: object
+  dashboard.TodayAppointmentItem:
+    properties:
+      clientId:
+        type: string
+      clientName:
+        type: string
+      endTime:
+        type: string
+      id:
+        type: string
+      locationName:
+        type: string
+      startTime:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+    type: object
+  dashboard.TodayAppointmentsDTO:
+    properties:
+      appointments:
+        items:
+          $ref: '#/definitions/dashboard.TodayAppointmentItem'
+        type: array
+      count:
+        type: integer
+    type: object
   employee.CreateEmployeeRequest:
     properties:
       bsn:
@@ -2556,6 +2737,94 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/client.StartDischargeResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-dashboard_CareTypeDistributionDTO:
+    properties:
+      data:
+        $ref: '#/definitions/dashboard.CareTypeDistributionDTO'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-dashboard_CriticalAlertsDTO:
+    properties:
+      data:
+        $ref: '#/definitions/dashboard.CriticalAlertsDTO'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-dashboard_DischargeStatsDTO:
+    properties:
+      data:
+        $ref: '#/definitions/dashboard.DischargeStatsDTO'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-dashboard_EvaluationStatsDTO:
+    properties:
+      data:
+        $ref: '#/definitions/dashboard.EvaluationStatsDTO'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-dashboard_LocationCapacityDTO:
+    properties:
+      data:
+        $ref: '#/definitions/dashboard.LocationCapacityDTO'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-dashboard_OverviewDTO:
+    properties:
+      data:
+        $ref: '#/definitions/dashboard.OverviewDTO'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-dashboard_PipelineStatsDTO:
+    properties:
+      data:
+        $ref: '#/definitions/dashboard.PipelineStatsDTO'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-dashboard_TodayAppointmentsDTO:
+    properties:
+      data:
+        $ref: '#/definitions/dashboard.TodayAppointmentsDTO'
       message:
         example: success message
         type: string
@@ -4643,6 +4912,188 @@ paths:
       summary: Get waitlist statistics
       tags:
       - Client
+  /dashboard/care-type-distribution:
+    get:
+      description: Get distribution of in-care clients by care type
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-dashboard_CareTypeDistributionDTO'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get care type distribution
+      tags:
+      - Dashboard
+  /dashboard/critical-alerts:
+    get:
+      description: Get critical alerts for the admin dashboard
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-dashboard_CriticalAlertsDTO'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get critical alerts
+      tags:
+      - Dashboard
+  /dashboard/discharge-stats:
+    get:
+      description: Get discharge statistics
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-dashboard_DischargeStatsDTO'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get discharge stats
+      tags:
+      - Dashboard
+  /dashboard/evaluation-stats:
+    get:
+      description: Get evaluation statistics for all coordinators
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-dashboard_EvaluationStatsDTO'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get evaluation stats
+      tags:
+      - Dashboard
+  /dashboard/location-capacity:
+    get:
+      description: Get location capacity statistics with optional limit and sorting
+      parameters:
+      - description: 'Number of locations to return (default: 4, max: 100)'
+        in: query
+        name: limit
+        type: integer
+      - description: 'Sort order: occupancy_desc, occupancy_asc, name (default: occupancy_desc)'
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-dashboard_LocationCapacityDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get location capacity
+      tags:
+      - Dashboard
+  /dashboard/overview-stats:
+    get:
+      description: Get overview statistics for the admin dashboard
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-dashboard_OverviewDTO'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get dashboard overview stats
+      tags:
+      - Dashboard
+  /dashboard/pipeline-stats:
+    get:
+      description: Get pipeline statistics showing client journey through the care
+        system
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-dashboard_PipelineStatsDTO'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get pipeline stats
+      tags:
+      - Dashboard
+  /dashboard/today-appointments:
+    get:
+      description: Get today's appointments for the logged-in user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-dashboard_TodayAppointmentsDTO'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get today's appointments
+      tags:
+      - Dashboard
   /employees:
     get:
       consumes:

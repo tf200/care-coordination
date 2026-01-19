@@ -2297,6 +2297,282 @@ const docTemplate = `{
                 }
             }
         },
+        "/dashboard/care-type-distribution": {
+            "get": {
+                "description": "Get distribution of in-care clients by care type",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Get care type distribution",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_CareTypeDistributionDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/dashboard/critical-alerts": {
+            "get": {
+                "description": "Get critical alerts for the admin dashboard",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Get critical alerts",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_CriticalAlertsDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/dashboard/discharge-stats": {
+            "get": {
+                "description": "Get discharge statistics",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Get discharge stats",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_DischargeStatsDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/dashboard/evaluation-stats": {
+            "get": {
+                "description": "Get evaluation statistics for all coordinators",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Get evaluation stats",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_EvaluationStatsDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/dashboard/location-capacity": {
+            "get": {
+                "description": "Get location capacity statistics with optional limit and sorting",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Get location capacity",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of locations to return (default: 4, max: 100)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort order: occupancy_desc, occupancy_asc, name (default: occupancy_desc)",
+                        "name": "sort",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_LocationCapacityDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/dashboard/overview-stats": {
+            "get": {
+                "description": "Get overview statistics for the admin dashboard",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Get dashboard overview stats",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_OverviewDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/dashboard/pipeline-stats": {
+            "get": {
+                "description": "Get pipeline statistics showing client journey through the care system",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Get pipeline stats",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_PipelineStatsDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/dashboard/today-appointments": {
+            "get": {
+                "description": "Get today's appointments for the logged-in user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Get today's appointments",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_TodayAppointmentsDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/employees": {
             "get": {
                 "description": "List all employees with pagination and search",
@@ -6067,6 +6343,279 @@ const docTemplate = `{
                 }
             }
         },
+        "dashboard.AlertDTO": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "link": {
+                    "type": "string"
+                },
+                "severity": {
+                    "$ref": "#/definitions/dashboard.AlertSeverity"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/dashboard.AlertType"
+                }
+            }
+        },
+        "dashboard.AlertSeverity": {
+            "type": "string",
+            "enum": [
+                "critical",
+                "warning"
+            ],
+            "x-enum-varnames": [
+                "AlertSeverityCritical",
+                "AlertSeverityWarning"
+            ]
+        },
+        "dashboard.AlertType": {
+            "type": "string",
+            "enum": [
+                "evaluation",
+                "care_end",
+                "incident",
+                "waitlist",
+                "transfer"
+            ],
+            "x-enum-varnames": [
+                "AlertTypeEvaluation",
+                "AlertTypeCareEnd",
+                "AlertTypeIncident",
+                "AlertTypeWaitlist",
+                "AlertTypeTransfer"
+            ]
+        },
+        "dashboard.CareTypeDistributionDTO": {
+            "type": "object",
+            "properties": {
+                "distribution": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dashboard.CareTypeDistributionItem"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dashboard.CareTypeDistributionItem": {
+            "type": "object",
+            "properties": {
+                "careType": {
+                    "type": "string"
+                },
+                "count": {
+                    "type": "integer"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "percentage": {
+                    "type": "number"
+                }
+            }
+        },
+        "dashboard.CriticalAlertsDTO": {
+            "type": "object",
+            "properties": {
+                "alerts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dashboard.AlertDTO"
+                    }
+                }
+            }
+        },
+        "dashboard.DischargeStatsDTO": {
+            "type": "object",
+            "properties": {
+                "averageDaysInCare": {
+                    "type": "integer"
+                },
+                "plannedRate": {
+                    "type": "integer"
+                },
+                "thisMonth": {
+                    "type": "integer"
+                },
+                "thisYear": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dashboard.EvaluationStatsDTO": {
+            "type": "object",
+            "properties": {
+                "completed": {
+                    "type": "integer"
+                },
+                "completionRate": {
+                    "type": "integer"
+                },
+                "dueSoon": {
+                    "type": "integer"
+                },
+                "overdue": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dashboard.LocationCapacityDTO": {
+            "type": "object",
+            "properties": {
+                "locations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dashboard.LocationCapacityItem"
+                    }
+                },
+                "totals": {
+                    "$ref": "#/definitions/dashboard.LocationCapacityTotals"
+                }
+            }
+        },
+        "dashboard.LocationCapacityItem": {
+            "type": "object",
+            "properties": {
+                "available": {
+                    "type": "integer"
+                },
+                "capacity": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "occupied": {
+                    "type": "integer"
+                },
+                "percentage": {
+                    "type": "number"
+                }
+            }
+        },
+        "dashboard.LocationCapacityTotals": {
+            "type": "object",
+            "properties": {
+                "overallPercentage": {
+                    "type": "number"
+                },
+                "totalAvailable": {
+                    "type": "integer"
+                },
+                "totalCapacity": {
+                    "type": "integer"
+                },
+                "totalOccupied": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dashboard.OverviewDTO": {
+            "type": "object",
+            "properties": {
+                "openIncidents": {
+                    "type": "integer"
+                },
+                "pendingRegistrations": {
+                    "type": "integer"
+                },
+                "totalActiveClients": {
+                    "type": "integer"
+                },
+                "totalCoordinators": {
+                    "type": "integer"
+                },
+                "totalEmployees": {
+                    "type": "integer"
+                },
+                "waitingListCount": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dashboard.PipelineStatsDTO": {
+            "type": "object",
+            "properties": {
+                "discharged": {
+                    "type": "integer"
+                },
+                "inCare": {
+                    "type": "integer"
+                },
+                "intakes": {
+                    "type": "integer"
+                },
+                "registrations": {
+                    "type": "integer"
+                },
+                "waitingList": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dashboard.TodayAppointmentItem": {
+            "type": "object",
+            "properties": {
+                "clientId": {
+                    "type": "string"
+                },
+                "clientName": {
+                    "type": "string"
+                },
+                "endTime": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "locationName": {
+                    "type": "string"
+                },
+                "startTime": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "dashboard.TodayAppointmentsDTO": {
+            "type": "object",
+            "properties": {
+                "appointments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dashboard.TodayAppointmentItem"
+                    }
+                },
+                "count": {
+                    "type": "integer"
+                }
+            }
+        },
         "employee.CreateEmployeeRequest": {
             "type": "object",
             "required": [
@@ -8971,6 +9520,134 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/client.StartDischargeResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-dashboard_CareTypeDistributionDTO": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/dashboard.CareTypeDistributionDTO"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-dashboard_CriticalAlertsDTO": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/dashboard.CriticalAlertsDTO"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-dashboard_DischargeStatsDTO": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/dashboard.DischargeStatsDTO"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-dashboard_EvaluationStatsDTO": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/dashboard.EvaluationStatsDTO"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-dashboard_LocationCapacityDTO": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/dashboard.LocationCapacityDTO"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-dashboard_OverviewDTO": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/dashboard.OverviewDTO"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-dashboard_PipelineStatsDTO": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/dashboard.PipelineStatsDTO"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-dashboard_TodayAppointmentsDTO": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/dashboard.TodayAppointmentsDTO"
                 },
                 "message": {
                     "type": "string",

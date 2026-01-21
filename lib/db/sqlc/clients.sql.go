@@ -189,8 +189,8 @@ func (q *Queries) GetClientByID(ctx context.Context, id string) (Client, error) 
 const getDischargeStats = `-- name: GetDischargeStats :one
 SELECT 
     COUNT(*) as total_count,
-    COUNT(*) FILTER (WHERE reason_for_discharge = 'treatment_completed') as completed_discharges,
-    COUNT(*) FILTER (WHERE reason_for_discharge != 'treatment_completed') as premature_discharges,
+    COUNT(*) FILTER (WHERE reason_for_discharge IS NOT NULL AND reason_for_discharge = 'treatment_completed') as completed_discharges,
+    COUNT(*) FILTER (WHERE reason_for_discharge IS NOT NULL AND reason_for_discharge != 'treatment_completed') as premature_discharges,
     CASE 
         WHEN COUNT(*) > 0 THEN 
             ROUND((COUNT(*) FILTER (WHERE discharge_status = 'completed')::DECIMAL / COUNT(*)::DECIMAL) * 100, 2)

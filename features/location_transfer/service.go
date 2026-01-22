@@ -356,7 +356,7 @@ func (s *locTransferService) GetLocationTransferStats(
 		TotalCount:   int(stats.TotalCount),
 		PendingCount: int(stats.PendingCount),
 		ApprovalRate: approvalRate,
-		CountsByStatus: TransferStatusCountsDTO{
+		CountsByStatus: TransferStatusCounts{
 			Pending:  int(stats.PendingCount),
 			Approved: int(stats.ApprovedCount),
 			Rejected: int(stats.RejectedCount),

@@ -134,7 +134,7 @@ func (h *EvaluationHandler) GetEvaluationHistory(c *gin.Context) {
 // @Description List evaluations due within the next 7 days or overdue.
 // @Tags Evaluation
 // @Produce json
-// @Success 200 {object} resp.SuccessResponse[resp.PaginationResponse[UpcomingEvaluationDTO]]
+// @Success 200 {object} resp.SuccessResponse[resp.PaginationResponse[UpcomingEvaluationItem]]
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
 // @Router /evaluations/critical [get]
@@ -152,7 +152,7 @@ func (h *EvaluationHandler) GetCritical(c *gin.Context) {
 // @Description List evaluations scheduled between 8 and 30 days from now.
 // @Tags Evaluation
 // @Produce json
-// @Success 200 {object} resp.SuccessResponse[resp.PaginationResponse[UpcomingEvaluationDTO]]
+// @Success 200 {object} resp.SuccessResponse[resp.PaginationResponse[UpcomingEvaluationItem]]
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
 // @Router /evaluations/scheduled [get]
@@ -170,7 +170,7 @@ func (h *EvaluationHandler) GetScheduled(c *gin.Context) {
 // @Description List the last 20 evaluations submitted across all clients.
 // @Tags Evaluation
 // @Produce json
-// @Success 200 {object} resp.SuccessResponse[resp.PaginationResponse[GlobalRecentEvaluationDTO]]
+// @Success 200 {object} resp.SuccessResponse[resp.PaginationResponse[GlobalRecentEvaluationItem]]
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
 // @Router /evaluations/recent [get]
@@ -189,7 +189,7 @@ func (h *EvaluationHandler) GetRecent(c *gin.Context) {
 // @Tags Evaluation
 // @Produce json
 // @Param clientId path string true "Client ID"
-// @Success 200 {object} resp.SuccessResponse[LastEvaluationDTO]
+// @Success 200 {object} resp.SuccessResponse[LastEvaluationItem]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 404 {object} resp.ErrorResponse
@@ -248,7 +248,7 @@ func (h *EvaluationHandler) SaveDraft(c *gin.Context) {
 // @Tags Evaluation
 // @Produce json
 // @Param coordinatorId query string true "Coordinator ID"
-// @Success 200 {object} resp.SuccessResponse[resp.PaginationResponse[DraftEvaluationListItemDTO]]
+// @Success 200 {object} resp.SuccessResponse[resp.PaginationResponse[DraftEvaluationListItem]]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse
@@ -269,7 +269,7 @@ func (h *EvaluationHandler) GetDrafts(c *gin.Context) {
 // @Tags Evaluation
 // @Produce json
 // @Param id path string true "Draft Evaluation ID"
-// @Success 200 {object} resp.SuccessResponse[DraftEvaluationDTO]
+// @Success 200 {object} resp.SuccessResponse[DraftEvaluationResponse]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 404 {object} resp.ErrorResponse
@@ -359,7 +359,7 @@ func (h *EvaluationHandler) DeleteDraft(c *gin.Context) {
 // @Tags Evaluation
 // @Produce json
 // @Param id path string true "Evaluation ID"
-// @Success 200 {object} resp.SuccessResponse[EvaluationDTO]
+// @Success 200 {object} resp.SuccessResponse[EvaluationResponse]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 404 {object} resp.ErrorResponse

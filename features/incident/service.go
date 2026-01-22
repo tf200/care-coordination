@@ -170,17 +170,17 @@ func (s *incidentService) GetIncidentStats(
 
 	return &GetIncidentStatsResponse{
 		TotalCount: int(stats.TotalCount),
-		CountsBySeverity: IncidentSeverityCountsDTO{
+		CountsBySeverity: IncidentSeverityCounts{
 			Minor:    int(stats.MinorCount),
 			Moderate: int(stats.ModerateCount),
 			Severe:   int(stats.SevereCount),
 		},
-		CountsByStatus: IncidentStatusCountsDTO{
+		CountsByStatus: IncidentStatusCounts{
 			Pending:            int(stats.PendingCount),
 			UnderInvestigation: int(stats.UnderInvestigationCount),
 			Completed:          int(stats.CompletedCount),
 		},
-		CountsByType: IncidentTypeCountsDTO{
+		CountsByType: IncidentTypeCounts{
 			Aggression:       int(stats.AggressionCount),
 			MedicalEmergency: int(stats.MedicalEmergencyCount),
 			SafetyConcern:    int(stats.SafetyConcernCount),

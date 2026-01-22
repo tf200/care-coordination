@@ -27,7 +27,7 @@ const (
 	ParticipantClient   ParticipantType = "client"
 )
 
-type ParticipantDTO struct {
+type Participant struct {
 	ID   string          `json:"id" binding:"required"`
 	Type ParticipantType `json:"type" binding:"required,oneof=employee client"`
 }
@@ -41,7 +41,7 @@ type CreateAppointmentRequest struct {
 	Status         AppointmentStatus `json:"status" binding:"omitempty,oneof=confirmed cancelled tentative"`
 	Type           AppointmentType   `json:"type" binding:"required,oneof=general intake ambulatory"`
 	RecurrenceRule string            `json:"recurrenceRule"`
-	Participants   []ParticipantDTO  `json:"participants" binding:"required,min=1"`
+	Participants   []Participant     `json:"participants" binding:"required,min=1"`
 }
 
 type UpdateAppointmentRequest struct {
@@ -53,7 +53,7 @@ type UpdateAppointmentRequest struct {
 	Status         *AppointmentStatus `json:"status" binding:"omitempty,oneof=confirmed cancelled tentative"`
 	Type           *AppointmentType   `json:"type" binding:"omitempty,oneof=general intake ambulatory"`
 	RecurrenceRule *string            `json:"recurrenceRule"`
-	Participants   []ParticipantDTO   `json:"participants"`
+	Participants   []Participant      `json:"participants"`
 }
 
 type AppointmentResponse struct {
@@ -67,7 +67,7 @@ type AppointmentResponse struct {
 	Status         AppointmentStatus `json:"status"`
 	Type           AppointmentType   `json:"type"`
 	RecurrenceRule string            `json:"recurrenceRule"`
-	Participants   []ParticipantDTO  `json:"participants"`
+	Participants   []Participant     `json:"participants"`
 	CreatedAt      time.Time         `json:"createdAt"`
 	UpdatedAt      time.Time         `json:"updatedAt"`
 }
@@ -99,13 +99,13 @@ type GetCalendarViewRequest struct {
 	EmployeeID *string   `form:"employeeId"`
 }
 
-type CalendarEventDTO struct {
+type CalendarEvent struct {
 	ID              string                `json:"id"`
 	Title           string                `json:"title"`
 	Start           time.Time             `json:"start"`
 	End             *time.Time            `json:"end,omitempty"`
 	AllDay          bool                  `json:"allDay"`
-	Type            string                `json:"type"` // "appointment" or "reminder"
+	Type            string                `json:"type"`
 	BackgroundColor string                `json:"backgroundColor,omitempty"`
 	ExtendedProps   CalendarExtendedProps `json:"extendedProps"`
 }

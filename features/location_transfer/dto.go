@@ -45,15 +45,15 @@ type UpdateLocationTransferRequest struct {
 	Reason           *string `json:"reason"`
 }
 
-type TransferStatusCountsDTO struct {
+type TransferStatusCounts struct {
 	Pending  int `json:"pending"`
 	Approved int `json:"approved"`
 	Rejected int `json:"rejected"`
 }
 
 type GetLocationTransferStatsResponse struct {
-	TotalCount     int                     `json:"totalCount"`
-	PendingCount   int                     `json:"pendingCount"`
-	ApprovalRate   float64                 `json:"approvalRate"`
-	CountsByStatus TransferStatusCountsDTO `json:"countsByStatus"`
+	TotalCount     int                  `json:"totalCount"`
+	PendingCount   int                  `json:"pendingCount"`
+	ApprovalRate   float64              `json:"approvalRate"`
+	CountsByStatus TransferStatusCounts `json:"countsByStatus"`
 }

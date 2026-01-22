@@ -790,6 +790,21 @@ func (mr *MockStoreInterfaceMockRecorder) GetClientEvaluationHistory(ctx, client
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetClientEvaluationHistory", reflect.TypeOf((*MockStoreInterface)(nil).GetClientEvaluationHistory), ctx, clientID)
 }
 
+// GetCoordinatorClients mocks base method.
+func (m *MockStoreInterface) GetCoordinatorClients(ctx context.Context, coordinatorID string) ([]db.GetCoordinatorClientsRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCoordinatorClients", ctx, coordinatorID)
+	ret0, _ := ret[0].([]db.GetCoordinatorClientsRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCoordinatorClients indicates an expected call of GetCoordinatorClients.
+func (mr *MockStoreInterfaceMockRecorder) GetCoordinatorClients(ctx, coordinatorID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCoordinatorClients", reflect.TypeOf((*MockStoreInterface)(nil).GetCoordinatorClients), ctx, coordinatorID)
+}
+
 // GetCoordinatorDraftEvaluationClients mocks base method.
 func (m *MockStoreInterface) GetCoordinatorDraftEvaluationClients(ctx context.Context, coordinatorID string) ([]db.GetCoordinatorDraftEvaluationClientsRow, error) {
 	m.ctrl.T.Helper()
@@ -835,6 +850,36 @@ func (mr *MockStoreInterfaceMockRecorder) GetCoordinatorExpiringContractClients(
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCoordinatorExpiringContractClients", reflect.TypeOf((*MockStoreInterface)(nil).GetCoordinatorExpiringContractClients), ctx, coordinatorID)
 }
 
+// GetCoordinatorGoalsProgress mocks base method.
+func (m *MockStoreInterface) GetCoordinatorGoalsProgress(ctx context.Context, coordinatorID string) (db.GetCoordinatorGoalsProgressRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCoordinatorGoalsProgress", ctx, coordinatorID)
+	ret0, _ := ret[0].(db.GetCoordinatorGoalsProgressRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCoordinatorGoalsProgress indicates an expected call of GetCoordinatorGoalsProgress.
+func (mr *MockStoreInterfaceMockRecorder) GetCoordinatorGoalsProgress(ctx, coordinatorID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCoordinatorGoalsProgress", reflect.TypeOf((*MockStoreInterface)(nil).GetCoordinatorGoalsProgress), ctx, coordinatorID)
+}
+
+// GetCoordinatorIncidents mocks base method.
+func (m *MockStoreInterface) GetCoordinatorIncidents(ctx context.Context, coordinatorID string) ([]db.GetCoordinatorIncidentsRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCoordinatorIncidents", ctx, coordinatorID)
+	ret0, _ := ret[0].([]db.GetCoordinatorIncidentsRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCoordinatorIncidents indicates an expected call of GetCoordinatorIncidents.
+func (mr *MockStoreInterfaceMockRecorder) GetCoordinatorIncidents(ctx, coordinatorID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCoordinatorIncidents", reflect.TypeOf((*MockStoreInterface)(nil).GetCoordinatorIncidents), ctx, coordinatorID)
+}
+
 // GetCoordinatorLongWaitingClients mocks base method.
 func (m *MockStoreInterface) GetCoordinatorLongWaitingClients(ctx context.Context, coordinatorID string) ([]db.GetCoordinatorLongWaitingClientsRow, error) {
 	m.ctrl.T.Helper()
@@ -863,6 +908,36 @@ func (m *MockStoreInterface) GetCoordinatorOverdueEvaluationClients(ctx context.
 func (mr *MockStoreInterfaceMockRecorder) GetCoordinatorOverdueEvaluationClients(ctx, coordinatorID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCoordinatorOverdueEvaluationClients", reflect.TypeOf((*MockStoreInterface)(nil).GetCoordinatorOverdueEvaluationClients), ctx, coordinatorID)
+}
+
+// GetCoordinatorReminders mocks base method.
+func (m *MockStoreInterface) GetCoordinatorReminders(ctx context.Context, userID string) ([]db.GetCoordinatorRemindersRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCoordinatorReminders", ctx, userID)
+	ret0, _ := ret[0].([]db.GetCoordinatorRemindersRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCoordinatorReminders indicates an expected call of GetCoordinatorReminders.
+func (mr *MockStoreInterfaceMockRecorder) GetCoordinatorReminders(ctx, userID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCoordinatorReminders", reflect.TypeOf((*MockStoreInterface)(nil).GetCoordinatorReminders), ctx, userID)
+}
+
+// GetCoordinatorStats mocks base method.
+func (m *MockStoreInterface) GetCoordinatorStats(ctx context.Context, coordinatorID string) (db.GetCoordinatorStatsRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCoordinatorStats", ctx, coordinatorID)
+	ret0, _ := ret[0].(db.GetCoordinatorStatsRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCoordinatorStats indicates an expected call of GetCoordinatorStats.
+func (mr *MockStoreInterfaceMockRecorder) GetCoordinatorStats(ctx, coordinatorID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCoordinatorStats", reflect.TypeOf((*MockStoreInterface)(nil).GetCoordinatorStats), ctx, coordinatorID)
 }
 
 // GetCoordinatorTodaySchedule mocks base method.

@@ -45,19 +45,19 @@ type ListIncidentsResponse struct {
 	CreatedAt            time.Time `json:"createdAt"`
 }
 
-type IncidentSeverityCountsDTO struct {
+type IncidentSeverityCounts struct {
 	Minor    int `json:"minor"`
 	Moderate int `json:"moderate"`
 	Severe   int `json:"severe"`
 }
 
-type IncidentStatusCountsDTO struct {
+type IncidentStatusCounts struct {
 	Pending            int `json:"pending"`
 	UnderInvestigation int `json:"underInvestigation"`
 	Completed          int `json:"completed"`
 }
 
-type IncidentTypeCountsDTO struct {
+type IncidentTypeCounts struct {
 	Aggression       int `json:"aggression"`
 	MedicalEmergency int `json:"medicalEmergency"`
 	SafetyConcern    int `json:"safetyConcern"`
@@ -66,10 +66,10 @@ type IncidentTypeCountsDTO struct {
 }
 
 type GetIncidentStatsResponse struct {
-	TotalCount       int                       `json:"totalCount"`
-	CountsBySeverity IncidentSeverityCountsDTO `json:"countsBySeverity"`
-	CountsByStatus   IncidentStatusCountsDTO   `json:"countsByStatus"`
-	CountsByType     IncidentTypeCountsDTO     `json:"countsByType"`
+	TotalCount       int                    `json:"totalCount"`
+	CountsBySeverity IncidentSeverityCounts `json:"countsBySeverity"`
+	CountsByStatus   IncidentStatusCounts   `json:"countsByStatus"`
+	CountsByType     IncidentTypeCounts     `json:"countsByType"`
 }
 
 type GetIncidentResponse struct {

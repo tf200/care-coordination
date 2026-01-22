@@ -2,31 +2,32 @@ package evaluation
 
 import "time"
 
-type GoalProgressDTO struct {
-	GoalID        string  `json:"goalId"        binding:"required"`
-	Status        string  `json:"status"        binding:"required,oneof=not_started starting in_progress on_track delayed stagnant deteriorating adjusted not_applicable achieved"`
+type GoalProgressItem struct {
+	GoalID        string  `json:"goalId"`
+	GoalTitle     string  `json:"goalTitle"`
+	Status        string  `json:"status"`
 	ProgressNotes *string `json:"progressNotes"`
 }
 
 type CreateEvaluationRequest struct {
-	ClientID       string            `json:"clientId"      binding:"required"`
-	CoordinatorID  string            `json:"coordinatorId" binding:"required"`
-	EvaluationDate string            `json:"evaluationDate" binding:"required,datetime=2006-01-02"`
-	OverallNotes   *string           `json:"overallNotes"`
-	ProgressLogs   []GoalProgressDTO `json:"progressLogs"   binding:"min=1"`
-	IsDraft        bool              `json:"isDraft"`
+	ClientID       string             `json:"clientId"      binding:"required"`
+	CoordinatorID  string             `json:"coordinatorId" binding:"required"`
+	EvaluationDate string             `json:"evaluationDate" binding:"required,datetime=2006-01-02"`
+	OverallNotes   *string            `json:"overallNotes"`
+	ProgressLogs   []GoalProgressItem `json:"progressLogs"   binding:"min=1"`
+	IsDraft        bool               `json:"isDraft"`
 }
 
 type CreateEvaluationResponse struct {
 	ID                 string     `json:"id"`
-	NextEvaluationDate *time.Time `json:"nextEvaluationDate,omitempty"` // Only set when not draft
+	NextEvaluationDate *time.Time `json:"nextEvaluationDate,omitempty"`
 	IsDraft            bool       `json:"isDraft"`
 }
 
 type UpdateEvaluationRequest struct {
-	EvaluationDate string            `json:"evaluationDate" binding:"required,datetime=2006-01-02"`
-	OverallNotes   *string           `json:"overallNotes"`
-	ProgressLogs   []GoalProgressDTO `json:"progressLogs" binding:"required,min=1"`
+	EvaluationDate string             `json:"evaluationDate" binding:"required,datetime=2006-01-02"`
+	OverallNotes   *string            `json:"overallNotes"`
+	ProgressLogs   []GoalProgressItem `json:"progressLogs" binding:"required,min=1"`
 }
 
 type UpdateEvaluationResponse struct {
@@ -34,11 +35,11 @@ type UpdateEvaluationResponse struct {
 }
 
 type SaveDraftRequest struct {
-	ClientID       string            `json:"clientId"      binding:"required"`
-	CoordinatorID  string            `json:"coordinatorId" binding:"required"`
-	EvaluationDate string            `json:"evaluationDate" binding:"required,datetime=2006-01-02"`
-	OverallNotes   *string           `json:"overallNotes"`
-	ProgressLogs   []GoalProgressDTO `json:"progressLogs"`
+	ClientID       string             `json:"clientId"      binding:"required"`
+	CoordinatorID  string             `json:"coordinatorId" binding:"required"`
+	EvaluationDate string             `json:"evaluationDate" binding:"required,datetime=2006-01-02"`
+	OverallNotes   *string            `json:"overallNotes"`
+	ProgressLogs   []GoalProgressItem `json:"progressLogs"`
 }
 
 type SaveDraftResponse struct {
@@ -46,7 +47,7 @@ type SaveDraftResponse struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-type DraftEvaluationListItemDTO struct {
+type DraftEvaluationListItem struct {
 	EvaluationID    string    `json:"evaluationId"`
 	ClientID        string    `json:"clientId"`
 	ClientFirstName string    `json:"clientFirstName"`
@@ -56,18 +57,18 @@ type DraftEvaluationListItemDTO struct {
 	UpdatedAt       time.Time `json:"updatedAt"`
 }
 
-type DraftEvaluationDTO struct {
-	EvaluationID         string                `json:"evaluationId"`
-	ClientID             string                `json:"clientId"`
-	ClientFirstName      string                `json:"clientFirstName"`
-	ClientLastName       string                `json:"clientLastName"`
-	EvaluationDate       time.Time             `json:"evaluationDate"`
-	OverallNotes         *string               `json:"overallNotes"`
-	CoordinatorFirstName string                `json:"coordinatorFirstName"`
-	CoordinatorLastName  string                `json:"coordinatorLastName"`
-	GoalProgress         []GoalProgressItemDTO `json:"goalProgress"`
-	CreatedAt            time.Time             `json:"createdAt"`
-	UpdatedAt            time.Time             `json:"updatedAt"`
+type DraftEvaluationResponse struct {
+	EvaluationID         string             `json:"evaluationId"`
+	ClientID             string             `json:"clientId"`
+	ClientFirstName      string             `json:"clientFirstName"`
+	ClientLastName       string             `json:"clientLastName"`
+	EvaluationDate       time.Time          `json:"evaluationDate"`
+	OverallNotes         *string            `json:"overallNotes"`
+	CoordinatorFirstName string             `json:"coordinatorFirstName"`
+	CoordinatorLastName  string             `json:"coordinatorLastName"`
+	GoalProgress         []GoalProgressItem `json:"goalProgress"`
+	CreatedAt            time.Time          `json:"createdAt"`
+	UpdatedAt            time.Time          `json:"updatedAt"`
 }
 
 type EvaluationHistoryItem struct {
@@ -82,7 +83,7 @@ type EvaluationHistoryItem struct {
 	CoordinatorLastName  string    `json:"coordinatorLastName"`
 }
 
-type UpcomingEvaluationDTO struct {
+type UpcomingEvaluationItem struct {
 	ID                      string    `json:"id"`
 	FirstName               string    `json:"firstName"`
 	LastName                string    `json:"lastName"`
@@ -95,7 +96,7 @@ type UpcomingEvaluationDTO struct {
 	DraftID                 *string   `json:"draftId,omitempty"`
 }
 
-type GlobalRecentEvaluationDTO struct {
+type GlobalRecentEvaluationItem struct {
 	EvaluationID         string    `json:"evaluationId"`
 	ClientID             string    `json:"clientId"`
 	EvaluationDate       time.Time `json:"evaluationDate"`
@@ -107,37 +108,30 @@ type GlobalRecentEvaluationDTO struct {
 	GoalsAchieved        int       `json:"goalsAchieved"`
 }
 
-type GoalProgressItemDTO struct {
-	GoalID        string  `json:"goalId"`
-	GoalTitle     string  `json:"goalTitle"`
-	Status        string  `json:"status"`
-	ProgressNotes *string `json:"progressNotes"`
-}
-
-type CoordinatorInfoDTO struct {
+type CoordinatorInfo struct {
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
 }
 
-type LastEvaluationDTO struct {
-	EvaluationID   string                `json:"evaluationId"`
-	EvaluationDate time.Time             `json:"evaluationDate"`
-	OverallNotes   *string               `json:"overallNotes"`
-	Coordinator    CoordinatorInfoDTO    `json:"coordinator"`
-	GoalProgress   []GoalProgressItemDTO `json:"goalProgress"`
+type LastEvaluationItem struct {
+	EvaluationID   string             `json:"evaluationId"`
+	EvaluationDate time.Time          `json:"evaluationDate"`
+	OverallNotes   *string            `json:"overallNotes"`
+	Coordinator    CoordinatorInfo    `json:"coordinator"`
+	GoalProgress   []GoalProgressItem `json:"goalProgress"`
 }
 
-type EvaluationDTO struct {
-	EvaluationID         string                `json:"evaluationId"`
-	ClientID             string                `json:"clientId"`
-	ClientFirstName      string                `json:"clientFirstName"`
-	ClientLastName       string                `json:"clientLastName"`
-	EvaluationDate       time.Time             `json:"evaluationDate"`
-	OverallNotes         *string               `json:"overallNotes"`
-	Status               string                `json:"status"`
-	CoordinatorFirstName string                `json:"coordinatorFirstName"`
-	CoordinatorLastName  string                `json:"coordinatorLastName"`
-	GoalProgress         []GoalProgressItemDTO `json:"goalProgress"`
-	CreatedAt            time.Time             `json:"createdAt"`
-	UpdatedAt            time.Time             `json:"updatedAt"`
+type EvaluationResponse struct {
+	EvaluationID         string             `json:"evaluationId"`
+	ClientID             string             `json:"clientId"`
+	ClientFirstName      string             `json:"clientFirstName"`
+	ClientLastName       string             `json:"clientLastName"`
+	EvaluationDate       time.Time          `json:"evaluationDate"`
+	OverallNotes         *string            `json:"overallNotes"`
+	Status               string             `json:"status"`
+	CoordinatorFirstName string             `json:"coordinatorFirstName"`
+	CoordinatorLastName  string             `json:"coordinatorLastName"`
+	GoalProgress         []GoalProgressItem `json:"goalProgress"`
+	CreatedAt            time.Time          `json:"createdAt"`
+	UpdatedAt            time.Time          `json:"updatedAt"`
 }

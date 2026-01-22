@@ -49,7 +49,7 @@ func (s *intakeService) CreateIntakeForm(
 			RegistrationStatusEnum: db.RegistrationStatusEnumInReview,
 			Valid:                  true,
 		},
-		Goals: util.Map(req.Goals, func(g GoalDTO) db.CreateClientGoalParams {
+		Goals: util.Map(req.Goals, func(g GoalItem) db.CreateClientGoalParams {
 			return db.CreateClientGoalParams{
 				ID:           nanoid.Generate(),
 				IntakeFormID: id,
@@ -167,8 +167,8 @@ func (s *intakeService) GetIntakeForm(
 		CoordinatorFirstName: intakeForm.CoordinatorFirstName,
 		CoordinatorLastName:  intakeForm.CoordinatorLastName,
 		HasClient:            intakeForm.HasClient,
-		Goals: util.Map(intakeGoals, func(g db.ClientGoal) GoalDTO {
-			return GoalDTO{
+		Goals: util.Map(intakeGoals, func(g db.ClientGoal) GoalItem {
+			return GoalItem{
 				ID:          &g.ID,
 				Title:       g.Title,
 				Description: g.Description,

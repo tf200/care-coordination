@@ -56,6 +56,81 @@ func (mr *MockDashboardServiceMockRecorder) GetCareTypeDistribution(ctx any) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCareTypeDistribution", reflect.TypeOf((*MockDashboardService)(nil).GetCareTypeDistribution), ctx)
 }
 
+// GetCoordinatorClients mocks base method.
+func (m *MockDashboardService) GetCoordinatorClients(ctx context.Context, employeeID string) (*dashboard.CoordinatorClientsDTO, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCoordinatorClients", ctx, employeeID)
+	ret0, _ := ret[0].(*dashboard.CoordinatorClientsDTO)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCoordinatorClients indicates an expected call of GetCoordinatorClients.
+func (mr *MockDashboardServiceMockRecorder) GetCoordinatorClients(ctx, employeeID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCoordinatorClients", reflect.TypeOf((*MockDashboardService)(nil).GetCoordinatorClients), ctx, employeeID)
+}
+
+// GetCoordinatorGoalsProgress mocks base method.
+func (m *MockDashboardService) GetCoordinatorGoalsProgress(ctx context.Context, employeeID string) (*dashboard.CoordinatorGoalsProgressDTO, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCoordinatorGoalsProgress", ctx, employeeID)
+	ret0, _ := ret[0].(*dashboard.CoordinatorGoalsProgressDTO)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCoordinatorGoalsProgress indicates an expected call of GetCoordinatorGoalsProgress.
+func (mr *MockDashboardServiceMockRecorder) GetCoordinatorGoalsProgress(ctx, employeeID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCoordinatorGoalsProgress", reflect.TypeOf((*MockDashboardService)(nil).GetCoordinatorGoalsProgress), ctx, employeeID)
+}
+
+// GetCoordinatorIncidents mocks base method.
+func (m *MockDashboardService) GetCoordinatorIncidents(ctx context.Context, employeeID string) (*dashboard.CoordinatorIncidentsDTO, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCoordinatorIncidents", ctx, employeeID)
+	ret0, _ := ret[0].(*dashboard.CoordinatorIncidentsDTO)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCoordinatorIncidents indicates an expected call of GetCoordinatorIncidents.
+func (mr *MockDashboardServiceMockRecorder) GetCoordinatorIncidents(ctx, employeeID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCoordinatorIncidents", reflect.TypeOf((*MockDashboardService)(nil).GetCoordinatorIncidents), ctx, employeeID)
+}
+
+// GetCoordinatorReminders mocks base method.
+func (m *MockDashboardService) GetCoordinatorReminders(ctx context.Context, employeeID string) (*dashboard.CoordinatorRemindersDTO, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCoordinatorReminders", ctx, employeeID)
+	ret0, _ := ret[0].(*dashboard.CoordinatorRemindersDTO)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCoordinatorReminders indicates an expected call of GetCoordinatorReminders.
+func (mr *MockDashboardServiceMockRecorder) GetCoordinatorReminders(ctx, employeeID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCoordinatorReminders", reflect.TypeOf((*MockDashboardService)(nil).GetCoordinatorReminders), ctx, employeeID)
+}
+
+// GetCoordinatorStats mocks base method.
+func (m *MockDashboardService) GetCoordinatorStats(ctx context.Context, employeeID string) (*dashboard.CoordinatorStatsDTO, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCoordinatorStats", ctx, employeeID)
+	ret0, _ := ret[0].(*dashboard.CoordinatorStatsDTO)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCoordinatorStats indicates an expected call of GetCoordinatorStats.
+func (mr *MockDashboardServiceMockRecorder) GetCoordinatorStats(ctx, employeeID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCoordinatorStats", reflect.TypeOf((*MockDashboardService)(nil).GetCoordinatorStats), ctx, employeeID)
+}
+
 // GetCoordinatorTodaySchedule mocks base method.
 func (m *MockDashboardService) GetCoordinatorTodaySchedule(ctx context.Context, employeeID string) (*dashboard.CoordinatorTodayScheduleDTO, error) {
 	m.ctrl.T.Helper()

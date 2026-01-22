@@ -121,20 +121,20 @@ type ListDischargedClientsResponse struct {
 	ReferringOrgName     *string `json:"referringOrgName"`
 }
 
-type PriorityCountsDTO struct {
+type PriorityCounts struct {
 	Low    int `json:"low"`
 	Normal int `json:"normal"`
 	High   int `json:"high"`
 }
 
 type GetWaitlistStatsResponse struct {
-	TotalCount         int               `json:"totalCount"`
-	AverageDaysWaiting float64           `json:"averageDaysWaiting"`
-	HighPriorityCount  int               `json:"highPriorityCount"`
-	CountsByPriority   PriorityCountsDTO `json:"countsByPriority"`
+	TotalCount         int            `json:"totalCount"`
+	AverageDaysWaiting float64        `json:"averageDaysWaiting"`
+	HighPriorityCount  int            `json:"highPriorityCount"`
+	CountsByPriority   PriorityCounts `json:"countsByPriority"`
 }
 
-type CareTypeCountsDTO struct {
+type CareTypeCounts struct {
 	ProtectedLiving           int `json:"protectedLiving"`
 	SemiIndependentLiving     int `json:"semiIndependentLiving"`
 	IndependentAssistedLiving int `json:"independentAssistedLiving"`
@@ -142,9 +142,9 @@ type CareTypeCountsDTO struct {
 }
 
 type GetInCareStatsResponse struct {
-	TotalCount        int               `json:"totalCount"`
-	AverageDaysInCare float64           `json:"averageDaysInCare"`
-	CountsByCareType  CareTypeCountsDTO `json:"countsByCareType"`
+	TotalCount        int            `json:"totalCount"`
+	AverageDaysInCare float64        `json:"averageDaysInCare"`
+	CountsByCareType  CareTypeCounts `json:"countsByCareType"`
 }
 
 type GetDischargeStatsResponse struct {

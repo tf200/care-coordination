@@ -3,6 +3,7 @@ package dashboard
 import (
 	db "care-cordination/lib/db/sqlc"
 	"care-cordination/lib/logger"
+	"care-cordination/lib/util"
 	"context"
 	"fmt"
 	"strings"
@@ -26,14 +27,14 @@ func NewDashboardService(
 	}
 }
 
-func (s *dashboardService) GetOverviewStats(ctx context.Context) (*OverviewDTO, error) {
+func (s *dashboardService) GetOverviewStats(ctx context.Context) (*OverviewResponse, error) {
 	stats, err := s.db.GetDashboardOverviewStats(ctx)
 	if err != nil {
 		s.logger.Error(ctx, "GetOverviewStats", "Failed to get dashboard overview stats", zap.Error(err))
 		return nil, ErrInternal
 	}
 
-	return &OverviewDTO{
+	return &OverviewResponse{
 		TotalActiveClients:   int(stats.TotalActiveClients),
 		WaitingListCount:     int(stats.WaitingListCount),
 		PendingRegistrations: int(stats.PendingRegistrations),
@@ -43,18 +44,18 @@ func (s *dashboardService) GetOverviewStats(ctx context.Context) (*OverviewDTO, 
 	}, nil
 }
 
-func (s *dashboardService) GetCriticalAlerts(ctx context.Context) (*CriticalAlertsDTO, error) {
+func (s *dashboardService) GetCriticalAlerts(ctx context.Context) (*CriticalAlertsResponse, error) {
 	data, err := s.db.GetCriticalAlertsData(ctx)
 	if err != nil {
 		s.logger.Error(ctx, "GetCriticalAlerts", "Failed to get critical alerts data", zap.Error(err))
 		return nil, ErrInternal
 	}
 
-	alerts := []AlertDTO{}
+	alerts := []AlertItem{}
 
 	// Overdue evaluations - critical severity
 	if data.OverdueEvaluations > 0 {
-		alerts = append(alerts, AlertDTO{
+		alerts = append(alerts, AlertItem{
 			ID:          "alert-evaluation",
 			Type:        AlertTypeEvaluation,
 			Title:       fmt.Sprintf("%d evaluaties achterstallig", data.OverdueEvaluations),
@@ -67,7 +68,7 @@ func (s *dashboardService) GetCriticalAlerts(ctx context.Context) (*CriticalAler
 
 	// Care end date approaching - warning severity
 	if data.CareEndingSoon > 0 {
-		alerts = append(alerts, AlertDTO{
+		alerts = append(alerts, AlertItem{
 			ID:          "alert-care-end",
 			Type:        AlertTypeCareEnd,
 			Title:       fmt.Sprintf("%d zorgtrajecten eindigen binnen 30 dagen", data.CareEndingSoon),
@@ -86,7 +87,7 @@ func (s *dashboardService) GetCriticalAlerts(ctx context.Context) (*CriticalAler
 		}
 
 		description := s.buildIncidentDescription(int(data.SevereIncidents), int(data.ModerateIncidents))
-		alerts = append(alerts, AlertDTO{
+		alerts = append(alerts, AlertItem{
 			ID:          "alert-incident",
 			Type:        AlertTypeIncident,
 			Title:       fmt.Sprintf("%d incidenten in onderzoek", data.OpenIncidents),
@@ -99,7 +100,7 @@ func (s *dashboardService) GetCriticalAlerts(ctx context.Context) (*CriticalAler
 
 	// High priority waiting list - warning severity
 	if data.HighPriorityWaiting > 0 {
-		alerts = append(alerts, AlertDTO{
+		alerts = append(alerts, AlertItem{
 			ID:          "alert-waitlist",
 			Type:        AlertTypeWaitlist,
 			Title:       fmt.Sprintf("%d hoge prioriteit op wachtlijst", data.HighPriorityWaiting),
@@ -112,7 +113,7 @@ func (s *dashboardService) GetCriticalAlerts(ctx context.Context) (*CriticalAler
 
 	// Pending location transfers - warning severity
 	if data.PendingTransfers > 0 {
-		alerts = append(alerts, AlertDTO{
+		alerts = append(alerts, AlertItem{
 			ID:          "alert-transfer",
 			Type:        AlertTypeTransfer,
 			Title:       fmt.Sprintf("%d verplaatsingen in afwachting", data.PendingTransfers),
@@ -123,7 +124,7 @@ func (s *dashboardService) GetCriticalAlerts(ctx context.Context) (*CriticalAler
 		})
 	}
 
-	return &CriticalAlertsDTO{
+	return &CriticalAlertsResponse{
 		Alerts: alerts,
 	}, nil
 }
@@ -145,14 +146,14 @@ func (s *dashboardService) buildIncidentDescription(severe, moderate int) string
 	return parts[0] + ", " + parts[1]
 }
 
-func (s *dashboardService) GetPipelineStats(ctx context.Context) (*PipelineStatsDTO, error) {
+func (s *dashboardService) GetPipelineStats(ctx context.Context) (*PipelineStatsResponse, error) {
 	stats, err := s.db.GetPipelineStats(ctx)
 	if err != nil {
 		s.logger.Error(ctx, "GetPipelineStats", "Failed to get pipeline stats", zap.Error(err))
 		return nil, ErrInternal
 	}
 
-	return &PipelineStatsDTO{
+	return &PipelineStatsResponse{
 		Registrations: int(stats.Registrations),
 		Intakes:       int(stats.Intakes),
 		WaitingList:   int(stats.WaitingList),
@@ -161,7 +162,7 @@ func (s *dashboardService) GetPipelineStats(ctx context.Context) (*PipelineStats
 	}, nil
 }
 
-func (s *dashboardService) GetCareTypeDistribution(ctx context.Context) (*CareTypeDistributionDTO, error) {
+func (s *dashboardService) GetCareTypeDistribution(ctx context.Context) (*CareTypeDistributionResponse, error) {
 	data, err := s.db.GetCareTypeDistribution(ctx)
 	if err != nil {
 		s.logger.Error(ctx, "GetCareTypeDistribution", "Failed to get care type distribution", zap.Error(err))
@@ -216,13 +217,13 @@ func (s *dashboardService) GetCareTypeDistribution(ctx context.Context) (*CareTy
 		})
 	}
 
-	return &CareTypeDistributionDTO{
+	return &CareTypeDistributionResponse{
 		Distribution: distribution,
 		Total:        total,
 	}, nil
 }
 
-func (s *dashboardService) GetLocationCapacity(ctx context.Context, req *LocationCapacityRequest) (*LocationCapacityDTO, error) {
+func (s *dashboardService) GetLocationCapacity(ctx context.Context, req *LocationCapacityRequest) (*LocationCapacityResponse, error) {
 	// Get all locations
 	locations, err := s.db.GetLocationCapacityList(ctx)
 	if err != nil {
@@ -283,7 +284,7 @@ func (s *dashboardService) GetLocationCapacity(ctx context.Context, req *Locatio
 		overallPercentage = float64(totalOccupied) / float64(totalCapacity) * 100
 	}
 
-	return &LocationCapacityDTO{
+	return &LocationCapacityResponse{
 		Locations: items,
 		Totals: LocationCapacityTotals{
 			TotalCapacity:     totalCapacity,
@@ -297,32 +298,21 @@ func (s *dashboardService) GetLocationCapacity(ctx context.Context, req *Locatio
 func (s *dashboardService) sortLocationItems(items []LocationCapacityItem, sortBy string) {
 	switch sortBy {
 	case "occupancy_desc":
-		sortSlice(items, func(i, j int) bool {
+		util.SortSlice(items, func(i, j int) bool {
 			return items[i].Percentage > items[j].Percentage
 		})
 	case "occupancy_asc":
-		sortSlice(items, func(i, j int) bool {
+		util.SortSlice(items, func(i, j int) bool {
 			return items[i].Percentage < items[j].Percentage
 		})
 	case "name":
-		sortSlice(items, func(i, j int) bool {
+		util.SortSlice(items, func(i, j int) bool {
 			return items[i].Name < items[j].Name
 		})
 	}
 }
 
-func sortSlice[T any](slice []T, less func(i, j int) bool) {
-	n := len(slice)
-	for i := 0; i < n-1; i++ {
-		for j := 0; j < n-i-1; j++ {
-			if !less(j, j+1) {
-				slice[j], slice[j+1] = slice[j+1], slice[j]
-			}
-		}
-	}
-}
-
-func (s *dashboardService) GetTodayAppointments(ctx context.Context, employeeID string) (*TodayAppointmentsDTO, error) {
+func (s *dashboardService) GetTodayAppointments(ctx context.Context, employeeID string) (*TodayAppointmentsResponse, error) {
 	appointments, err := s.db.GetTodayAppointmentsForEmployee(ctx, employeeID)
 	if err != nil {
 		s.logger.Error(ctx, "GetTodayAppointments", "Failed to get today's appointments", zap.Error(err))
@@ -347,13 +337,13 @@ func (s *dashboardService) GetTodayAppointments(ctx context.Context, employeeID 
 		}
 	}
 
-	return &TodayAppointmentsDTO{
+	return &TodayAppointmentsResponse{
 		Appointments: items,
 		Count:        len(items),
 	}, nil
 }
 
-func (s *dashboardService) GetEvaluationStats(ctx context.Context) (*EvaluationStatsDTO, error) {
+func (s *dashboardService) GetEvaluationStats(ctx context.Context) (*EvaluationStatsResponse, error) {
 	stats, err := s.db.GetEvaluationStats(ctx)
 	if err != nil {
 		s.logger.Error(ctx, "GetEvaluationStats", "Failed to get evaluation stats", zap.Error(err))
@@ -367,7 +357,7 @@ func (s *dashboardService) GetEvaluationStats(ctx context.Context) (*EvaluationS
 		completionRate = (completed * 100) / total
 	}
 
-	return &EvaluationStatsDTO{
+	return &EvaluationStatsResponse{
 		CompletionRate: completionRate,
 		Completed:      completed,
 		Total:          total,
@@ -376,7 +366,7 @@ func (s *dashboardService) GetEvaluationStats(ctx context.Context) (*EvaluationS
 	}, nil
 }
 
-func (s *dashboardService) GetDischargeStats(ctx context.Context) (*DischargeStatsDTO, error) {
+func (s *dashboardService) GetDischargeStats(ctx context.Context) (*DischargeStatsResponse, error) {
 	stats, err := s.db.GetDashboardDischargeStats(ctx)
 	if err != nil {
 		s.logger.Error(ctx, "GetDischargeStats", "Failed to get discharge stats", zap.Error(err))
@@ -390,7 +380,7 @@ func (s *dashboardService) GetDischargeStats(ctx context.Context) (*DischargeSta
 		plannedRate = (plannedDischarges * 100) / totalDischarged
 	}
 
-	return &DischargeStatsDTO{
+	return &DischargeStatsResponse{
 		ThisMonth:         int(stats.ThisMonth),
 		ThisYear:          int(stats.ThisYear),
 		PlannedRate:       plannedRate,
@@ -400,7 +390,7 @@ func (s *dashboardService) GetDischargeStats(ctx context.Context) (*DischargeSta
 
 // Coordinator Dashboard Methods
 
-func (s *dashboardService) GetCoordinatorUrgentAlerts(ctx context.Context, employeeID string) (*CoordinatorUrgentAlertsDTO, error) {
+func (s *dashboardService) GetCoordinatorUrgentAlerts(ctx context.Context, employeeID string) (*CoordinatorUrgentAlertsResponse, error) {
 	// Get counts
 	data, err := s.db.GetCoordinatorUrgentAlertsData(ctx, employeeID)
 	if err != nil {
@@ -408,13 +398,13 @@ func (s *dashboardService) GetCoordinatorUrgentAlerts(ctx context.Context, emplo
 		return nil, ErrInternal
 	}
 
-	alerts := []CoordinatorUrgentAlertDTO{}
+	alerts := []CoordinatorUrgentAlertItem{}
 
 	// Overdue evaluations (critical)
 	if data.OverdueEvaluations > 0 {
 		clients, _ := s.db.GetCoordinatorOverdueEvaluationClients(ctx, employeeID)
 		clientIDs, description := s.buildClientInfo(clients)
-		alerts = append(alerts, CoordinatorUrgentAlertDTO{
+		alerts = append(alerts, CoordinatorUrgentAlertItem{
 			ID:          "alert-evaluation",
 			Type:        CoordinatorAlertTypeEvaluation,
 			Title:       "overdue_evaluations",
@@ -430,7 +420,7 @@ func (s *dashboardService) GetCoordinatorUrgentAlerts(ctx context.Context, emplo
 	if data.ExpiringContracts > 0 {
 		clients, _ := s.db.GetCoordinatorExpiringContractClients(ctx, employeeID)
 		clientIDs, description := s.buildClientInfo(clients)
-		alerts = append(alerts, CoordinatorUrgentAlertDTO{
+		alerts = append(alerts, CoordinatorUrgentAlertItem{
 			ID:          "alert-contract",
 			Type:        CoordinatorAlertTypeContract,
 			Title:       "expiring_contracts",
@@ -446,7 +436,7 @@ func (s *dashboardService) GetCoordinatorUrgentAlerts(ctx context.Context, emplo
 	if data.DraftEvaluations > 0 {
 		clients, _ := s.db.GetCoordinatorDraftEvaluationClients(ctx, employeeID)
 		clientIDs, description := s.buildClientInfo(clients)
-		alerts = append(alerts, CoordinatorUrgentAlertDTO{
+		alerts = append(alerts, CoordinatorUrgentAlertItem{
 			ID:          "alert-draft",
 			Type:        CoordinatorAlertTypeDraft,
 			Title:       "draft_evaluations",
@@ -462,7 +452,7 @@ func (s *dashboardService) GetCoordinatorUrgentAlerts(ctx context.Context, emplo
 	if data.UnresolvedIncidents > 0 {
 		clients, _ := s.db.GetCoordinatorUnresolvedIncidentClients(ctx, employeeID)
 		clientIDs, description := s.buildClientInfo(clients)
-		alerts = append(alerts, CoordinatorUrgentAlertDTO{
+		alerts = append(alerts, CoordinatorUrgentAlertItem{
 			ID:          "alert-incident",
 			Type:        CoordinatorAlertTypeIncident,
 			Title:       "unresolved_incidents",
@@ -478,7 +468,7 @@ func (s *dashboardService) GetCoordinatorUrgentAlerts(ctx context.Context, emplo
 	if data.LongWaiting > 0 {
 		clients, _ := s.db.GetCoordinatorLongWaitingClients(ctx, employeeID)
 		clientIDs, description := s.buildClientInfo(clients)
-		alerts = append(alerts, CoordinatorUrgentAlertDTO{
+		alerts = append(alerts, CoordinatorUrgentAlertItem{
 			ID:          "alert-waiting",
 			Type:        CoordinatorAlertTypeWaitingLong,
 			Title:       "long_waiting_clients",
@@ -490,7 +480,7 @@ func (s *dashboardService) GetCoordinatorUrgentAlerts(ctx context.Context, emplo
 		})
 	}
 
-	return &CoordinatorUrgentAlertsDTO{Alerts: alerts}, nil
+	return &CoordinatorUrgentAlertsResponse{Alerts: alerts}, nil
 }
 
 type clientInfo interface {
@@ -543,7 +533,7 @@ func (s *dashboardService) buildClientInfo(clients any) ([]string, string) {
 	return clientIDs, description
 }
 
-func (s *dashboardService) GetCoordinatorTodaySchedule(ctx context.Context, employeeID string) (*CoordinatorTodayScheduleDTO, error) {
+func (s *dashboardService) GetCoordinatorTodaySchedule(ctx context.Context, employeeID string) (*CoordinatorTodayScheduleResponse, error) {
 	appointments, err := s.db.GetCoordinatorTodaySchedule(ctx, employeeID)
 	if err != nil {
 		s.logger.Error(ctx, "GetCoordinatorTodaySchedule", "Failed to get coordinator today schedule", zap.Error(err))
@@ -552,7 +542,7 @@ func (s *dashboardService) GetCoordinatorTodaySchedule(ctx context.Context, empl
 
 	now := time.Now()
 	today := now.Format("2006-01-02")
-	items := make([]CoordinatorScheduleItemDTO, len(appointments))
+	items := make([]CoordinatorScheduleItem, len(appointments))
 
 	for i, apt := range appointments {
 		// Determine status based on time
@@ -566,7 +556,7 @@ func (s *dashboardService) GetCoordinatorTodaySchedule(ctx context.Context, empl
 			status = "in_progress"
 		}
 
-		items[i] = CoordinatorScheduleItemDTO{
+		items[i] = CoordinatorScheduleItem{
 			ID:           apt.ID,
 			Time:         apt.StartTime.Time.Format("15:04"),
 			EndTime:      apt.EndTime.Time.Format("15:04"),
@@ -579,21 +569,21 @@ func (s *dashboardService) GetCoordinatorTodaySchedule(ctx context.Context, empl
 		}
 	}
 
-	return &CoordinatorTodayScheduleDTO{
+	return &CoordinatorTodayScheduleResponse{
 		Date:         today,
 		Appointments: items,
 		Count:        len(items),
 	}, nil
 }
 
-func (s *dashboardService) GetCoordinatorStats(ctx context.Context, employeeID string) (*CoordinatorStatsDTO, error) {
+func (s *dashboardService) GetCoordinatorStats(ctx context.Context, employeeID string) (*CoordinatorStatsResponse, error) {
 	stats, err := s.db.GetCoordinatorStats(ctx, employeeID)
 	if err != nil {
 		s.logger.Error(ctx, "GetCoordinatorStats", "Failed to get coordinator stats", zap.Error(err))
 		return nil, ErrInternal
 	}
 
-	return &CoordinatorStatsDTO{
+	return &CoordinatorStatsResponse{
 		MyActiveClients:       int(stats.MyActiveClients),
 		MyUpcomingEvaluations: int(stats.MyUpcomingEvaluations),
 		MyPendingIntakes:      int(stats.MyPendingIntakes),
@@ -601,16 +591,16 @@ func (s *dashboardService) GetCoordinatorStats(ctx context.Context, employeeID s
 	}, nil
 }
 
-func (s *dashboardService) GetCoordinatorReminders(ctx context.Context, employeeID string) (*CoordinatorRemindersDTO, error) {
+func (s *dashboardService) GetCoordinatorReminders(ctx context.Context, employeeID string) (*CoordinatorRemindersResponse, error) {
 	reminders, err := s.db.GetCoordinatorReminders(ctx, employeeID)
 	if err != nil {
 		s.logger.Error(ctx, "GetCoordinatorReminders", "Failed to get coordinator reminders", zap.Error(err))
 		return nil, ErrInternal
 	}
 
-	items := make([]ReminderDTO, len(reminders))
+	items := make([]ReminderItem, len(reminders))
 	for i, r := range reminders {
-		items[i] = ReminderDTO{
+		items[i] = ReminderItem{
 			ID:       r.ID,
 			Title:    r.Title,
 			Client:   "",
@@ -619,10 +609,10 @@ func (s *dashboardService) GetCoordinatorReminders(ctx context.Context, employee
 		}
 	}
 
-	return &CoordinatorRemindersDTO{Reminders: items}, nil
+	return &CoordinatorRemindersResponse{Reminders: items}, nil
 }
 
-func (s *dashboardService) GetCoordinatorClients(ctx context.Context, employeeID string) (*CoordinatorClientsDTO, error) {
+func (s *dashboardService) GetCoordinatorClients(ctx context.Context, employeeID string) (*CoordinatorClientsResponse, error) {
 	clients, err := s.db.GetCoordinatorClients(ctx, employeeID)
 	if err != nil {
 		s.logger.Error(ctx, "GetCoordinatorClients", "Failed to get coordinator clients", zap.Error(err))
@@ -632,7 +622,7 @@ func (s *dashboardService) GetCoordinatorClients(ctx context.Context, employeeID
 	now := time.Now()
 	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 
-	items := make([]CoordinatorClientDTO, len(clients))
+	items := make([]CoordinatorClientItem, len(clients))
 	for i, c := range clients {
 		daysUntilEnd := 0
 		status := "active"
@@ -655,7 +645,7 @@ func (s *dashboardService) GetCoordinatorClients(ctx context.Context, employeeID
 			locationName = *c.LocationName
 		}
 
-		items[i] = CoordinatorClientDTO{
+		items[i] = CoordinatorClientItem{
 			ID:               c.ID,
 			FirstName:        c.FirstName,
 			LastName:         c.LastName,
@@ -668,7 +658,7 @@ func (s *dashboardService) GetCoordinatorClients(ctx context.Context, employeeID
 		}
 	}
 
-	return &CoordinatorClientsDTO{Clients: items}, nil
+	return &CoordinatorClientsResponse{Clients: items}, nil
 }
 
 func (s *dashboardService) calculateEvaluationStatus(evalDate time.Time, valid bool, today time.Time) string {
@@ -687,14 +677,14 @@ func (s *dashboardService) calculateEvaluationStatus(evalDate time.Time, valid b
 	return "upcoming"
 }
 
-func (s *dashboardService) GetCoordinatorGoalsProgress(ctx context.Context, employeeID string) (*CoordinatorGoalsProgressDTO, error) {
+func (s *dashboardService) GetCoordinatorGoalsProgress(ctx context.Context, employeeID string) (*CoordinatorGoalsProgressResponse, error) {
 	progress, err := s.db.GetCoordinatorGoalsProgress(ctx, employeeID)
 	if err != nil {
 		s.logger.Error(ctx, "GetCoordinatorGoalsProgress", "Failed to get coordinator goals progress", zap.Error(err))
 		return nil, ErrInternal
 	}
 
-	return &CoordinatorGoalsProgressDTO{
+	return &CoordinatorGoalsProgressResponse{
 		OnTrack:    int(progress.OnTrack),
 		Delayed:    int(progress.Delayed),
 		Achieved:   int(progress.Achieved),
@@ -703,16 +693,16 @@ func (s *dashboardService) GetCoordinatorGoalsProgress(ctx context.Context, empl
 	}, nil
 }
 
-func (s *dashboardService) GetCoordinatorIncidents(ctx context.Context, employeeID string) (*CoordinatorIncidentsDTO, error) {
+func (s *dashboardService) GetCoordinatorIncidents(ctx context.Context, employeeID string) (*CoordinatorIncidentsResponse, error) {
 	incidents, err := s.db.GetCoordinatorIncidents(ctx, employeeID)
 	if err != nil {
 		s.logger.Error(ctx, "GetCoordinatorIncidents", "Failed to get coordinator incidents", zap.Error(err))
 		return nil, ErrInternal
 	}
 
-	items := make([]CoordinatorIncidentDTO, len(incidents))
+	items := make([]CoordinatorIncidentItem, len(incidents))
 	for i, inc := range incidents {
-		items[i] = CoordinatorIncidentDTO{
+		items[i] = CoordinatorIncidentItem{
 			ID:       inc.ID,
 			Client:   inc.ClientFirstName + " " + inc.ClientLastName,
 			Type:     string(inc.IncidentType),
@@ -722,5 +712,5 @@ func (s *dashboardService) GetCoordinatorIncidents(ctx context.Context, employee
 		}
 	}
 
-	return &CoordinatorIncidentsDTO{Incidents: items}, nil
+	return &CoordinatorIncidentsResponse{Incidents: items}, nil
 }

@@ -78,14 +78,14 @@ func (s *calendarService) GetAppointment(ctx context.Context, id string) (*Appoi
 			return err
 		}
 
-		participants, err := q.ListAppointmentParticipants(ctx, id)
+		dbParticipants, err := q.ListAppointmentParticipants(ctx, id)
 		if err != nil {
 			return err
 		}
 
-		participantDTOs := make([]ParticipantDTO, len(participants))
-		for i, p := range participants {
-			participantDTOs[i] = ParticipantDTO{
+		participants := make([]Participant, len(dbParticipants))
+		for i, p := range dbParticipants {
+			participants[i] = Participant{
 				ID:   p.ParticipantID,
 				Type: ParticipantType(p.ParticipantType),
 			}
@@ -102,7 +102,7 @@ func (s *calendarService) GetAppointment(ctx context.Context, id string) (*Appoi
 			Status:         AppointmentStatus(appointment.Status.AppointmentStatusEnum),
 			Type:           AppointmentType(appointment.Type),
 			RecurrenceRule: util.HandleNilString(appointment.RecurrenceRule),
-			Participants:   participantDTOs,
+			Participants:   participants,
 			CreatedAt:      appointment.CreatedAt.Time,
 			UpdatedAt:      appointment.UpdatedAt.Time,
 		}
@@ -205,14 +205,14 @@ func (s *calendarService) ListAppointments(ctx context.Context, userID string) (
 		responses = make([]AppointmentResponse, 0, len(appointments))
 		for _, a := range appointments {
 			// Note: We avoid calling s.GetAppointment here to stay within the same transaction/queries object
-			participants, err := q.ListAppointmentParticipants(ctx, a.ID)
+			dbParticipants, err := q.ListAppointmentParticipants(ctx, a.ID)
 			if err != nil {
 				return err
 			}
 
-			participantDTOs := make([]ParticipantDTO, len(participants))
-			for i, p := range participants {
-				participantDTOs[i] = ParticipantDTO{
+			participants := make([]Participant, len(dbParticipants))
+			for i, p := range dbParticipants {
+				participants[i] = Participant{
 					ID:   p.ParticipantID,
 					Type: ParticipantType(p.ParticipantType),
 				}
@@ -229,7 +229,7 @@ func (s *calendarService) ListAppointments(ctx context.Context, userID string) (
 				Status:         AppointmentStatus(a.Status.AppointmentStatusEnum),
 				Type:           AppointmentType(a.Type),
 				RecurrenceRule: util.HandleNilString(a.RecurrenceRule),
-				Participants:   participantDTOs,
+				Participants:   participants,
 				CreatedAt:      a.CreatedAt.Time,
 				UpdatedAt:      a.UpdatedAt.Time,
 			})
@@ -395,8 +395,8 @@ func (s *calendarService) ListReminders(ctx context.Context, userID string) ([]R
 	return responses, nil
 }
 
-func (s *calendarService) GetCalendarView(ctx context.Context, userID string, startTime, endTime time.Time) ([]CalendarEventDTO, error) {
-	var events []CalendarEventDTO
+func (s *calendarService) GetCalendarView(ctx context.Context, userID string, startTime, endTime time.Time) ([]CalendarEvent, error) {
+	var events []CalendarEvent
 	err := s.store.ExecTx(ctx, func(q *db.Queries) error {
 		// Fetch non-recurring appointments in range
 		appointments, err := q.ListAppointmentsByRange(ctx, db.ListAppointmentsByRangeParams{
@@ -426,7 +426,7 @@ func (s *calendarService) GetCalendarView(ctx context.Context, userID string, st
 			return err
 		}
 
-		events = make([]CalendarEventDTO, 0, len(appointments)+len(reminders))
+		events = make([]CalendarEvent, 0, len(appointments)+len(reminders))
 
 		// Add non-recurring appointments (filter out any that have recurrence rules)
 		for _, a := range appointments {
@@ -435,7 +435,7 @@ func (s *calendarService) GetCalendarView(ctx context.Context, userID string, st
 				continue
 			}
 			endTimeValue := a.EndTime.Time
-			events = append(events, CalendarEventDTO{
+			events = append(events, CalendarEvent{
 				ID:              a.ID,
 				Title:           a.Title,
 				Start:           a.StartTime.Time,
@@ -470,7 +470,7 @@ func (s *calendarService) GetCalendarView(ctx context.Context, userID string, st
 				occurrenceEnd := recurrence.CalculateOccurrenceEnd(occurrenceStart, a.StartTime.Time, a.EndTime.Time)
 				occurrenceID := recurrence.GenerateOccurrenceID(a.ID, occurrenceStart)
 
-				events = append(events, CalendarEventDTO{
+				events = append(events, CalendarEvent{
 					ID:              occurrenceID,
 					Title:           a.Title,
 					Start:           occurrenceStart,
@@ -491,7 +491,7 @@ func (s *calendarService) GetCalendarView(ctx context.Context, userID string, st
 		}
 
 		for _, r := range reminders {
-			events = append(events, CalendarEventDTO{
+			events = append(events, CalendarEvent{
 				ID:              r.ID,
 				Title:           r.Title,
 				Start:           r.DueTime.Time,

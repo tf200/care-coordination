@@ -30,3 +30,14 @@ func ParseJSONB(data []byte) map[string]any {
 	}
 	return result
 }
+
+func SortSlice[T any](slice []T, less func(i, j int) bool) {
+	n := len(slice)
+	for i := 0; i < n-1; i++ {
+		for j := 0; j < n-i-1; j++ {
+			if !less(j, j+1) {
+				slice[j], slice[j+1] = slice[j+1], slice[j]
+			}
+		}
+	}
+}

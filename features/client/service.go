@@ -577,7 +577,7 @@ func (s *clientService) GetWaitlistStats(
 		TotalCount:         int(stats.TotalCount),
 		AverageDaysWaiting: avgDays,
 		HighPriorityCount:  int(stats.HighPriorityCount),
-		CountsByPriority: PriorityCountsDTO{
+		CountsByPriority: PriorityCounts{
 			Low:    int(stats.LowPriorityCount),
 			Normal: int(stats.NormalPriorityCount),
 			High:   int(stats.HighPriorityCount),
@@ -605,7 +605,7 @@ func (s *clientService) GetInCareStats(
 	return &GetInCareStatsResponse{
 		TotalCount:        int(stats.TotalCount),
 		AverageDaysInCare: avgDays,
-		CountsByCareType: CareTypeCountsDTO{
+		CountsByCareType: CareTypeCounts{
 			ProtectedLiving:           int(stats.ProtectedLivingCount),
 			SemiIndependentLiving:     int(stats.SemiIndependentLivingCount),
 			IndependentAssistedLiving: int(stats.IndependentAssistedLivingCount),

@@ -1,6 +1,6 @@
 package dashboard
 
-type OverviewDTO struct {
+type OverviewResponse struct {
 	TotalActiveClients   int `json:"totalActiveClients"`
 	WaitingListCount     int `json:"waitingListCount"`
 	PendingRegistrations int `json:"pendingRegistrations"`
@@ -28,7 +28,7 @@ const (
 	AlertTypeTransfer   AlertType = "transfer"
 )
 
-type AlertDTO struct {
+type AlertItem struct {
 	ID          string        `json:"id"`
 	Type        AlertType     `json:"type"`
 	Title       string        `json:"title"`
@@ -38,11 +38,11 @@ type AlertDTO struct {
 	Link        string        `json:"link"`
 }
 
-type CriticalAlertsDTO struct {
-	Alerts []AlertDTO `json:"alerts"`
+type CriticalAlertsResponse struct {
+	Alerts []AlertItem `json:"alerts"`
 }
 
-type PipelineStatsDTO struct {
+type PipelineStatsResponse struct {
 	Registrations int `json:"registrations"`
 	Intakes       int `json:"intakes"`
 	WaitingList   int `json:"waitingList"`
@@ -57,7 +57,7 @@ type CareTypeDistributionItem struct {
 	Percentage float64 `json:"percentage"`
 }
 
-type CareTypeDistributionDTO struct {
+type CareTypeDistributionResponse struct {
 	Distribution []CareTypeDistributionItem `json:"distribution"`
 	Total        int                        `json:"total"`
 }
@@ -83,7 +83,7 @@ type LocationCapacityTotals struct {
 	OverallPercentage float64 `json:"overallPercentage"`
 }
 
-type LocationCapacityDTO struct {
+type LocationCapacityResponse struct {
 	Locations []LocationCapacityItem `json:"locations"`
 	Totals    LocationCapacityTotals `json:"totals"`
 }
@@ -99,12 +99,12 @@ type TodayAppointmentItem struct {
 	LocationName string `json:"locationName,omitempty"`
 }
 
-type TodayAppointmentsDTO struct {
+type TodayAppointmentsResponse struct {
 	Appointments []TodayAppointmentItem `json:"appointments"`
 	Count        int                    `json:"count"`
 }
 
-type EvaluationStatsDTO struct {
+type EvaluationStatsResponse struct {
 	CompletionRate int `json:"completionRate"`
 	Completed      int `json:"completed"`
 	Total          int `json:"total"`
@@ -112,7 +112,7 @@ type EvaluationStatsDTO struct {
 	DueSoon        int `json:"dueSoon"`
 }
 
-type DischargeStatsDTO struct {
+type DischargeStatsResponse struct {
 	ThisMonth         int `json:"thisMonth"`
 	ThisYear          int `json:"thisYear"`
 	PlannedRate       int `json:"plannedRate"`
@@ -139,7 +139,7 @@ const (
 	CoordinatorAlertTypeWaitingLong CoordinatorAlertType = "waiting_long"
 )
 
-type CoordinatorUrgentAlertDTO struct {
+type CoordinatorUrgentAlertItem struct {
 	ID          string                   `json:"id"`
 	Type        CoordinatorAlertType     `json:"type"`
 	Title       string                   `json:"title"`
@@ -150,11 +150,11 @@ type CoordinatorUrgentAlertDTO struct {
 	Link        string                   `json:"link"`
 }
 
-type CoordinatorUrgentAlertsDTO struct {
-	Alerts []CoordinatorUrgentAlertDTO `json:"alerts"`
+type CoordinatorUrgentAlertsResponse struct {
+	Alerts []CoordinatorUrgentAlertItem `json:"alerts"`
 }
 
-type CoordinatorScheduleItemDTO struct {
+type CoordinatorScheduleItem struct {
 	ID           string `json:"id"`
 	Time         string `json:"time"`
 	EndTime      string `json:"endTime"`
@@ -166,20 +166,20 @@ type CoordinatorScheduleItemDTO struct {
 	Status       string `json:"status"`
 }
 
-type CoordinatorTodayScheduleDTO struct {
-	Date         string                       `json:"date"`
-	Appointments []CoordinatorScheduleItemDTO `json:"appointments"`
-	Count        int                          `json:"count"`
+type CoordinatorTodayScheduleResponse struct {
+	Date         string                    `json:"date"`
+	Appointments []CoordinatorScheduleItem `json:"appointments"`
+	Count        int                       `json:"count"`
 }
 
-type CoordinatorStatsDTO struct {
+type CoordinatorStatsResponse struct {
 	MyActiveClients       int `json:"myActiveClients"`
 	MyUpcomingEvaluations int `json:"myUpcomingEvaluations"`
 	MyPendingIntakes      int `json:"myPendingIntakes"`
 	MyWaitingListClients  int `json:"myWaitingListClients"`
 }
 
-type ReminderDTO struct {
+type ReminderItem struct {
 	ID       string `json:"id"`
 	Title    string `json:"title"`
 	Client   string `json:"client"`
@@ -187,11 +187,11 @@ type ReminderDTO struct {
 	Priority string `json:"priority"`
 }
 
-type CoordinatorRemindersDTO struct {
-	Reminders []ReminderDTO `json:"reminders"`
+type CoordinatorRemindersResponse struct {
+	Reminders []ReminderItem `json:"reminders"`
 }
 
-type CoordinatorClientDTO struct {
+type CoordinatorClientItem struct {
 	ID               string `json:"id"`
 	FirstName        string `json:"firstName"`
 	LastName         string `json:"lastName"`
@@ -203,11 +203,11 @@ type CoordinatorClientDTO struct {
 	EvaluationStatus string `json:"evaluationStatus"`
 }
 
-type CoordinatorClientsDTO struct {
-	Clients []CoordinatorClientDTO `json:"clients"`
+type CoordinatorClientsResponse struct {
+	Clients []CoordinatorClientItem `json:"clients"`
 }
 
-type CoordinatorGoalsProgressDTO struct {
+type CoordinatorGoalsProgressResponse struct {
 	OnTrack    int `json:"onTrack"`
 	Delayed    int `json:"delayed"`
 	Achieved   int `json:"achieved"`
@@ -215,7 +215,7 @@ type CoordinatorGoalsProgressDTO struct {
 	Total      int `json:"total"`
 }
 
-type CoordinatorIncidentDTO struct {
+type CoordinatorIncidentItem struct {
 	ID       string `json:"id"`
 	Client   string `json:"client"`
 	Type     string `json:"type"`
@@ -224,6 +224,6 @@ type CoordinatorIncidentDTO struct {
 	Status   string `json:"status"`
 }
 
-type CoordinatorIncidentsDTO struct {
-	Incidents []CoordinatorIncidentDTO `json:"incidents"`
+type CoordinatorIncidentsResponse struct {
+	Incidents []CoordinatorIncidentItem `json:"incidents"`
 }

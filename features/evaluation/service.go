@@ -17,15 +17,15 @@ type EvaluationService interface {
 	CreateEvaluation(ctx context.Context, req *CreateEvaluationRequest) (*CreateEvaluationResponse, error)
 	UpdateEvaluation(ctx context.Context, evaluationID string, req *UpdateEvaluationRequest) (*UpdateEvaluationResponse, error)
 	GetEvaluationHistory(ctx context.Context, clientID string) ([]EvaluationHistoryItem, error)
-	GetCriticalEvaluations(ctx context.Context) (*resp.PaginationResponse[UpcomingEvaluationDTO], error)
-	GetScheduledEvaluations(ctx context.Context) (*resp.PaginationResponse[UpcomingEvaluationDTO], error)
-	GetRecentEvaluations(ctx context.Context) (*resp.PaginationResponse[GlobalRecentEvaluationDTO], error)
-	GetLastEvaluation(ctx context.Context, clientID string) (*LastEvaluationDTO, error)
-	GetEvaluationDetails(ctx context.Context, evaluationID string) (*EvaluationDTO, error)
+	GetCriticalEvaluations(ctx context.Context) (*resp.PaginationResponse[UpcomingEvaluationItem], error)
+	GetScheduledEvaluations(ctx context.Context) (*resp.PaginationResponse[UpcomingEvaluationItem], error)
+	GetRecentEvaluations(ctx context.Context) (*resp.PaginationResponse[GlobalRecentEvaluationItem], error)
+	GetLastEvaluation(ctx context.Context, clientID string) (*LastEvaluationItem, error)
+	GetEvaluationDetails(ctx context.Context, evaluationID string) (*EvaluationResponse, error)
 	// Draft methods
 	SaveDraft(ctx context.Context, req *SaveDraftRequest) (*SaveDraftResponse, error)
-	GetDrafts(ctx context.Context) (*resp.PaginationResponse[DraftEvaluationListItemDTO], error)
-	GetDraft(ctx context.Context, evaluationID string) (*DraftEvaluationDTO, error)
+	GetDrafts(ctx context.Context) (*resp.PaginationResponse[DraftEvaluationListItem], error)
+	GetDraft(ctx context.Context, evaluationID string) (*DraftEvaluationResponse, error)
 	SubmitDraft(ctx context.Context, evaluationID string) (*CreateEvaluationResponse, error)
 	DeleteDraft(ctx context.Context, evaluationID string) error
 }
@@ -48,7 +48,7 @@ func (s *evaluationService) CreateEvaluation(ctx context.Context, req *CreateEva
 
 	evaluationID := nanoid.Generate()
 
-	progressLogs := util.Map(req.ProgressLogs, func(log GoalProgressDTO) db.CreateGoalProgressLogParams {
+	progressLogs := util.Map(req.ProgressLogs, func(log GoalProgressItem) db.CreateGoalProgressLogParams {
 		return db.CreateGoalProgressLogParams{
 			ID:            nanoid.Generate(),
 			EvaluationID:  evaluationID,
@@ -122,7 +122,7 @@ func (s *evaluationService) GetEvaluationHistory(ctx context.Context, clientID s
 	}), nil
 }
 
-func (s *evaluationService) GetCriticalEvaluations(ctx context.Context) (*resp.PaginationResponse[UpcomingEvaluationDTO], error) {
+func (s *evaluationService) GetCriticalEvaluations(ctx context.Context) (*resp.PaginationResponse[UpcomingEvaluationItem], error) {
 	limit, offset, page, pageSize := middleware.GetPaginationParams(ctx)
 
 	rows, err := s.db.GetCriticalEvaluations(ctx, db.GetCriticalEvaluationsParams{
@@ -139,13 +139,13 @@ func (s *evaluationService) GetCriticalEvaluations(ctx context.Context) (*resp.P
 		totalCount = rows[0].TotalCount
 	}
 
-	result := util.Map(rows, func(row db.GetCriticalEvaluationsRow) UpcomingEvaluationDTO {
+	result := util.Map(rows, func(row db.GetCriticalEvaluationsRow) UpcomingEvaluationItem {
 		var draftID *string
 		hasDraft := row.DraftID != ""
 		if hasDraft {
 			draftID = &row.DraftID
 		}
-		return UpcomingEvaluationDTO{
+		return UpcomingEvaluationItem{
 			ID:                      row.ID,
 			FirstName:               row.FirstName,
 			LastName:                row.LastName,
@@ -163,7 +163,7 @@ func (s *evaluationService) GetCriticalEvaluations(ctx context.Context) (*resp.P
 	return &pag, nil
 }
 
-func (s *evaluationService) GetScheduledEvaluations(ctx context.Context) (*resp.PaginationResponse[UpcomingEvaluationDTO], error) {
+func (s *evaluationService) GetScheduledEvaluations(ctx context.Context) (*resp.PaginationResponse[UpcomingEvaluationItem], error) {
 	limit, offset, page, pageSize := middleware.GetPaginationParams(ctx)
 
 	rows, err := s.db.GetScheduledEvaluations(ctx, db.GetScheduledEvaluationsParams{
@@ -180,13 +180,13 @@ func (s *evaluationService) GetScheduledEvaluations(ctx context.Context) (*resp.
 		totalCount = rows[0].TotalCount
 	}
 
-	result := util.Map(rows, func(row db.GetScheduledEvaluationsRow) UpcomingEvaluationDTO {
+	result := util.Map(rows, func(row db.GetScheduledEvaluationsRow) UpcomingEvaluationItem {
 		var draftID *string
 		hasDraft := row.DraftID != ""
 		if hasDraft {
 			draftID = &row.DraftID
 		}
-		return UpcomingEvaluationDTO{
+		return UpcomingEvaluationItem{
 			ID:                      row.ID,
 			FirstName:               row.FirstName,
 			LastName:                row.LastName,
@@ -204,7 +204,7 @@ func (s *evaluationService) GetScheduledEvaluations(ctx context.Context) (*resp.
 	return &pag, nil
 }
 
-func (s *evaluationService) GetRecentEvaluations(ctx context.Context) (*resp.PaginationResponse[GlobalRecentEvaluationDTO], error) {
+func (s *evaluationService) GetRecentEvaluations(ctx context.Context) (*resp.PaginationResponse[GlobalRecentEvaluationItem], error) {
 	limit, offset, page, pageSize := middleware.GetPaginationParams(ctx)
 
 	rows, err := s.db.GetRecentEvaluationsGlobal(ctx, db.GetRecentEvaluationsGlobalParams{
@@ -221,8 +221,8 @@ func (s *evaluationService) GetRecentEvaluations(ctx context.Context) (*resp.Pag
 		totalCount = rows[0].TotalCount
 	}
 
-	result := util.Map(rows, func(row db.GetRecentEvaluationsGlobalRow) GlobalRecentEvaluationDTO {
-		return GlobalRecentEvaluationDTO{
+	result := util.Map(rows, func(row db.GetRecentEvaluationsGlobalRow) GlobalRecentEvaluationItem {
+		return GlobalRecentEvaluationItem{
 			EvaluationID:         row.EvaluationID,
 			ClientID:             row.ClientID,
 			EvaluationDate:       row.EvaluationDate.Time,
@@ -239,7 +239,7 @@ func (s *evaluationService) GetRecentEvaluations(ctx context.Context) (*resp.Pag
 	return &pag, nil
 }
 
-func (s *evaluationService) GetLastEvaluation(ctx context.Context, clientID string) (*LastEvaluationDTO, error) {
+func (s *evaluationService) GetLastEvaluation(ctx context.Context, clientID string) (*LastEvaluationItem, error) {
 	rows, err := s.db.GetLastClientEvaluation(ctx, clientID)
 	if err != nil {
 		s.logger.Error(ctx, "GetLastEvaluation", "Failed to get last evaluation", zap.Error(err))
@@ -254,8 +254,8 @@ func (s *evaluationService) GetLastEvaluation(ctx context.Context, clientID stri
 	firstRow := rows[0]
 
 	// Transform all rows into goal progress items
-	goalProgress := util.Map(rows, func(row db.GetLastClientEvaluationRow) GoalProgressItemDTO {
-		return GoalProgressItemDTO{
+	goalProgress := util.Map(rows, func(row db.GetLastClientEvaluationRow) GoalProgressItem {
+		return GoalProgressItem{
 			GoalID:        row.GoalID,
 			GoalTitle:     row.GoalTitle,
 			Status:        string(row.Status),
@@ -263,11 +263,11 @@ func (s *evaluationService) GetLastEvaluation(ctx context.Context, clientID stri
 		}
 	})
 
-	return &LastEvaluationDTO{
+	return &LastEvaluationItem{
 		EvaluationID:   firstRow.EvaluationID,
 		EvaluationDate: firstRow.EvaluationDate.Time,
 		OverallNotes:   firstRow.OverallNotes,
-		Coordinator: CoordinatorInfoDTO{
+		Coordinator: CoordinatorInfo{
 			FirstName: firstRow.CoordinatorFirstName,
 			LastName:  firstRow.CoordinatorLastName,
 		},
@@ -339,7 +339,7 @@ func (s *evaluationService) SaveDraft(ctx context.Context, req *SaveDraftRequest
 }
 
 // GetDrafts retrieves all draft evaluations for a coordinator
-func (s *evaluationService) GetDrafts(ctx context.Context) (*resp.PaginationResponse[DraftEvaluationListItemDTO], error) {
+func (s *evaluationService) GetDrafts(ctx context.Context) (*resp.PaginationResponse[DraftEvaluationListItem], error) {
 	coordinatorID := util.GetEmployeeID(ctx)
 	if coordinatorID == "" {
 		return nil, errors.New("user id is required")
@@ -362,8 +362,8 @@ func (s *evaluationService) GetDrafts(ctx context.Context) (*resp.PaginationResp
 		totalCount = rows[0].TotalCount
 	}
 
-	result := util.Map(rows, func(row db.GetCoordinatorDraftsRow) DraftEvaluationListItemDTO {
-		return DraftEvaluationListItemDTO{
+	result := util.Map(rows, func(row db.GetCoordinatorDraftsRow) DraftEvaluationListItem {
+		return DraftEvaluationListItem{
 			EvaluationID:    row.EvaluationID,
 			ClientID:        row.ClientID,
 			ClientFirstName: row.ClientFirstName,
@@ -379,7 +379,7 @@ func (s *evaluationService) GetDrafts(ctx context.Context) (*resp.PaginationResp
 }
 
 // GetDraft retrieves a specific draft evaluation with all progress logs
-func (s *evaluationService) GetDraft(ctx context.Context, evaluationID string) (*DraftEvaluationDTO, error) {
+func (s *evaluationService) GetDraft(ctx context.Context, evaluationID string) (*DraftEvaluationResponse, error) {
 	rows, err := s.db.GetDraftEvaluation(ctx, evaluationID)
 	if err != nil {
 		s.logger.Error(ctx, "GetDraft", "Failed to get draft evaluation", zap.Error(err))
@@ -393,10 +393,10 @@ func (s *evaluationService) GetDraft(ctx context.Context, evaluationID string) (
 	firstRow := rows[0]
 
 	// Build goal progress list (filter out empty goals from LEFT JOIN)
-	goalProgress := []GoalProgressItemDTO{}
+	goalProgress := []GoalProgressItem{}
 	for _, row := range rows {
 		if row.GoalID != nil {
-			goalProgress = append(goalProgress, GoalProgressItemDTO{
+			goalProgress = append(goalProgress, GoalProgressItem{
 				GoalID:        *row.GoalID,
 				GoalTitle:     *row.GoalTitle,
 				Status:        string(row.Status.GoalProgressStatus),
@@ -405,7 +405,7 @@ func (s *evaluationService) GetDraft(ctx context.Context, evaluationID string) (
 		}
 	}
 
-	return &DraftEvaluationDTO{
+	return &DraftEvaluationResponse{
 		EvaluationID:         firstRow.EvaluationID,
 		ClientID:             firstRow.ClientID,
 		ClientFirstName:      firstRow.ClientFirstName,
@@ -482,7 +482,7 @@ func (s *evaluationService) DeleteDraft(ctx context.Context, evaluationID string
 // UpdateEvaluation updates an existing submitted evaluation
 func (s *evaluationService) UpdateEvaluation(ctx context.Context, evaluationID string, req *UpdateEvaluationRequest) (*UpdateEvaluationResponse, error) {
 	// Build progress log params
-	progressLogs := util.Map(req.ProgressLogs, func(log GoalProgressDTO) db.UpdateGoalProgressLogParams {
+	progressLogs := util.Map(req.ProgressLogs, func(log GoalProgressItem) db.UpdateGoalProgressLogParams {
 		return db.UpdateGoalProgressLogParams{
 			EvaluationID:  evaluationID,
 			GoalID:        log.GoalID,
@@ -508,7 +508,7 @@ func (s *evaluationService) UpdateEvaluation(ctx context.Context, evaluationID s
 	}, nil
 }
 
-func (s *evaluationService) GetEvaluationDetails(ctx context.Context, evaluationID string) (*EvaluationDTO, error) {
+func (s *evaluationService) GetEvaluationDetails(ctx context.Context, evaluationID string) (*EvaluationResponse, error) {
 	rows, err := s.db.GetEvaluationDetails(ctx, evaluationID)
 	if err != nil {
 		s.logger.Error(ctx, "GetEvaluationDetails", "Failed to get evaluation details", zap.Error(err))
@@ -522,10 +522,10 @@ func (s *evaluationService) GetEvaluationDetails(ctx context.Context, evaluation
 	firstRow := rows[0]
 
 	// Build goal progress list (filter out empty goals from LEFT JOIN if any, though evaluations usually have goals)
-	goalProgress := []GoalProgressItemDTO{}
+	goalProgress := []GoalProgressItem{}
 	for _, row := range rows {
 		if row.GoalID != nil {
-			goalProgress = append(goalProgress, GoalProgressItemDTO{
+			goalProgress = append(goalProgress, GoalProgressItem{
 				GoalID:        *row.GoalID,
 				GoalTitle:     *row.GoalTitle,
 				Status:        string(row.ProgressStatus.GoalProgressStatus),
@@ -534,7 +534,7 @@ func (s *evaluationService) GetEvaluationDetails(ctx context.Context, evaluation
 		}
 	}
 
-	return &EvaluationDTO{
+	return &EvaluationResponse{
 		EvaluationID:         firstRow.EvaluationID,
 		ClientID:             firstRow.ClientID,
 		ClientFirstName:      firstRow.ClientFirstName,

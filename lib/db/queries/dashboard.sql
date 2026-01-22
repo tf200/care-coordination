@@ -205,8 +205,8 @@ SELECT
     (SELECT COUNT(*) FROM clients c3
      WHERE c3.coordinator_id = $1
      AND c3.status = 'waiting_list' 
-     AND c3.waiting_list_date IS NOT NULL
-     AND c3.waiting_list_date < (CURRENT_DATE - INTERVAL '60 days')::date)::bigint as long_waiting;
+     AND c3.created_at IS NOT NULL
+     AND c3.created_at < (CURRENT_DATE - INTERVAL '60 days')::date)::bigint as long_waiting;
 
 
 -- name: GetCoordinatorOverdueEvaluationClients :many
@@ -250,8 +250,8 @@ SELECT id, first_name, last_name
 FROM clients
 WHERE coordinator_id = $1
 AND status = 'waiting_list'
-AND waiting_list_date IS NOT NULL
-AND waiting_list_date < (CURRENT_DATE - INTERVAL '60 days')::date
+AND created_at IS NOT NULL
+AND created_at < (CURRENT_DATE - INTERVAL '60 days')::date
 LIMIT 5;
 
 -- name: GetCoordinatorTodaySchedule :many

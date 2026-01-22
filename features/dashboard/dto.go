@@ -171,3 +171,59 @@ type CoordinatorTodayScheduleDTO struct {
 	Appointments []CoordinatorScheduleItemDTO `json:"appointments"`
 	Count        int                          `json:"count"`
 }
+
+type CoordinatorStatsDTO struct {
+	MyActiveClients       int `json:"myActiveClients"`
+	MyUpcomingEvaluations int `json:"myUpcomingEvaluations"`
+	MyPendingIntakes      int `json:"myPendingIntakes"`
+	MyWaitingListClients  int `json:"myWaitingListClients"`
+}
+
+type ReminderDTO struct {
+	ID       string `json:"id"`
+	Title    string `json:"title"`
+	Client   string `json:"client"`
+	DueDate  string `json:"dueDate"`
+	Priority string `json:"priority"`
+}
+
+type CoordinatorRemindersDTO struct {
+	Reminders []ReminderDTO `json:"reminders"`
+}
+
+type CoordinatorClientDTO struct {
+	ID               string `json:"id"`
+	FirstName        string `json:"firstName"`
+	LastName         string `json:"lastName"`
+	CareType         string `json:"careType"`
+	Location         string `json:"location"`
+	DaysUntilEnd     int    `json:"daysUntilEnd"`
+	Status           string `json:"status"`
+	NextEvaluation   string `json:"nextEvaluation"`
+	EvaluationStatus string `json:"evaluationStatus"`
+}
+
+type CoordinatorClientsDTO struct {
+	Clients []CoordinatorClientDTO `json:"clients"`
+}
+
+type CoordinatorGoalsProgressDTO struct {
+	OnTrack    int `json:"onTrack"`
+	Delayed    int `json:"delayed"`
+	Achieved   int `json:"achieved"`
+	NotStarted int `json:"notStarted"`
+	Total      int `json:"total"`
+}
+
+type CoordinatorIncidentDTO struct {
+	ID       string `json:"id"`
+	Client   string `json:"client"`
+	Type     string `json:"type"`
+	Severity string `json:"severity"`
+	Date     string `json:"date"`
+	Status   string `json:"status"`
+}
+
+type CoordinatorIncidentsDTO struct {
+	Incidents []CoordinatorIncidentDTO `json:"incidents"`
+}

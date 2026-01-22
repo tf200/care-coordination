@@ -1,103 +1,145 @@
-# Agent Guide: Care Coordination Backend
+# PROJECT KNOWLEDGE BASE
 
-This guide provides instructions for development, testing, and code style conventions for the Care Coordination backend.
+**Generated:** 2026-01-22
+**Commit:** e1f00e3
+**Branch:** main
 
-## 🛠 Build and Development Commands
+## OVERVIEW
 
-### Core Commands
-- **Run Application**: `go run cmd/app/main.go`
-- **Build**: `go build -o server cmd/app/main.go`
-- **SQL Generation**: `make sqlc` (Uses `sqlc.yaml` to generate type-safe DB code)
-- **Swagger Generation**: `make swagger` (Generates API docs from annotations)
-- **Add Feature**: `make add-feature NAME=<feature_name>` (Scaffolds a new feature directory)
-- **Dependency Update**: `go mod tidy`
+Go-based care coordination API for healthcare client management. Stack: Gin + PostgreSQL (sqlc) + Redis + MinIO + WebSocket.
 
-### Database & Migrations
-- **Up**: `make migrate-up`
-- **Down**: `make migrate-down`
-- **Version**: `make migrate-version`
-- **Force Version**: `make migrate-force VERSION=<v>`
-- **Seed Data**: `make seed` or `make admin`
+## STRUCTURE
 
-### Docker Support
-- **Up**: `make docker-up` or `docker compose up -d`
-- **Down**: `make docker-down`
-- **Rebuild**: `make docker-rebuild`
+```
+care-coordination/
+├── api/              # HTTP server setup, route registration
+├── cmd/              # Entry points (app, worker, migrate, admin, seed, nanoid)
+├── features/         # Domain modules (17 features, uniform structure)
+├── lib/              # Shared libraries (db, token, websocket, ratelimit, etc.)
+├── internal/mocks/   # Generated service mocks
+├── docs/             # Swagger + WebSocket documentation
+└── scripts/          # Deploy and key generation
+```
 
-## 🧪 Testing Guidelines
+## WHERE TO LOOK
 
-### Unit Testing
-Use standard Go `testing` package with table-driven tests.
-- **Run All Tests**: `go test ./...`
-- **Run Single Test**: `go test -v -run <TestName> <PackagePath>`
-- **Generate Mocks**: `go generate ./...` (Uses `mockgen`)
+| Task | Location | Notes |
+|------|----------|-------|
+| Add new feature | `features/{name}/` | Use `make add-feature NAME=xxx` scaffolds interface/service/dto/handler |
+| Add API endpoint | `features/{name}/handler.go` | Use `SetupXxxRoutes()` pattern |
+| Add database query | `lib/db/queries/{domain}.sql` | Run `make sqlc` after |
+| Add migration | `lib/db/migrations/` | `NNNNNN_name.up.sql` / `.down.sql` |
+| Auth/middleware | `features/middleware/` | AuthMdw, RoleMdw, RateLimitMdw |
+| WebSocket | `lib/websocket/` | Hub manages connections, tickets for auth |
+| Config/env vars | `lib/config/config.go` | All env vars defined here |
+| Rate limiting | `lib/ratelimit/` | Redis primary, memory fallback |
 
-**Patterns:**
-- Use `github.com/stretchr/testify/assert` and `require`.
-- Use `go.uber.org/mock/gomock` for mocking interfaces.
-- Mock files are located in `internal/mocks/` or package-local `mocks/` directories.
+## FEATURE MODULE PATTERN
 
-### Integration Testing (Database)
-Follow patterns in `lib/db/sqlc/` as specified in `PROMPTS.md`.
-- **Isolation**: Use `runTestWithTx` helper for test isolation.
-- **Factories**: Use factory functions in `testutil.go` for creating test data.
-- **Constraints**: Test for `pgx.ErrNoRows`, `IsUniqueViolation`, and `IsForeignKeyViolation`.
-- **Command**: `go test -v ./lib/db/sqlc/... -run <TestName> -count=1`
+Every feature in `features/` follows this structure:
 
-## 🗄 Database Structure & RLS
+```
+features/{name}/
+├── interface.go   # Service interface (go:generate mockgen directive)
+├── service.go     # Business logic, database calls via store
+├── handler.go     # HTTP handlers, SetupXxxRoutes(router)
+├── dto.go         # Request/response structs with validation tags
+├── errors.go      # Domain-specific errors (var ErrXxx = errors.New(...))
+└── *_test.go      # Handler and service tests (some features)
+```
 
-### Schema Design
-The database uses a feature-based relational schema managed by `sqlc` and `golang-migrate`.
-- **Core Tables**: `users`, `employees`, `clients`, `locations`.
-- **Access Control**: `roles`, `permissions`, `user_roles`, `role_permissions`.
-- **Features**: `appointments`, `notifications`, `incidents`, `intake_forms`, `client_evaluations`.
-- **Primary Keys**: Nanoids are used for IDs (generated via `lib/nanoid`).
+**Handler pattern:**
+```go
+type XxxHandler struct {
+    service XxxService
+    mdw     *middleware.Middleware
+}
 
-### Row Level Security (RLS)
-Postgres RLS is enabled on sensitive tables (e.g., `clients`, `appointments`, `client_goals`).
-- **Mechanism**: Policies rely on the `app.current_user_id` session variable.
-- **Policy Patterns**:
-    - `admin`: Full access via `admin_all` policies.
-    - `coordinator`: Limited to assigned records (e.g., `coordinator_own_clients` checks `coordinator_id`).
-    - `user`: Limited to own records (e.g., `user_own_notifications`).
-- **Enforcement in Go**:
-    The setting MUST be applied per-transaction. Use `store.ExecTx` which automatically sets the context:
-    ```go
-    // Inside lib/db/sqlc/store.go
-    tx.Exec(ctx, "SELECT set_config('app.current_user_id', $1, true)", userID)
-    ```
-- **Constraint**: Direct use of `store.Queries` outside of `ExecTx` will NOT enforce RLS if `userID` is missing from the context. Always ensure `context` contains the `user_id`.
+func (h *XxxHandler) SetupXxxRoutes(router *gin.Engine) {
+    group := router.Group("/xxx")
+    group.Use(h.mdw.AuthMdw())
+    group.POST("/", h.Create)
+    // ...
+}
+```
 
-## 📏 Code Style & Conventions
+## CONVENTIONS
 
-### Architecture
-Feature-based architecture in `features/`. Each feature typically contains:
-- `interface.go`: Defines the Service interface and DTOs.
-- `service.go`: Business logic implementation (`xxxService` private struct).
-- `handler.go`: Gin HTTP handlers (`XxxHandler` struct).
-- `dto.go`: Data transfer objects.
+| Area | Convention |
+|------|------------|
+| IDs | NanoID (not UUID) - see `lib/nanoid/` |
+| Module name | Typo in go.mod: `care-cordination` (missing 'o') - keep as-is |
+| Logging | Zap structured logging via `lib/logger/` |
+| Responses | Use `lib/resp/` helpers: `resp.Success()`, `resp.Error()` |
+| Errors | Domain errors in `errors.go`, switch-case in handlers |
+| Transactions | Use `store.ExecTx()` - sets RLS context automatically |
+| Mocks | `go:generate mockgen` in interface.go, outputs to `internal/mocks/` or local `mocks/` |
 
-### Naming Conventions
-- **Handlers**: `XxxHandler`, factory `NewXxxHandler(...)`.
-- **Services**: Interface `XxxService`, implementation `xxxService`, factory `NewXxxService(...)`.
-- **Routes**: Method `SetupXxxRoutes(router *gin.Engine, ...)`.
-- **Files**: Use `snake_case` for filenames. Standard files: `handler.go`, `service.go`.
+## ANTI-PATTERNS (DO NOT)
 
-### Imports
-Group imports into:
-1. Standard library
-2. Project dependencies (Alias generated DB code: `db "care-cordination/lib/db/sqlc"`)
-3. Third-party packages
+| Forbidden | Reason |
+|-----------|--------|
+| Edit `lib/db/sqlc/*.sql.go` | Auto-generated by sqlc, run `make sqlc` instead |
+| Edit `docs/docs.go` | Auto-generated by swag, run `make swagger` instead |
+| Edit `**/mocks/*.go` | Auto-generated by mockgen |
+| Skip RLS context | Always use `store.ExecTx()` for writes, it sets `app.current_user_id` |
+| Direct pgxpool queries | Use Store/Queries from `lib/db/sqlc/` |
 
-### Error Handling
-- Define package-level error variables (e.g., `ErrNotFound = errors.New("...")`).
-- In handlers, use `switch` on errors to return appropriate HTTP status codes via `lib/resp`.
-- Use `lib/resp` helpers: `resp.Success(data, msg)`, `resp.Error(err)`, `resp.PagResp(...)`.
+## COMMANDS
 
-### Logging
-- Use `zap` logger via the `logger.Logger` interface.
-- Pattern: `s.logger.Error(ctx, "Operation", "Message", zap.Error(err), zap.String("key", value))`.
+```bash
+# Development
+make sqlc              # Regenerate query code from lib/db/queries/*.sql
+make swagger           # Regenerate API docs from handler annotations
+make add-feature NAME=x  # Scaffold new feature module
 
-### API Documentation
-- Use `swag` annotations on handler methods.
-- Required fields: `@Summary`, `@Description`, `@Tags`, `@Accept`, `@Produce`, `@Param`, `@Success`, `@Failure`, `@Router`.
+# Database
+make migrate-up        # Run all pending migrations
+make migrate-down      # Rollback all migrations
+make migrate-up1       # Run next migration only
+make migrate-down1     # Rollback last migration
+make migrate-version   # Check current migration version
+make seed              # Seed sample data
+make admin             # Create admin user
+
+# Docker
+make docker-rebuild    # Rebuild and restart app container
+make deploy            # SSH deploy via scripts/deploy.sh
+
+# Testing
+go test -v ./lib/db/sqlc/... -count=1  # Database integration tests
+go test ./features/...                  # Feature tests
+```
+
+## ENTRY POINTS
+
+| Binary | Path | Purpose |
+|--------|------|---------|
+| API Server | `cmd/app/main.go` | Main HTTP server (port from config) |
+| Worker | `cmd/worker/main.go` | Background job runner (5-min notification checks) |
+| Migrate | `cmd/migrate/main.go` | Database migrations |
+| Admin | `cmd/admin/main.go` | Create admin user |
+| Seed | `cmd/seed/main.go` | Populate sample data |
+
+## DATABASE
+
+- **PostgreSQL** with Row Level Security (RLS)
+- **sqlc** for type-safe queries - queries in `lib/db/queries/`, generated code in `lib/db/sqlc/`
+- **Migrations** in `lib/db/migrations/` using golang-migrate
+- **Store pattern**: `db.NewStore(pool)` wraps Queries with transaction support
+
+Key tables: users, employees, clients, locations, incidents, evaluations, appointments, notifications, audit_logs
+
+## TESTING
+
+- **DB tests**: Table-driven tests with `runTestWithTx()` - always rollback
+- **Factories**: `CreateTestXxx()` in `lib/db/sqlc/testutil.go`
+- **Mocks**: Service interfaces have mockgen directives
+- See `lib/db/sqlc/README.md` for detailed testing patterns
+
+## NOTES
+
+- WebSocket auth uses ticket system (30s TTL) - see `docs/WEBSOCKET_NOTIFICATIONS.md`
+- Audit logging is NEN7510/ISO27001 compliant with hash chains
+- Client status transitions: `waiting_list` → `in_care` → `discharged` (with constraints)
+- TODO in `features/rbac/handler.go`: "Add admin permission check" (incomplete)

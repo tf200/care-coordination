@@ -669,6 +669,171 @@ definitions:
       percentage:
         type: number
     type: object
+  dashboard.CoordinatorAlertSeverity:
+    enum:
+    - critical
+    - warning
+    - info
+    type: string
+    x-enum-varnames:
+    - CoordinatorAlertSeverityCritical
+    - CoordinatorAlertSeverityWarning
+    - CoordinatorAlertSeverityInfo
+  dashboard.CoordinatorAlertType:
+    enum:
+    - evaluation
+    - contract
+    - draft
+    - incident
+    - waiting_long
+    type: string
+    x-enum-varnames:
+    - CoordinatorAlertTypeEvaluation
+    - CoordinatorAlertTypeContract
+    - CoordinatorAlertTypeDraft
+    - CoordinatorAlertTypeIncident
+    - CoordinatorAlertTypeWaitingLong
+  dashboard.CoordinatorClientDTO:
+    properties:
+      careType:
+        type: string
+      daysUntilEnd:
+        type: integer
+      evaluationStatus:
+        type: string
+      firstName:
+        type: string
+      id:
+        type: string
+      lastName:
+        type: string
+      location:
+        type: string
+      nextEvaluation:
+        type: string
+      status:
+        type: string
+    type: object
+  dashboard.CoordinatorClientsDTO:
+    properties:
+      clients:
+        items:
+          $ref: '#/definitions/dashboard.CoordinatorClientDTO'
+        type: array
+    type: object
+  dashboard.CoordinatorGoalsProgressDTO:
+    properties:
+      achieved:
+        type: integer
+      delayed:
+        type: integer
+      notStarted:
+        type: integer
+      onTrack:
+        type: integer
+      total:
+        type: integer
+    type: object
+  dashboard.CoordinatorIncidentDTO:
+    properties:
+      client:
+        type: string
+      date:
+        type: string
+      id:
+        type: string
+      severity:
+        type: string
+      status:
+        type: string
+      type:
+        type: string
+    type: object
+  dashboard.CoordinatorIncidentsDTO:
+    properties:
+      incidents:
+        items:
+          $ref: '#/definitions/dashboard.CoordinatorIncidentDTO'
+        type: array
+    type: object
+  dashboard.CoordinatorRemindersDTO:
+    properties:
+      reminders:
+        items:
+          $ref: '#/definitions/dashboard.ReminderDTO'
+        type: array
+    type: object
+  dashboard.CoordinatorScheduleItemDTO:
+    properties:
+      clientId:
+        type: string
+      clientName:
+        type: string
+      endTime:
+        type: string
+      id:
+        type: string
+      locationId:
+        type: string
+      locationName:
+        type: string
+      status:
+        type: string
+      time:
+        type: string
+      type:
+        type: string
+    type: object
+  dashboard.CoordinatorStatsDTO:
+    properties:
+      myActiveClients:
+        type: integer
+      myPendingIntakes:
+        type: integer
+      myUpcomingEvaluations:
+        type: integer
+      myWaitingListClients:
+        type: integer
+    type: object
+  dashboard.CoordinatorTodayScheduleDTO:
+    properties:
+      appointments:
+        items:
+          $ref: '#/definitions/dashboard.CoordinatorScheduleItemDTO'
+        type: array
+      count:
+        type: integer
+      date:
+        type: string
+    type: object
+  dashboard.CoordinatorUrgentAlertDTO:
+    properties:
+      clientIds:
+        items:
+          type: string
+        type: array
+      count:
+        type: integer
+      description:
+        type: string
+      id:
+        type: string
+      link:
+        type: string
+      severity:
+        $ref: '#/definitions/dashboard.CoordinatorAlertSeverity'
+      title:
+        type: string
+      type:
+        $ref: '#/definitions/dashboard.CoordinatorAlertType'
+    type: object
+  dashboard.CoordinatorUrgentAlertsDTO:
+    properties:
+      alerts:
+        items:
+          $ref: '#/definitions/dashboard.CoordinatorUrgentAlertDTO'
+        type: array
+    type: object
   dashboard.CriticalAlertsDTO:
     properties:
       alerts:
@@ -762,6 +927,19 @@ definitions:
         type: integer
       waitingList:
         type: integer
+    type: object
+  dashboard.ReminderDTO:
+    properties:
+      client:
+        type: string
+      dueDate:
+        type: string
+      id:
+        type: string
+      priority:
+        type: string
+      title:
+        type: string
     type: object
   dashboard.TodayAppointmentItem:
     properties:
@@ -2748,6 +2926,83 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/dashboard.CareTypeDistributionDTO'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-dashboard_CoordinatorClientsDTO:
+    properties:
+      data:
+        $ref: '#/definitions/dashboard.CoordinatorClientsDTO'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-dashboard_CoordinatorGoalsProgressDTO:
+    properties:
+      data:
+        $ref: '#/definitions/dashboard.CoordinatorGoalsProgressDTO'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-dashboard_CoordinatorIncidentsDTO:
+    properties:
+      data:
+        $ref: '#/definitions/dashboard.CoordinatorIncidentsDTO'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-dashboard_CoordinatorRemindersDTO:
+    properties:
+      data:
+        $ref: '#/definitions/dashboard.CoordinatorRemindersDTO'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-dashboard_CoordinatorStatsDTO:
+    properties:
+      data:
+        $ref: '#/definitions/dashboard.CoordinatorStatsDTO'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-dashboard_CoordinatorTodayScheduleDTO:
+    properties:
+      data:
+        $ref: '#/definitions/dashboard.CoordinatorTodayScheduleDTO'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-dashboard_CoordinatorUrgentAlertsDTO:
+    properties:
+      data:
+        $ref: '#/definitions/dashboard.CoordinatorUrgentAlertsDTO'
       message:
         example: success message
         type: string
@@ -4933,6 +5188,153 @@ paths:
       summary: Get care type distribution
       tags:
       - Dashboard
+  /dashboard/coordinator/clients:
+    get:
+      description: Get list of clients assigned to this coordinator
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-dashboard_CoordinatorClientsDTO'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get coordinator clients
+      tags:
+      - Dashboard - Coordinator
+  /dashboard/coordinator/goals-progress:
+    get:
+      description: Get aggregated goals progress for all coordinator's clients
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-dashboard_CoordinatorGoalsProgressDTO'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get coordinator goals progress
+      tags:
+      - Dashboard - Coordinator
+  /dashboard/coordinator/incidents:
+    get:
+      description: Get incidents for coordinator's assigned clients
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-dashboard_CoordinatorIncidentsDTO'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get coordinator incidents
+      tags:
+      - Dashboard - Coordinator
+  /dashboard/coordinator/reminders:
+    get:
+      description: Get pending reminders and tasks for the coordinator
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-dashboard_CoordinatorRemindersDTO'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get coordinator reminders
+      tags:
+      - Dashboard - Coordinator
+  /dashboard/coordinator/stats:
+    get:
+      description: Get personal statistics for the coordinator's dashboard summary
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-dashboard_CoordinatorStatsDTO'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get coordinator personal stats
+      tags:
+      - Dashboard - Coordinator
+  /dashboard/coordinator/today-schedule:
+    get:
+      description: Get today's schedule for the logged-in coordinator
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-dashboard_CoordinatorTodayScheduleDTO'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get coordinator today schedule
+      tags:
+      - Dashboard - Coordinator
+  /dashboard/coordinator/urgent-alerts:
+    get:
+      description: Get urgent alerts for the logged-in coordinator's clients
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-dashboard_CoordinatorUrgentAlertsDTO'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Get coordinator urgent alerts
+      tags:
+      - Dashboard - Coordinator
   /dashboard/critical-alerts:
     get:
       description: Get critical alerts for the admin dashboard

@@ -417,7 +417,7 @@ func (s *dashboardService) GetCoordinatorUrgentAlerts(ctx context.Context, emplo
 		alerts = append(alerts, CoordinatorUrgentAlertDTO{
 			ID:          "alert-evaluation",
 			Type:        CoordinatorAlertTypeEvaluation,
-			Title:       fmt.Sprintf("%d evaluaties achterstallig", data.OverdueEvaluations),
+			Title:       "overdue_evaluations",
 			Description: description,
 			Severity:    CoordinatorAlertSeverityCritical,
 			Count:       int(data.OverdueEvaluations),
@@ -433,7 +433,7 @@ func (s *dashboardService) GetCoordinatorUrgentAlerts(ctx context.Context, emplo
 		alerts = append(alerts, CoordinatorUrgentAlertDTO{
 			ID:          "alert-contract",
 			Type:        CoordinatorAlertTypeContract,
-			Title:       fmt.Sprintf("Contract verloopt binnen 7 dagen (%d)", data.ExpiringContracts),
+			Title:       "expiring_contracts",
 			Description: description,
 			Severity:    CoordinatorAlertSeverityWarning,
 			Count:       int(data.ExpiringContracts),
@@ -449,7 +449,7 @@ func (s *dashboardService) GetCoordinatorUrgentAlerts(ctx context.Context, emplo
 		alerts = append(alerts, CoordinatorUrgentAlertDTO{
 			ID:          "alert-draft",
 			Type:        CoordinatorAlertTypeDraft,
-			Title:       fmt.Sprintf("%d concept evaluatie niet afgerond", data.DraftEvaluations),
+			Title:       "draft_evaluations",
 			Description: description,
 			Severity:    CoordinatorAlertSeverityInfo,
 			Count:       int(data.DraftEvaluations),
@@ -465,7 +465,7 @@ func (s *dashboardService) GetCoordinatorUrgentAlerts(ctx context.Context, emplo
 		alerts = append(alerts, CoordinatorUrgentAlertDTO{
 			ID:          "alert-incident",
 			Type:        CoordinatorAlertTypeIncident,
-			Title:       fmt.Sprintf("%d onopgeloste incidenten", data.UnresolvedIncidents),
+			Title:       "unresolved_incidents",
 			Description: description,
 			Severity:    CoordinatorAlertSeverityWarning,
 			Count:       int(data.UnresolvedIncidents),
@@ -481,7 +481,7 @@ func (s *dashboardService) GetCoordinatorUrgentAlerts(ctx context.Context, emplo
 		alerts = append(alerts, CoordinatorUrgentAlertDTO{
 			ID:          "alert-waiting",
 			Type:        CoordinatorAlertTypeWaitingLong,
-			Title:       fmt.Sprintf("%d wachtlijst cliënten > 60 dagen", data.LongWaiting),
+			Title:       "long_waiting_clients",
 			Description: description,
 			Severity:    CoordinatorAlertSeverityWarning,
 			Count:       int(data.LongWaiting),
@@ -536,7 +536,7 @@ func (s *dashboardService) buildClientInfo(clients any) ([]string, string) {
 		if len(names) <= 3 {
 			description = strings.Join(names, ", ")
 		} else {
-			description = strings.Join(names[:3], ", ") + fmt.Sprintf(" +%d meer", len(names)-3)
+			description = strings.Join(names[:3], ", ") + fmt.Sprintf(" +%d", len(names)-3)
 		}
 	}
 
@@ -584,4 +584,143 @@ func (s *dashboardService) GetCoordinatorTodaySchedule(ctx context.Context, empl
 		Appointments: items,
 		Count:        len(items),
 	}, nil
+}
+
+func (s *dashboardService) GetCoordinatorStats(ctx context.Context, employeeID string) (*CoordinatorStatsDTO, error) {
+	stats, err := s.db.GetCoordinatorStats(ctx, employeeID)
+	if err != nil {
+		s.logger.Error(ctx, "GetCoordinatorStats", "Failed to get coordinator stats", zap.Error(err))
+		return nil, ErrInternal
+	}
+
+	return &CoordinatorStatsDTO{
+		MyActiveClients:       int(stats.MyActiveClients),
+		MyUpcomingEvaluations: int(stats.MyUpcomingEvaluations),
+		MyPendingIntakes:      int(stats.MyPendingIntakes),
+		MyWaitingListClients:  int(stats.MyWaitingListClients),
+	}, nil
+}
+
+func (s *dashboardService) GetCoordinatorReminders(ctx context.Context, employeeID string) (*CoordinatorRemindersDTO, error) {
+	reminders, err := s.db.GetCoordinatorReminders(ctx, employeeID)
+	if err != nil {
+		s.logger.Error(ctx, "GetCoordinatorReminders", "Failed to get coordinator reminders", zap.Error(err))
+		return nil, ErrInternal
+	}
+
+	items := make([]ReminderDTO, len(reminders))
+	for i, r := range reminders {
+		items[i] = ReminderDTO{
+			ID:       r.ID,
+			Title:    r.Title,
+			Client:   "",
+			DueDate:  r.DueTime.Time.Format("2006-01-02"),
+			Priority: "medium",
+		}
+	}
+
+	return &CoordinatorRemindersDTO{Reminders: items}, nil
+}
+
+func (s *dashboardService) GetCoordinatorClients(ctx context.Context, employeeID string) (*CoordinatorClientsDTO, error) {
+	clients, err := s.db.GetCoordinatorClients(ctx, employeeID)
+	if err != nil {
+		s.logger.Error(ctx, "GetCoordinatorClients", "Failed to get coordinator clients", zap.Error(err))
+		return nil, ErrInternal
+	}
+
+	now := time.Now()
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+
+	items := make([]CoordinatorClientDTO, len(clients))
+	for i, c := range clients {
+		daysUntilEnd := 0
+		status := "active"
+		if c.CareEndDate.Valid {
+			endDate := c.CareEndDate.Time
+			daysUntilEnd = int(endDate.Sub(today).Hours() / 24)
+			if daysUntilEnd <= 30 {
+				status = "expiring"
+			}
+		}
+
+		nextEvaluation := "-"
+		if c.NextEvaluationDate.Valid {
+			nextEvaluation = c.NextEvaluationDate.Time.Format("2006-01-02")
+		}
+		evalStatus := s.calculateEvaluationStatus(c.NextEvaluationDate.Time, c.NextEvaluationDate.Valid, today)
+
+		locationName := ""
+		if c.LocationName != nil {
+			locationName = *c.LocationName
+		}
+
+		items[i] = CoordinatorClientDTO{
+			ID:               c.ID,
+			FirstName:        c.FirstName,
+			LastName:         c.LastName,
+			CareType:         string(c.CareType),
+			Location:         locationName,
+			DaysUntilEnd:     daysUntilEnd,
+			Status:           status,
+			NextEvaluation:   nextEvaluation,
+			EvaluationStatus: evalStatus,
+		}
+	}
+
+	return &CoordinatorClientsDTO{Clients: items}, nil
+}
+
+func (s *dashboardService) calculateEvaluationStatus(evalDate time.Time, valid bool, today time.Time) string {
+	if !valid {
+		return "upcoming"
+	}
+
+	evalDay := time.Date(evalDate.Year(), evalDate.Month(), evalDate.Day(), 0, 0, 0, 0, evalDate.Location())
+	daysUntil := int(evalDay.Sub(today).Hours() / 24)
+
+	if daysUntil <= 0 {
+		return "overdue"
+	} else if daysUntil <= 7 {
+		return "due_soon"
+	}
+	return "upcoming"
+}
+
+func (s *dashboardService) GetCoordinatorGoalsProgress(ctx context.Context, employeeID string) (*CoordinatorGoalsProgressDTO, error) {
+	progress, err := s.db.GetCoordinatorGoalsProgress(ctx, employeeID)
+	if err != nil {
+		s.logger.Error(ctx, "GetCoordinatorGoalsProgress", "Failed to get coordinator goals progress", zap.Error(err))
+		return nil, ErrInternal
+	}
+
+	return &CoordinatorGoalsProgressDTO{
+		OnTrack:    int(progress.OnTrack),
+		Delayed:    int(progress.Delayed),
+		Achieved:   int(progress.Achieved),
+		NotStarted: int(progress.NotStarted),
+		Total:      int(progress.Total),
+	}, nil
+}
+
+func (s *dashboardService) GetCoordinatorIncidents(ctx context.Context, employeeID string) (*CoordinatorIncidentsDTO, error) {
+	incidents, err := s.db.GetCoordinatorIncidents(ctx, employeeID)
+	if err != nil {
+		s.logger.Error(ctx, "GetCoordinatorIncidents", "Failed to get coordinator incidents", zap.Error(err))
+		return nil, ErrInternal
+	}
+
+	items := make([]CoordinatorIncidentDTO, len(incidents))
+	for i, inc := range incidents {
+		items[i] = CoordinatorIncidentDTO{
+			ID:       inc.ID,
+			Client:   inc.ClientFirstName + " " + inc.ClientLastName,
+			Type:     string(inc.IncidentType),
+			Severity: string(inc.IncidentSeverity),
+			Date:     inc.IncidentDate.Time.Format("2006-01-02"),
+			Status:   string(inc.Status),
+		}
+	}
+
+	return &CoordinatorIncidentsDTO{Incidents: items}, nil
 }

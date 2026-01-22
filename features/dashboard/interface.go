@@ -16,4 +16,9 @@ type DashboardService interface {
 	// Coordinator Dashboard
 	GetCoordinatorUrgentAlerts(ctx context.Context, employeeID string) (*CoordinatorUrgentAlertsDTO, error)
 	GetCoordinatorTodaySchedule(ctx context.Context, employeeID string) (*CoordinatorTodayScheduleDTO, error)
+	GetCoordinatorStats(ctx context.Context, employeeID string) (*CoordinatorStatsDTO, error)
+	GetCoordinatorReminders(ctx context.Context, employeeID string) (*CoordinatorRemindersDTO, error)
+	GetCoordinatorClients(ctx context.Context, employeeID string) (*CoordinatorClientsDTO, error)
+	GetCoordinatorGoalsProgress(ctx context.Context, employeeID string) (*CoordinatorGoalsProgressDTO, error)
+	GetCoordinatorIncidents(ctx context.Context, employeeID string) (*CoordinatorIncidentsDTO, error)
 }

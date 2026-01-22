@@ -41,6 +41,63 @@ func (q *Queries) GetCareTypeDistribution(ctx context.Context) (GetCareTypeDistr
 	return i, err
 }
 
+const getCoordinatorClients = `-- name: GetCoordinatorClients :many
+SELECT
+    c.id,
+    c.first_name,
+    c.last_name,
+    c.care_type,
+    c.status,
+    c.care_end_date,
+    c.next_evaluation_date,
+    l.name as location_name
+FROM clients c
+LEFT JOIN locations l ON c.assigned_location_id = l.id
+WHERE c.coordinator_id = $1
+AND c.status IN ('in_care', 'waiting_list')
+ORDER BY c.care_end_date ASC NULLS LAST, c.next_evaluation_date ASC NULLS LAST
+`
+
+type GetCoordinatorClientsRow struct {
+	ID                 string           `json:"id"`
+	FirstName          string           `json:"first_name"`
+	LastName           string           `json:"last_name"`
+	CareType           CareTypeEnum     `json:"care_type"`
+	Status             ClientStatusEnum `json:"status"`
+	CareEndDate        pgtype.Date      `json:"care_end_date"`
+	NextEvaluationDate pgtype.Date      `json:"next_evaluation_date"`
+	LocationName       *string          `json:"location_name"`
+}
+
+func (q *Queries) GetCoordinatorClients(ctx context.Context, coordinatorID string) ([]GetCoordinatorClientsRow, error) {
+	rows, err := q.db.Query(ctx, getCoordinatorClients, coordinatorID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetCoordinatorClientsRow{}
+	for rows.Next() {
+		var i GetCoordinatorClientsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.FirstName,
+			&i.LastName,
+			&i.CareType,
+			&i.Status,
+			&i.CareEndDate,
+			&i.NextEvaluationDate,
+			&i.LocationName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getCoordinatorDraftEvaluationClients = `-- name: GetCoordinatorDraftEvaluationClients :many
 SELECT c.id, c.first_name, c.last_name
 FROM clients c
@@ -103,6 +160,109 @@ func (q *Queries) GetCoordinatorExpiringContractClients(ctx context.Context, coo
 	for rows.Next() {
 		var i GetCoordinatorExpiringContractClientsRow
 		if err := rows.Scan(&i.ID, &i.FirstName, &i.LastName); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getCoordinatorGoalsProgress = `-- name: GetCoordinatorGoalsProgress :one
+WITH coordinator_goals AS (
+    SELECT cg.id as goal_id
+    FROM client_goals cg
+    JOIN clients c ON cg.client_id = c.id
+    WHERE c.coordinator_id = $1
+    AND c.status = 'in_care'
+),
+latest_progress AS (
+    SELECT DISTINCT ON (gpl.goal_id) 
+        gpl.goal_id,
+        gpl.status
+    FROM goal_progress_logs gpl
+    WHERE gpl.goal_id IN (SELECT goal_id FROM coordinator_goals)
+    ORDER BY gpl.goal_id, gpl.created_at DESC
+)
+SELECT
+    (SELECT COUNT(*) FROM coordinator_goals)::bigint as total,
+    COALESCE((SELECT COUNT(*) FROM latest_progress WHERE status IN ('on_track', 'in_progress', 'starting')), 0)::bigint as on_track,
+    COALESCE((SELECT COUNT(*) FROM latest_progress WHERE status IN ('delayed', 'stagnant', 'deteriorating')), 0)::bigint as delayed,
+    COALESCE((SELECT COUNT(*) FROM latest_progress WHERE status = 'achieved'), 0)::bigint as achieved,
+    (
+        (SELECT COUNT(*) FROM coordinator_goals) - 
+        (SELECT COUNT(*) FROM latest_progress WHERE status != 'not_started')
+    )::bigint as not_started
+`
+
+type GetCoordinatorGoalsProgressRow struct {
+	Total      int64 `json:"total"`
+	OnTrack    int64 `json:"on_track"`
+	Delayed    int64 `json:"delayed"`
+	Achieved   int64 `json:"achieved"`
+	NotStarted int64 `json:"not_started"`
+}
+
+func (q *Queries) GetCoordinatorGoalsProgress(ctx context.Context, coordinatorID string) (GetCoordinatorGoalsProgressRow, error) {
+	row := q.db.QueryRow(ctx, getCoordinatorGoalsProgress, coordinatorID)
+	var i GetCoordinatorGoalsProgressRow
+	err := row.Scan(
+		&i.Total,
+		&i.OnTrack,
+		&i.Delayed,
+		&i.Achieved,
+		&i.NotStarted,
+	)
+	return i, err
+}
+
+const getCoordinatorIncidents = `-- name: GetCoordinatorIncidents :many
+SELECT
+    i.id,
+    i.incident_type,
+    i.incident_severity,
+    i.incident_date,
+    i.status,
+    c.first_name as client_first_name,
+    c.last_name as client_last_name
+FROM incidents i
+JOIN clients c ON i.client_id = c.id
+WHERE i.coordinator_id = $1
+AND i.is_deleted = FALSE
+ORDER BY i.incident_date DESC
+LIMIT 10
+`
+
+type GetCoordinatorIncidentsRow struct {
+	ID               string               `json:"id"`
+	IncidentType     IncidentTypeEnum     `json:"incident_type"`
+	IncidentSeverity IncidentSeverityEnum `json:"incident_severity"`
+	IncidentDate     pgtype.Date          `json:"incident_date"`
+	Status           IncidentStatusEnum   `json:"status"`
+	ClientFirstName  string               `json:"client_first_name"`
+	ClientLastName   string               `json:"client_last_name"`
+}
+
+func (q *Queries) GetCoordinatorIncidents(ctx context.Context, coordinatorID string) ([]GetCoordinatorIncidentsRow, error) {
+	rows, err := q.db.Query(ctx, getCoordinatorIncidents, coordinatorID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetCoordinatorIncidentsRow{}
+	for rows.Next() {
+		var i GetCoordinatorIncidentsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.IncidentType,
+			&i.IncidentSeverity,
+			&i.IncidentDate,
+			&i.Status,
+			&i.ClientFirstName,
+			&i.ClientLastName,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -183,6 +343,85 @@ func (q *Queries) GetCoordinatorOverdueEvaluationClients(ctx context.Context, co
 		return nil, err
 	}
 	return items, nil
+}
+
+const getCoordinatorReminders = `-- name: GetCoordinatorReminders :many
+SELECT
+    r.id,
+    r.title,
+    r.due_time
+FROM reminders r
+WHERE r.user_id = $1
+AND r.is_completed = FALSE
+ORDER BY r.due_time ASC
+LIMIT 10
+`
+
+type GetCoordinatorRemindersRow struct {
+	ID      string             `json:"id"`
+	Title   string             `json:"title"`
+	DueTime pgtype.Timestamptz `json:"due_time"`
+}
+
+func (q *Queries) GetCoordinatorReminders(ctx context.Context, userID string) ([]GetCoordinatorRemindersRow, error) {
+	rows, err := q.db.Query(ctx, getCoordinatorReminders, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetCoordinatorRemindersRow{}
+	for rows.Next() {
+		var i GetCoordinatorRemindersRow
+		if err := rows.Scan(&i.ID, &i.Title, &i.DueTime); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getCoordinatorStats = `-- name: GetCoordinatorStats :one
+SELECT
+    (SELECT COUNT(*) FROM clients c1
+     WHERE c1.coordinator_id = $1 
+     AND c1.status = 'in_care')::bigint as my_active_clients,
+    
+    (SELECT COUNT(*) FROM clients c2
+     WHERE c2.coordinator_id = $1 
+     AND c2.status = 'in_care' 
+     AND c2.next_evaluation_date IS NOT NULL 
+     AND c2.next_evaluation_date >= CURRENT_DATE
+     AND c2.next_evaluation_date <= (CURRENT_DATE + INTERVAL '30 days')::date)::bigint as my_upcoming_evaluations,
+    
+    (SELECT COUNT(*) FROM intake_forms i
+     WHERE i.coordinator_id = $1 
+     AND i.status = 'pending')::bigint as my_pending_intakes,
+    
+    (SELECT COUNT(*) FROM clients c3
+     WHERE c3.coordinator_id = $1 
+     AND c3.status = 'waiting_list')::bigint as my_waiting_list_clients
+`
+
+type GetCoordinatorStatsRow struct {
+	MyActiveClients       int64 `json:"my_active_clients"`
+	MyUpcomingEvaluations int64 `json:"my_upcoming_evaluations"`
+	MyPendingIntakes      int64 `json:"my_pending_intakes"`
+	MyWaitingListClients  int64 `json:"my_waiting_list_clients"`
+}
+
+func (q *Queries) GetCoordinatorStats(ctx context.Context, coordinatorID string) (GetCoordinatorStatsRow, error) {
+	row := q.db.QueryRow(ctx, getCoordinatorStats, coordinatorID)
+	var i GetCoordinatorStatsRow
+	err := row.Scan(
+		&i.MyActiveClients,
+		&i.MyUpcomingEvaluations,
+		&i.MyPendingIntakes,
+		&i.MyWaitingListClients,
+	)
+	return i, err
 }
 
 const getCoordinatorTodaySchedule = `-- name: GetCoordinatorTodaySchedule :many

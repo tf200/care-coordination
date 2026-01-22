@@ -2322,6 +2322,230 @@
                 }
             }
         },
+        "/dashboard/coordinator/clients": {
+            "get": {
+                "description": "Get list of clients assigned to this coordinator",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dashboard - Coordinator"
+                ],
+                "summary": "Get coordinator clients",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_CoordinatorClientsDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/dashboard/coordinator/goals-progress": {
+            "get": {
+                "description": "Get aggregated goals progress for all coordinator's clients",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dashboard - Coordinator"
+                ],
+                "summary": "Get coordinator goals progress",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_CoordinatorGoalsProgressDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/dashboard/coordinator/incidents": {
+            "get": {
+                "description": "Get incidents for coordinator's assigned clients",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dashboard - Coordinator"
+                ],
+                "summary": "Get coordinator incidents",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_CoordinatorIncidentsDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/dashboard/coordinator/reminders": {
+            "get": {
+                "description": "Get pending reminders and tasks for the coordinator",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dashboard - Coordinator"
+                ],
+                "summary": "Get coordinator reminders",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_CoordinatorRemindersDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/dashboard/coordinator/stats": {
+            "get": {
+                "description": "Get personal statistics for the coordinator's dashboard summary",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dashboard - Coordinator"
+                ],
+                "summary": "Get coordinator personal stats",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_CoordinatorStatsDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/dashboard/coordinator/today-schedule": {
+            "get": {
+                "description": "Get today's schedule for the logged-in coordinator",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dashboard - Coordinator"
+                ],
+                "summary": "Get coordinator today schedule",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_CoordinatorTodayScheduleDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/dashboard/coordinator/urgent-alerts": {
+            "get": {
+                "description": "Get urgent alerts for the logged-in coordinator's clients",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dashboard - Coordinator"
+                ],
+                "summary": "Get coordinator urgent alerts",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_CoordinatorUrgentAlertsDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/dashboard/critical-alerts": {
             "get": {
                 "description": "Get critical alerts for the admin dashboard",
@@ -6421,6 +6645,253 @@
                 }
             }
         },
+        "dashboard.CoordinatorAlertSeverity": {
+            "type": "string",
+            "enum": [
+                "critical",
+                "warning",
+                "info"
+            ],
+            "x-enum-varnames": [
+                "CoordinatorAlertSeverityCritical",
+                "CoordinatorAlertSeverityWarning",
+                "CoordinatorAlertSeverityInfo"
+            ]
+        },
+        "dashboard.CoordinatorAlertType": {
+            "type": "string",
+            "enum": [
+                "evaluation",
+                "contract",
+                "draft",
+                "incident",
+                "waiting_long"
+            ],
+            "x-enum-varnames": [
+                "CoordinatorAlertTypeEvaluation",
+                "CoordinatorAlertTypeContract",
+                "CoordinatorAlertTypeDraft",
+                "CoordinatorAlertTypeIncident",
+                "CoordinatorAlertTypeWaitingLong"
+            ]
+        },
+        "dashboard.CoordinatorClientDTO": {
+            "type": "object",
+            "properties": {
+                "careType": {
+                    "type": "string"
+                },
+                "daysUntilEnd": {
+                    "type": "integer"
+                },
+                "evaluationStatus": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "location": {
+                    "type": "string"
+                },
+                "nextEvaluation": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "dashboard.CoordinatorClientsDTO": {
+            "type": "object",
+            "properties": {
+                "clients": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dashboard.CoordinatorClientDTO"
+                    }
+                }
+            }
+        },
+        "dashboard.CoordinatorGoalsProgressDTO": {
+            "type": "object",
+            "properties": {
+                "achieved": {
+                    "type": "integer"
+                },
+                "delayed": {
+                    "type": "integer"
+                },
+                "notStarted": {
+                    "type": "integer"
+                },
+                "onTrack": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dashboard.CoordinatorIncidentDTO": {
+            "type": "object",
+            "properties": {
+                "client": {
+                    "type": "string"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "severity": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "dashboard.CoordinatorIncidentsDTO": {
+            "type": "object",
+            "properties": {
+                "incidents": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dashboard.CoordinatorIncidentDTO"
+                    }
+                }
+            }
+        },
+        "dashboard.CoordinatorRemindersDTO": {
+            "type": "object",
+            "properties": {
+                "reminders": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dashboard.ReminderDTO"
+                    }
+                }
+            }
+        },
+        "dashboard.CoordinatorScheduleItemDTO": {
+            "type": "object",
+            "properties": {
+                "clientId": {
+                    "type": "string"
+                },
+                "clientName": {
+                    "type": "string"
+                },
+                "endTime": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "locationId": {
+                    "type": "string"
+                },
+                "locationName": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "time": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "dashboard.CoordinatorStatsDTO": {
+            "type": "object",
+            "properties": {
+                "myActiveClients": {
+                    "type": "integer"
+                },
+                "myPendingIntakes": {
+                    "type": "integer"
+                },
+                "myUpcomingEvaluations": {
+                    "type": "integer"
+                },
+                "myWaitingListClients": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dashboard.CoordinatorTodayScheduleDTO": {
+            "type": "object",
+            "properties": {
+                "appointments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dashboard.CoordinatorScheduleItemDTO"
+                    }
+                },
+                "count": {
+                    "type": "integer"
+                },
+                "date": {
+                    "type": "string"
+                }
+            }
+        },
+        "dashboard.CoordinatorUrgentAlertDTO": {
+            "type": "object",
+            "properties": {
+                "clientIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "count": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "link": {
+                    "type": "string"
+                },
+                "severity": {
+                    "$ref": "#/definitions/dashboard.CoordinatorAlertSeverity"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/dashboard.CoordinatorAlertType"
+                }
+            }
+        },
+        "dashboard.CoordinatorUrgentAlertsDTO": {
+            "type": "object",
+            "properties": {
+                "alerts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dashboard.CoordinatorUrgentAlertDTO"
+                    }
+                }
+            }
+        },
         "dashboard.CriticalAlertsDTO": {
             "type": "object",
             "properties": {
@@ -6563,6 +7034,26 @@
                 },
                 "waitingList": {
                     "type": "integer"
+                }
+            }
+        },
+        "dashboard.ReminderDTO": {
+            "type": "object",
+            "properties": {
+                "client": {
+                    "type": "string"
+                },
+                "dueDate": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "priority": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         },
@@ -9529,6 +10020,118 @@
             "properties": {
                 "data": {
                     "$ref": "#/definitions/dashboard.CareTypeDistributionDTO"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-dashboard_CoordinatorClientsDTO": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/dashboard.CoordinatorClientsDTO"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-dashboard_CoordinatorGoalsProgressDTO": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/dashboard.CoordinatorGoalsProgressDTO"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-dashboard_CoordinatorIncidentsDTO": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/dashboard.CoordinatorIncidentsDTO"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-dashboard_CoordinatorRemindersDTO": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/dashboard.CoordinatorRemindersDTO"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-dashboard_CoordinatorStatsDTO": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/dashboard.CoordinatorStatsDTO"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-dashboard_CoordinatorTodayScheduleDTO": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/dashboard.CoordinatorTodayScheduleDTO"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-dashboard_CoordinatorUrgentAlertsDTO": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/dashboard.CoordinatorUrgentAlertsDTO"
                 },
                 "message": {
                     "type": "string",

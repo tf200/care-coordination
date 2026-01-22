@@ -40,6 +40,11 @@ func (h *DashboardHandler) SetupDashboardRoutes(router *gin.Engine) {
 	coordinator := dashboard.Group("/coordinator")
 	coordinator.GET("/urgent-alerts", h.mdw.AuthMdw(), h.GetCoordinatorUrgentAlerts)
 	coordinator.GET("/today-schedule", h.mdw.AuthMdw(), h.GetCoordinatorTodaySchedule)
+	coordinator.GET("/stats", h.mdw.AuthMdw(), h.GetCoordinatorStats)
+	coordinator.GET("/reminders", h.mdw.AuthMdw(), h.GetCoordinatorReminders)
+	coordinator.GET("/clients", h.mdw.AuthMdw(), h.GetCoordinatorClients)
+	coordinator.GET("/goals-progress", h.mdw.AuthMdw(), h.GetCoordinatorGoalsProgress)
+	coordinator.GET("/incidents", h.mdw.AuthMdw(), h.GetCoordinatorIncidents)
 }
 
 // @Summary Get dashboard overview stats
@@ -289,4 +294,144 @@ func (h *DashboardHandler) GetCoordinatorTodaySchedule(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, resp.Success(schedule, "Coordinator today schedule retrieved successfully"))
+}
+
+// @Summary Get coordinator personal stats
+// @Description Get personal statistics for the coordinator's dashboard summary
+// @Tags Dashboard - Coordinator
+// @Produce json
+// @Success 200 {object} resp.SuccessResponse[CoordinatorStatsDTO]
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /dashboard/coordinator/stats [get]
+func (h *DashboardHandler) GetCoordinatorStats(ctx *gin.Context) {
+	employeeID, exists := ctx.Get(middleware.EmployeeIDKey)
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, resp.Error(ErrInternal))
+		return
+	}
+
+	stats, err := h.dashboardService.GetCoordinatorStats(ctx, employeeID.(string))
+	if err != nil {
+		switch err {
+		case ErrInternal:
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
+		default:
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
+		}
+		return
+	}
+	ctx.JSON(http.StatusOK, resp.Success(stats, "Coordinator stats retrieved successfully"))
+}
+
+// @Summary Get coordinator reminders
+// @Description Get pending reminders and tasks for the coordinator
+// @Tags Dashboard - Coordinator
+// @Produce json
+// @Success 200 {object} resp.SuccessResponse[CoordinatorRemindersDTO]
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /dashboard/coordinator/reminders [get]
+func (h *DashboardHandler) GetCoordinatorReminders(ctx *gin.Context) {
+	employeeID, exists := ctx.Get(middleware.EmployeeIDKey)
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, resp.Error(ErrInternal))
+		return
+	}
+
+	reminders, err := h.dashboardService.GetCoordinatorReminders(ctx, employeeID.(string))
+	if err != nil {
+		switch err {
+		case ErrInternal:
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
+		default:
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
+		}
+		return
+	}
+	ctx.JSON(http.StatusOK, resp.Success(reminders, "Coordinator reminders retrieved successfully"))
+}
+
+// @Summary Get coordinator clients
+// @Description Get list of clients assigned to this coordinator
+// @Tags Dashboard - Coordinator
+// @Produce json
+// @Success 200 {object} resp.SuccessResponse[CoordinatorClientsDTO]
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /dashboard/coordinator/clients [get]
+func (h *DashboardHandler) GetCoordinatorClients(ctx *gin.Context) {
+	employeeID, exists := ctx.Get(middleware.EmployeeIDKey)
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, resp.Error(ErrInternal))
+		return
+	}
+
+	clients, err := h.dashboardService.GetCoordinatorClients(ctx, employeeID.(string))
+	if err != nil {
+		switch err {
+		case ErrInternal:
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
+		default:
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
+		}
+		return
+	}
+	ctx.JSON(http.StatusOK, resp.Success(clients, "Coordinator clients retrieved successfully"))
+}
+
+// @Summary Get coordinator goals progress
+// @Description Get aggregated goals progress for all coordinator's clients
+// @Tags Dashboard - Coordinator
+// @Produce json
+// @Success 200 {object} resp.SuccessResponse[CoordinatorGoalsProgressDTO]
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /dashboard/coordinator/goals-progress [get]
+func (h *DashboardHandler) GetCoordinatorGoalsProgress(ctx *gin.Context) {
+	employeeID, exists := ctx.Get(middleware.EmployeeIDKey)
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, resp.Error(ErrInternal))
+		return
+	}
+
+	progress, err := h.dashboardService.GetCoordinatorGoalsProgress(ctx, employeeID.(string))
+	if err != nil {
+		switch err {
+		case ErrInternal:
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
+		default:
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
+		}
+		return
+	}
+	ctx.JSON(http.StatusOK, resp.Success(progress, "Coordinator goals progress retrieved successfully"))
+}
+
+// @Summary Get coordinator incidents
+// @Description Get incidents for coordinator's assigned clients
+// @Tags Dashboard - Coordinator
+// @Produce json
+// @Success 200 {object} resp.SuccessResponse[CoordinatorIncidentsDTO]
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /dashboard/coordinator/incidents [get]
+func (h *DashboardHandler) GetCoordinatorIncidents(ctx *gin.Context) {
+	employeeID, exists := ctx.Get(middleware.EmployeeIDKey)
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, resp.Error(ErrInternal))
+		return
+	}
+
+	incidents, err := h.dashboardService.GetCoordinatorIncidents(ctx, employeeID.(string))
+	if err != nil {
+		switch err {
+		case ErrInternal:
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
+		default:
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
+		}
+		return
+	}
+	ctx.JSON(http.StatusOK, resp.Success(incidents, "Coordinator incidents retrieved successfully"))
 }

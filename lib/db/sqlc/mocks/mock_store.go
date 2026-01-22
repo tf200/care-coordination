@@ -865,6 +865,21 @@ func (mr *MockStoreInterfaceMockRecorder) GetCoordinatorOverdueEvaluationClients
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCoordinatorOverdueEvaluationClients", reflect.TypeOf((*MockStoreInterface)(nil).GetCoordinatorOverdueEvaluationClients), ctx, coordinatorID)
 }
 
+// GetCoordinatorTodaySchedule mocks base method.
+func (m *MockStoreInterface) GetCoordinatorTodaySchedule(ctx context.Context, organizerID string) ([]db.GetCoordinatorTodayScheduleRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCoordinatorTodaySchedule", ctx, organizerID)
+	ret0, _ := ret[0].([]db.GetCoordinatorTodayScheduleRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCoordinatorTodaySchedule indicates an expected call of GetCoordinatorTodaySchedule.
+func (mr *MockStoreInterfaceMockRecorder) GetCoordinatorTodaySchedule(ctx, organizerID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCoordinatorTodaySchedule", reflect.TypeOf((*MockStoreInterface)(nil).GetCoordinatorTodaySchedule), ctx, organizerID)
+}
+
 // GetCoordinatorUnresolvedIncidentClients mocks base method.
 func (m *MockStoreInterface) GetCoordinatorUnresolvedIncidentClients(ctx context.Context, coordinatorID string) ([]db.GetCoordinatorUnresolvedIncidentClientsRow, error) {
 	m.ctrl.T.Helper()

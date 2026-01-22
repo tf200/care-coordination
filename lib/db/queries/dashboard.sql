@@ -161,7 +161,7 @@ SELECT
     (SELECT COUNT(*) FROM clients 
      WHERE status = 'discharged' 
      AND reason_for_discharge IS NOT NULL 
-     AND reason_for_discharge != '')::bigint as planned_discharges,
+     )::bigint as planned_discharges,
     -- Average days in care (from care_start_date to discharge_date)
     COALESCE((SELECT AVG(EXTRACT(DAY FROM (discharge_date - care_start_date)))::bigint 
      FROM clients 

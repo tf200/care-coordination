@@ -20,5 +20,5 @@ type CalendarService interface {
 	DeleteReminder(ctx context.Context, id string) error
 	ListReminders(ctx context.Context, userID string) ([]ReminderResponse, error)
 
-	GetCalendarView(ctx context.Context, userID string, startTime, endTime time.Time) ([]CalendarEventDTO, error)
+	GetCalendarView(ctx context.Context, userID string, startTime, endTime time.Time) ([]CalendarEvent, error)
 }

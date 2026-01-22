@@ -42,10 +42,10 @@ func (m *MockDashboardService) EXPECT() *MockDashboardServiceMockRecorder {
 }
 
 // GetCareTypeDistribution mocks base method.
-func (m *MockDashboardService) GetCareTypeDistribution(ctx context.Context) (*dashboard.CareTypeDistributionDTO, error) {
+func (m *MockDashboardService) GetCareTypeDistribution(ctx context.Context) (*dashboard.CareTypeDistributionResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCareTypeDistribution", ctx)
-	ret0, _ := ret[0].(*dashboard.CareTypeDistributionDTO)
+	ret0, _ := ret[0].(*dashboard.CareTypeDistributionResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -57,10 +57,10 @@ func (mr *MockDashboardServiceMockRecorder) GetCareTypeDistribution(ctx any) *go
 }
 
 // GetCoordinatorClients mocks base method.
-func (m *MockDashboardService) GetCoordinatorClients(ctx context.Context, employeeID string) (*dashboard.CoordinatorClientsDTO, error) {
+func (m *MockDashboardService) GetCoordinatorClients(ctx context.Context, employeeID string) (*dashboard.CoordinatorClientsResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCoordinatorClients", ctx, employeeID)
-	ret0, _ := ret[0].(*dashboard.CoordinatorClientsDTO)
+	ret0, _ := ret[0].(*dashboard.CoordinatorClientsResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -72,10 +72,10 @@ func (mr *MockDashboardServiceMockRecorder) GetCoordinatorClients(ctx, employeeI
 }
 
 // GetCoordinatorGoalsProgress mocks base method.
-func (m *MockDashboardService) GetCoordinatorGoalsProgress(ctx context.Context, employeeID string) (*dashboard.CoordinatorGoalsProgressDTO, error) {
+func (m *MockDashboardService) GetCoordinatorGoalsProgress(ctx context.Context, employeeID string) (*dashboard.CoordinatorGoalsProgressResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCoordinatorGoalsProgress", ctx, employeeID)
-	ret0, _ := ret[0].(*dashboard.CoordinatorGoalsProgressDTO)
+	ret0, _ := ret[0].(*dashboard.CoordinatorGoalsProgressResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -87,10 +87,10 @@ func (mr *MockDashboardServiceMockRecorder) GetCoordinatorGoalsProgress(ctx, emp
 }
 
 // GetCoordinatorIncidents mocks base method.
-func (m *MockDashboardService) GetCoordinatorIncidents(ctx context.Context, employeeID string) (*dashboard.CoordinatorIncidentsDTO, error) {
+func (m *MockDashboardService) GetCoordinatorIncidents(ctx context.Context, employeeID string) (*dashboard.CoordinatorIncidentsResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCoordinatorIncidents", ctx, employeeID)
-	ret0, _ := ret[0].(*dashboard.CoordinatorIncidentsDTO)
+	ret0, _ := ret[0].(*dashboard.CoordinatorIncidentsResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -102,10 +102,10 @@ func (mr *MockDashboardServiceMockRecorder) GetCoordinatorIncidents(ctx, employe
 }
 
 // GetCoordinatorReminders mocks base method.
-func (m *MockDashboardService) GetCoordinatorReminders(ctx context.Context, employeeID string) (*dashboard.CoordinatorRemindersDTO, error) {
+func (m *MockDashboardService) GetCoordinatorReminders(ctx context.Context, employeeID string) (*dashboard.CoordinatorRemindersResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCoordinatorReminders", ctx, employeeID)
-	ret0, _ := ret[0].(*dashboard.CoordinatorRemindersDTO)
+	ret0, _ := ret[0].(*dashboard.CoordinatorRemindersResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -117,10 +117,10 @@ func (mr *MockDashboardServiceMockRecorder) GetCoordinatorReminders(ctx, employe
 }
 
 // GetCoordinatorStats mocks base method.
-func (m *MockDashboardService) GetCoordinatorStats(ctx context.Context, employeeID string) (*dashboard.CoordinatorStatsDTO, error) {
+func (m *MockDashboardService) GetCoordinatorStats(ctx context.Context, employeeID string) (*dashboard.CoordinatorStatsResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCoordinatorStats", ctx, employeeID)
-	ret0, _ := ret[0].(*dashboard.CoordinatorStatsDTO)
+	ret0, _ := ret[0].(*dashboard.CoordinatorStatsResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -132,10 +132,10 @@ func (mr *MockDashboardServiceMockRecorder) GetCoordinatorStats(ctx, employeeID 
 }
 
 // GetCoordinatorTodaySchedule mocks base method.
-func (m *MockDashboardService) GetCoordinatorTodaySchedule(ctx context.Context, employeeID string) (*dashboard.CoordinatorTodayScheduleDTO, error) {
+func (m *MockDashboardService) GetCoordinatorTodaySchedule(ctx context.Context, employeeID string) (*dashboard.CoordinatorTodayScheduleResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCoordinatorTodaySchedule", ctx, employeeID)
-	ret0, _ := ret[0].(*dashboard.CoordinatorTodayScheduleDTO)
+	ret0, _ := ret[0].(*dashboard.CoordinatorTodayScheduleResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -147,10 +147,10 @@ func (mr *MockDashboardServiceMockRecorder) GetCoordinatorTodaySchedule(ctx, emp
 }
 
 // GetCoordinatorUrgentAlerts mocks base method.
-func (m *MockDashboardService) GetCoordinatorUrgentAlerts(ctx context.Context, employeeID string) (*dashboard.CoordinatorUrgentAlertsDTO, error) {
+func (m *MockDashboardService) GetCoordinatorUrgentAlerts(ctx context.Context, employeeID string) (*dashboard.CoordinatorUrgentAlertsResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCoordinatorUrgentAlerts", ctx, employeeID)
-	ret0, _ := ret[0].(*dashboard.CoordinatorUrgentAlertsDTO)
+	ret0, _ := ret[0].(*dashboard.CoordinatorUrgentAlertsResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -162,10 +162,10 @@ func (mr *MockDashboardServiceMockRecorder) GetCoordinatorUrgentAlerts(ctx, empl
 }
 
 // GetCriticalAlerts mocks base method.
-func (m *MockDashboardService) GetCriticalAlerts(ctx context.Context) (*dashboard.CriticalAlertsDTO, error) {
+func (m *MockDashboardService) GetCriticalAlerts(ctx context.Context) (*dashboard.CriticalAlertsResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCriticalAlerts", ctx)
-	ret0, _ := ret[0].(*dashboard.CriticalAlertsDTO)
+	ret0, _ := ret[0].(*dashboard.CriticalAlertsResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -177,10 +177,10 @@ func (mr *MockDashboardServiceMockRecorder) GetCriticalAlerts(ctx any) *gomock.C
 }
 
 // GetDischargeStats mocks base method.
-func (m *MockDashboardService) GetDischargeStats(ctx context.Context) (*dashboard.DischargeStatsDTO, error) {
+func (m *MockDashboardService) GetDischargeStats(ctx context.Context) (*dashboard.DischargeStatsResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetDischargeStats", ctx)
-	ret0, _ := ret[0].(*dashboard.DischargeStatsDTO)
+	ret0, _ := ret[0].(*dashboard.DischargeStatsResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -192,10 +192,10 @@ func (mr *MockDashboardServiceMockRecorder) GetDischargeStats(ctx any) *gomock.C
 }
 
 // GetEvaluationStats mocks base method.
-func (m *MockDashboardService) GetEvaluationStats(ctx context.Context) (*dashboard.EvaluationStatsDTO, error) {
+func (m *MockDashboardService) GetEvaluationStats(ctx context.Context) (*dashboard.EvaluationStatsResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetEvaluationStats", ctx)
-	ret0, _ := ret[0].(*dashboard.EvaluationStatsDTO)
+	ret0, _ := ret[0].(*dashboard.EvaluationStatsResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -207,10 +207,10 @@ func (mr *MockDashboardServiceMockRecorder) GetEvaluationStats(ctx any) *gomock.
 }
 
 // GetLocationCapacity mocks base method.
-func (m *MockDashboardService) GetLocationCapacity(ctx context.Context, req *dashboard.LocationCapacityRequest) (*dashboard.LocationCapacityDTO, error) {
+func (m *MockDashboardService) GetLocationCapacity(ctx context.Context, req *dashboard.LocationCapacityRequest) (*dashboard.LocationCapacityResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetLocationCapacity", ctx, req)
-	ret0, _ := ret[0].(*dashboard.LocationCapacityDTO)
+	ret0, _ := ret[0].(*dashboard.LocationCapacityResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -222,10 +222,10 @@ func (mr *MockDashboardServiceMockRecorder) GetLocationCapacity(ctx, req any) *g
 }
 
 // GetOverviewStats mocks base method.
-func (m *MockDashboardService) GetOverviewStats(ctx context.Context) (*dashboard.OverviewDTO, error) {
+func (m *MockDashboardService) GetOverviewStats(ctx context.Context) (*dashboard.OverviewResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetOverviewStats", ctx)
-	ret0, _ := ret[0].(*dashboard.OverviewDTO)
+	ret0, _ := ret[0].(*dashboard.OverviewResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -237,10 +237,10 @@ func (mr *MockDashboardServiceMockRecorder) GetOverviewStats(ctx any) *gomock.Ca
 }
 
 // GetPipelineStats mocks base method.
-func (m *MockDashboardService) GetPipelineStats(ctx context.Context) (*dashboard.PipelineStatsDTO, error) {
+func (m *MockDashboardService) GetPipelineStats(ctx context.Context) (*dashboard.PipelineStatsResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetPipelineStats", ctx)
-	ret0, _ := ret[0].(*dashboard.PipelineStatsDTO)
+	ret0, _ := ret[0].(*dashboard.PipelineStatsResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -252,10 +252,10 @@ func (mr *MockDashboardServiceMockRecorder) GetPipelineStats(ctx any) *gomock.Ca
 }
 
 // GetTodayAppointments mocks base method.
-func (m *MockDashboardService) GetTodayAppointments(ctx context.Context, employeeID string) (*dashboard.TodayAppointmentsDTO, error) {
+func (m *MockDashboardService) GetTodayAppointments(ctx context.Context, employeeID string) (*dashboard.TodayAppointmentsResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTodayAppointments", ctx, employeeID)
-	ret0, _ := ret[0].(*dashboard.TodayAppointmentsDTO)
+	ret0, _ := ret[0].(*dashboard.TodayAppointmentsResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

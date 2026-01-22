@@ -5,6 +5,8 @@ import (
 	"care-cordination/lib/logger"
 	"context"
 	"fmt"
+	"strings"
+	"time"
 
 	"go.uber.org/zap"
 )
@@ -393,5 +395,193 @@ func (s *dashboardService) GetDischargeStats(ctx context.Context) (*DischargeSta
 		ThisYear:          int(stats.ThisYear),
 		PlannedRate:       plannedRate,
 		AverageDaysInCare: int(stats.AvgDaysInCare),
+	}, nil
+}
+
+// Coordinator Dashboard Methods
+
+func (s *dashboardService) GetCoordinatorUrgentAlerts(ctx context.Context, employeeID string) (*CoordinatorUrgentAlertsDTO, error) {
+	// Get counts
+	data, err := s.db.GetCoordinatorUrgentAlertsData(ctx, employeeID)
+	if err != nil {
+		s.logger.Error(ctx, "GetCoordinatorUrgentAlerts", "Failed to get coordinator urgent alerts data", zap.Error(err))
+		return nil, ErrInternal
+	}
+
+	alerts := []CoordinatorUrgentAlertDTO{}
+
+	// Overdue evaluations (critical)
+	if data.OverdueEvaluations > 0 {
+		clients, _ := s.db.GetCoordinatorOverdueEvaluationClients(ctx, employeeID)
+		clientIDs, description := s.buildClientInfo(clients)
+		alerts = append(alerts, CoordinatorUrgentAlertDTO{
+			ID:          "alert-evaluation",
+			Type:        CoordinatorAlertTypeEvaluation,
+			Title:       fmt.Sprintf("%d evaluaties achterstallig", data.OverdueEvaluations),
+			Description: description,
+			Severity:    CoordinatorAlertSeverityCritical,
+			Count:       int(data.OverdueEvaluations),
+			ClientIDs:   clientIDs,
+			Link:        "/evaluaties",
+		})
+	}
+
+	// Expiring contracts (warning)
+	if data.ExpiringContracts > 0 {
+		clients, _ := s.db.GetCoordinatorExpiringContractClients(ctx, employeeID)
+		clientIDs, description := s.buildClientInfo(clients)
+		alerts = append(alerts, CoordinatorUrgentAlertDTO{
+			ID:          "alert-contract",
+			Type:        CoordinatorAlertTypeContract,
+			Title:       fmt.Sprintf("Contract verloopt binnen 7 dagen (%d)", data.ExpiringContracts),
+			Description: description,
+			Severity:    CoordinatorAlertSeverityWarning,
+			Count:       int(data.ExpiringContracts),
+			ClientIDs:   clientIDs,
+			Link:        "/inzorg",
+		})
+	}
+
+	// Draft evaluations (info)
+	if data.DraftEvaluations > 0 {
+		clients, _ := s.db.GetCoordinatorDraftEvaluationClients(ctx, employeeID)
+		clientIDs, description := s.buildClientInfo(clients)
+		alerts = append(alerts, CoordinatorUrgentAlertDTO{
+			ID:          "alert-draft",
+			Type:        CoordinatorAlertTypeDraft,
+			Title:       fmt.Sprintf("%d concept evaluatie niet afgerond", data.DraftEvaluations),
+			Description: description,
+			Severity:    CoordinatorAlertSeverityInfo,
+			Count:       int(data.DraftEvaluations),
+			ClientIDs:   clientIDs,
+			Link:        "/evaluaties",
+		})
+	}
+
+	// Unresolved incidents (warning)
+	if data.UnresolvedIncidents > 0 {
+		clients, _ := s.db.GetCoordinatorUnresolvedIncidentClients(ctx, employeeID)
+		clientIDs, description := s.buildClientInfo(clients)
+		alerts = append(alerts, CoordinatorUrgentAlertDTO{
+			ID:          "alert-incident",
+			Type:        CoordinatorAlertTypeIncident,
+			Title:       fmt.Sprintf("%d onopgeloste incidenten", data.UnresolvedIncidents),
+			Description: description,
+			Severity:    CoordinatorAlertSeverityWarning,
+			Count:       int(data.UnresolvedIncidents),
+			ClientIDs:   clientIDs,
+			Link:        "/incidenten",
+		})
+	}
+
+	// Long waiting clients (warning)
+	if data.LongWaiting > 0 {
+		clients, _ := s.db.GetCoordinatorLongWaitingClients(ctx, employeeID)
+		clientIDs, description := s.buildClientInfo(clients)
+		alerts = append(alerts, CoordinatorUrgentAlertDTO{
+			ID:          "alert-waiting",
+			Type:        CoordinatorAlertTypeWaitingLong,
+			Title:       fmt.Sprintf("%d wachtlijst cliënten > 60 dagen", data.LongWaiting),
+			Description: description,
+			Severity:    CoordinatorAlertSeverityWarning,
+			Count:       int(data.LongWaiting),
+			ClientIDs:   clientIDs,
+			Link:        "/wachtlijst",
+		})
+	}
+
+	return &CoordinatorUrgentAlertsDTO{Alerts: alerts}, nil
+}
+
+type clientInfo interface {
+	GetID() string
+	GetFirstName() string
+	GetLastName() string
+}
+
+func (s *dashboardService) buildClientInfo(clients any) ([]string, string) {
+	clientIDs := []string{}
+	names := []string{}
+
+	switch v := clients.(type) {
+	case []db.GetCoordinatorOverdueEvaluationClientsRow:
+		for _, c := range v {
+			clientIDs = append(clientIDs, c.ID)
+			names = append(names, c.FirstName+" "+c.LastName)
+		}
+	case []db.GetCoordinatorExpiringContractClientsRow:
+		for _, c := range v {
+			clientIDs = append(clientIDs, c.ID)
+			names = append(names, c.FirstName+" "+c.LastName)
+		}
+	case []db.GetCoordinatorDraftEvaluationClientsRow:
+		for _, c := range v {
+			clientIDs = append(clientIDs, c.ID)
+			names = append(names, c.FirstName+" "+c.LastName)
+		}
+	case []db.GetCoordinatorUnresolvedIncidentClientsRow:
+		for _, c := range v {
+			clientIDs = append(clientIDs, c.ID)
+			names = append(names, c.FirstName+" "+c.LastName)
+		}
+	case []db.GetCoordinatorLongWaitingClientsRow:
+		for _, c := range v {
+			clientIDs = append(clientIDs, c.ID)
+			names = append(names, c.FirstName+" "+c.LastName)
+		}
+	}
+
+	description := ""
+	if len(names) > 0 {
+		if len(names) <= 3 {
+			description = strings.Join(names, ", ")
+		} else {
+			description = strings.Join(names[:3], ", ") + fmt.Sprintf(" +%d meer", len(names)-3)
+		}
+	}
+
+	return clientIDs, description
+}
+
+func (s *dashboardService) GetCoordinatorTodaySchedule(ctx context.Context, employeeID string) (*CoordinatorTodayScheduleDTO, error) {
+	appointments, err := s.db.GetCoordinatorTodaySchedule(ctx, employeeID)
+	if err != nil {
+		s.logger.Error(ctx, "GetCoordinatorTodaySchedule", "Failed to get coordinator today schedule", zap.Error(err))
+		return nil, ErrInternal
+	}
+
+	now := time.Now()
+	today := now.Format("2006-01-02")
+	items := make([]CoordinatorScheduleItemDTO, len(appointments))
+
+	for i, apt := range appointments {
+		// Determine status based on time
+		status := "upcoming"
+		if apt.Status.Valid {
+			status = string(apt.Status.AppointmentStatusEnum)
+		}
+		if apt.EndTime.Time.Before(now) {
+			status = "completed"
+		} else if apt.StartTime.Time.Before(now) && apt.EndTime.Time.After(now) {
+			status = "in_progress"
+		}
+
+		items[i] = CoordinatorScheduleItemDTO{
+			ID:           apt.ID,
+			Time:         apt.StartTime.Time.Format("15:04"),
+			EndTime:      apt.EndTime.Time.Format("15:04"),
+			Type:         string(apt.Type),
+			ClientID:     apt.ClientID,
+			ClientName:   apt.ClientName,
+			LocationID:   apt.LocationID,
+			LocationName: apt.LocationName,
+			Status:       status,
+		}
+	}
+
+	return &CoordinatorTodayScheduleDTO{
+		Date:         today,
+		Appointments: items,
+		Count:        len(items),
 	}, nil
 }

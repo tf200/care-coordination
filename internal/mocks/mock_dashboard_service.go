@@ -56,6 +56,21 @@ func (mr *MockDashboardServiceMockRecorder) GetCareTypeDistribution(ctx any) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCareTypeDistribution", reflect.TypeOf((*MockDashboardService)(nil).GetCareTypeDistribution), ctx)
 }
 
+// GetCoordinatorUrgentAlerts mocks base method.
+func (m *MockDashboardService) GetCoordinatorUrgentAlerts(ctx context.Context, employeeID string) (*dashboard.CoordinatorUrgentAlertsDTO, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCoordinatorUrgentAlerts", ctx, employeeID)
+	ret0, _ := ret[0].(*dashboard.CoordinatorUrgentAlertsDTO)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCoordinatorUrgentAlerts indicates an expected call of GetCoordinatorUrgentAlerts.
+func (mr *MockDashboardServiceMockRecorder) GetCoordinatorUrgentAlerts(ctx, employeeID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCoordinatorUrgentAlerts", reflect.TypeOf((*MockDashboardService)(nil).GetCoordinatorUrgentAlerts), ctx, employeeID)
+}
+
 // GetCriticalAlerts mocks base method.
 func (m *MockDashboardService) GetCriticalAlerts(ctx context.Context) (*dashboard.CriticalAlertsDTO, error) {
 	m.ctrl.T.Helper()

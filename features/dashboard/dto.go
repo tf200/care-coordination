@@ -118,3 +118,56 @@ type DischargeStatsDTO struct {
 	PlannedRate       int `json:"plannedRate"`
 	AverageDaysInCare int `json:"averageDaysInCare"`
 }
+
+// Coordinator Dashboard DTOs
+
+type CoordinatorAlertSeverity string
+
+const (
+	CoordinatorAlertSeverityCritical CoordinatorAlertSeverity = "critical"
+	CoordinatorAlertSeverityWarning  CoordinatorAlertSeverity = "warning"
+	CoordinatorAlertSeverityInfo     CoordinatorAlertSeverity = "info"
+)
+
+type CoordinatorAlertType string
+
+const (
+	CoordinatorAlertTypeEvaluation  CoordinatorAlertType = "evaluation"
+	CoordinatorAlertTypeContract    CoordinatorAlertType = "contract"
+	CoordinatorAlertTypeDraft       CoordinatorAlertType = "draft"
+	CoordinatorAlertTypeIncident    CoordinatorAlertType = "incident"
+	CoordinatorAlertTypeWaitingLong CoordinatorAlertType = "waiting_long"
+)
+
+type CoordinatorUrgentAlertDTO struct {
+	ID          string                   `json:"id"`
+	Type        CoordinatorAlertType     `json:"type"`
+	Title       string                   `json:"title"`
+	Description string                   `json:"description"`
+	Severity    CoordinatorAlertSeverity `json:"severity"`
+	Count       int                      `json:"count"`
+	ClientIDs   []string                 `json:"clientIds"`
+	Link        string                   `json:"link"`
+}
+
+type CoordinatorUrgentAlertsDTO struct {
+	Alerts []CoordinatorUrgentAlertDTO `json:"alerts"`
+}
+
+type CoordinatorScheduleItemDTO struct {
+	ID           string `json:"id"`
+	Time         string `json:"time"`
+	EndTime      string `json:"endTime"`
+	Type         string `json:"type"`
+	ClientID     string `json:"clientId,omitempty"`
+	ClientName   string `json:"clientName"`
+	LocationID   string `json:"locationId,omitempty"`
+	LocationName string `json:"locationName"`
+	Status       string `json:"status"`
+}
+
+type CoordinatorTodayScheduleDTO struct {
+	Date         string                       `json:"date"`
+	Appointments []CoordinatorScheduleItemDTO `json:"appointments"`
+	Count        int                          `json:"count"`
+}

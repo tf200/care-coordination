@@ -95,7 +95,17 @@ type Querier interface {
 	GetCareTypeDistribution(ctx context.Context) (GetCareTypeDistributionRow, error)
 	GetClientByID(ctx context.Context, id string) (Client, error)
 	GetClientEvaluationHistory(ctx context.Context, clientID string) ([]GetClientEvaluationHistoryRow, error)
+	GetCoordinatorDraftEvaluationClients(ctx context.Context, coordinatorID string) ([]GetCoordinatorDraftEvaluationClientsRow, error)
 	GetCoordinatorDrafts(ctx context.Context, arg GetCoordinatorDraftsParams) ([]GetCoordinatorDraftsRow, error)
+	GetCoordinatorExpiringContractClients(ctx context.Context, coordinatorID string) ([]GetCoordinatorExpiringContractClientsRow, error)
+	GetCoordinatorLongWaitingClients(ctx context.Context, coordinatorID string) ([]GetCoordinatorLongWaitingClientsRow, error)
+	GetCoordinatorOverdueEvaluationClients(ctx context.Context, coordinatorID string) ([]GetCoordinatorOverdueEvaluationClientsRow, error)
+	GetCoordinatorTodaySchedule(ctx context.Context, organizerID string) ([]GetCoordinatorTodayScheduleRow, error)
+	GetCoordinatorUnresolvedIncidentClients(ctx context.Context, coordinatorID string) ([]GetCoordinatorUnresolvedIncidentClientsRow, error)
+	// ============================================================
+	// Coordinator Dashboard
+	// ============================================================
+	GetCoordinatorUrgentAlertsData(ctx context.Context, coordinatorID string) (GetCoordinatorUrgentAlertsDataRow, error)
 	GetCriticalAlertsData(ctx context.Context) (GetCriticalAlertsDataRow, error)
 	GetCriticalEvaluations(ctx context.Context, arg GetCriticalEvaluationsParams) ([]GetCriticalEvaluationsRow, error)
 	GetDashboardDischargeStats(ctx context.Context) (GetDashboardDischargeStatsRow, error)

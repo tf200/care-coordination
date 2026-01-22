@@ -26,6 +26,7 @@ func NewDashboardHandler(
 func (h *DashboardHandler) SetupDashboardRoutes(router *gin.Engine) {
 	dashboard := router.Group("/dashboard")
 
+	// Admin Dashboard
 	dashboard.GET("/overview-stats", h.mdw.AuthMdw(), h.GetOverviewStats)
 	dashboard.GET("/critical-alerts", h.mdw.AuthMdw(), h.GetCriticalAlerts)
 	dashboard.GET("/pipeline-stats", h.mdw.AuthMdw(), h.GetPipelineStats)
@@ -34,6 +35,11 @@ func (h *DashboardHandler) SetupDashboardRoutes(router *gin.Engine) {
 	dashboard.GET("/today-appointments", h.mdw.AuthMdw(), h.GetTodayAppointments)
 	dashboard.GET("/evaluation-stats", h.mdw.AuthMdw(), h.GetEvaluationStats)
 	dashboard.GET("/discharge-stats", h.mdw.AuthMdw(), h.GetDischargeStats)
+
+	// Coordinator Dashboard
+	coordinator := dashboard.Group("/coordinator")
+	coordinator.GET("/urgent-alerts", h.mdw.AuthMdw(), h.GetCoordinatorUrgentAlerts)
+	coordinator.GET("/today-schedule", h.mdw.AuthMdw(), h.GetCoordinatorTodaySchedule)
 }
 
 // @Summary Get dashboard overview stats
@@ -225,4 +231,62 @@ func (h *DashboardHandler) GetDischargeStats(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, resp.Success(stats, "Discharge stats retrieved successfully"))
+}
+
+// Coordinator Dashboard Handlers
+
+// @Summary Get coordinator urgent alerts
+// @Description Get urgent alerts for the logged-in coordinator's clients
+// @Tags Dashboard - Coordinator
+// @Produce json
+// @Success 200 {object} resp.SuccessResponse[CoordinatorUrgentAlertsDTO]
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /dashboard/coordinator/urgent-alerts [get]
+func (h *DashboardHandler) GetCoordinatorUrgentAlerts(ctx *gin.Context) {
+	employeeID, exists := ctx.Get(middleware.EmployeeIDKey)
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, resp.Error(ErrInternal))
+		return
+	}
+
+	alerts, err := h.dashboardService.GetCoordinatorUrgentAlerts(ctx, employeeID.(string))
+	if err != nil {
+		switch err {
+		case ErrInternal:
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
+		default:
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
+		}
+		return
+	}
+	ctx.JSON(http.StatusOK, resp.Success(alerts, "Coordinator urgent alerts retrieved successfully"))
+}
+
+// @Summary Get coordinator today schedule
+// @Description Get today's schedule for the logged-in coordinator
+// @Tags Dashboard - Coordinator
+// @Produce json
+// @Success 200 {object} resp.SuccessResponse[CoordinatorTodayScheduleDTO]
+// @Failure 401 {object} resp.ErrorResponse
+// @Failure 500 {object} resp.ErrorResponse
+// @Router /dashboard/coordinator/today-schedule [get]
+func (h *DashboardHandler) GetCoordinatorTodaySchedule(ctx *gin.Context) {
+	employeeID, exists := ctx.Get(middleware.EmployeeIDKey)
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, resp.Error(ErrInternal))
+		return
+	}
+
+	schedule, err := h.dashboardService.GetCoordinatorTodaySchedule(ctx, employeeID.(string))
+	if err != nil {
+		switch err {
+		case ErrInternal:
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
+		default:
+			ctx.JSON(http.StatusInternalServerError, resp.Error(err))
+		}
+		return
+	}
+	ctx.JSON(http.StatusOK, resp.Success(schedule, "Coordinator today schedule retrieved successfully"))
 }

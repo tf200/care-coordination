@@ -1,7 +1,7 @@
 package locTransfer
 
 import (
-	"care-cordination/features/middleware"
+	"care-cordination/lib/middleware"
 	"care-cordination/lib/resp"
 	"errors"
 	"net/http"
@@ -26,14 +26,15 @@ func NewLocTransferHandler(
 
 func (h *LocTransferHandler) SetupLocTransferRoutes(router *gin.Engine) {
 	locTransfers := router.Group("/location-transfers")
+	locTransfers.Use(h.mdw.AuthMdw())
 
-	locTransfers.POST("", h.mdw.AuthMdw(), h.RegisterLocationTransfer)
-	locTransfers.GET("/stats", h.mdw.AuthMdw(), h.GetLocationTransferStats)
-	locTransfers.GET("", h.mdw.AuthMdw(), h.mdw.PaginationMdw(), h.ListLocationTransfers)
-	locTransfers.GET("/:id", h.mdw.AuthMdw(), h.GetLocationTransferByID)
-	locTransfers.POST("/:id/confirm", h.mdw.AuthMdw(), h.ConfirmLocationTransfer)
-	locTransfers.POST("/:id/refuse", h.mdw.AuthMdw(), h.RefuseLocationTransfer)
-	locTransfers.PUT("/:id", h.mdw.AuthMdw(), h.UpdateLocationTransfer)
+	locTransfers.POST("", h.mdw.RequirePermission("location_transfer", "write"), h.RegisterLocationTransfer)
+	locTransfers.GET("/stats", h.mdw.RequirePermission("location_transfer", "read"), h.GetLocationTransferStats)
+	locTransfers.GET("", h.mdw.RequirePermission("location_transfer", "read"), h.mdw.PaginationMdw(), h.ListLocationTransfers)
+	locTransfers.GET("/:id", h.mdw.RequirePermission("location_transfer", "read"), h.GetLocationTransferByID)
+	locTransfers.POST("/:id/confirm", h.mdw.RequirePermission("location_transfer", "write"), h.ConfirmLocationTransfer)
+	locTransfers.POST("/:id/refuse", h.mdw.RequirePermission("location_transfer", "write"), h.RefuseLocationTransfer)
+	locTransfers.PUT("/:id", h.mdw.RequirePermission("location_transfer", "write"), h.UpdateLocationTransfer)
 }
 
 // @Summary Register a location transfer

@@ -37,7 +37,7 @@ func TestCreateAppointment(t *testing.T) {
 				StartTime: time.Now().Add(time.Hour),
 				EndTime:   time.Now().Add(2 * time.Hour),
 				Type:      TypeGeneral,
-				Participants: []ParticipantDTO{
+				Participants: []Participant{
 					{ID: "client-1", Type: ParticipantClient},
 				},
 			},
@@ -63,7 +63,7 @@ func TestCreateAppointment(t *testing.T) {
 				StartTime: time.Now().Add(time.Hour),
 				EndTime:   time.Now().Add(2 * time.Hour),
 				Type:      TypeGeneral,
-				Participants: []ParticipantDTO{
+				Participants: []Participant{
 					{ID: "client-1", Type: ParticipantClient},
 				},
 			},

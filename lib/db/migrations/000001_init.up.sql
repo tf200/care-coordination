@@ -501,8 +501,7 @@ CREATE POLICY coordinator_own_clients ON clients
 -- ============================================================
 INSERT INTO roles (id, name, description) VALUES
     ('role_admin', 'admin', 'Full system access'),
-    ('role_coordinator', 'coordinator', 'Manage assigned clients'),
-    ('role_viewer', 'viewer', 'Read-only access');
+    ('role_coordinator', 'coordinator', 'Manage assigned clients');
 
 -- ============================================================
 -- System Preset: Permissions
@@ -552,6 +551,8 @@ INSERT INTO permissions (id, resource, action, description) VALUES
     ('perm_rbac_read', 'rbac', 'read', 'View rbac'),
     ('perm_rbac_write', 'rbac', 'write', 'Create and update rbac'),
     ('perm_rbac_delete', 'rbac', 'delete', 'Delete rbac'),
+    -- Dashboard permissions
+    ('perm_dashboard_read', 'dashboard', 'read', 'View dashboard'),
     -- Admin permissions
     ('perm_admin_manage', 'admin', 'manage', 'Full admin access');
 
@@ -568,12 +569,26 @@ INSERT INTO role_permissions (role_id, permission_id) VALUES
     ('role_admin', 'perm_employee_delete'),
     ('role_admin', 'perm_location_read'),
     ('role_admin', 'perm_location_write'),
+    ('role_admin', 'perm_location_delete'),
+    ('role_admin', 'perm_location_transfer_read'),
+    ('role_admin', 'perm_location_transfer_write'),
+    ('role_admin', 'perm_location_transfer_delete'),
     ('role_admin', 'perm_registration_read'),
     ('role_admin', 'perm_registration_write'),
     ('role_admin', 'perm_intake_read'),
     ('role_admin', 'perm_intake_write'),
     ('role_admin', 'perm_incident_read'),
     ('role_admin', 'perm_incident_write'),
+    ('role_admin', 'perm_evaluation_read'),
+    ('role_admin', 'perm_evaluation_write'),
+    ('role_admin', 'perm_evaluation_delete'),
+    ('role_admin', 'perm_calendar_read'),
+    ('role_admin', 'perm_calendar_write'),
+    ('role_admin', 'perm_calendar_delete'),
+    ('role_admin', 'perm_rbac_read'),
+    ('role_admin', 'perm_rbac_write'),
+    ('role_admin', 'perm_rbac_delete'),
+    ('role_admin', 'perm_dashboard_read'),
     ('role_admin', 'perm_admin_manage');
 
 -- Coordinator: Read + write for assigned resources
@@ -589,12 +604,6 @@ INSERT INTO role_permissions (role_id, permission_id) VALUES
     ('role_coordinator', 'perm_incident_read'),
     ('role_coordinator', 'perm_incident_write');
 
--- Viewer: Read-only
-INSERT INTO role_permissions (role_id, permission_id) VALUES
-    ('role_viewer', 'perm_client_read'),
-    ('role_viewer', 'perm_employee_read'),
-    ('role_viewer', 'perm_location_read'),
-    ('role_viewer', 'perm_registration_read');
 -- ============================================================
 -- Calendar Feature
 -- ============================================================

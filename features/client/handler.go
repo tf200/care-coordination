@@ -1,7 +1,7 @@
 package client
 
 import (
-	"care-cordination/features/middleware"
+	"care-cordination/lib/middleware"
 	"care-cordination/lib/resp"
 	"errors"
 	"net/http"

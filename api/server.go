@@ -30,7 +30,7 @@ import (
 	"care-cordination/features/intake"
 	locTransfer "care-cordination/features/location_transfer"
 	"care-cordination/features/locations"
-	"care-cordination/features/middleware"
+	"care-cordination/lib/middleware"
 	"care-cordination/features/notification"
 	"care-cordination/features/rbac"
 	referringOrgs "care-cordination/features/referring_orgs"

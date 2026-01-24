@@ -1,7 +1,7 @@
 package employee
 
 import (
-	"care-cordination/features/middleware"
+	"care-cordination/lib/middleware"
 	"care-cordination/lib/resp"
 	"errors"
 	"net/http"
@@ -26,13 +26,14 @@ func NewEmployeeHandler(
 
 func (h *EmployeeHandler) SetupEmployeeRoutes(router *gin.Engine) {
 	employee := router.Group("/employees")
+	employee.Use(h.mdw.AuthMdw())
 
-	employee.GET("/me", h.mdw.AuthMdw(), h.GetMyProfile)
-	employee.POST("", h.mdw.AuthMdw(), h.CreateEmployee)
-	employee.GET("", h.mdw.AuthMdw(), h.mdw.PaginationMdw(), h.ListEmployees)
-	employee.GET("/:id", h.mdw.AuthMdw(), h.GetEmployeeByID)
-	employee.PUT("/:id", h.mdw.AuthMdw(), h.UpdateEmployee)
-	employee.DELETE("/:id", h.mdw.AuthMdw(), h.DeleteEmployee)
+	employee.GET("/me", h.GetMyProfile)
+	employee.GET("", h.mdw.PaginationMdw(), h.ListEmployees)
+	employee.GET("/:id", h.GetEmployeeByID)
+	employee.POST("", h.mdw.RequirePermission("employee", "write"), h.CreateEmployee)
+	employee.PUT("/:id", h.mdw.RequirePermission("employee", "write"), h.UpdateEmployee)
+	employee.DELETE("/:id", h.mdw.RequirePermission("employee", "delete"), h.DeleteEmployee)
 }
 
 // @Summary Create an employee

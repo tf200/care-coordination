@@ -1,12 +1,11 @@
 package audit
 
 import (
+	"care-cordination/lib/audit"
 	db "care-cordination/lib/db/sqlc"
 	"care-cordination/lib/logger"
 	"care-cordination/lib/util"
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"time"
@@ -15,8 +14,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"go.uber.org/zap"
 )
-
-const GenesisHash = "GENESIS"
 
 // ChainVerificationResult represents the result of verifying the audit log chain
 type ChainVerificationResult struct {
@@ -40,40 +37,6 @@ func NewAuditService(store db.Store, logger logger.Logger) AuditService {
 		store:  store,
 		logger: logger,
 	}
-}
-
-// computeHash generates a SHA-256 hash of audit entry data + previous hash (for verification)
-func computeHash(id string, userID, employeeID *string, action, resourceType string,
-	resourceID *string, oldValue, newValue []byte, ipAddress, userAgent, requestID *string,
-	status, failureReason *string, prevHash string, createdAt time.Time) string {
-
-	data := fmt.Sprintf("%s|%v|%v|%s|%s|%v|%s|%s|%v|%v|%v|%v|%v|%s|%s",
-		id,
-		ptrToStr(userID),
-		ptrToStr(employeeID),
-		action,
-		resourceType,
-		ptrToStr(resourceID),
-		string(oldValue),
-		string(newValue),
-		ptrToStr(ipAddress),
-		ptrToStr(userAgent),
-		ptrToStr(requestID),
-		ptrToStr(status),
-		ptrToStr(failureReason),
-		prevHash,
-		createdAt.UTC().Format(time.RFC3339Nano),
-	)
-
-	hash := sha256.Sum256([]byte(data))
-	return hex.EncodeToString(hash[:])
-}
-
-func ptrToStr(s *string) string {
-	if s == nil {
-		return "<nil>"
-	}
-	return *s
 }
 
 // ListAuditLogs retrieves audit logs with filters and pagination
@@ -162,7 +125,7 @@ func (s *auditService) VerifyChain(ctx context.Context, startSeq, endSeq int64) 
 		// For the first entry in our range, get the previous hash
 		if i == 0 {
 			if log.SequenceNumber == 1 {
-				prevHash = GenesisHash
+				prevHash = audit.GenesisHash
 			} else {
 				// Get the previous entry's hash
 				prevLog, err := s.store.GetAuditLogBySequence(ctx, log.SequenceNumber-1)
@@ -186,7 +149,7 @@ func (s *auditService) VerifyChain(ctx context.Context, startSeq, endSeq int64) 
 		// Recompute the hash and verify current_hash
 		statusStr := string(log.Status)
 		actionStr := string(log.Action)
-		computedHash := computeHash(
+		computedHash := audit.ComputeHash(
 			log.ID,
 			log.UserID,
 			log.EmployeeID,

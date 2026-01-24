@@ -244,7 +244,7 @@ Create `/home/taha/care-cordination/features/audit/service.go`:
 package audit
 
 import (
-    "care-cordination/features/middleware"
+    "care-cordination/lib/middleware"
     db "care-cordination/lib/db/sqlc"
     "care-cordination/lib/logger"
     "care-cordination/lib/nanoid"
@@ -626,7 +626,7 @@ func toNullString(s string) *string {
 
 #### Step 4.1: Add context helpers to middleware
 
-Add to `/home/taha/care-cordination/features/middleware/middleware.go`:
+Add to `/home/taha/care-cordination/lib/middleware/middleware.go`:
 
 ```go
 const (

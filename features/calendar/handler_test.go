@@ -91,7 +91,7 @@ func TestCreateAppointmentHandler(t *testing.T) {
 				StartTime: time.Now().Add(time.Hour),
 				EndTime:   time.Now().Add(2 * time.Hour),
 				Type:      calendar.TypeGeneral,
-				Participants: []calendar.ParticipantDTO{
+				Participants: []calendar.Participant{
 					{ID: "client-1", Type: calendar.ParticipantClient},
 				},
 			},
@@ -125,7 +125,7 @@ func TestCreateAppointmentHandler(t *testing.T) {
 				StartTime: time.Now().Add(time.Hour),
 				EndTime:   time.Now().Add(2 * time.Hour),
 				Type:      calendar.TypeGeneral,
-				Participants: []calendar.ParticipantDTO{
+				Participants: []calendar.Participant{
 					{ID: "client-1", Type: calendar.ParticipantClient},
 				},
 			},
@@ -387,7 +387,7 @@ func TestGetCalendarViewHandler(t *testing.T) {
 			setup: func(mockService *mocks.MockCalendarService) {
 				mockService.EXPECT().
 					GetCalendarView(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
-					Return([]calendar.CalendarEventDTO{}, nil)
+					Return([]calendar.CalendarEvent{}, nil)
 			},
 			expectedStatus: http.StatusOK,
 		},

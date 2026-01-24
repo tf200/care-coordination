@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"care-cordination/features/middleware"
+	"care-cordination/lib/middleware"
 	"care-cordination/lib/ratelimit"
 	"care-cordination/lib/resp"
 	"net/http"

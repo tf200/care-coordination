@@ -3,7 +3,7 @@ package main
 import (
 	"care-cordination/api"
 	"care-cordination/features/attachments"
-	"care-cordination/features/audit"
+	featureAudit "care-cordination/features/audit"
 	"care-cordination/features/auth"
 	"care-cordination/features/calendar"
 	"care-cordination/features/client"
@@ -14,18 +14,20 @@ import (
 	"care-cordination/features/intake"
 	locTransfer "care-cordination/features/location_transfer"
 	"care-cordination/features/locations"
-	"care-cordination/features/middleware"
 	"care-cordination/features/notification"
 	"care-cordination/features/rbac"
 	referringOrgs "care-cordination/features/referring_orgs"
 	"care-cordination/features/registration"
+	libAudit "care-cordination/lib/audit"
 	"care-cordination/lib/bucket"
 	"care-cordination/lib/config"
 	db "care-cordination/lib/db/sqlc"
 	"care-cordination/lib/logger"
+	"care-cordination/lib/middleware"
 	"care-cordination/lib/ratelimit"
 	"care-cordination/lib/token"
 	"care-cordination/lib/websocket"
+
 	"context"
 	"log"
 	"net/http"
@@ -134,7 +136,7 @@ func main() {
 
 	// 5. Initialize Features
 	// Create audit logger first (needed by middleware)
-	auditLogger := middleware.NewAuditLoggerService(*store, l)
+	auditLogger := libAudit.NewAuditLoggerService(*store, l)
 	mdw := middleware.NewMiddleware(tokenManager, rateLimiter, l, store, auditLogger)
 
 	authService := auth.NewAuthService(store, tokenManager, l)
@@ -206,8 +208,8 @@ func main() {
 	incidentHandler := incident.NewIncidentHandler(incidentService, mdw)
 
 	// Audit Service - NEN7510/ISO27001 compliant audit logging
-	auditService := audit.NewAuditService(*store, l)
-	auditHandler := audit.NewAuditHandler(auditService, mdw)
+	auditService := featureAudit.NewAuditService(*store, l)
+	auditHandler := featureAudit.NewAuditHandler(auditService, mdw)
 
 	// Dashboard Service
 	dashboardService := dashboard.NewDashboardService(store, l)

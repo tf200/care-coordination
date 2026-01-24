@@ -6,6 +6,7 @@ import (
 	"care-cordination/lib/util"
 	"context"
 	"fmt"
+	"math"
 	"strings"
 	"time"
 
@@ -177,7 +178,8 @@ func (s *dashboardService) GetCareTypeDistribution(ctx context.Context) (*CareTy
 		if total == 0 {
 			return 0
 		}
-		return float64(count) / float64(total) * 100
+		val := float64(count) / float64(total) * 100
+		return math.Round(val*100) / 100
 	}
 
 	// Add care types with their Dutch labels
@@ -246,7 +248,8 @@ func (s *dashboardService) GetLocationCapacity(ctx context.Context, req *Locatio
 		available := capacity - occupied
 		percentage := float64(0)
 		if capacity > 0 {
-			percentage = float64(occupied) / float64(capacity) * 100
+			val := float64(occupied) / float64(capacity) * 100
+			percentage = math.Round(val*100) / 100
 		}
 		items[i] = LocationCapacityItem{
 			ID:         loc.ID,
@@ -281,7 +284,8 @@ func (s *dashboardService) GetLocationCapacity(ctx context.Context, req *Locatio
 	totalAvailable := totalCapacity - totalOccupied
 	overallPercentage := float64(0)
 	if totalCapacity > 0 {
-		overallPercentage = float64(totalOccupied) / float64(totalCapacity) * 100
+		val := float64(totalOccupied) / float64(totalCapacity) * 100
+		overallPercentage = math.Round(val*100) / 100
 	}
 
 	return &LocationCapacityResponse{

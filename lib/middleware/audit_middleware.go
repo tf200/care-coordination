@@ -4,52 +4,10 @@ import (
 	"bytes"
 	"care-cordination/lib/audit"
 	"care-cordination/lib/util"
-	"context"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 )
-
-// AuditAction represents an audit action type
-type AuditAction string
-
-const (
-	ActionRead   AuditAction = "read"
-	ActionCreate AuditAction = "create"
-	ActionUpdate AuditAction = "update"
-	ActionDelete AuditAction = "delete"
-)
-
-// AuditStatus represents the status of an audit entry
-type AuditStatus string
-
-const (
-	StatusSuccess AuditStatus = "success"
-	StatusFailure AuditStatus = "failure"
-)
-
-// AuditEntry represents a single audit log entry for the middleware
-type AuditEntry struct {
-	UserID        string
-	EmployeeID    string
-	ClientID      string // NEN7510: Track which client's data was accessed
-	Action        AuditAction
-	ResourceType  string
-	ResourceID    string
-	OldValue      any
-	NewValue      any
-	IPAddress     string
-	UserAgent     string
-	RequestID     string
-	Status        AuditStatus
-	FailureReason string
-}
-
-// AuditLogger is an interface for logging audit entries
-// This avoids import cycle between middleware and audit packages
-type AuditLogger interface {
-	LogEntry(ctx context.Context, entry AuditEntry) error
-}
 
 // responseWriter wraps gin.ResponseWriter to capture status code
 type responseWriter struct {
@@ -136,18 +94,18 @@ func shouldSkipAudit(path string) bool {
 }
 
 // httpMethodToAction maps HTTP methods to audit actions
-func httpMethodToAction(method string) AuditAction {
+func httpMethodToAction(method string) audit.AuditAction {
 	switch method {
 	case "GET":
-		return ActionRead
+		return audit.ActionRead
 	case "POST":
-		return ActionCreate
+		return audit.ActionCreate
 	case "PUT", "PATCH":
-		return ActionUpdate
+		return audit.ActionUpdate
 	case "DELETE":
-		return ActionDelete
+		return audit.ActionDelete
 	default:
-		return ActionRead
+		return audit.ActionRead
 	}
 }
 
@@ -178,10 +136,10 @@ func (m *Middleware) logAuditEntry(ctx *gin.Context, statusCode int, path, metho
 	resourceType, resourceID := extractResourceInfo(path)
 
 	// Determine status
-	status := StatusSuccess
+	status := audit.StatusSuccess
 	var failureReason string
 	if statusCode >= 400 {
-		status = StatusFailure
+		status = audit.StatusFailure
 		if statusCode == 401 {
 			failureReason = "unauthorized"
 		} else if statusCode == 403 {
@@ -195,7 +153,7 @@ func (m *Middleware) logAuditEntry(ctx *gin.Context, statusCode int, path, metho
 		}
 	}
 
-	entry := AuditEntry{
+	entry := audit.AuditEntry{
 		UserID:        util.GetUserID(ctx),
 		EmployeeID:    util.GetEmployeeID(ctx),
 		ClientID:      util.GetClientID(ctx),

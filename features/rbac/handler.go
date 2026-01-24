@@ -1,7 +1,7 @@
 package rbac
 
 import (
-	"care-cordination/features/middleware"
+	"care-cordination/lib/middleware"
 	"care-cordination/lib/resp"
 	"errors"
 	"net/http"
@@ -24,28 +24,27 @@ func NewRBACHandler(rbacService RBACService, mdw *middleware.Middleware) *RBACHa
 func (h *RBACHandler) SetupRBACRoutes(router *gin.Engine) {
 	admin := router.Group("/admin")
 	admin.Use(h.mdw.AuthMdw())
-	// TODO: Add admin permission check: admin.Use(h.mdw.RequirePermission("admin", "manage"))
 
 	// Roles
 	roles := admin.Group("/roles")
-	roles.POST("", h.CreateRole)
-	roles.GET("", h.mdw.PaginationMdw(), h.ListRoles)
-	roles.GET("/:id", h.GetRole)
-	roles.PUT("/:id", h.UpdateRole)
-	roles.DELETE("/:id", h.DeleteRole)
-	roles.GET("/:id/permissions", h.ListPermissionsForRole)
-	roles.POST("/:id/permissions", h.AssignPermissionToRole)
-	roles.DELETE("/:id/permissions/:permissionId", h.RemovePermissionFromRole)
+	roles.POST("", h.mdw.RequirePermission("rbac", "write"), h.CreateRole)
+	roles.GET("", h.mdw.PaginationMdw(), h.mdw.RequirePermission("rbac", "read"), h.ListRoles)
+	roles.GET("/:id", h.mdw.RequirePermission("rbac", "read"), h.GetRole)
+	roles.PUT("/:id", h.mdw.RequirePermission("rbac", "write"), h.UpdateRole)
+	roles.DELETE("/:id", h.mdw.RequirePermission("rbac", "delete"), h.DeleteRole)
+	roles.GET("/:id/permissions", h.mdw.RequirePermission("rbac", "read"), h.ListPermissionsForRole)
+	roles.POST("/:id/permissions", h.mdw.RequirePermission("rbac", "write"), h.AssignPermissionToRole)
+	roles.DELETE("/:id/permissions/:permissionId", h.mdw.RequirePermission("rbac", "delete"), h.RemovePermissionFromRole)
 
 	// Permissions (read-only)
 	permissions := admin.Group("/permissions")
-	permissions.GET("", h.mdw.PaginationMdw(), h.ListPermissions)
+	permissions.GET("", h.mdw.PaginationMdw(), h.mdw.RequirePermission("rbac", "read"), h.ListPermissions)
 
 	// User-Role assignments
 	userRoles := admin.Group("/user-roles")
-	userRoles.POST("", h.AssignRoleToUser)
-	userRoles.DELETE("/user/:userId", h.RemoveRoleFromUser)
-	userRoles.GET("/user/:userId", h.GetRoleForUser)
+	userRoles.POST("", h.mdw.RequirePermission("rbac", "write"), h.AssignRoleToUser)
+	userRoles.DELETE("/user/:userId", h.mdw.RequirePermission("rbac", "delete"), h.RemoveRoleFromUser)
+	userRoles.GET("/user/:userId", h.mdw.RequirePermission("rbac", "read"), h.GetRoleForUser)
 }
 
 // ============================================================

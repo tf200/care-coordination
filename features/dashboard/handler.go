@@ -1,7 +1,7 @@
 package dashboard
 
 import (
-	"care-cordination/features/middleware"
+	"care-cordination/lib/middleware"
 	"care-cordination/lib/resp"
 	"net/http"
 
@@ -25,26 +25,29 @@ func NewDashboardHandler(
 
 func (h *DashboardHandler) SetupDashboardRoutes(router *gin.Engine) {
 	dashboard := router.Group("/dashboard")
+	dashboard.Use(h.mdw.AuthMdw())
 
 	// Admin Dashboard
-	dashboard.GET("/overview-stats", h.mdw.AuthMdw(), h.GetOverviewStats)
-	dashboard.GET("/critical-alerts", h.mdw.AuthMdw(), h.GetCriticalAlerts)
-	dashboard.GET("/pipeline-stats", h.mdw.AuthMdw(), h.GetPipelineStats)
-	dashboard.GET("/care-type-distribution", h.mdw.AuthMdw(), h.GetCareTypeDistribution)
-	dashboard.GET("/location-capacity", h.mdw.AuthMdw(), h.GetLocationCapacity)
-	dashboard.GET("/today-appointments", h.mdw.AuthMdw(), h.GetTodayAppointments)
-	dashboard.GET("/evaluation-stats", h.mdw.AuthMdw(), h.GetEvaluationStats)
-	dashboard.GET("/discharge-stats", h.mdw.AuthMdw(), h.GetDischargeStats)
+	admin := dashboard.Group("")
+	admin.Use(h.mdw.RequirePermission("dashboard", "read"))
+	admin.GET("/overview-stats", h.GetOverviewStats)
+	admin.GET("/critical-alerts", h.GetCriticalAlerts)
+	admin.GET("/pipeline-stats", h.GetPipelineStats)
+	admin.GET("/care-type-distribution", h.GetCareTypeDistribution)
+	admin.GET("/location-capacity", h.GetLocationCapacity)
+	admin.GET("/today-appointments", h.GetTodayAppointments)
+	admin.GET("/evaluation-stats", h.GetEvaluationStats)
+	admin.GET("/discharge-stats", h.GetDischargeStats)
 
 	// Coordinator Dashboard
 	coordinator := dashboard.Group("/coordinator")
-	coordinator.GET("/urgent-alerts", h.mdw.AuthMdw(), h.GetCoordinatorUrgentAlerts)
-	coordinator.GET("/today-schedule", h.mdw.AuthMdw(), h.GetCoordinatorTodaySchedule)
-	coordinator.GET("/stats", h.mdw.AuthMdw(), h.GetCoordinatorStats)
-	coordinator.GET("/reminders", h.mdw.AuthMdw(), h.GetCoordinatorReminders)
-	coordinator.GET("/clients", h.mdw.AuthMdw(), h.GetCoordinatorClients)
-	coordinator.GET("/goals-progress", h.mdw.AuthMdw(), h.GetCoordinatorGoalsProgress)
-	coordinator.GET("/incidents", h.mdw.AuthMdw(), h.GetCoordinatorIncidents)
+	coordinator.GET("/urgent-alerts", h.GetCoordinatorUrgentAlerts)
+	coordinator.GET("/today-schedule", h.GetCoordinatorTodaySchedule)
+	coordinator.GET("/stats", h.GetCoordinatorStats)
+	coordinator.GET("/reminders", h.GetCoordinatorReminders)
+	coordinator.GET("/clients", h.GetCoordinatorClients)
+	coordinator.GET("/goals-progress", h.GetCoordinatorGoalsProgress)
+	coordinator.GET("/incidents", h.GetCoordinatorIncidents)
 }
 
 // @Summary Get dashboard overview stats

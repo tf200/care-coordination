@@ -1,7 +1,7 @@
 package client
 
 import (
-	"care-cordination/features/middleware"
+	"care-cordination/lib/middleware"
 	db "care-cordination/lib/db/sqlc"
 	"care-cordination/lib/logger"
 	"care-cordination/lib/nanoid"

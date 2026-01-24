@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"care-cordination/lib/audit"
 	db "care-cordination/lib/db/sqlc"
 	"care-cordination/lib/logger"
 	"care-cordination/lib/ratelimit"
@@ -19,7 +20,7 @@ type Middleware struct {
 	rateLimiter ratelimit.RateLimiter
 	logger      logger.Logger
 	store       *db.Store
-	auditLogger AuditLogger
+	auditLogger audit.AuditLogger
 }
 
 func NewMiddleware(
@@ -27,7 +28,7 @@ func NewMiddleware(
 	rateLimiter ratelimit.RateLimiter,
 	logger logger.Logger,
 	store *db.Store,
-	auditLogger AuditLogger,
+	auditLogger audit.AuditLogger,
 ) *Middleware {
 	return &Middleware{
 		tokenMaker:  tokenMaker,

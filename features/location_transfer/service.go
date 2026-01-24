@@ -1,7 +1,7 @@
 package locTransfer
 
 import (
-	"care-cordination/features/middleware"
+	"care-cordination/lib/middleware"
 	"care-cordination/features/notification"
 	db "care-cordination/lib/db/sqlc"
 	"care-cordination/lib/logger"

@@ -85,16 +85,40 @@ GROUP BY e.id, e.user_id, e.first_name, e.last_name, e.bsn, e.date_of_birth,
 LIMIT 1;
 
 -- name: GetEmployeeByUserID :one
-SELECT e.*, u.email,
-       r.id as role_id,
-       r.name as role_name,
-       l.name as location_name
+SELECT
+    e.id,
+    e.user_id,
+    e.first_name,
+    e.last_name,
+    e.bsn,
+    e.date_of_birth,
+    e.phone_number,
+    e.gender,
+    e.contract_hours,
+    e.contract_type,
+    e.location_id,
+    e.created_at,
+    e.updated_at,
+    e.is_deleted,
+    u.email,
+    r.id as role_id,
+    r.name as role_name,
+    l.name as location_name,
+    l.address as location_address,
+    l.postal_code as location_postal_code,
+    COALESCE(COUNT(DISTINCT c.id), 0) as client_count
 FROM employees e
 JOIN users u ON e.user_id = u.id
 LEFT JOIN user_roles ur ON e.user_id = ur.user_id
 LEFT JOIN roles r ON ur.role_id = r.id
 LEFT JOIN locations l ON e.location_id = l.id
-WHERE e.user_id = $1 LIMIT 1;
+LEFT JOIN clients c ON c.coordinator_id = e.id
+WHERE e.user_id = $1
+GROUP BY e.id, e.user_id, e.first_name, e.last_name, e.bsn, e.date_of_birth,
+         e.phone_number, e.gender, e.contract_hours, e.contract_type, e.location_id,
+         e.created_at, e.updated_at, e.is_deleted, u.email, r.id, r.name,
+         l.name, l.address, l.postal_code
+LIMIT 1;
 
 -- name: UpdateEmployee :exec
 UPDATE employees SET

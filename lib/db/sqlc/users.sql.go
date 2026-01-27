@@ -32,8 +32,40 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (string,
 	return id, err
 }
 
+const disableUserMFA = `-- name: DisableUserMFA :exec
+UPDATE users SET
+    is_mfa_enabled = false,
+    mfa_secret = NULL,
+    mfa_backup_codes = NULL,
+    updated_at = now()
+WHERE id = $1
+`
+
+func (q *Queries) DisableUserMFA(ctx context.Context, id string) error {
+	_, err := q.db.Exec(ctx, disableUserMFA, id)
+	return err
+}
+
+const enableUserMFA = `-- name: EnableUserMFA :exec
+UPDATE users SET
+    is_mfa_enabled = true,
+    mfa_backup_codes = $2,
+    updated_at = now()
+WHERE id = $1
+`
+
+type EnableUserMFAParams struct {
+	ID             string  `json:"id"`
+	MfaBackupCodes *string `json:"mfa_backup_codes"`
+}
+
+func (q *Queries) EnableUserMFA(ctx context.Context, arg EnableUserMFAParams) error {
+	_, err := q.db.Exec(ctx, enableUserMFA, arg.ID, arg.MfaBackupCodes)
+	return err
+}
+
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, email, password_hash, created_at, updated_at FROM users WHERE email = $1
+SELECT id, email, password_hash, is_mfa_enabled, mfa_secret, mfa_backup_codes, created_at, updated_at FROM users WHERE email = $1
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
@@ -43,8 +75,56 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.ID,
 		&i.Email,
 		&i.PasswordHash,
+		&i.IsMfaEnabled,
+		&i.MfaSecret,
+		&i.MfaBackupCodes,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getUserByID = `-- name: GetUserByID :one
+SELECT id, email, password_hash, is_mfa_enabled, mfa_secret, mfa_backup_codes, created_at, updated_at FROM users WHERE id = $1
+`
+
+func (q *Queries) GetUserByID(ctx context.Context, id string) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByID, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.PasswordHash,
+		&i.IsMfaEnabled,
+		&i.MfaSecret,
+		&i.MfaBackupCodes,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getUserMFAState = `-- name: GetUserMFAState :one
+SELECT id, is_mfa_enabled, mfa_secret, mfa_backup_codes
+FROM users
+WHERE id = $1
+`
+
+type GetUserMFAStateRow struct {
+	ID             string  `json:"id"`
+	IsMfaEnabled   bool    `json:"is_mfa_enabled"`
+	MfaSecret      *string `json:"mfa_secret"`
+	MfaBackupCodes *string `json:"mfa_backup_codes"`
+}
+
+func (q *Queries) GetUserMFAState(ctx context.Context, id string) (GetUserMFAStateRow, error) {
+	row := q.db.QueryRow(ctx, getUserMFAState, id)
+	var i GetUserMFAStateRow
+	err := row.Scan(
+		&i.ID,
+		&i.IsMfaEnabled,
+		&i.MfaSecret,
+		&i.MfaBackupCodes,
 	)
 	return i, err
 }
@@ -65,5 +145,24 @@ type UpdateUserParams struct {
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
 	_, err := q.db.Exec(ctx, updateUser, arg.ID, arg.Email, arg.PasswordHash)
+	return err
+}
+
+const updateUserMFASecret = `-- name: UpdateUserMFASecret :exec
+UPDATE users SET
+    mfa_secret = $2,
+    is_mfa_enabled = false,
+    mfa_backup_codes = NULL,
+    updated_at = now()
+WHERE id = $1
+`
+
+type UpdateUserMFASecretParams struct {
+	ID        string  `json:"id"`
+	MfaSecret *string `json:"mfa_secret"`
+}
+
+func (q *Queries) UpdateUserMFASecret(ctx context.Context, arg UpdateUserMFASecretParams) error {
+	_, err := q.db.Exec(ctx, updateUserMFASecret, arg.ID, arg.MfaSecret)
 	return err
 }

@@ -73,17 +73,24 @@ type PermissionResponse struct {
 }
 
 type GetMyProfileResponse struct {
-	ID          string               `json:"id"`
-	UserID      string               `json:"userId"`
-	FirstName   string               `json:"firstName"`
-	LastName    string               `json:"lastName"`
-	Email       string               `json:"email"`
-	BSN         string               `json:"bsn"`
-	DateOfBirth string               `json:"dateOfBirth"`
-	PhoneNumber string               `json:"phoneNumber"`
-	Gender      string               `json:"gender"`
-	Role        string               `json:"role"`
-	Permissions []PermissionResponse `json:"permissions"`
+	ID                 string               `json:"id"`
+	UserID             string               `json:"userId"`
+	FirstName          string               `json:"firstName"`
+	LastName           string               `json:"lastName"`
+	Email              string               `json:"email"`
+	BSN                string               `json:"bsn"`
+	DateOfBirth        string               `json:"dateOfBirth"`
+	PhoneNumber        string               `json:"phoneNumber"`
+	Gender             string               `json:"gender"`
+	Role               string               `json:"role"`
+	ContractHours      *int32               `json:"contractHours"`
+	ContractType       *string              `json:"contractType"`
+	ClientCount        int64                `json:"clientCount"`
+	LocationID         string               `json:"locationId"`
+	LocationName       string               `json:"locationName"`
+	LocationAddress    string               `json:"locationAddress"`
+	LocationPostalCode string               `json:"locationPostalCode"`
+	Permissions        []PermissionResponse `json:"permissions"`
 }
 
 type UpdateEmployeeRequest struct {

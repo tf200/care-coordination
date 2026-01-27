@@ -17,4 +17,9 @@ type AuthService interface {
 		ipAddress string,
 	) (*RefreshTokensResponse, error)
 	Logout(ctx context.Context, req *LogoutRequest) error
+	ResetPassword(ctx context.Context, req *ResetPasswordRequest) error
+	SetupMFA(ctx context.Context) (*SetupMFAResponse, error)
+	EnableMFA(ctx context.Context, req *EnableMFARequest) (*EnableMFAResponse, error)
+	VerifyMFA(ctx context.Context, req *VerifyMFARequest, preAuthToken string) (*VerifyMFAResponse, error)
+	DisableMFA(ctx context.Context, req *DisableMFARequest) error
 }

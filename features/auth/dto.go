@@ -8,6 +8,8 @@ type LoginRequest struct {
 type LoginResponse struct {
 	AccessToken  string `json:"accessToken"`
 	RefreshToken string `json:"refreshToken"`
+	MFARequired  bool   `json:"mfaRequired"`
+	PreAuthToken string `json:"preAuthToken"`
 }
 
 type RefreshTokensRequest struct {
@@ -21,4 +23,35 @@ type RefreshTokensResponse struct {
 
 type LogoutRequest struct {
 	RefreshToken string `json:"refreshToken" binding:"required"`
+}
+
+type ResetPasswordRequest struct {
+	CurrentPassword string `json:"currentPassword" binding:"required"`
+	NewPassword     string `json:"newPassword" binding:"required,min=6"`
+}
+
+type SetupMFAResponse struct {
+	Secret     string `json:"secret"`
+	OtpAuthURL string `json:"otpAuthUrl"`
+}
+
+type EnableMFARequest struct {
+	Code string `json:"code" binding:"required"`
+}
+
+type EnableMFAResponse struct {
+	BackupCodes []string `json:"backupCodes"`
+}
+
+type VerifyMFARequest struct {
+	Code string `json:"code" binding:"required"`
+}
+
+type VerifyMFAResponse struct {
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
+}
+
+type DisableMFARequest struct {
+	Password string `json:"password" binding:"required"`
 }

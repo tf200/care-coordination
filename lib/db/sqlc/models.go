@@ -1280,11 +1280,14 @@ type Session struct {
 }
 
 type User struct {
-	ID           string             `json:"id"`
-	Email        string             `json:"email"`
-	PasswordHash string             `json:"password_hash"`
-	CreatedAt    pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+	ID             string             `json:"id"`
+	Email          string             `json:"email"`
+	PasswordHash   string             `json:"password_hash"`
+	IsMfaEnabled   bool               `json:"is_mfa_enabled"`
+	MfaSecret      *string            `json:"mfa_secret"`
+	MfaBackupCodes *string            `json:"mfa_backup_codes"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
 }
 
 type UserRole struct {

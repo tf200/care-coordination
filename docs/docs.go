@@ -1028,6 +1028,194 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/mfa/disable": {
+            "post": {
+                "description": "Disable MFA for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Disable MFA",
+                "parameters": [
+                    {
+                        "description": "Disable MFA Request",
+                        "name": "disableMFARequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.DisableMFARequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.MessageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/mfa/enable": {
+            "post": {
+                "description": "Verify code and enable MFA for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Enable MFA",
+                "parameters": [
+                    {
+                        "description": "Enable MFA Request",
+                        "name": "enableMFARequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.EnableMFARequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-auth_EnableMFAResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/mfa/setup": {
+            "post": {
+                "description": "Generate MFA secret and OTP auth URL for the authenticated user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Setup MFA",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-auth_SetupMFAResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/mfa/verify": {
+            "post": {
+                "description": "Verify MFA code using pre-auth token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Verify MFA",
+                "parameters": [
+                    {
+                        "description": "Verify MFA Request",
+                        "name": "verifyMFARequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.VerifyMFARequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.SuccessResponse-auth_VerifyMFAResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/refresh": {
             "post": {
                 "description": "Refresh access and refresh tokens using a valid refresh token",
@@ -1057,6 +1245,58 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/resp.SuccessResponse-auth_RefreshTokensResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/resp.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/reset-password": {
+            "post": {
+                "description": "Reset password for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Reset password",
+                "parameters": [
+                    {
+                        "description": "Reset Password Request",
+                        "name": "resetPasswordRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.ResetPasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.MessageResponse"
                         }
                     },
                     "400": {
@@ -1682,7 +1922,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.SuccessResponse-array_calendar_CalendarEventDTO"
+                            "$ref": "#/definitions/resp.SuccessResponse-array_calendar_CalendarEvent"
                         }
                     },
                     "400": {
@@ -2311,7 +2551,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_CareTypeDistributionDTO"
+                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_CareTypeDistributionResponse"
                         }
                     },
                     "401": {
@@ -2343,7 +2583,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_CoordinatorClientsDTO"
+                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_CoordinatorClientsResponse"
                         }
                     },
                     "401": {
@@ -2375,7 +2615,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_CoordinatorGoalsProgressDTO"
+                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_CoordinatorGoalsProgressResponse"
                         }
                     },
                     "401": {
@@ -2407,7 +2647,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_CoordinatorIncidentsDTO"
+                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_CoordinatorIncidentsResponse"
                         }
                     },
                     "401": {
@@ -2439,7 +2679,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_CoordinatorRemindersDTO"
+                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_CoordinatorRemindersResponse"
                         }
                     },
                     "401": {
@@ -2471,7 +2711,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_CoordinatorStatsDTO"
+                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_CoordinatorStatsResponse"
                         }
                     },
                     "401": {
@@ -2503,7 +2743,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_CoordinatorTodayScheduleDTO"
+                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_CoordinatorTodayScheduleResponse"
                         }
                     },
                     "401": {
@@ -2535,7 +2775,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_CoordinatorUrgentAlertsDTO"
+                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_CoordinatorUrgentAlertsResponse"
                         }
                     },
                     "401": {
@@ -2567,7 +2807,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_CriticalAlertsDTO"
+                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_CriticalAlertsResponse"
                         }
                     },
                     "401": {
@@ -2599,7 +2839,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_DischargeStatsDTO"
+                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_DischargeStatsResponse"
                         }
                     },
                     "401": {
@@ -2631,7 +2871,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_EvaluationStatsDTO"
+                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_EvaluationStatsResponse"
                         }
                     },
                     "401": {
@@ -2677,7 +2917,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_LocationCapacityDTO"
+                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_LocationCapacityResponse"
                         }
                     },
                     "400": {
@@ -2715,7 +2955,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_OverviewDTO"
+                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_OverviewResponse"
                         }
                     },
                     "401": {
@@ -2747,7 +2987,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_PipelineStatsDTO"
+                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_PipelineStatsResponse"
                         }
                     },
                     "401": {
@@ -2779,7 +3019,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_TodayAppointmentsDTO"
+                            "$ref": "#/definitions/resp.SuccessResponse-dashboard_TodayAppointmentsResponse"
                         }
                     },
                     "401": {
@@ -3161,7 +3401,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.SuccessResponse-resp_PaginationResponse-evaluation_UpcomingEvaluationDTO"
+                            "$ref": "#/definitions/resp.SuccessResponse-resp_PaginationResponse-evaluation_UpcomingEvaluationItem"
                         }
                     },
                     "401": {
@@ -3202,7 +3442,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.SuccessResponse-resp_PaginationResponse-evaluation_DraftEvaluationListItemDTO"
+                            "$ref": "#/definitions/resp.SuccessResponse-resp_PaginationResponse-evaluation_DraftEvaluationListItem"
                         }
                     },
                     "400": {
@@ -3299,7 +3539,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.SuccessResponse-evaluation_DraftEvaluationDTO"
+                            "$ref": "#/definitions/resp.SuccessResponse-evaluation_DraftEvaluationResponse"
                         }
                     },
                     "400": {
@@ -3497,7 +3737,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.SuccessResponse-evaluation_LastEvaluationDTO"
+                            "$ref": "#/definitions/resp.SuccessResponse-evaluation_LastEvaluationItem"
                         }
                     },
                     "400": {
@@ -3541,7 +3781,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.SuccessResponse-resp_PaginationResponse-evaluation_GlobalRecentEvaluationDTO"
+                            "$ref": "#/definitions/resp.SuccessResponse-resp_PaginationResponse-evaluation_GlobalRecentEvaluationItem"
                         }
                     },
                     "401": {
@@ -3573,7 +3813,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.SuccessResponse-resp_PaginationResponse-evaluation_UpcomingEvaluationDTO"
+                            "$ref": "#/definitions/resp.SuccessResponse-resp_PaginationResponse-evaluation_UpcomingEvaluationItem"
                         }
                     },
                     "401": {
@@ -3614,7 +3854,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/resp.SuccessResponse-evaluation_EvaluationDTO"
+                            "$ref": "#/definitions/resp.SuccessResponse-evaluation_EvaluationResponse"
                         }
                     },
                     "400": {
@@ -5773,6 +6013,39 @@ const docTemplate = `{
                 }
             }
         },
+        "auth.DisableMFARequest": {
+            "type": "object",
+            "required": [
+                "password"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth.EnableMFARequest": {
+            "type": "object",
+            "required": [
+                "code"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth.EnableMFAResponse": {
+            "type": "object",
+            "properties": {
+                "backupCodes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "auth.LoginRequest": {
             "type": "object",
             "required": [
@@ -5792,6 +6065,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "accessToken": {
+                    "type": "string"
+                },
+                "mfaRequired": {
+                    "type": "boolean"
+                },
+                "preAuthToken": {
                     "type": "string"
                 },
                 "refreshToken": {
@@ -5832,6 +6111,55 @@ const docTemplate = `{
                 }
             }
         },
+        "auth.ResetPasswordRequest": {
+            "type": "object",
+            "required": [
+                "currentPassword",
+                "newPassword"
+            ],
+            "properties": {
+                "currentPassword": {
+                    "type": "string"
+                },
+                "newPassword": {
+                    "type": "string",
+                    "minLength": 6
+                }
+            }
+        },
+        "auth.SetupMFAResponse": {
+            "type": "object",
+            "properties": {
+                "otpAuthUrl": {
+                    "type": "string"
+                },
+                "secret": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth.VerifyMFARequest": {
+            "type": "object",
+            "required": [
+                "code"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth.VerifyMFAResponse": {
+            "type": "object",
+            "properties": {
+                "accessToken": {
+                    "type": "string"
+                },
+                "refreshToken": {
+                    "type": "string"
+                }
+            }
+        },
         "calendar.AppointmentResponse": {
             "type": "object",
             "properties": {
@@ -5856,7 +6184,7 @@ const docTemplate = `{
                 "participants": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/calendar.ParticipantDTO"
+                        "$ref": "#/definitions/calendar.Participant"
                     }
                 },
                 "recurrenceRule": {
@@ -5905,7 +6233,7 @@ const docTemplate = `{
                 "TypeAmbulatory"
             ]
         },
-        "calendar.CalendarEventDTO": {
+        "calendar.CalendarEvent": {
             "type": "object",
             "properties": {
                 "allDay": {
@@ -5930,7 +6258,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
-                    "description": "\"appointment\" or \"reminder\"",
                     "type": "string"
                 }
             }
@@ -5984,7 +6311,7 @@ const docTemplate = `{
                     "type": "array",
                     "minItems": 1,
                     "items": {
-                        "$ref": "#/definitions/calendar.ParticipantDTO"
+                        "$ref": "#/definitions/calendar.Participant"
                     }
                 },
                 "recurrenceRule": {
@@ -6040,7 +6367,7 @@ const docTemplate = `{
                 }
             }
         },
-        "calendar.ParticipantDTO": {
+        "calendar.Participant": {
             "type": "object",
             "required": [
                 "id",
@@ -6118,7 +6445,7 @@ const docTemplate = `{
                 "participants": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/calendar.ParticipantDTO"
+                        "$ref": "#/definitions/calendar.Participant"
                     }
                 },
                 "recurrenceRule": {
@@ -6164,7 +6491,7 @@ const docTemplate = `{
                 }
             }
         },
-        "client.CareTypeCountsDTO": {
+        "client.CareTypeCounts": {
             "type": "object",
             "properties": {
                 "ambulatoryCare": {
@@ -6237,7 +6564,7 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "countsByCareType": {
-                    "$ref": "#/definitions/client.CareTypeCountsDTO"
+                    "$ref": "#/definitions/client.CareTypeCounts"
                 },
                 "totalCount": {
                     "type": "integer"
@@ -6251,7 +6578,7 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "countsByPriority": {
-                    "$ref": "#/definitions/client.PriorityCountsDTO"
+                    "$ref": "#/definitions/client.PriorityCounts"
                 },
                 "highPriorityCount": {
                     "type": "integer"
@@ -6522,7 +6849,7 @@ const docTemplate = `{
                 }
             }
         },
-        "client.PriorityCountsDTO": {
+        "client.PriorityCounts": {
             "type": "object",
             "properties": {
                 "high": {
@@ -6567,7 +6894,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dashboard.AlertDTO": {
+        "dashboard.AlertItem": {
             "type": "object",
             "properties": {
                 "count": {
@@ -6621,20 +6948,6 @@ const docTemplate = `{
                 "AlertTypeTransfer"
             ]
         },
-        "dashboard.CareTypeDistributionDTO": {
-            "type": "object",
-            "properties": {
-                "distribution": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dashboard.CareTypeDistributionItem"
-                    }
-                },
-                "total": {
-                    "type": "integer"
-                }
-            }
-        },
         "dashboard.CareTypeDistributionItem": {
             "type": "object",
             "properties": {
@@ -6649,6 +6962,20 @@ const docTemplate = `{
                 },
                 "percentage": {
                     "type": "number"
+                }
+            }
+        },
+        "dashboard.CareTypeDistributionResponse": {
+            "type": "object",
+            "properties": {
+                "distribution": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dashboard.CareTypeDistributionItem"
+                    }
+                },
+                "total": {
+                    "type": "integer"
                 }
             }
         },
@@ -6682,7 +7009,7 @@ const docTemplate = `{
                 "CoordinatorAlertTypeWaitingLong"
             ]
         },
-        "dashboard.CoordinatorClientDTO": {
+        "dashboard.CoordinatorClientItem": {
             "type": "object",
             "properties": {
                 "careType": {
@@ -6714,18 +7041,18 @@ const docTemplate = `{
                 }
             }
         },
-        "dashboard.CoordinatorClientsDTO": {
+        "dashboard.CoordinatorClientsResponse": {
             "type": "object",
             "properties": {
                 "clients": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dashboard.CoordinatorClientDTO"
+                        "$ref": "#/definitions/dashboard.CoordinatorClientItem"
                     }
                 }
             }
         },
-        "dashboard.CoordinatorGoalsProgressDTO": {
+        "dashboard.CoordinatorGoalsProgressResponse": {
             "type": "object",
             "properties": {
                 "achieved": {
@@ -6745,7 +7072,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dashboard.CoordinatorIncidentDTO": {
+        "dashboard.CoordinatorIncidentItem": {
             "type": "object",
             "properties": {
                 "client": {
@@ -6768,29 +7095,29 @@ const docTemplate = `{
                 }
             }
         },
-        "dashboard.CoordinatorIncidentsDTO": {
+        "dashboard.CoordinatorIncidentsResponse": {
             "type": "object",
             "properties": {
                 "incidents": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dashboard.CoordinatorIncidentDTO"
+                        "$ref": "#/definitions/dashboard.CoordinatorIncidentItem"
                     }
                 }
             }
         },
-        "dashboard.CoordinatorRemindersDTO": {
+        "dashboard.CoordinatorRemindersResponse": {
             "type": "object",
             "properties": {
                 "reminders": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dashboard.ReminderDTO"
+                        "$ref": "#/definitions/dashboard.ReminderItem"
                     }
                 }
             }
         },
-        "dashboard.CoordinatorScheduleItemDTO": {
+        "dashboard.CoordinatorScheduleItem": {
             "type": "object",
             "properties": {
                 "clientId": {
@@ -6822,7 +7149,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dashboard.CoordinatorStatsDTO": {
+        "dashboard.CoordinatorStatsResponse": {
             "type": "object",
             "properties": {
                 "myActiveClients": {
@@ -6839,13 +7166,13 @@ const docTemplate = `{
                 }
             }
         },
-        "dashboard.CoordinatorTodayScheduleDTO": {
+        "dashboard.CoordinatorTodayScheduleResponse": {
             "type": "object",
             "properties": {
                 "appointments": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dashboard.CoordinatorScheduleItemDTO"
+                        "$ref": "#/definitions/dashboard.CoordinatorScheduleItem"
                     }
                 },
                 "count": {
@@ -6856,7 +7183,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dashboard.CoordinatorUrgentAlertDTO": {
+        "dashboard.CoordinatorUrgentAlertItem": {
             "type": "object",
             "properties": {
                 "clientIds": {
@@ -6888,29 +7215,29 @@ const docTemplate = `{
                 }
             }
         },
-        "dashboard.CoordinatorUrgentAlertsDTO": {
+        "dashboard.CoordinatorUrgentAlertsResponse": {
             "type": "object",
             "properties": {
                 "alerts": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dashboard.CoordinatorUrgentAlertDTO"
+                        "$ref": "#/definitions/dashboard.CoordinatorUrgentAlertItem"
                     }
                 }
             }
         },
-        "dashboard.CriticalAlertsDTO": {
+        "dashboard.CriticalAlertsResponse": {
             "type": "object",
             "properties": {
                 "alerts": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dashboard.AlertDTO"
+                        "$ref": "#/definitions/dashboard.AlertItem"
                     }
                 }
             }
         },
-        "dashboard.DischargeStatsDTO": {
+        "dashboard.DischargeStatsResponse": {
             "type": "object",
             "properties": {
                 "averageDaysInCare": {
@@ -6927,7 +7254,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dashboard.EvaluationStatsDTO": {
+        "dashboard.EvaluationStatsResponse": {
             "type": "object",
             "properties": {
                 "completed": {
@@ -6944,20 +7271,6 @@ const docTemplate = `{
                 },
                 "total": {
                     "type": "integer"
-                }
-            }
-        },
-        "dashboard.LocationCapacityDTO": {
-            "type": "object",
-            "properties": {
-                "locations": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dashboard.LocationCapacityItem"
-                    }
-                },
-                "totals": {
-                    "$ref": "#/definitions/dashboard.LocationCapacityTotals"
                 }
             }
         },
@@ -6984,6 +7297,20 @@ const docTemplate = `{
                 }
             }
         },
+        "dashboard.LocationCapacityResponse": {
+            "type": "object",
+            "properties": {
+                "locations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dashboard.LocationCapacityItem"
+                    }
+                },
+                "totals": {
+                    "$ref": "#/definitions/dashboard.LocationCapacityTotals"
+                }
+            }
+        },
         "dashboard.LocationCapacityTotals": {
             "type": "object",
             "properties": {
@@ -7001,7 +7328,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dashboard.OverviewDTO": {
+        "dashboard.OverviewResponse": {
             "type": "object",
             "properties": {
                 "openIncidents": {
@@ -7024,7 +7351,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dashboard.PipelineStatsDTO": {
+        "dashboard.PipelineStatsResponse": {
             "type": "object",
             "properties": {
                 "discharged": {
@@ -7044,7 +7371,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dashboard.ReminderDTO": {
+        "dashboard.ReminderItem": {
             "type": "object",
             "properties": {
                 "client": {
@@ -7093,7 +7420,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dashboard.TodayAppointmentsDTO": {
+        "dashboard.TodayAppointmentsResponse": {
             "type": "object",
             "properties": {
                 "appointments": {
@@ -7236,6 +7563,15 @@ const docTemplate = `{
                 "bsn": {
                     "type": "string"
                 },
+                "clientCount": {
+                    "type": "integer"
+                },
+                "contractHours": {
+                    "type": "integer"
+                },
+                "contractType": {
+                    "type": "string"
+                },
                 "dateOfBirth": {
                     "type": "string"
                 },
@@ -7252,6 +7588,18 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "lastName": {
+                    "type": "string"
+                },
+                "locationAddress": {
+                    "type": "string"
+                },
+                "locationId": {
+                    "type": "string"
+                },
+                "locationName": {
+                    "type": "string"
+                },
+                "locationPostalCode": {
                     "type": "string"
                 },
                 "permissions": {
@@ -7391,7 +7739,7 @@ const docTemplate = `{
                 }
             }
         },
-        "evaluation.CoordinatorInfoDTO": {
+        "evaluation.CoordinatorInfo": {
             "type": "object",
             "properties": {
                 "firstName": {
@@ -7429,7 +7777,7 @@ const docTemplate = `{
                     "type": "array",
                     "minItems": 1,
                     "items": {
-                        "$ref": "#/definitions/evaluation.GoalProgressDTO"
+                        "$ref": "#/definitions/evaluation.GoalProgressItem"
                     }
                 }
             }
@@ -7444,53 +7792,11 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "nextEvaluationDate": {
-                    "description": "Only set when not draft",
                     "type": "string"
                 }
             }
         },
-        "evaluation.DraftEvaluationDTO": {
-            "type": "object",
-            "properties": {
-                "clientFirstName": {
-                    "type": "string"
-                },
-                "clientId": {
-                    "type": "string"
-                },
-                "clientLastName": {
-                    "type": "string"
-                },
-                "coordinatorFirstName": {
-                    "type": "string"
-                },
-                "coordinatorLastName": {
-                    "type": "string"
-                },
-                "createdAt": {
-                    "type": "string"
-                },
-                "evaluationDate": {
-                    "type": "string"
-                },
-                "evaluationId": {
-                    "type": "string"
-                },
-                "goalProgress": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/evaluation.GoalProgressItemDTO"
-                    }
-                },
-                "overallNotes": {
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
-                }
-            }
-        },
-        "evaluation.DraftEvaluationListItemDTO": {
+        "evaluation.DraftEvaluationListItem": {
             "type": "object",
             "properties": {
                 "clientFirstName": {
@@ -7516,7 +7822,7 @@ const docTemplate = `{
                 }
             }
         },
-        "evaluation.EvaluationDTO": {
+        "evaluation.DraftEvaluationResponse": {
             "type": "object",
             "properties": {
                 "clientFirstName": {
@@ -7546,13 +7852,10 @@ const docTemplate = `{
                 "goalProgress": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/evaluation.GoalProgressItemDTO"
+                        "$ref": "#/definitions/evaluation.GoalProgressItem"
                     }
                 },
                 "overallNotes": {
-                    "type": "string"
-                },
-                "status": {
                     "type": "string"
                 },
                 "updatedAt": {
@@ -7592,7 +7895,51 @@ const docTemplate = `{
                 }
             }
         },
-        "evaluation.GlobalRecentEvaluationDTO": {
+        "evaluation.EvaluationResponse": {
+            "type": "object",
+            "properties": {
+                "clientFirstName": {
+                    "type": "string"
+                },
+                "clientId": {
+                    "type": "string"
+                },
+                "clientLastName": {
+                    "type": "string"
+                },
+                "coordinatorFirstName": {
+                    "type": "string"
+                },
+                "coordinatorLastName": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "evaluationDate": {
+                    "type": "string"
+                },
+                "evaluationId": {
+                    "type": "string"
+                },
+                "goalProgress": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/evaluation.GoalProgressItem"
+                    }
+                },
+                "overallNotes": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "evaluation.GlobalRecentEvaluationItem": {
             "type": "object",
             "properties": {
                 "clientFirstName": {
@@ -7624,37 +7971,7 @@ const docTemplate = `{
                 }
             }
         },
-        "evaluation.GoalProgressDTO": {
-            "type": "object",
-            "required": [
-                "goalId",
-                "status"
-            ],
-            "properties": {
-                "goalId": {
-                    "type": "string"
-                },
-                "progressNotes": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string",
-                    "enum": [
-                        "not_started",
-                        "starting",
-                        "in_progress",
-                        "on_track",
-                        "delayed",
-                        "stagnant",
-                        "deteriorating",
-                        "adjusted",
-                        "not_applicable",
-                        "achieved"
-                    ]
-                }
-            }
-        },
-        "evaluation.GoalProgressItemDTO": {
+        "evaluation.GoalProgressItem": {
             "type": "object",
             "properties": {
                 "goalId": {
@@ -7671,11 +7988,11 @@ const docTemplate = `{
                 }
             }
         },
-        "evaluation.LastEvaluationDTO": {
+        "evaluation.LastEvaluationItem": {
             "type": "object",
             "properties": {
                 "coordinator": {
-                    "$ref": "#/definitions/evaluation.CoordinatorInfoDTO"
+                    "$ref": "#/definitions/evaluation.CoordinatorInfo"
                 },
                 "evaluationDate": {
                     "type": "string"
@@ -7686,7 +8003,7 @@ const docTemplate = `{
                 "goalProgress": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/evaluation.GoalProgressItemDTO"
+                        "$ref": "#/definitions/evaluation.GoalProgressItem"
                     }
                 },
                 "overallNotes": {
@@ -7717,7 +8034,7 @@ const docTemplate = `{
                 "progressLogs": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/evaluation.GoalProgressDTO"
+                        "$ref": "#/definitions/evaluation.GoalProgressItem"
                     }
                 }
             }
@@ -7733,7 +8050,7 @@ const docTemplate = `{
                 }
             }
         },
-        "evaluation.UpcomingEvaluationDTO": {
+        "evaluation.UpcomingEvaluationItem": {
             "type": "object",
             "properties": {
                 "coordinatorFirstName": {
@@ -7785,7 +8102,7 @@ const docTemplate = `{
                     "type": "array",
                     "minItems": 1,
                     "items": {
-                        "$ref": "#/definitions/evaluation.GoalProgressDTO"
+                        "$ref": "#/definitions/evaluation.GoalProgressItem"
                     }
                 }
             }
@@ -7944,20 +8261,20 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "countsBySeverity": {
-                    "$ref": "#/definitions/incident.IncidentSeverityCountsDTO"
+                    "$ref": "#/definitions/incident.IncidentSeverityCounts"
                 },
                 "countsByStatus": {
-                    "$ref": "#/definitions/incident.IncidentStatusCountsDTO"
+                    "$ref": "#/definitions/incident.IncidentStatusCounts"
                 },
                 "countsByType": {
-                    "$ref": "#/definitions/incident.IncidentTypeCountsDTO"
+                    "$ref": "#/definitions/incident.IncidentTypeCounts"
                 },
                 "totalCount": {
                     "type": "integer"
                 }
             }
         },
-        "incident.IncidentSeverityCountsDTO": {
+        "incident.IncidentSeverityCounts": {
             "type": "object",
             "properties": {
                 "minor": {
@@ -7971,7 +8288,7 @@ const docTemplate = `{
                 }
             }
         },
-        "incident.IncidentStatusCountsDTO": {
+        "incident.IncidentStatusCounts": {
             "type": "object",
             "properties": {
                 "completed": {
@@ -7985,7 +8302,7 @@ const docTemplate = `{
                 }
             }
         },
-        "incident.IncidentTypeCountsDTO": {
+        "incident.IncidentTypeCounts": {
             "type": "object",
             "properties": {
                 "aggression": {
@@ -8151,7 +8468,7 @@ const docTemplate = `{
                     "type": "array",
                     "minItems": 1,
                     "items": {
-                        "$ref": "#/definitions/intake.GoalDTO"
+                        "$ref": "#/definitions/intake.GoalItem"
                     }
                 },
                 "intakeDate": {
@@ -8221,7 +8538,7 @@ const docTemplate = `{
                 "goals": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/intake.GoalDTO"
+                        "$ref": "#/definitions/intake.GoalItem"
                     }
                 },
                 "hasClient": {
@@ -8276,7 +8593,7 @@ const docTemplate = `{
                 }
             }
         },
-        "intake.GoalDTO": {
+        "intake.GoalItem": {
             "type": "object",
             "required": [
                 "title"
@@ -8368,7 +8685,7 @@ const docTemplate = `{
                 "goals": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/intake.GoalDTO"
+                        "$ref": "#/definitions/intake.GoalItem"
                     }
                 },
                 "intakeDate": {
@@ -8413,7 +8730,7 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "countsByStatus": {
-                    "$ref": "#/definitions/location_transfer.TransferStatusCountsDTO"
+                    "$ref": "#/definitions/location_transfer.TransferStatusCounts"
                 },
                 "pendingCount": {
                     "type": "integer"
@@ -8521,7 +8838,7 @@ const docTemplate = `{
                 }
             }
         },
-        "location_transfer.TransferStatusCountsDTO": {
+        "location_transfer.TransferStatusCounts": {
             "type": "object",
             "properties": {
                 "approved": {
@@ -9482,13 +9799,13 @@ const docTemplate = `{
                 }
             }
         },
-        "resp.PaginationResponse-evaluation_DraftEvaluationListItemDTO": {
+        "resp.PaginationResponse-evaluation_DraftEvaluationListItem": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/evaluation.DraftEvaluationListItemDTO"
+                        "$ref": "#/definitions/evaluation.DraftEvaluationListItem"
                     }
                 },
                 "page": {
@@ -9505,13 +9822,13 @@ const docTemplate = `{
                 }
             }
         },
-        "resp.PaginationResponse-evaluation_GlobalRecentEvaluationDTO": {
+        "resp.PaginationResponse-evaluation_GlobalRecentEvaluationItem": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/evaluation.GlobalRecentEvaluationDTO"
+                        "$ref": "#/definitions/evaluation.GlobalRecentEvaluationItem"
                     }
                 },
                 "page": {
@@ -9528,13 +9845,13 @@ const docTemplate = `{
                 }
             }
         },
-        "resp.PaginationResponse-evaluation_UpcomingEvaluationDTO": {
+        "resp.PaginationResponse-evaluation_UpcomingEvaluationItem": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/evaluation.UpcomingEvaluationDTO"
+                        "$ref": "#/definitions/evaluation.UpcomingEvaluationItem"
                     }
                 },
                 "page": {
@@ -9722,13 +10039,13 @@ const docTemplate = `{
                 }
             }
         },
-        "resp.SuccessResponse-array_calendar_CalendarEventDTO": {
+        "resp.SuccessResponse-array_calendar_CalendarEvent": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/calendar.CalendarEventDTO"
+                        "$ref": "#/definitions/calendar.CalendarEvent"
                     }
                 },
                 "message": {
@@ -9846,6 +10163,22 @@ const docTemplate = `{
                 }
             }
         },
+        "resp.SuccessResponse-auth_EnableMFAResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/auth.EnableMFAResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
         "resp.SuccessResponse-auth_LoginResponse": {
             "type": "object",
             "properties": {
@@ -9867,6 +10200,38 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/auth.RefreshTokensResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-auth_SetupMFAResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/auth.SetupMFAResponse"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success message"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "resp.SuccessResponse-auth_VerifyMFAResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/auth.VerifyMFAResponse"
                 },
                 "message": {
                     "type": "string",
@@ -10022,11 +10387,11 @@ const docTemplate = `{
                 }
             }
         },
-        "resp.SuccessResponse-dashboard_CareTypeDistributionDTO": {
+        "resp.SuccessResponse-dashboard_CareTypeDistributionResponse": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dashboard.CareTypeDistributionDTO"
+                    "$ref": "#/definitions/dashboard.CareTypeDistributionResponse"
                 },
                 "message": {
                     "type": "string",
@@ -10038,11 +10403,11 @@ const docTemplate = `{
                 }
             }
         },
-        "resp.SuccessResponse-dashboard_CoordinatorClientsDTO": {
+        "resp.SuccessResponse-dashboard_CoordinatorClientsResponse": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dashboard.CoordinatorClientsDTO"
+                    "$ref": "#/definitions/dashboard.CoordinatorClientsResponse"
                 },
                 "message": {
                     "type": "string",
@@ -10054,11 +10419,11 @@ const docTemplate = `{
                 }
             }
         },
-        "resp.SuccessResponse-dashboard_CoordinatorGoalsProgressDTO": {
+        "resp.SuccessResponse-dashboard_CoordinatorGoalsProgressResponse": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dashboard.CoordinatorGoalsProgressDTO"
+                    "$ref": "#/definitions/dashboard.CoordinatorGoalsProgressResponse"
                 },
                 "message": {
                     "type": "string",
@@ -10070,11 +10435,11 @@ const docTemplate = `{
                 }
             }
         },
-        "resp.SuccessResponse-dashboard_CoordinatorIncidentsDTO": {
+        "resp.SuccessResponse-dashboard_CoordinatorIncidentsResponse": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dashboard.CoordinatorIncidentsDTO"
+                    "$ref": "#/definitions/dashboard.CoordinatorIncidentsResponse"
                 },
                 "message": {
                     "type": "string",
@@ -10086,11 +10451,11 @@ const docTemplate = `{
                 }
             }
         },
-        "resp.SuccessResponse-dashboard_CoordinatorRemindersDTO": {
+        "resp.SuccessResponse-dashboard_CoordinatorRemindersResponse": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dashboard.CoordinatorRemindersDTO"
+                    "$ref": "#/definitions/dashboard.CoordinatorRemindersResponse"
                 },
                 "message": {
                     "type": "string",
@@ -10102,11 +10467,11 @@ const docTemplate = `{
                 }
             }
         },
-        "resp.SuccessResponse-dashboard_CoordinatorStatsDTO": {
+        "resp.SuccessResponse-dashboard_CoordinatorStatsResponse": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dashboard.CoordinatorStatsDTO"
+                    "$ref": "#/definitions/dashboard.CoordinatorStatsResponse"
                 },
                 "message": {
                     "type": "string",
@@ -10118,11 +10483,11 @@ const docTemplate = `{
                 }
             }
         },
-        "resp.SuccessResponse-dashboard_CoordinatorTodayScheduleDTO": {
+        "resp.SuccessResponse-dashboard_CoordinatorTodayScheduleResponse": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dashboard.CoordinatorTodayScheduleDTO"
+                    "$ref": "#/definitions/dashboard.CoordinatorTodayScheduleResponse"
                 },
                 "message": {
                     "type": "string",
@@ -10134,11 +10499,11 @@ const docTemplate = `{
                 }
             }
         },
-        "resp.SuccessResponse-dashboard_CoordinatorUrgentAlertsDTO": {
+        "resp.SuccessResponse-dashboard_CoordinatorUrgentAlertsResponse": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dashboard.CoordinatorUrgentAlertsDTO"
+                    "$ref": "#/definitions/dashboard.CoordinatorUrgentAlertsResponse"
                 },
                 "message": {
                     "type": "string",
@@ -10150,11 +10515,11 @@ const docTemplate = `{
                 }
             }
         },
-        "resp.SuccessResponse-dashboard_CriticalAlertsDTO": {
+        "resp.SuccessResponse-dashboard_CriticalAlertsResponse": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dashboard.CriticalAlertsDTO"
+                    "$ref": "#/definitions/dashboard.CriticalAlertsResponse"
                 },
                 "message": {
                     "type": "string",
@@ -10166,11 +10531,11 @@ const docTemplate = `{
                 }
             }
         },
-        "resp.SuccessResponse-dashboard_DischargeStatsDTO": {
+        "resp.SuccessResponse-dashboard_DischargeStatsResponse": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dashboard.DischargeStatsDTO"
+                    "$ref": "#/definitions/dashboard.DischargeStatsResponse"
                 },
                 "message": {
                     "type": "string",
@@ -10182,11 +10547,11 @@ const docTemplate = `{
                 }
             }
         },
-        "resp.SuccessResponse-dashboard_EvaluationStatsDTO": {
+        "resp.SuccessResponse-dashboard_EvaluationStatsResponse": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dashboard.EvaluationStatsDTO"
+                    "$ref": "#/definitions/dashboard.EvaluationStatsResponse"
                 },
                 "message": {
                     "type": "string",
@@ -10198,11 +10563,11 @@ const docTemplate = `{
                 }
             }
         },
-        "resp.SuccessResponse-dashboard_LocationCapacityDTO": {
+        "resp.SuccessResponse-dashboard_LocationCapacityResponse": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dashboard.LocationCapacityDTO"
+                    "$ref": "#/definitions/dashboard.LocationCapacityResponse"
                 },
                 "message": {
                     "type": "string",
@@ -10214,11 +10579,11 @@ const docTemplate = `{
                 }
             }
         },
-        "resp.SuccessResponse-dashboard_OverviewDTO": {
+        "resp.SuccessResponse-dashboard_OverviewResponse": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dashboard.OverviewDTO"
+                    "$ref": "#/definitions/dashboard.OverviewResponse"
                 },
                 "message": {
                     "type": "string",
@@ -10230,11 +10595,11 @@ const docTemplate = `{
                 }
             }
         },
-        "resp.SuccessResponse-dashboard_PipelineStatsDTO": {
+        "resp.SuccessResponse-dashboard_PipelineStatsResponse": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dashboard.PipelineStatsDTO"
+                    "$ref": "#/definitions/dashboard.PipelineStatsResponse"
                 },
                 "message": {
                     "type": "string",
@@ -10246,11 +10611,11 @@ const docTemplate = `{
                 }
             }
         },
-        "resp.SuccessResponse-dashboard_TodayAppointmentsDTO": {
+        "resp.SuccessResponse-dashboard_TodayAppointmentsResponse": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dashboard.TodayAppointmentsDTO"
+                    "$ref": "#/definitions/dashboard.TodayAppointmentsResponse"
                 },
                 "message": {
                     "type": "string",
@@ -10342,11 +10707,11 @@ const docTemplate = `{
                 }
             }
         },
-        "resp.SuccessResponse-evaluation_DraftEvaluationDTO": {
+        "resp.SuccessResponse-evaluation_DraftEvaluationResponse": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/evaluation.DraftEvaluationDTO"
+                    "$ref": "#/definitions/evaluation.DraftEvaluationResponse"
                 },
                 "message": {
                     "type": "string",
@@ -10358,11 +10723,11 @@ const docTemplate = `{
                 }
             }
         },
-        "resp.SuccessResponse-evaluation_EvaluationDTO": {
+        "resp.SuccessResponse-evaluation_EvaluationResponse": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/evaluation.EvaluationDTO"
+                    "$ref": "#/definitions/evaluation.EvaluationResponse"
                 },
                 "message": {
                     "type": "string",
@@ -10374,11 +10739,11 @@ const docTemplate = `{
                 }
             }
         },
-        "resp.SuccessResponse-evaluation_LastEvaluationDTO": {
+        "resp.SuccessResponse-evaluation_LastEvaluationItem": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/evaluation.LastEvaluationDTO"
+                    "$ref": "#/definitions/evaluation.LastEvaluationItem"
                 },
                 "message": {
                     "type": "string",
@@ -10966,11 +11331,11 @@ const docTemplate = `{
                 }
             }
         },
-        "resp.SuccessResponse-resp_PaginationResponse-evaluation_DraftEvaluationListItemDTO": {
+        "resp.SuccessResponse-resp_PaginationResponse-evaluation_DraftEvaluationListItem": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/resp.PaginationResponse-evaluation_DraftEvaluationListItemDTO"
+                    "$ref": "#/definitions/resp.PaginationResponse-evaluation_DraftEvaluationListItem"
                 },
                 "message": {
                     "type": "string",
@@ -10982,11 +11347,11 @@ const docTemplate = `{
                 }
             }
         },
-        "resp.SuccessResponse-resp_PaginationResponse-evaluation_GlobalRecentEvaluationDTO": {
+        "resp.SuccessResponse-resp_PaginationResponse-evaluation_GlobalRecentEvaluationItem": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/resp.PaginationResponse-evaluation_GlobalRecentEvaluationDTO"
+                    "$ref": "#/definitions/resp.PaginationResponse-evaluation_GlobalRecentEvaluationItem"
                 },
                 "message": {
                     "type": "string",
@@ -10998,11 +11363,11 @@ const docTemplate = `{
                 }
             }
         },
-        "resp.SuccessResponse-resp_PaginationResponse-evaluation_UpcomingEvaluationDTO": {
+        "resp.SuccessResponse-resp_PaginationResponse-evaluation_UpcomingEvaluationItem": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/resp.PaginationResponse-evaluation_UpcomingEvaluationDTO"
+                    "$ref": "#/definitions/resp.PaginationResponse-evaluation_UpcomingEvaluationItem"
                 },
                 "message": {
                     "type": "string",

@@ -1,9 +1,9 @@
 package employee
 
 import (
-	"care-cordination/lib/middleware"
 	db "care-cordination/lib/db/sqlc"
 	"care-cordination/lib/logger"
+	"care-cordination/lib/middleware"
 	"care-cordination/lib/nanoid"
 	"care-cordination/lib/resp"
 	"care-cordination/lib/util"
@@ -175,6 +175,37 @@ func (s *employeeService) GetMyProfile(ctx context.Context) (*GetMyProfileRespon
 		roleName = *employee.RoleName
 	}
 
+	locationName := ""
+	if employee.LocationName != nil {
+		locationName = *employee.LocationName
+	}
+
+	locationAddress := ""
+	if employee.LocationAddress != nil {
+		locationAddress = *employee.LocationAddress
+	}
+
+	locationPostalCode := ""
+	if employee.LocationPostalCode != nil {
+		locationPostalCode = *employee.LocationPostalCode
+	}
+
+	var contractType *string
+	if employee.ContractType.Valid {
+		value := string(employee.ContractType.ContractTypeEnum)
+		contractType = &value
+	}
+
+	clientCount := int64(0)
+	switch count := employee.ClientCount.(type) {
+	case int64:
+		clientCount = count
+	case int32:
+		clientCount = int64(count)
+	case int:
+		clientCount = int64(count)
+	}
+
 	// Fetch permissions for the user's role
 	permissionsResponse := []PermissionResponse{}
 	if employee.RoleID != nil {
@@ -199,17 +230,24 @@ func (s *employeeService) GetMyProfile(ctx context.Context) (*GetMyProfileRespon
 	}
 
 	return &GetMyProfileResponse{
-		ID:          employee.ID,
-		UserID:      employee.UserID,
-		FirstName:   employee.FirstName,
-		LastName:    employee.LastName,
-		Email:       employee.Email,
-		BSN:         employee.Bsn,
-		DateOfBirth: employee.DateOfBirth.Time.Format("2006-01-02"),
-		PhoneNumber: employee.PhoneNumber,
-		Gender:      string(employee.Gender),
-		Role:        roleName,
-		Permissions: permissionsResponse,
+		ID:                 employee.ID,
+		UserID:             employee.UserID,
+		FirstName:          employee.FirstName,
+		LastName:           employee.LastName,
+		Email:              employee.Email,
+		BSN:                employee.Bsn,
+		DateOfBirth:        employee.DateOfBirth.Time.Format("2006-01-02"),
+		PhoneNumber:        employee.PhoneNumber,
+		Gender:             string(employee.Gender),
+		Role:               roleName,
+		ContractHours:      employee.ContractHours,
+		ContractType:       contractType,
+		ClientCount:        clientCount,
+		LocationID:         employee.LocationID,
+		LocationName:       locationName,
+		LocationAddress:    locationAddress,
+		LocationPostalCode: locationPostalCode,
+		Permissions:        permissionsResponse,
 	}, nil
 }
 

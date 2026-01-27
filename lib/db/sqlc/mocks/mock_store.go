@@ -1660,6 +1660,21 @@ func (mr *MockStoreInterfaceMockRecorder) GetUserByEmail(ctx, email any) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByEmail", reflect.TypeOf((*MockStoreInterface)(nil).GetUserByEmail), ctx, email)
 }
 
+// GetUserByID mocks base method.
+func (m *MockStoreInterface) GetUserByID(ctx context.Context, id string) (db.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserByID", ctx, id)
+	ret0, _ := ret[0].(db.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserByID indicates an expected call of GetUserByID.
+func (mr *MockStoreInterfaceMockRecorder) GetUserByID(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByID", reflect.TypeOf((*MockStoreInterface)(nil).GetUserByID), ctx, id)
+}
+
 // GetUserIDsByRoleName mocks base method.
 func (m *MockStoreInterface) GetUserIDsByRoleName(ctx context.Context, name string) ([]string, error) {
 	m.ctrl.T.Helper()

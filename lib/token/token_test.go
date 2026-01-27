@@ -17,7 +17,7 @@ const (
 )
 
 func newTestTokenManager() TokenManager {
-	return NewTokenManager(testAccessSecret, testRefreshSecret, testAccessTTL, testRefreshTTL)
+	return NewTokenManager(testAccessSecret, testRefreshSecret, testAccessTTL, testRefreshTTL, 5*time.Minute)
 }
 
 // ============================================================
@@ -241,7 +241,7 @@ func TestValidateAccessToken(t *testing.T) {
 			name: "wrong_secret",
 			setup: func(t *testing.T, tm TokenManager) string {
 				// Create a token with a different secret
-				wrongTm := NewTokenManager("wrong-secret-key-32-bytes-long!", testRefreshSecret, testAccessTTL, testRefreshTTL)
+				wrongTm := NewTokenManager("wrong-secret-key-32-bytes-long!", testRefreshSecret, testAccessTTL, testRefreshTTL, 5*time.Minute)
 				token, err := wrongTm.GenerateAccessToken("user-123", "emp-456", time.Now())
 				require.NoError(t, err)
 				return token
@@ -360,7 +360,7 @@ func TestValidateRefreshToken(t *testing.T) {
 			name: "wrong_secret",
 			setup: func(t *testing.T, tm TokenManager) string {
 				// Create a token with a different secret
-				wrongTm := NewTokenManager(testAccessSecret, "wrong-refresh-secret-32-bytes!!", testAccessTTL, testRefreshTTL)
+				wrongTm := NewTokenManager(testAccessSecret, "wrong-refresh-secret-32-bytes!!", testAccessTTL, testRefreshTTL, 5*time.Minute)
 				token, _, err := wrongTm.GenerateRefreshToken("user-123", time.Now())
 				require.NoError(t, err)
 				return token

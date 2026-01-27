@@ -12,6 +12,7 @@ import (
 //go:generate mockgen -destination=mocks/mock_token_manager.go -package=mocks care-cordination/lib/token TokenManager
 type TokenManager interface {
 	GenerateAccessToken(userID, employeeID string, now time.Time) (string, error)
+	GenerateMFAPendingToken(userID string, now time.Time) (string, error)
 	GenerateRefreshToken(userID string, now time.Time) (string, *RefreshTokenClaims, error)
 	ValidateAccessToken(tokenStr string) (*AccessTokenClaims, error)
 	ValidateRefreshToken(tokenStr string) (*RefreshTokenClaims, error)
@@ -22,9 +23,14 @@ type tokenManager struct {
 	refreshSecret []byte
 	accessTTL     time.Duration
 	refreshTTL    time.Duration
+	mfaPendingTTL time.Duration
 	issuer        string
 	audience      string
 }
+
+const (
+	ScopeMFAPending = "mfa_pending"
+)
 
 type AccessTokenClaims struct {
 	Scope      string `json:"scope,omitempty"`
@@ -40,13 +46,14 @@ type RefreshTokenClaims struct {
 
 func NewTokenManager(
 	accessSecret, refreshSecret string,
-	accessTTL, refreshTTL time.Duration,
+	accessTTL, refreshTTL, mfaPendingTTL time.Duration,
 ) TokenManager {
 	return &tokenManager{
 		accessSecret:  []byte(accessSecret),
 		refreshSecret: []byte(refreshSecret),
 		accessTTL:     accessTTL,
 		refreshTTL:    refreshTTL,
+		mfaPendingTTL: mfaPendingTTL,
 		issuer:        "care-coordination",
 		audience:      "care-coordination",
 	}
@@ -61,6 +68,26 @@ func (tm *tokenManager) GenerateAccessToken(
 
 	accessClaims := &AccessTokenClaims{
 		EmployeeID: employeeID,
+		RegisteredClaims: jwt.RegisteredClaims{
+			Issuer:    tm.issuer,
+			Audience:  jwt.ClaimStrings{tm.audience},
+			Subject:   userID,
+			IssuedAt:  jwt.NewNumericDate(now),
+			ExpiresAt: jwt.NewNumericDate(accessExpire),
+		},
+	}
+
+	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
+	return accessToken.SignedString(tm.accessSecret)
+}
+
+func (tm *tokenManager) GenerateMFAPendingToken(
+	userID string,
+	now time.Time,
+) (string, error) {
+	accessExpire := now.Add(tm.mfaPendingTTL)
+	accessClaims := &AccessTokenClaims{
+		Scope: ScopeMFAPending,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    tm.issuer,
 			Audience:  jwt.ClaimStrings{tm.audience},

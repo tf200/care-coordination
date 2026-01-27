@@ -139,37 +139,64 @@ func (q *Queries) GetEmployeeByID(ctx context.Context, id string) (GetEmployeeBy
 }
 
 const getEmployeeByUserID = `-- name: GetEmployeeByUserID :one
-SELECT e.id, e.user_id, e.first_name, e.last_name, e.bsn, e.date_of_birth, e.phone_number, e.gender, e.contract_hours, e.contract_type, e.location_id, e.created_at, e.updated_at, e.is_deleted, u.email,
-       r.id as role_id,
-       r.name as role_name,
-       l.name as location_name
+SELECT
+    e.id,
+    e.user_id,
+    e.first_name,
+    e.last_name,
+    e.bsn,
+    e.date_of_birth,
+    e.phone_number,
+    e.gender,
+    e.contract_hours,
+    e.contract_type,
+    e.location_id,
+    e.created_at,
+    e.updated_at,
+    e.is_deleted,
+    u.email,
+    r.id as role_id,
+    r.name as role_name,
+    l.name as location_name,
+    l.address as location_address,
+    l.postal_code as location_postal_code,
+    COALESCE(COUNT(DISTINCT c.id), 0) as client_count
 FROM employees e
 JOIN users u ON e.user_id = u.id
 LEFT JOIN user_roles ur ON e.user_id = ur.user_id
 LEFT JOIN roles r ON ur.role_id = r.id
 LEFT JOIN locations l ON e.location_id = l.id
-WHERE e.user_id = $1 LIMIT 1
+LEFT JOIN clients c ON c.coordinator_id = e.id
+WHERE e.user_id = $1
+GROUP BY e.id, e.user_id, e.first_name, e.last_name, e.bsn, e.date_of_birth,
+         e.phone_number, e.gender, e.contract_hours, e.contract_type, e.location_id,
+         e.created_at, e.updated_at, e.is_deleted, u.email, r.id, r.name,
+         l.name, l.address, l.postal_code
+LIMIT 1
 `
 
 type GetEmployeeByUserIDRow struct {
-	ID            string               `json:"id"`
-	UserID        string               `json:"user_id"`
-	FirstName     string               `json:"first_name"`
-	LastName      string               `json:"last_name"`
-	Bsn           string               `json:"bsn"`
-	DateOfBirth   pgtype.Date          `json:"date_of_birth"`
-	PhoneNumber   string               `json:"phone_number"`
-	Gender        GenderEnum           `json:"gender"`
-	ContractHours *int32               `json:"contract_hours"`
-	ContractType  NullContractTypeEnum `json:"contract_type"`
-	LocationID    string               `json:"location_id"`
-	CreatedAt     pgtype.Timestamp     `json:"created_at"`
-	UpdatedAt     pgtype.Timestamp     `json:"updated_at"`
-	IsDeleted     *bool                `json:"is_deleted"`
-	Email         string               `json:"email"`
-	RoleID        *string              `json:"role_id"`
-	RoleName      *string              `json:"role_name"`
-	LocationName  *string              `json:"location_name"`
+	ID                 string               `json:"id"`
+	UserID             string               `json:"user_id"`
+	FirstName          string               `json:"first_name"`
+	LastName           string               `json:"last_name"`
+	Bsn                string               `json:"bsn"`
+	DateOfBirth        pgtype.Date          `json:"date_of_birth"`
+	PhoneNumber        string               `json:"phone_number"`
+	Gender             GenderEnum           `json:"gender"`
+	ContractHours      *int32               `json:"contract_hours"`
+	ContractType       NullContractTypeEnum `json:"contract_type"`
+	LocationID         string               `json:"location_id"`
+	CreatedAt          pgtype.Timestamp     `json:"created_at"`
+	UpdatedAt          pgtype.Timestamp     `json:"updated_at"`
+	IsDeleted          *bool                `json:"is_deleted"`
+	Email              string               `json:"email"`
+	RoleID             *string              `json:"role_id"`
+	RoleName           *string              `json:"role_name"`
+	LocationName       *string              `json:"location_name"`
+	LocationAddress    *string              `json:"location_address"`
+	LocationPostalCode *string              `json:"location_postal_code"`
+	ClientCount        interface{}          `json:"client_count"`
 }
 
 func (q *Queries) GetEmployeeByUserID(ctx context.Context, userID string) (GetEmployeeByUserIDRow, error) {
@@ -194,6 +221,9 @@ func (q *Queries) GetEmployeeByUserID(ctx context.Context, userID string) (GetEm
 		&i.RoleID,
 		&i.RoleName,
 		&i.LocationName,
+		&i.LocationAddress,
+		&i.LocationPostalCode,
+		&i.ClientCount,
 	)
 	return i, err
 }

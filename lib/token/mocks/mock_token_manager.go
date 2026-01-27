@@ -56,6 +56,21 @@ func (mr *MockTokenManagerMockRecorder) GenerateAccessToken(userID, employeeID, 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenerateAccessToken", reflect.TypeOf((*MockTokenManager)(nil).GenerateAccessToken), userID, employeeID, now)
 }
 
+// GenerateMFAPendingToken mocks base method.
+func (m *MockTokenManager) GenerateMFAPendingToken(userID string, now time.Time) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GenerateMFAPendingToken", userID, now)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GenerateMFAPendingToken indicates an expected call of GenerateMFAPendingToken.
+func (mr *MockTokenManagerMockRecorder) GenerateMFAPendingToken(userID, now any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenerateMFAPendingToken", reflect.TypeOf((*MockTokenManager)(nil).GenerateMFAPendingToken), userID, now)
+}
+
 // GenerateRefreshToken mocks base method.
 func (m *MockTokenManager) GenerateRefreshToken(userID string, now time.Time) (string, *token.RefreshTokenClaims, error) {
 	m.ctrl.T.Helper()

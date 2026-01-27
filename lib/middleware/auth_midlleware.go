@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"care-cordination/lib/resp"
+	"care-cordination/lib/token"
 	"net/http"
 	"strings"
 
@@ -35,6 +36,10 @@ func (m *Middleware) AuthMdw() gin.HandlerFunc {
 		payload, err := m.tokenMaker.ValidateAccessToken(accessToken)
 		if err != nil {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, resp.Error(err))
+			return
+		}
+		if payload.Scope == token.ScopeMFAPending {
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, resp.Error(ErrUnauthorized))
 			return
 		}
 

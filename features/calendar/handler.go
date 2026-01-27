@@ -50,7 +50,7 @@ func (h *CalendarHandler) SetupRoutes(router *gin.Engine) {
 // @Param start query string true "Start time (RFC3339 format)"
 // @Param end query string true "End time (RFC3339 format)"
 // @Param employee_id query string false "Employee ID (defaults to current user)"
-// @Success 200 {object} resp.SuccessResponse[[]CalendarEventDTO]
+// @Success 200 {object} resp.SuccessResponse[[]CalendarEvent]
 // @Failure 400 {object} resp.ErrorResponse
 // @Failure 401 {object} resp.ErrorResponse
 // @Failure 500 {object} resp.ErrorResponse

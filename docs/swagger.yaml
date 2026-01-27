@@ -86,6 +86,27 @@ definitions:
       verified_entries:
         type: integer
     type: object
+  auth.DisableMFARequest:
+    properties:
+      password:
+        type: string
+    required:
+    - password
+    type: object
+  auth.EnableMFARequest:
+    properties:
+      code:
+        type: string
+    required:
+    - code
+    type: object
+  auth.EnableMFAResponse:
+    properties:
+      backupCodes:
+        items:
+          type: string
+        type: array
+    type: object
   auth.LoginRequest:
     properties:
       email:
@@ -99,6 +120,10 @@ definitions:
   auth.LoginResponse:
     properties:
       accessToken:
+        type: string
+      mfaRequired:
+        type: boolean
+      preAuthToken:
         type: string
       refreshToken:
         type: string
@@ -124,6 +149,38 @@ definitions:
       refreshToken:
         type: string
     type: object
+  auth.ResetPasswordRequest:
+    properties:
+      currentPassword:
+        type: string
+      newPassword:
+        minLength: 6
+        type: string
+    required:
+    - currentPassword
+    - newPassword
+    type: object
+  auth.SetupMFAResponse:
+    properties:
+      otpAuthUrl:
+        type: string
+      secret:
+        type: string
+    type: object
+  auth.VerifyMFARequest:
+    properties:
+      code:
+        type: string
+    required:
+    - code
+    type: object
+  auth.VerifyMFAResponse:
+    properties:
+      accessToken:
+        type: string
+      refreshToken:
+        type: string
+    type: object
   calendar.AppointmentResponse:
     properties:
       createdAt:
@@ -140,7 +197,7 @@ definitions:
         type: string
       participants:
         items:
-          $ref: '#/definitions/calendar.ParticipantDTO'
+          $ref: '#/definitions/calendar.Participant'
         type: array
       recurrenceRule:
         type: string
@@ -175,7 +232,7 @@ definitions:
     - TypeGeneral
     - TypeIntake
     - TypeAmbulatory
-  calendar.CalendarEventDTO:
+  calendar.CalendarEvent:
     properties:
       allDay:
         type: boolean
@@ -192,7 +249,6 @@ definitions:
       title:
         type: string
       type:
-        description: '"appointment" or "reminder"'
         type: string
     type: object
   calendar.CalendarExtendedProps:
@@ -222,7 +278,7 @@ definitions:
         type: string
       participants:
         items:
-          $ref: '#/definitions/calendar.ParticipantDTO'
+          $ref: '#/definitions/calendar.Participant'
         minItems: 1
         type: array
       recurrenceRule:
@@ -264,7 +320,7 @@ definitions:
     - dueTime
     - title
     type: object
-  calendar.ParticipantDTO:
+  calendar.Participant:
     properties:
       id:
         type: string
@@ -315,7 +371,7 @@ definitions:
         type: string
       participants:
         items:
-          $ref: '#/definitions/calendar.ParticipantDTO'
+          $ref: '#/definitions/calendar.Participant'
         type: array
       recurrenceRule:
         type: string
@@ -343,7 +399,7 @@ definitions:
       isCompleted:
         type: boolean
     type: object
-  client.CareTypeCountsDTO:
+  client.CareTypeCounts:
     properties:
       ambulatoryCare:
         type: integer
@@ -391,7 +447,7 @@ definitions:
       averageDaysInCare:
         type: number
       countsByCareType:
-        $ref: '#/definitions/client.CareTypeCountsDTO'
+        $ref: '#/definitions/client.CareTypeCounts'
       totalCount:
         type: integer
     type: object
@@ -400,7 +456,7 @@ definitions:
       averageDaysWaiting:
         type: number
       countsByPriority:
-        $ref: '#/definitions/client.PriorityCountsDTO'
+        $ref: '#/definitions/client.PriorityCounts'
       highPriorityCount:
         type: integer
       totalCount:
@@ -579,7 +635,7 @@ definitions:
       clientId:
         type: string
     type: object
-  client.PriorityCountsDTO:
+  client.PriorityCounts:
     properties:
       high:
         type: integer
@@ -610,7 +666,7 @@ definitions:
       clientId:
         type: string
     type: object
-  dashboard.AlertDTO:
+  dashboard.AlertItem:
     properties:
       count:
         type: integer
@@ -649,15 +705,6 @@ definitions:
     - AlertTypeIncident
     - AlertTypeWaitlist
     - AlertTypeTransfer
-  dashboard.CareTypeDistributionDTO:
-    properties:
-      distribution:
-        items:
-          $ref: '#/definitions/dashboard.CareTypeDistributionItem'
-        type: array
-      total:
-        type: integer
-    type: object
   dashboard.CareTypeDistributionItem:
     properties:
       careType:
@@ -668,6 +715,15 @@ definitions:
         type: string
       percentage:
         type: number
+    type: object
+  dashboard.CareTypeDistributionResponse:
+    properties:
+      distribution:
+        items:
+          $ref: '#/definitions/dashboard.CareTypeDistributionItem'
+        type: array
+      total:
+        type: integer
     type: object
   dashboard.CoordinatorAlertSeverity:
     enum:
@@ -693,7 +749,7 @@ definitions:
     - CoordinatorAlertTypeDraft
     - CoordinatorAlertTypeIncident
     - CoordinatorAlertTypeWaitingLong
-  dashboard.CoordinatorClientDTO:
+  dashboard.CoordinatorClientItem:
     properties:
       careType:
         type: string
@@ -714,14 +770,14 @@ definitions:
       status:
         type: string
     type: object
-  dashboard.CoordinatorClientsDTO:
+  dashboard.CoordinatorClientsResponse:
     properties:
       clients:
         items:
-          $ref: '#/definitions/dashboard.CoordinatorClientDTO'
+          $ref: '#/definitions/dashboard.CoordinatorClientItem'
         type: array
     type: object
-  dashboard.CoordinatorGoalsProgressDTO:
+  dashboard.CoordinatorGoalsProgressResponse:
     properties:
       achieved:
         type: integer
@@ -734,7 +790,7 @@ definitions:
       total:
         type: integer
     type: object
-  dashboard.CoordinatorIncidentDTO:
+  dashboard.CoordinatorIncidentItem:
     properties:
       client:
         type: string
@@ -749,21 +805,21 @@ definitions:
       type:
         type: string
     type: object
-  dashboard.CoordinatorIncidentsDTO:
+  dashboard.CoordinatorIncidentsResponse:
     properties:
       incidents:
         items:
-          $ref: '#/definitions/dashboard.CoordinatorIncidentDTO'
+          $ref: '#/definitions/dashboard.CoordinatorIncidentItem'
         type: array
     type: object
-  dashboard.CoordinatorRemindersDTO:
+  dashboard.CoordinatorRemindersResponse:
     properties:
       reminders:
         items:
-          $ref: '#/definitions/dashboard.ReminderDTO'
+          $ref: '#/definitions/dashboard.ReminderItem'
         type: array
     type: object
-  dashboard.CoordinatorScheduleItemDTO:
+  dashboard.CoordinatorScheduleItem:
     properties:
       clientId:
         type: string
@@ -784,7 +840,7 @@ definitions:
       type:
         type: string
     type: object
-  dashboard.CoordinatorStatsDTO:
+  dashboard.CoordinatorStatsResponse:
     properties:
       myActiveClients:
         type: integer
@@ -795,18 +851,18 @@ definitions:
       myWaitingListClients:
         type: integer
     type: object
-  dashboard.CoordinatorTodayScheduleDTO:
+  dashboard.CoordinatorTodayScheduleResponse:
     properties:
       appointments:
         items:
-          $ref: '#/definitions/dashboard.CoordinatorScheduleItemDTO'
+          $ref: '#/definitions/dashboard.CoordinatorScheduleItem'
         type: array
       count:
         type: integer
       date:
         type: string
     type: object
-  dashboard.CoordinatorUrgentAlertDTO:
+  dashboard.CoordinatorUrgentAlertItem:
     properties:
       clientIds:
         items:
@@ -827,21 +883,21 @@ definitions:
       type:
         $ref: '#/definitions/dashboard.CoordinatorAlertType'
     type: object
-  dashboard.CoordinatorUrgentAlertsDTO:
+  dashboard.CoordinatorUrgentAlertsResponse:
     properties:
       alerts:
         items:
-          $ref: '#/definitions/dashboard.CoordinatorUrgentAlertDTO'
+          $ref: '#/definitions/dashboard.CoordinatorUrgentAlertItem'
         type: array
     type: object
-  dashboard.CriticalAlertsDTO:
+  dashboard.CriticalAlertsResponse:
     properties:
       alerts:
         items:
-          $ref: '#/definitions/dashboard.AlertDTO'
+          $ref: '#/definitions/dashboard.AlertItem'
         type: array
     type: object
-  dashboard.DischargeStatsDTO:
+  dashboard.DischargeStatsResponse:
     properties:
       averageDaysInCare:
         type: integer
@@ -852,7 +908,7 @@ definitions:
       thisYear:
         type: integer
     type: object
-  dashboard.EvaluationStatsDTO:
+  dashboard.EvaluationStatsResponse:
     properties:
       completed:
         type: integer
@@ -864,15 +920,6 @@ definitions:
         type: integer
       total:
         type: integer
-    type: object
-  dashboard.LocationCapacityDTO:
-    properties:
-      locations:
-        items:
-          $ref: '#/definitions/dashboard.LocationCapacityItem'
-        type: array
-      totals:
-        $ref: '#/definitions/dashboard.LocationCapacityTotals'
     type: object
   dashboard.LocationCapacityItem:
     properties:
@@ -889,6 +936,15 @@ definitions:
       percentage:
         type: number
     type: object
+  dashboard.LocationCapacityResponse:
+    properties:
+      locations:
+        items:
+          $ref: '#/definitions/dashboard.LocationCapacityItem'
+        type: array
+      totals:
+        $ref: '#/definitions/dashboard.LocationCapacityTotals'
+    type: object
   dashboard.LocationCapacityTotals:
     properties:
       overallPercentage:
@@ -900,7 +956,7 @@ definitions:
       totalOccupied:
         type: integer
     type: object
-  dashboard.OverviewDTO:
+  dashboard.OverviewResponse:
     properties:
       openIncidents:
         type: integer
@@ -915,7 +971,7 @@ definitions:
       waitingListCount:
         type: integer
     type: object
-  dashboard.PipelineStatsDTO:
+  dashboard.PipelineStatsResponse:
     properties:
       discharged:
         type: integer
@@ -928,7 +984,7 @@ definitions:
       waitingList:
         type: integer
     type: object
-  dashboard.ReminderDTO:
+  dashboard.ReminderItem:
     properties:
       client:
         type: string
@@ -960,7 +1016,7 @@ definitions:
       type:
         type: string
     type: object
-  dashboard.TodayAppointmentsDTO:
+  dashboard.TodayAppointmentsResponse:
     properties:
       appointments:
         items:
@@ -1058,6 +1114,12 @@ definitions:
     properties:
       bsn:
         type: string
+      clientCount:
+        type: integer
+      contractHours:
+        type: integer
+      contractType:
+        type: string
       dateOfBirth:
         type: string
       email:
@@ -1069,6 +1131,14 @@ definitions:
       id:
         type: string
       lastName:
+        type: string
+      locationAddress:
+        type: string
+      locationId:
+        type: string
+      locationName:
+        type: string
+      locationPostalCode:
         type: string
       permissions:
         items:
@@ -1161,7 +1231,7 @@ definitions:
       id:
         type: string
     type: object
-  evaluation.CoordinatorInfoDTO:
+  evaluation.CoordinatorInfo:
     properties:
       firstName:
         type: string
@@ -1182,7 +1252,7 @@ definitions:
         type: string
       progressLogs:
         items:
-          $ref: '#/definitions/evaluation.GoalProgressDTO'
+          $ref: '#/definitions/evaluation.GoalProgressItem'
         minItems: 1
         type: array
     required:
@@ -1197,37 +1267,9 @@ definitions:
       isDraft:
         type: boolean
       nextEvaluationDate:
-        description: Only set when not draft
         type: string
     type: object
-  evaluation.DraftEvaluationDTO:
-    properties:
-      clientFirstName:
-        type: string
-      clientId:
-        type: string
-      clientLastName:
-        type: string
-      coordinatorFirstName:
-        type: string
-      coordinatorLastName:
-        type: string
-      createdAt:
-        type: string
-      evaluationDate:
-        type: string
-      evaluationId:
-        type: string
-      goalProgress:
-        items:
-          $ref: '#/definitions/evaluation.GoalProgressItemDTO'
-        type: array
-      overallNotes:
-        type: string
-      updatedAt:
-        type: string
-    type: object
-  evaluation.DraftEvaluationListItemDTO:
+  evaluation.DraftEvaluationListItem:
     properties:
       clientFirstName:
         type: string
@@ -1244,7 +1286,7 @@ definitions:
       updatedAt:
         type: string
     type: object
-  evaluation.EvaluationDTO:
+  evaluation.DraftEvaluationResponse:
     properties:
       clientFirstName:
         type: string
@@ -1264,11 +1306,9 @@ definitions:
         type: string
       goalProgress:
         items:
-          $ref: '#/definitions/evaluation.GoalProgressItemDTO'
+          $ref: '#/definitions/evaluation.GoalProgressItem'
         type: array
       overallNotes:
-        type: string
-      status:
         type: string
       updatedAt:
         type: string
@@ -1294,7 +1334,36 @@ definitions:
       status:
         type: string
     type: object
-  evaluation.GlobalRecentEvaluationDTO:
+  evaluation.EvaluationResponse:
+    properties:
+      clientFirstName:
+        type: string
+      clientId:
+        type: string
+      clientLastName:
+        type: string
+      coordinatorFirstName:
+        type: string
+      coordinatorLastName:
+        type: string
+      createdAt:
+        type: string
+      evaluationDate:
+        type: string
+      evaluationId:
+        type: string
+      goalProgress:
+        items:
+          $ref: '#/definitions/evaluation.GoalProgressItem'
+        type: array
+      overallNotes:
+        type: string
+      status:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  evaluation.GlobalRecentEvaluationItem:
     properties:
       clientFirstName:
         type: string
@@ -1315,30 +1384,7 @@ definitions:
       totalGoals:
         type: integer
     type: object
-  evaluation.GoalProgressDTO:
-    properties:
-      goalId:
-        type: string
-      progressNotes:
-        type: string
-      status:
-        enum:
-        - not_started
-        - starting
-        - in_progress
-        - on_track
-        - delayed
-        - stagnant
-        - deteriorating
-        - adjusted
-        - not_applicable
-        - achieved
-        type: string
-    required:
-    - goalId
-    - status
-    type: object
-  evaluation.GoalProgressItemDTO:
+  evaluation.GoalProgressItem:
     properties:
       goalId:
         type: string
@@ -1349,17 +1395,17 @@ definitions:
       status:
         type: string
     type: object
-  evaluation.LastEvaluationDTO:
+  evaluation.LastEvaluationItem:
     properties:
       coordinator:
-        $ref: '#/definitions/evaluation.CoordinatorInfoDTO'
+        $ref: '#/definitions/evaluation.CoordinatorInfo'
       evaluationDate:
         type: string
       evaluationId:
         type: string
       goalProgress:
         items:
-          $ref: '#/definitions/evaluation.GoalProgressItemDTO'
+          $ref: '#/definitions/evaluation.GoalProgressItem'
         type: array
       overallNotes:
         type: string
@@ -1376,7 +1422,7 @@ definitions:
         type: string
       progressLogs:
         items:
-          $ref: '#/definitions/evaluation.GoalProgressDTO'
+          $ref: '#/definitions/evaluation.GoalProgressItem'
         type: array
     required:
     - clientId
@@ -1390,7 +1436,7 @@ definitions:
       updatedAt:
         type: string
     type: object
-  evaluation.UpcomingEvaluationDTO:
+  evaluation.UpcomingEvaluationItem:
     properties:
       coordinatorFirstName:
         type: string
@@ -1421,7 +1467,7 @@ definitions:
         type: string
       progressLogs:
         items:
-          $ref: '#/definitions/evaluation.GoalProgressDTO'
+          $ref: '#/definitions/evaluation.GoalProgressItem'
         minItems: 1
         type: array
     required:
@@ -1535,15 +1581,15 @@ definitions:
   incident.GetIncidentStatsResponse:
     properties:
       countsBySeverity:
-        $ref: '#/definitions/incident.IncidentSeverityCountsDTO'
+        $ref: '#/definitions/incident.IncidentSeverityCounts'
       countsByStatus:
-        $ref: '#/definitions/incident.IncidentStatusCountsDTO'
+        $ref: '#/definitions/incident.IncidentStatusCounts'
       countsByType:
-        $ref: '#/definitions/incident.IncidentTypeCountsDTO'
+        $ref: '#/definitions/incident.IncidentTypeCounts'
       totalCount:
         type: integer
     type: object
-  incident.IncidentSeverityCountsDTO:
+  incident.IncidentSeverityCounts:
     properties:
       minor:
         type: integer
@@ -1552,7 +1598,7 @@ definitions:
       severe:
         type: integer
     type: object
-  incident.IncidentStatusCountsDTO:
+  incident.IncidentStatusCounts:
     properties:
       completed:
         type: integer
@@ -1561,7 +1607,7 @@ definitions:
       underInvestigation:
         type: integer
     type: object
-  incident.IncidentTypeCountsDTO:
+  incident.IncidentTypeCounts:
     properties:
       aggression:
         type: integer
@@ -1668,7 +1714,7 @@ definitions:
         type: string
       goals:
         items:
-          $ref: '#/definitions/intake.GoalDTO'
+          $ref: '#/definitions/intake.GoalItem'
         minItems: 1
         type: array
       intakeDate:
@@ -1721,7 +1767,7 @@ definitions:
         type: string
       goals:
         items:
-          $ref: '#/definitions/intake.GoalDTO'
+          $ref: '#/definitions/intake.GoalItem'
         type: array
       hasClient:
         type: boolean
@@ -1757,7 +1803,7 @@ definitions:
       totalCount:
         type: integer
     type: object
-  intake.GoalDTO:
+  intake.GoalItem:
     properties:
       description:
         type: string
@@ -1818,7 +1864,7 @@ definitions:
         type: string
       goals:
         items:
-          $ref: '#/definitions/intake.GoalDTO'
+          $ref: '#/definitions/intake.GoalItem'
         type: array
       intakeDate:
         type: string
@@ -1848,7 +1894,7 @@ definitions:
       approvalRate:
         type: number
       countsByStatus:
-        $ref: '#/definitions/location_transfer.TransferStatusCountsDTO'
+        $ref: '#/definitions/location_transfer.TransferStatusCounts'
       pendingCount:
         type: integer
       totalCount:
@@ -1919,7 +1965,7 @@ definitions:
       transferId:
         type: string
     type: object
-  location_transfer.TransferStatusCountsDTO:
+  location_transfer.TransferStatusCounts:
     properties:
       approved:
         type: integer
@@ -2558,11 +2604,11 @@ definitions:
       totalPages:
         type: integer
     type: object
-  resp.PaginationResponse-evaluation_DraftEvaluationListItemDTO:
+  resp.PaginationResponse-evaluation_DraftEvaluationListItem:
     properties:
       data:
         items:
-          $ref: '#/definitions/evaluation.DraftEvaluationListItemDTO'
+          $ref: '#/definitions/evaluation.DraftEvaluationListItem'
         type: array
       page:
         type: integer
@@ -2573,11 +2619,11 @@ definitions:
       totalPages:
         type: integer
     type: object
-  resp.PaginationResponse-evaluation_GlobalRecentEvaluationDTO:
+  resp.PaginationResponse-evaluation_GlobalRecentEvaluationItem:
     properties:
       data:
         items:
-          $ref: '#/definitions/evaluation.GlobalRecentEvaluationDTO'
+          $ref: '#/definitions/evaluation.GlobalRecentEvaluationItem'
         type: array
       page:
         type: integer
@@ -2588,11 +2634,11 @@ definitions:
       totalPages:
         type: integer
     type: object
-  resp.PaginationResponse-evaluation_UpcomingEvaluationDTO:
+  resp.PaginationResponse-evaluation_UpcomingEvaluationItem:
     properties:
       data:
         items:
-          $ref: '#/definitions/evaluation.UpcomingEvaluationDTO'
+          $ref: '#/definitions/evaluation.UpcomingEvaluationItem'
         type: array
       page:
         type: integer
@@ -2716,11 +2762,11 @@ definitions:
         example: true
         type: boolean
     type: object
-  resp.SuccessResponse-array_calendar_CalendarEventDTO:
+  resp.SuccessResponse-array_calendar_CalendarEvent:
     properties:
       data:
         items:
-          $ref: '#/definitions/calendar.CalendarEventDTO'
+          $ref: '#/definitions/calendar.CalendarEvent'
         type: array
       message:
         example: success message
@@ -2801,6 +2847,17 @@ definitions:
         example: true
         type: boolean
     type: object
+  resp.SuccessResponse-auth_EnableMFAResponse:
+    properties:
+      data:
+        $ref: '#/definitions/auth.EnableMFAResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
   resp.SuccessResponse-auth_LoginResponse:
     properties:
       data:
@@ -2816,6 +2873,28 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/auth.RefreshTokensResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-auth_SetupMFAResponse:
+    properties:
+      data:
+        $ref: '#/definitions/auth.SetupMFAResponse'
+      message:
+        example: success message
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  resp.SuccessResponse-auth_VerifyMFAResponse:
+    properties:
+      data:
+        $ref: '#/definitions/auth.VerifyMFAResponse'
       message:
         example: success message
         type: string
@@ -2922,10 +3001,10 @@ definitions:
         example: true
         type: boolean
     type: object
-  resp.SuccessResponse-dashboard_CareTypeDistributionDTO:
+  resp.SuccessResponse-dashboard_CareTypeDistributionResponse:
     properties:
       data:
-        $ref: '#/definitions/dashboard.CareTypeDistributionDTO'
+        $ref: '#/definitions/dashboard.CareTypeDistributionResponse'
       message:
         example: success message
         type: string
@@ -2933,10 +3012,10 @@ definitions:
         example: true
         type: boolean
     type: object
-  resp.SuccessResponse-dashboard_CoordinatorClientsDTO:
+  resp.SuccessResponse-dashboard_CoordinatorClientsResponse:
     properties:
       data:
-        $ref: '#/definitions/dashboard.CoordinatorClientsDTO'
+        $ref: '#/definitions/dashboard.CoordinatorClientsResponse'
       message:
         example: success message
         type: string
@@ -2944,10 +3023,10 @@ definitions:
         example: true
         type: boolean
     type: object
-  resp.SuccessResponse-dashboard_CoordinatorGoalsProgressDTO:
+  resp.SuccessResponse-dashboard_CoordinatorGoalsProgressResponse:
     properties:
       data:
-        $ref: '#/definitions/dashboard.CoordinatorGoalsProgressDTO'
+        $ref: '#/definitions/dashboard.CoordinatorGoalsProgressResponse'
       message:
         example: success message
         type: string
@@ -2955,10 +3034,10 @@ definitions:
         example: true
         type: boolean
     type: object
-  resp.SuccessResponse-dashboard_CoordinatorIncidentsDTO:
+  resp.SuccessResponse-dashboard_CoordinatorIncidentsResponse:
     properties:
       data:
-        $ref: '#/definitions/dashboard.CoordinatorIncidentsDTO'
+        $ref: '#/definitions/dashboard.CoordinatorIncidentsResponse'
       message:
         example: success message
         type: string
@@ -2966,10 +3045,10 @@ definitions:
         example: true
         type: boolean
     type: object
-  resp.SuccessResponse-dashboard_CoordinatorRemindersDTO:
+  resp.SuccessResponse-dashboard_CoordinatorRemindersResponse:
     properties:
       data:
-        $ref: '#/definitions/dashboard.CoordinatorRemindersDTO'
+        $ref: '#/definitions/dashboard.CoordinatorRemindersResponse'
       message:
         example: success message
         type: string
@@ -2977,10 +3056,10 @@ definitions:
         example: true
         type: boolean
     type: object
-  resp.SuccessResponse-dashboard_CoordinatorStatsDTO:
+  resp.SuccessResponse-dashboard_CoordinatorStatsResponse:
     properties:
       data:
-        $ref: '#/definitions/dashboard.CoordinatorStatsDTO'
+        $ref: '#/definitions/dashboard.CoordinatorStatsResponse'
       message:
         example: success message
         type: string
@@ -2988,10 +3067,10 @@ definitions:
         example: true
         type: boolean
     type: object
-  resp.SuccessResponse-dashboard_CoordinatorTodayScheduleDTO:
+  resp.SuccessResponse-dashboard_CoordinatorTodayScheduleResponse:
     properties:
       data:
-        $ref: '#/definitions/dashboard.CoordinatorTodayScheduleDTO'
+        $ref: '#/definitions/dashboard.CoordinatorTodayScheduleResponse'
       message:
         example: success message
         type: string
@@ -2999,10 +3078,10 @@ definitions:
         example: true
         type: boolean
     type: object
-  resp.SuccessResponse-dashboard_CoordinatorUrgentAlertsDTO:
+  resp.SuccessResponse-dashboard_CoordinatorUrgentAlertsResponse:
     properties:
       data:
-        $ref: '#/definitions/dashboard.CoordinatorUrgentAlertsDTO'
+        $ref: '#/definitions/dashboard.CoordinatorUrgentAlertsResponse'
       message:
         example: success message
         type: string
@@ -3010,10 +3089,10 @@ definitions:
         example: true
         type: boolean
     type: object
-  resp.SuccessResponse-dashboard_CriticalAlertsDTO:
+  resp.SuccessResponse-dashboard_CriticalAlertsResponse:
     properties:
       data:
-        $ref: '#/definitions/dashboard.CriticalAlertsDTO'
+        $ref: '#/definitions/dashboard.CriticalAlertsResponse'
       message:
         example: success message
         type: string
@@ -3021,10 +3100,10 @@ definitions:
         example: true
         type: boolean
     type: object
-  resp.SuccessResponse-dashboard_DischargeStatsDTO:
+  resp.SuccessResponse-dashboard_DischargeStatsResponse:
     properties:
       data:
-        $ref: '#/definitions/dashboard.DischargeStatsDTO'
+        $ref: '#/definitions/dashboard.DischargeStatsResponse'
       message:
         example: success message
         type: string
@@ -3032,10 +3111,10 @@ definitions:
         example: true
         type: boolean
     type: object
-  resp.SuccessResponse-dashboard_EvaluationStatsDTO:
+  resp.SuccessResponse-dashboard_EvaluationStatsResponse:
     properties:
       data:
-        $ref: '#/definitions/dashboard.EvaluationStatsDTO'
+        $ref: '#/definitions/dashboard.EvaluationStatsResponse'
       message:
         example: success message
         type: string
@@ -3043,10 +3122,10 @@ definitions:
         example: true
         type: boolean
     type: object
-  resp.SuccessResponse-dashboard_LocationCapacityDTO:
+  resp.SuccessResponse-dashboard_LocationCapacityResponse:
     properties:
       data:
-        $ref: '#/definitions/dashboard.LocationCapacityDTO'
+        $ref: '#/definitions/dashboard.LocationCapacityResponse'
       message:
         example: success message
         type: string
@@ -3054,10 +3133,10 @@ definitions:
         example: true
         type: boolean
     type: object
-  resp.SuccessResponse-dashboard_OverviewDTO:
+  resp.SuccessResponse-dashboard_OverviewResponse:
     properties:
       data:
-        $ref: '#/definitions/dashboard.OverviewDTO'
+        $ref: '#/definitions/dashboard.OverviewResponse'
       message:
         example: success message
         type: string
@@ -3065,10 +3144,10 @@ definitions:
         example: true
         type: boolean
     type: object
-  resp.SuccessResponse-dashboard_PipelineStatsDTO:
+  resp.SuccessResponse-dashboard_PipelineStatsResponse:
     properties:
       data:
-        $ref: '#/definitions/dashboard.PipelineStatsDTO'
+        $ref: '#/definitions/dashboard.PipelineStatsResponse'
       message:
         example: success message
         type: string
@@ -3076,10 +3155,10 @@ definitions:
         example: true
         type: boolean
     type: object
-  resp.SuccessResponse-dashboard_TodayAppointmentsDTO:
+  resp.SuccessResponse-dashboard_TodayAppointmentsResponse:
     properties:
       data:
-        $ref: '#/definitions/dashboard.TodayAppointmentsDTO'
+        $ref: '#/definitions/dashboard.TodayAppointmentsResponse'
       message:
         example: success message
         type: string
@@ -3142,10 +3221,10 @@ definitions:
         example: true
         type: boolean
     type: object
-  resp.SuccessResponse-evaluation_DraftEvaluationDTO:
+  resp.SuccessResponse-evaluation_DraftEvaluationResponse:
     properties:
       data:
-        $ref: '#/definitions/evaluation.DraftEvaluationDTO'
+        $ref: '#/definitions/evaluation.DraftEvaluationResponse'
       message:
         example: success message
         type: string
@@ -3153,10 +3232,10 @@ definitions:
         example: true
         type: boolean
     type: object
-  resp.SuccessResponse-evaluation_EvaluationDTO:
+  resp.SuccessResponse-evaluation_EvaluationResponse:
     properties:
       data:
-        $ref: '#/definitions/evaluation.EvaluationDTO'
+        $ref: '#/definitions/evaluation.EvaluationResponse'
       message:
         example: success message
         type: string
@@ -3164,10 +3243,10 @@ definitions:
         example: true
         type: boolean
     type: object
-  resp.SuccessResponse-evaluation_LastEvaluationDTO:
+  resp.SuccessResponse-evaluation_LastEvaluationItem:
     properties:
       data:
-        $ref: '#/definitions/evaluation.LastEvaluationDTO'
+        $ref: '#/definitions/evaluation.LastEvaluationItem'
       message:
         example: success message
         type: string
@@ -3571,10 +3650,10 @@ definitions:
         example: true
         type: boolean
     type: object
-  resp.SuccessResponse-resp_PaginationResponse-evaluation_DraftEvaluationListItemDTO:
+  resp.SuccessResponse-resp_PaginationResponse-evaluation_DraftEvaluationListItem:
     properties:
       data:
-        $ref: '#/definitions/resp.PaginationResponse-evaluation_DraftEvaluationListItemDTO'
+        $ref: '#/definitions/resp.PaginationResponse-evaluation_DraftEvaluationListItem'
       message:
         example: success message
         type: string
@@ -3582,10 +3661,10 @@ definitions:
         example: true
         type: boolean
     type: object
-  resp.SuccessResponse-resp_PaginationResponse-evaluation_GlobalRecentEvaluationDTO:
+  resp.SuccessResponse-resp_PaginationResponse-evaluation_GlobalRecentEvaluationItem:
     properties:
       data:
-        $ref: '#/definitions/resp.PaginationResponse-evaluation_GlobalRecentEvaluationDTO'
+        $ref: '#/definitions/resp.PaginationResponse-evaluation_GlobalRecentEvaluationItem'
       message:
         example: success message
         type: string
@@ -3593,10 +3672,10 @@ definitions:
         example: true
         type: boolean
     type: object
-  resp.SuccessResponse-resp_PaginationResponse-evaluation_UpcomingEvaluationDTO:
+  resp.SuccessResponse-resp_PaginationResponse-evaluation_UpcomingEvaluationItem:
     properties:
       data:
-        $ref: '#/definitions/resp.PaginationResponse-evaluation_UpcomingEvaluationDTO'
+        $ref: '#/definitions/resp.PaginationResponse-evaluation_UpcomingEvaluationItem'
       message:
         example: success message
         type: string
@@ -4334,6 +4413,129 @@ paths:
       summary: Logout a user
       tags:
       - Auth
+  /auth/mfa/disable:
+    post:
+      consumes:
+      - application/json
+      description: Disable MFA for the authenticated user
+      parameters:
+      - description: Disable MFA Request
+        in: body
+        name: disableMFARequest
+        required: true
+        schema:
+          $ref: '#/definitions/auth.DisableMFARequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Disable MFA
+      tags:
+      - Auth
+  /auth/mfa/enable:
+    post:
+      consumes:
+      - application/json
+      description: Verify code and enable MFA for the authenticated user
+      parameters:
+      - description: Enable MFA Request
+        in: body
+        name: enableMFARequest
+        required: true
+        schema:
+          $ref: '#/definitions/auth.EnableMFARequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-auth_EnableMFAResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Enable MFA
+      tags:
+      - Auth
+  /auth/mfa/setup:
+    post:
+      description: Generate MFA secret and OTP auth URL for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-auth_SetupMFAResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Setup MFA
+      tags:
+      - Auth
+  /auth/mfa/verify:
+    post:
+      consumes:
+      - application/json
+      description: Verify MFA code using pre-auth token
+      parameters:
+      - description: Verify MFA Request
+        in: body
+        name: verifyMFARequest
+        required: true
+        schema:
+          $ref: '#/definitions/auth.VerifyMFARequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.SuccessResponse-auth_VerifyMFAResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Verify MFA
+      tags:
+      - Auth
   /auth/refresh:
     post:
       consumes:
@@ -4366,6 +4568,40 @@ paths:
           schema:
             $ref: '#/definitions/resp.ErrorResponse'
       summary: Refresh tokens
+      tags:
+      - Auth
+  /auth/reset-password:
+    post:
+      consumes:
+      - application/json
+      description: Reset password for the authenticated user
+      parameters:
+      - description: Reset Password Request
+        in: body
+        name: resetPasswordRequest
+        required: true
+        schema:
+          $ref: '#/definitions/auth.ResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/resp.ErrorResponse'
+      summary: Reset password
       tags:
       - Auth
   /calendar/appointments:
@@ -4750,7 +4986,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/resp.SuccessResponse-array_calendar_CalendarEventDTO'
+            $ref: '#/definitions/resp.SuccessResponse-array_calendar_CalendarEvent'
         "400":
           description: Bad Request
           schema:
@@ -5176,7 +5412,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/resp.SuccessResponse-dashboard_CareTypeDistributionDTO'
+            $ref: '#/definitions/resp.SuccessResponse-dashboard_CareTypeDistributionResponse'
         "401":
           description: Unauthorized
           schema:
@@ -5197,7 +5433,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/resp.SuccessResponse-dashboard_CoordinatorClientsDTO'
+            $ref: '#/definitions/resp.SuccessResponse-dashboard_CoordinatorClientsResponse'
         "401":
           description: Unauthorized
           schema:
@@ -5218,7 +5454,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/resp.SuccessResponse-dashboard_CoordinatorGoalsProgressDTO'
+            $ref: '#/definitions/resp.SuccessResponse-dashboard_CoordinatorGoalsProgressResponse'
         "401":
           description: Unauthorized
           schema:
@@ -5239,7 +5475,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/resp.SuccessResponse-dashboard_CoordinatorIncidentsDTO'
+            $ref: '#/definitions/resp.SuccessResponse-dashboard_CoordinatorIncidentsResponse'
         "401":
           description: Unauthorized
           schema:
@@ -5260,7 +5496,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/resp.SuccessResponse-dashboard_CoordinatorRemindersDTO'
+            $ref: '#/definitions/resp.SuccessResponse-dashboard_CoordinatorRemindersResponse'
         "401":
           description: Unauthorized
           schema:
@@ -5281,7 +5517,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/resp.SuccessResponse-dashboard_CoordinatorStatsDTO'
+            $ref: '#/definitions/resp.SuccessResponse-dashboard_CoordinatorStatsResponse'
         "401":
           description: Unauthorized
           schema:
@@ -5302,7 +5538,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/resp.SuccessResponse-dashboard_CoordinatorTodayScheduleDTO'
+            $ref: '#/definitions/resp.SuccessResponse-dashboard_CoordinatorTodayScheduleResponse'
         "401":
           description: Unauthorized
           schema:
@@ -5323,7 +5559,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/resp.SuccessResponse-dashboard_CoordinatorUrgentAlertsDTO'
+            $ref: '#/definitions/resp.SuccessResponse-dashboard_CoordinatorUrgentAlertsResponse'
         "401":
           description: Unauthorized
           schema:
@@ -5344,7 +5580,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/resp.SuccessResponse-dashboard_CriticalAlertsDTO'
+            $ref: '#/definitions/resp.SuccessResponse-dashboard_CriticalAlertsResponse'
         "401":
           description: Unauthorized
           schema:
@@ -5365,7 +5601,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/resp.SuccessResponse-dashboard_DischargeStatsDTO'
+            $ref: '#/definitions/resp.SuccessResponse-dashboard_DischargeStatsResponse'
         "401":
           description: Unauthorized
           schema:
@@ -5386,7 +5622,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/resp.SuccessResponse-dashboard_EvaluationStatsDTO'
+            $ref: '#/definitions/resp.SuccessResponse-dashboard_EvaluationStatsResponse'
         "401":
           description: Unauthorized
           schema:
@@ -5416,7 +5652,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/resp.SuccessResponse-dashboard_LocationCapacityDTO'
+            $ref: '#/definitions/resp.SuccessResponse-dashboard_LocationCapacityResponse'
         "400":
           description: Bad Request
           schema:
@@ -5441,7 +5677,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/resp.SuccessResponse-dashboard_OverviewDTO'
+            $ref: '#/definitions/resp.SuccessResponse-dashboard_OverviewResponse'
         "401":
           description: Unauthorized
           schema:
@@ -5463,7 +5699,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/resp.SuccessResponse-dashboard_PipelineStatsDTO'
+            $ref: '#/definitions/resp.SuccessResponse-dashboard_PipelineStatsResponse'
         "401":
           description: Unauthorized
           schema:
@@ -5484,7 +5720,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/resp.SuccessResponse-dashboard_TodayAppointmentsDTO'
+            $ref: '#/definitions/resp.SuccessResponse-dashboard_TodayAppointmentsResponse'
         "401":
           description: Unauthorized
           schema:
@@ -5744,7 +5980,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/resp.SuccessResponse-evaluation_EvaluationDTO'
+            $ref: '#/definitions/resp.SuccessResponse-evaluation_EvaluationResponse'
         "400":
           description: Bad Request
           schema:
@@ -5816,7 +6052,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/resp.SuccessResponse-resp_PaginationResponse-evaluation_UpcomingEvaluationDTO'
+            $ref: '#/definitions/resp.SuccessResponse-resp_PaginationResponse-evaluation_UpcomingEvaluationItem'
         "401":
           description: Unauthorized
           schema:
@@ -5843,7 +6079,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/resp.SuccessResponse-resp_PaginationResponse-evaluation_DraftEvaluationListItemDTO'
+            $ref: '#/definitions/resp.SuccessResponse-resp_PaginationResponse-evaluation_DraftEvaluationListItem'
         "400":
           description: Bad Request
           schema:
@@ -5938,7 +6174,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/resp.SuccessResponse-evaluation_DraftEvaluationDTO'
+            $ref: '#/definitions/resp.SuccessResponse-evaluation_DraftEvaluationResponse'
         "400":
           description: Bad Request
           schema:
@@ -6042,7 +6278,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/resp.SuccessResponse-evaluation_LastEvaluationDTO'
+            $ref: '#/definitions/resp.SuccessResponse-evaluation_LastEvaluationItem'
         "400":
           description: Bad Request
           schema:
@@ -6071,7 +6307,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/resp.SuccessResponse-resp_PaginationResponse-evaluation_GlobalRecentEvaluationDTO'
+            $ref: '#/definitions/resp.SuccessResponse-resp_PaginationResponse-evaluation_GlobalRecentEvaluationItem'
         "401":
           description: Unauthorized
           schema:
@@ -6092,7 +6328,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/resp.SuccessResponse-resp_PaginationResponse-evaluation_UpcomingEvaluationDTO'
+            $ref: '#/definitions/resp.SuccessResponse-resp_PaginationResponse-evaluation_UpcomingEvaluationItem'
         "401":
           description: Unauthorized
           schema:

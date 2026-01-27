@@ -4,6 +4,7 @@
 
 # 2. Connect to server and update
 echo "Connecting to server to pull and rebuild..."
+make swagger
 ssh root@maicare.online << 'EOF'
     cd care-coordination/
     git pull origin main

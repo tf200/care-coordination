@@ -14,6 +14,9 @@ type Config struct {
 	RefreshTokenSecret string
 	AccessTokenTTL     time.Duration
 	RefreshTokenTTL    time.Duration
+	MFAPreAuthTTL      time.Duration
+	MFASecretKey       string
+	MFAIssuer          string
 	Environment        string
 	ServerAddress      string
 	Url                string
@@ -49,6 +52,12 @@ func LoadConfig() (*Config, error) {
 	refreshTokenTTL, err := time.ParseDuration(os.Getenv("REFRESH_TOKEN_TTL"))
 	if err != nil {
 		return nil, err
+	}
+	mfaPreAuthTTL := 5 * time.Minute
+	if val := os.Getenv("MFA_PREAUTH_TTL"); val != "" {
+		if parsed, err := time.ParseDuration(val); err == nil {
+			mfaPreAuthTTL = parsed
+		}
 	}
 
 	// Parse rate limit windows with defaults
@@ -97,6 +106,9 @@ func LoadConfig() (*Config, error) {
 		RefreshTokenSecret: os.Getenv("REFRESH_TOKEN_SECRET"),
 		AccessTokenTTL:     accessTokenTTL,
 		RefreshTokenTTL:    refreshTokenTTL,
+		MFAPreAuthTTL:      mfaPreAuthTTL,
+		MFASecretKey:       os.Getenv("MFA_SECRET_KEY"),
+		MFAIssuer:          os.Getenv("MFA_ISSUER"),
 		Environment:        os.Getenv("ENVIRONMENT"),
 		ServerAddress:      os.Getenv("SERVER_ADDRESS"),
 		Url:                os.Getenv("URL"),
@@ -143,6 +155,15 @@ func (c *Config) validate() error {
 	}
 	if c.RefreshTokenTTL == 0 {
 		return errors.New("REFRESH_TOKEN_TTL is not set")
+	}
+	if c.MFAPreAuthTTL == 0 {
+		return errors.New("MFA_PREAUTH_TTL is not set")
+	}
+	if c.MFASecretKey == "" {
+		return errors.New("MFA_SECRET_KEY is not set")
+	}
+	if c.MFAIssuer == "" {
+		return errors.New("MFA_ISSUER is not set")
 	}
 
 	// Rate limiting validation (only if enabled)

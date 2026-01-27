@@ -13,6 +13,9 @@ CREATE TABLE users (
     id TEXT PRIMARY KEY,
     email TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
+    is_mfa_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+    mfa_secret TEXT,
+    mfa_backup_codes TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );

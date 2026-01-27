@@ -84,6 +84,8 @@ type Querier interface {
 	DeleteReminder(ctx context.Context, id string) error
 	DeleteRole(ctx context.Context, id string) error
 	DeleteUserSession(ctx context.Context, tokenHash string) error
+	DisableUserMFA(ctx context.Context, id string) error
+	EnableUserMFA(ctx context.Context, arg EnableUserMFAParams) error
 	GetAppointment(ctx context.Context, id string) (Appointment, error)
 	GetAuditLogByID(ctx context.Context, id string) (GetAuditLogByIDRow, error)
 	GetAuditLogBySequence(ctx context.Context, sequenceNumber int64) (AuditLog, error)
@@ -163,7 +165,9 @@ type Querier interface {
 	// Get appointments starting in the next hour for reminder notifications
 	GetUpcomingAppointments(ctx context.Context) ([]GetUpcomingAppointmentsRow, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
+	GetUserByID(ctx context.Context, id string) (User, error)
 	GetUserIDsByRoleName(ctx context.Context, name string) ([]string, error)
+	GetUserMFAState(ctx context.Context, id string) (GetUserMFAStateRow, error)
 	GetUserSession(ctx context.Context, tokenHash string) (Session, error)
 	GetWaitlistStats(ctx context.Context) (GetWaitlistStatsRow, error)
 	HasPermission(ctx context.Context, arg HasPermissionParams) (bool, error)
@@ -226,6 +230,7 @@ type Querier interface {
 	UpdateReminder(ctx context.Context, arg UpdateReminderParams) (Reminder, error)
 	UpdateRole(ctx context.Context, arg UpdateRoleParams) (Role, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) error
+	UpdateUserMFASecret(ctx context.Context, arg UpdateUserMFASecretParams) error
 	UpdateUserSession(ctx context.Context, arg UpdateUserSessionParams) error
 }
 

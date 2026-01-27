@@ -22,6 +22,9 @@ DROP POLICY IF EXISTS user_own_reminders ON reminders;
 -- Drop notification RLS policy
 DROP POLICY IF EXISTS user_own_notifications ON notifications;
 
+-- Drop audit logs (must be before clients, employees, users)
+DROP TABLE IF EXISTS audit_logs;
+
 -- Drop notifications table
 DROP TABLE IF EXISTS notifications;
 DROP TYPE IF EXISTS notification_priority_enum;
@@ -58,6 +61,8 @@ DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS attachments;
 
 -- Drop enums
+DROP TYPE IF EXISTS audit_status_enum CASCADE;
+DROP TYPE IF EXISTS audit_action_enum CASCADE;
 DROP TYPE IF EXISTS incident_severity_enum CASCADE;
 DROP TYPE IF EXISTS incident_type_enum CASCADE;
 DROP TYPE IF EXISTS incident_status_enum CASCADE;

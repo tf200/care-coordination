@@ -80,6 +80,7 @@ func main() {
 		cfg.RefreshTokenSecret,
 		cfg.AccessTokenTTL,
 		cfg.RefreshTokenTTL,
+		cfg.MFAPreAuthTTL,
 	)
 
 	// Initialize Object Storage
@@ -139,7 +140,7 @@ func main() {
 	auditLogger := libAudit.NewAuditLoggerService(*store, l)
 	mdw := middleware.NewMiddleware(tokenManager, rateLimiter, l, store, auditLogger)
 
-	authService := auth.NewAuthService(store, tokenManager, l)
+	authService := auth.NewAuthServiceWithMFA(store, tokenManager, l, cfg.MFASecretKey, cfg.MFAIssuer)
 	authHandler := auth.NewAuthHandler(authService, mdw)
 
 	employeeService := employee.NewEmployeeService(store, l)

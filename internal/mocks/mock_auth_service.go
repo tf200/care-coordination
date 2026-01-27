@@ -41,6 +41,35 @@ func (m *MockAuthService) EXPECT() *MockAuthServiceMockRecorder {
 	return m.recorder
 }
 
+// DisableMFA mocks base method.
+func (m *MockAuthService) DisableMFA(ctx context.Context, req *auth.DisableMFARequest) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DisableMFA", ctx, req)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DisableMFA indicates an expected call of DisableMFA.
+func (mr *MockAuthServiceMockRecorder) DisableMFA(ctx, req any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DisableMFA", reflect.TypeOf((*MockAuthService)(nil).DisableMFA), ctx, req)
+}
+
+// EnableMFA mocks base method.
+func (m *MockAuthService) EnableMFA(ctx context.Context, req *auth.EnableMFARequest) (*auth.EnableMFAResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EnableMFA", ctx, req)
+	ret0, _ := ret[0].(*auth.EnableMFAResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EnableMFA indicates an expected call of EnableMFA.
+func (mr *MockAuthServiceMockRecorder) EnableMFA(ctx, req any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnableMFA", reflect.TypeOf((*MockAuthService)(nil).EnableMFA), ctx, req)
+}
+
 // Login mocks base method.
 func (m *MockAuthService) Login(ctx context.Context, req *auth.LoginRequest, userAgent, ipAddress string) (*auth.LoginResponse, error) {
 	m.ctrl.T.Helper()
@@ -83,4 +112,48 @@ func (m *MockAuthService) RefreshTokens(ctx context.Context, req *auth.RefreshTo
 func (mr *MockAuthServiceMockRecorder) RefreshTokens(ctx, req, userAgent, ipAddress any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RefreshTokens", reflect.TypeOf((*MockAuthService)(nil).RefreshTokens), ctx, req, userAgent, ipAddress)
+}
+
+// ResetPassword mocks base method.
+func (m *MockAuthService) ResetPassword(ctx context.Context, req *auth.ResetPasswordRequest) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ResetPassword", ctx, req)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ResetPassword indicates an expected call of ResetPassword.
+func (mr *MockAuthServiceMockRecorder) ResetPassword(ctx, req any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResetPassword", reflect.TypeOf((*MockAuthService)(nil).ResetPassword), ctx, req)
+}
+
+// SetupMFA mocks base method.
+func (m *MockAuthService) SetupMFA(ctx context.Context) (*auth.SetupMFAResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetupMFA", ctx)
+	ret0, _ := ret[0].(*auth.SetupMFAResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SetupMFA indicates an expected call of SetupMFA.
+func (mr *MockAuthServiceMockRecorder) SetupMFA(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetupMFA", reflect.TypeOf((*MockAuthService)(nil).SetupMFA), ctx)
+}
+
+// VerifyMFA mocks base method.
+func (m *MockAuthService) VerifyMFA(ctx context.Context, req *auth.VerifyMFARequest, preAuthToken string) (*auth.VerifyMFAResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "VerifyMFA", ctx, req, preAuthToken)
+	ret0, _ := ret[0].(*auth.VerifyMFAResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// VerifyMFA indicates an expected call of VerifyMFA.
+func (mr *MockAuthServiceMockRecorder) VerifyMFA(ctx, req, preAuthToken any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyMFA", reflect.TypeOf((*MockAuthService)(nil).VerifyMFA), ctx, req, preAuthToken)
 }

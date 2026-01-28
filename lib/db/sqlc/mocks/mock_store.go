@@ -626,6 +626,34 @@ func (mr *MockStoreInterfaceMockRecorder) DeleteUserSession(ctx, tokenHash any) 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteUserSession", reflect.TypeOf((*MockStoreInterface)(nil).DeleteUserSession), ctx, tokenHash)
 }
 
+// DisableUserMFA mocks base method.
+func (m *MockStoreInterface) DisableUserMFA(ctx context.Context, id string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DisableUserMFA", ctx, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DisableUserMFA indicates an expected call of DisableUserMFA.
+func (mr *MockStoreInterfaceMockRecorder) DisableUserMFA(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DisableUserMFA", reflect.TypeOf((*MockStoreInterface)(nil).DisableUserMFA), ctx, id)
+}
+
+// EnableUserMFA mocks base method.
+func (m *MockStoreInterface) EnableUserMFA(ctx context.Context, arg db.EnableUserMFAParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EnableUserMFA", ctx, arg)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// EnableUserMFA indicates an expected call of EnableUserMFA.
+func (mr *MockStoreInterfaceMockRecorder) EnableUserMFA(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnableUserMFA", reflect.TypeOf((*MockStoreInterface)(nil).EnableUserMFA), ctx, arg)
+}
+
 // ExecTx mocks base method.
 func (m *MockStoreInterface) ExecTx(ctx context.Context, fn func(*db.Queries) error) error {
 	m.ctrl.T.Helper()
@@ -1690,6 +1718,21 @@ func (mr *MockStoreInterfaceMockRecorder) GetUserIDsByRoleName(ctx, name any) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserIDsByRoleName", reflect.TypeOf((*MockStoreInterface)(nil).GetUserIDsByRoleName), ctx, name)
 }
 
+// GetUserMFAState mocks base method.
+func (m *MockStoreInterface) GetUserMFAState(ctx context.Context, id string) (db.GetUserMFAStateRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserMFAState", ctx, id)
+	ret0, _ := ret[0].(db.GetUserMFAStateRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserMFAState indicates an expected call of GetUserMFAState.
+func (mr *MockStoreInterfaceMockRecorder) GetUserMFAState(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserMFAState", reflect.TypeOf((*MockStoreInterface)(nil).GetUserMFAState), ctx, id)
+}
+
 // GetUserSession mocks base method.
 func (m *MockStoreInterface) GetUserSession(ctx context.Context, tokenHash string) (db.Session, error) {
 	m.ctrl.T.Helper()
@@ -2621,6 +2664,20 @@ func (m *MockStoreInterface) UpdateUser(ctx context.Context, arg db.UpdateUserPa
 func (mr *MockStoreInterfaceMockRecorder) UpdateUser(ctx, arg any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUser", reflect.TypeOf((*MockStoreInterface)(nil).UpdateUser), ctx, arg)
+}
+
+// UpdateUserMFASecret mocks base method.
+func (m *MockStoreInterface) UpdateUserMFASecret(ctx context.Context, arg db.UpdateUserMFASecretParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateUserMFASecret", ctx, arg)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateUserMFASecret indicates an expected call of UpdateUserMFASecret.
+func (mr *MockStoreInterfaceMockRecorder) UpdateUserMFASecret(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserMFASecret", reflect.TypeOf((*MockStoreInterface)(nil).UpdateUserMFASecret), ctx, arg)
 }
 
 // UpdateUserSession mocks base method.

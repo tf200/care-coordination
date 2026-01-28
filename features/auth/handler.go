@@ -5,7 +5,6 @@ import (
 	"care-cordination/lib/ratelimit"
 	"care-cordination/lib/resp"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -258,19 +257,7 @@ func (h *AuthHandler) VerifyMFA(ctx *gin.Context) {
 		return
 	}
 
-	authHeader := ctx.GetHeader("Authorization")
-	if authHeader == "" {
-		ctx.JSON(http.StatusUnauthorized, resp.Error(ErrInvalidToken))
-		return
-	}
-	fields := strings.Fields(authHeader)
-	if len(fields) < 2 || strings.ToLower(fields[0]) != "bearer" {
-		ctx.JSON(http.StatusUnauthorized, resp.Error(ErrInvalidToken))
-		return
-	}
-	preAuthToken := fields[1]
-
-	result, err := h.authService.VerifyMFA(ctx, &req, preAuthToken)
+	result, err := h.authService.VerifyMFA(ctx, &req)
 	if err != nil {
 		switch err {
 		case ErrInvalidMFACode, ErrInvalidToken, ErrMFANotSetup:

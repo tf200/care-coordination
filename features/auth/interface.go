@@ -20,6 +20,6 @@ type AuthService interface {
 	ResetPassword(ctx context.Context, req *ResetPasswordRequest) error
 	SetupMFA(ctx context.Context) (*SetupMFAResponse, error)
 	EnableMFA(ctx context.Context, req *EnableMFARequest) (*EnableMFAResponse, error)
-	VerifyMFA(ctx context.Context, req *VerifyMFARequest, preAuthToken string) (*VerifyMFAResponse, error)
+	VerifyMFA(ctx context.Context, req *VerifyMFARequest) (*VerifyMFAResponse, error)
 	DisableMFA(ctx context.Context, req *DisableMFARequest) error
 }

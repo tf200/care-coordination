@@ -367,8 +367,8 @@ func (s *authService) EnableMFA(ctx context.Context, req *EnableMFARequest) (*En
 	return &EnableMFAResponse{BackupCodes: backupCodes}, nil
 }
 
-func (s *authService) VerifyMFA(ctx context.Context, req *VerifyMFARequest, preAuthToken string) (*VerifyMFAResponse, error) {
-	claims, err := s.tokenManager.ValidateAccessToken(preAuthToken)
+func (s *authService) VerifyMFA(ctx context.Context, req *VerifyMFARequest) (*VerifyMFAResponse, error) {
+	claims, err := s.tokenManager.ValidateAccessToken(req.PreAuthToken)
 	if err != nil || claims.Scope != token.ScopeMFAPending {
 		return nil, ErrInvalidToken
 	}

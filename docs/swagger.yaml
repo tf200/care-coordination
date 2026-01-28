@@ -171,8 +171,11 @@ definitions:
     properties:
       code:
         type: string
+      preAuthToken:
+        type: string
     required:
     - code
+    - preAuthToken
     type: object
   auth.VerifyMFAResponse:
     properties:

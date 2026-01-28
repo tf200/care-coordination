@@ -144,16 +144,16 @@ func (mr *MockAuthServiceMockRecorder) SetupMFA(ctx any) *gomock.Call {
 }
 
 // VerifyMFA mocks base method.
-func (m *MockAuthService) VerifyMFA(ctx context.Context, req *auth.VerifyMFARequest, preAuthToken string) (*auth.VerifyMFAResponse, error) {
+func (m *MockAuthService) VerifyMFA(ctx context.Context, req *auth.VerifyMFARequest) (*auth.VerifyMFAResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "VerifyMFA", ctx, req, preAuthToken)
+	ret := m.ctrl.Call(m, "VerifyMFA", ctx, req)
 	ret0, _ := ret[0].(*auth.VerifyMFAResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // VerifyMFA indicates an expected call of VerifyMFA.
-func (mr *MockAuthServiceMockRecorder) VerifyMFA(ctx, req, preAuthToken any) *gomock.Call {
+func (mr *MockAuthServiceMockRecorder) VerifyMFA(ctx, req any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyMFA", reflect.TypeOf((*MockAuthService)(nil).VerifyMFA), ctx, req, preAuthToken)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyMFA", reflect.TypeOf((*MockAuthService)(nil).VerifyMFA), ctx, req)
 }

@@ -44,7 +44,8 @@ type EnableMFAResponse struct {
 }
 
 type VerifyMFARequest struct {
-	Code string `json:"code" binding:"required"`
+	Code         string `json:"code" binding:"required"`
+	PreAuthToken string `json:"preAuthToken" binding:"required"`
 }
 
 type VerifyMFAResponse struct {

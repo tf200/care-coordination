@@ -6141,10 +6141,14 @@ const docTemplate = `{
         "auth.VerifyMFARequest": {
             "type": "object",
             "required": [
-                "code"
+                "code",
+                "preAuthToken"
             ],
             "properties": {
                 "code": {
+                    "type": "string"
+                },
+                "preAuthToken": {
                     "type": "string"
                 }
             }

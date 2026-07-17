@@ -22,6 +22,10 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./cmd/app
 # Build the worker
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o worker ./cmd/worker
 
+# Build the migration and admin tools
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o migrate ./cmd/migrate
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o admin ./cmd/admin
+
 # Final stage for app
 FROM alpine:latest AS app
 
@@ -52,3 +56,26 @@ COPY --from=builder /app/worker .
 
 # Run the worker
 CMD ["./worker"]
+
+# Final stage for migration tool
+FROM alpine:latest AS migrate
+
+RUN apk --no-cache add ca-certificates
+
+WORKDIR /root/
+
+COPY --from=builder /app/migrate .
+COPY --from=builder /app/lib/db/migrations ./lib/db/migrations
+
+CMD ["./migrate", "up"]
+
+# Final stage for admin bootstrap tool
+FROM alpine:latest AS admin
+
+RUN apk --no-cache add ca-certificates
+
+WORKDIR /root/
+
+COPY --from=builder /app/admin .
+
+CMD ["./admin"]

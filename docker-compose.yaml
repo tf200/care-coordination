@@ -1,5 +1,25 @@
 services:
 
+  # PostgreSQL Database
+  postgres:
+    image: postgres:17-alpine
+    container_name: care-coordination-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-care_coordination}
+    ports:
+      - "${DB_PUBLISHED_PORT:-5433}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - care-coordination-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-care_coordination}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   # Redis Cache
   redis:
@@ -7,7 +27,7 @@ services:
     container_name: care-coordination-redis
     restart: unless-stopped
     volumes:
-      - redis_data:/dataa
+      - redis_data:/data
     networks:
       - care-coordination-network
     healthcheck:
@@ -38,6 +58,24 @@ services:
       timeout: 5s
       retries: 5
 
+  # Database migrations
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: migrate
+    container_name: care-coordination-migrate
+    env_file:
+      - .env
+    environment:
+      DB_SOURCE: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-care_coordination}?sslmode=disable
+      DB_MIGRATE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-care_coordination}?sslmode=disable
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - care-coordination-network
+
   # Application
   app:
     build:
@@ -50,7 +88,11 @@ services:
       - "8086:8080"
     env_file:
       - .env
+    environment:
+      DB_SOURCE: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-care_coordination}?sslmode=disable
     depends_on:
+      migrate:
+        condition: service_completed_successfully
       redis:
         condition: service_healthy
       minio:
@@ -68,11 +110,33 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    environment:
+      DB_SOURCE: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-care_coordination}?sslmode=disable
     depends_on:
+      migrate:
+        condition: service_completed_successfully
       redis:
         condition: service_healthy
       app:
         condition: service_started
+    networks:
+      - care-coordination-network
+
+  # Manual first-user bootstrap. Start with:
+  # docker compose --profile tools run --rm admin
+  admin:
+    profiles: ["tools"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: admin
+    env_file:
+      - .env
+    environment:
+      DB_SOURCE: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-care_coordination}?sslmode=disable
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
     networks:
       - care-coordination-network
 
@@ -81,5 +145,6 @@ networks:
     driver: bridge
 
 volumes:
+  postgres_data:
   redis_data:
   minio_data:

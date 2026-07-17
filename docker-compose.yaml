@@ -140,6 +140,24 @@ services:
     networks:
       - care-coordination-network
 
+  # Manual mock data seeding. This also ensures the admin user exists.
+  # docker compose --profile tools run --rm seed
+  seed:
+    profiles: ["tools"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: seed
+    env_file:
+      - .env
+    environment:
+      DB_SOURCE: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-care_coordination}?sslmode=disable
+    depends_on:
+      admin:
+        condition: service_completed_successfully
+    networks:
+      - care-coordination-network
+
 networks:
   care-coordination-network:
     driver: bridge

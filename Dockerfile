@@ -25,6 +25,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o worker ./cmd/work
 # Build the migration and admin tools
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o migrate ./cmd/migrate
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o admin ./cmd/admin
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o seed ./cmd/seed
 
 # Final stage for app
 FROM alpine:latest AS app
@@ -79,3 +80,14 @@ WORKDIR /root/
 COPY --from=builder /app/admin .
 
 CMD ["./admin"]
+
+# Final stage for mock data seeding tool
+FROM alpine:latest AS seed
+
+RUN apk --no-cache add ca-certificates
+
+WORKDIR /root/
+
+COPY --from=builder /app/seed .
+
+CMD ["./seed"]
